@@ -2,7 +2,7 @@
 PROJECT 7:  Ice rheology from symmetric flows
 STUDENTS: XXX
 ADVISOR: Ed Bueler
-DESCRIPTION:  There are simple models for how circularly-symmetric flows of ice or other viscous fluids evolve.  This theory, used quantitatively, allows us to convert observations of real flows, whether approximately circular (polar caps on Mars) or deliberately circular (laboratory), into estimates of the rheology of the fluid.  The project will use pencil and paper calculations and some processing of data on computer.
+DESCRIPTION:  There are simple models for the evolution of circularly-symmetric flows of ice (or other viscous fluids).  This theory, used quantitatively, allows us to convert observations of real flows, whether approximately circular (polar caps on Mars) or deliberately circular (laboratory), into estimates of the rheology of the fluid.  The project will use pencil and paper calculations, some processing of data on computer, and modest experimentation.
 SOFTWARE REQUIREMENTS: Matlab or Octave
 REQUIRED STUDENT BACKGROUND: Basic exposure to (1) differential equations and (2) Matlab or similar.
 
@@ -10,7 +10,7 @@ REQUIRED STUDENT BACKGROUND: Basic exposure to (1) differential equations and (2
 PROJECT 8: Glaciating random terrain
 STUDENTS: XXX
 ADVISOR: Ed Bueler
-DESCRIPTION: How does the glacier-covered area, or glacier volume, depend on the roughness of topography?  In this modeling project we will generate random terrain, assume altitude-accumulation feedback, model the steady states of the glaciers under such assumptions, and measure the modeled glaciated area and glacier volume.  How does glaciation change as equilibrium line altitude and/or lapse rates change on random terrain of different steepness?
+DESCRIPTION: How does glacier-covered area, or glacier volume, depend on the roughness of topography?  In this modeling project we will generate random terrain, assume altitude-accumulation feedback, model the corresponding steady states of the glaciers, and measure the modeled glaciated area and glacier volume.  How does glaciation change as equilibrium line altitude and/or lapse rates change on random terrain of different steepness?  This project will involve running laptop-suitable glacier models and processing their output.
 SOFTWARE REQUIREMENTS: Python and Linux/Unix
 REQUIRED STUDENT BACKGROUND: Basic exposure to (1) differential equations, (2) some numerical methods, and (3) use of Python and unix-type command line.
 
