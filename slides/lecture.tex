@@ -1,0 +1,84 @@
+% Copyright 2009 Ed Bueler
+% based on example (directory) by Till Tantau:
+%   /usr/share/doc/latex-beamer/examples/a-lecture/
+
+\documentclass[10pt,hyperref={pdfpagelabels=true}]{beamer}
+
+\input{style.tex}
+
+\newcommand{\ddt}[1]{\ensuremath{\frac{\partial #1}{\partial t}}}
+\newcommand{\ddx}[1]{\ensuremath{\frac{\partial #1}{\partial x}}}
+\newcommand{\ddy}[1]{\ensuremath{\frac{\partial #1}{\partial y}}}
+\newcommand{\pp}[2]{\ensuremath{\frac{\partial #1}{\partial #2}}}
+\renewcommand{\t}[1]{\texttt{#1}}
+\newcommand{\Matlab}{\textsc{Matlab}\xspace}
+\newcommand{\bq}{\mathbf{q}}
+\newcommand{\bU}{\mathbf{U}}
+\newcommand{\eps}{\epsilon}
+\newcommand{\grad}{\nabla}
+\newcommand{\Div}{\nabla\cdot}
+\newcommand{\devstress}{\tau}
+
+\newcommand{\mmess}[1]{\vspace{-0.1in}\begin{center}
+\fbox{\url{#1.m}}
+\end{center}}
+
+\newcommand{\minput}[1]{\scriptsize\verbatiminput{../mfiles/#1.slim.m}
+\tiny\mmess{#1}\normalsize}
+
+\newcommand{\minputtiny}[1]{\tiny\verbatiminput{../mfiles/#1.slim.m}
+\mmess{#1}\normalsize}
+
+
+\lecture[1]{Numerical modelling of ice sheets, streams, and shelves}{lecture-text}
+
+%\date{August 2014}
+
+
+\begin{document}
+\graphicspath{{../photos/}{../pdffigs/}}
+
+
+\begin{frame}
+  \maketitle
+\end{frame}
+
+%\AtBeginSection[]{}
+
+\AtBeginSection[]
+{
+  \begin{frame}<beamer>
+    \frametitle{Outline}
+    \tableofcontents[currentsection,hideallsubsections]
+  \end{frame}
+}
+
+\input{preamble.tex}
+
+\input{sia.tex}
+
+\input{masscont.tex}
+
+\input{ssa.tex}
+
+%\input{advanced.tex}
+
+% bibliography will actually not appear in slides unless bibtex is run
+%   (i.e. not normally)
+%\newpage\bigskip\small
+%\bibliography{ice_bib}
+%\bibliographystyle{igs}
+
+\begin{comment}
+THINK ABOUT THESE THINGS:
+* SSA numerics use matrix solution: point out general sparseness and methods?  exercise related to methods?
+* attempt to use Green's function to understand diffusivity of 1D SSA?
+* why is ice sheet modeling a "1 bar subject"?
+* make sure to test codes in Matlab
+* props
+   -- bicycle for plastic till analogy
+   -- membrane and grid for free boundary
+   -- silly putty
+\end{comment}
+
+\end{document}

@@ -1,0 +1,419 @@
+
+
+%\subsection{preamble}
+
+\begin{frame}{what are you trying to do with this thing?}
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{computer}
+\end{center}
+\end{frame}
+
+
+\begin{frame}{slogans \& scope}
+
+slogans: I will
+  \begin{itemize}
+  \item \alert{focus on approximating ice flow}
+  \item \alert{provide numerical codes that actually work}
+  \item \alert{always care about the continuum model}
+  \end{itemize}
+\medskip
+
+scope: I will cover these
+  \begin{itemize}
+  \item models
+
+    \begin{itemize}
+    \item[$\circ$] shallow ice approximation (SIA) in 2D
+    \item[$\circ$] shallow shelf approximation (SSA) in 1D
+    \item[$\circ$] mass continuity \& surface kinematical equations
+    \end{itemize}
+
+  \item numerical ideas
+
+    \begin{itemize}
+    \item[$\circ$] finite difference schemes
+    \item[$\circ$] solving algebraic systems from stress balances
+    \item[$\circ$] verification
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+\begin{comment}
+\begin{frame}{outside of scope}
+
+\large\emph{not} \normalsize covered here:\normalsize
+\medskip
+
+  \begin{itemize}
+  \item Stokes and ``higher order'' flow equations
+  \item thermomechanical coupling or polythermal ice
+  \item subglacial hydrology/processes
+  \item mass balance and snow/firn processes
+  \item constitutive relations other than Glen isotropic
+  \item grounding lines, calving fronts, ocean interaction
+  \item paleo-climate and ``spin-up''
+  \item earth deformation under ice sheet load
+  \item other numerics: FEM, spectral, multigrid, parallel, \dots
+  \item etc.
+  \end{itemize}
+
+\end{frame}
+\end{comment}
+
+\begin{frame}{notation} 
+
+\begin{center}
+  \includegraphics[width=0.9\textwidth]{flowline}
+
+\tiny \emph{figure modified from} Schoof (2007)\nocite{SchoofMarine1}
+\end{center}
+
+\scriptsize
+  \begin{itemize}
+  \item coordinates $t,x,y,z$  (with $z$ vertical, positive upward)
+  \item subscripts for partial derivatives $u_x = \partial u/\partial x$
+  \item $H=$ ice thickness
+  \item $h=$ ice surface elevation
+  \item $b=$ bedrock surface elevation
+  \item $T=$ temperature
+  \item $\mathbf{u}=(u,v,w)=$ ice velocity
+  \item $\rho=$ density of ice
+  \item $\rho_w=$ density of ocean water
+  \item $g=$ acceleration of gravity
+  \item $n=3$ Glen flow law exponent $=3$
+  \item $A=A(T)=$ ice softness in Glen law ($\mathbf{D}_{ij} = A(T) \tau^{n-1} \tau_{ij}$)
+  \item \alert{please ask about notation!}  (stupid questions impossible)
+  \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Matlab/Octave codes}
+
+\begin{itemize}
+\item lectures and notes are structured around 18 ice flow codes
+\item several codes will appear in these lectures, but not all
+\item each is $\sim$ 1/2 page of Matlab/Octave code
+\item please give them a try!
+
+  \begin{itemize}
+  \item[$\circ$] \texttt{.zip} and \texttt{.tar.gz} forms available from memory stick
+  \item[$\circ$] and online:
+
+  \bigskip\bigskip\small
+  \centerline{\fbox{\url{https://github.com/bueler/karthaus}}}
+  
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\section[introduction]{introduction: view from outside glaciology}
+
+\subsection{ice flow equations}
+
+\begin{frame}{ice in glaciers is a \emph{fluid}}
+
+\begin{itemize}
+\item what's a fluid?
+
+\bigskip\bigskip
+\item at minimum, we describe fluids by
+  \begin{itemize}
+  \item[$\circ$] a \emph{density field}\quad $\rho(t,x,y,z)$
+  \item[$\circ$] a vector \emph{velocity field}\quad $\mathbf{u}(t,x,y,z)$
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{ice in glaciers is a \emph{fluid} \quad 2}
+
+\begin{itemize}
+\item if ice fluid were
+  \begin{itemize}
+  \item[$\circ$] faster-moving than it actually is, and
+  \item[$\circ$] linearly-viscous like liquid water
+  \end{itemize}
+  
+  then ice flow would be a ``typical'' fluid
+
+\bigskip
+\item for typical fluids one uses the Navier-Stokes equations as the model:
+\begin{align*}
+\nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \\
+\rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) &= -\nabla p + \nabla \cdot \tau_{ij} + \rho \mathbf{g} &&\text{\emph{force balance}} \\
+2 \nu \mathbf{D}_{ij} &= \tau_{ij} &&\text{\emph{flow law}}
+\end{align*}
+
+\bigskip
+\item  force balance equation is ``$m a = F$''
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{\emph{hmmm} \dots \emph{does not sound like glaciology to me!}}
+
+\begin{itemize}
+\item \alert{yes}, numerical ice sheet flow modelling is ``computational fluid dynamics''
+  \begin{itemize}
+  \item[$\circ$] it's large-scale like atmosphere and ocean
+  \item[$\circ$] \dots\, but it is a weird one
+  \end{itemize}
+\item consider what makes atmosphere/ocean flow exciting:
+  \begin{itemize}
+  \item[$\circ$] turbulence
+  \item[$\circ$] convection
+  \item[$\circ$] coriolis force
+  \item[$\circ$] density/salinity variation
+  \item[$\circ$] chemistry (methane, ozone, \dots)
+  \end{itemize}
+\item none of the above list is relevant to ice flow
+\item so what could be interesting about the flow of slow, cold, stiff, laminar, inert old ice?
+  \begin{itemize}
+  \item[$\circ$] it's \emph{ice dynamics!}
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{ice is a slow, shear-thinning fluid}
+
+\begin{itemize}
+\item our fluid is
+
+\smallskip
+  \begin{tabular}{lc}
+  \emph{slow}\,: & $\rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) \approx 0$ \\
+  \emph{non-Newtonian}\,: & viscosity $\nu$ is not constant
+  \end{tabular}
+
+\bigskip
+\item ``slow'':
+  $$\rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) \approx 0 \qquad \iff \qquad \begin{pmatrix} \text{forces of inertia} \\ \text{are neglected} \end{pmatrix}$$
+
+\medskip
+\item non-Newtonian in a ``shear-thinning'' way
+  \begin{itemize}
+  \item[$\circ$] higher strain rates means lower viscosity
+  \end{itemize}
+
+\bigskip
+\item \emph{so} the standard ``full'' model is Glen-law ($n=3$) \alert{Stokes}:
+\begin{align*}
+\nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \\
+0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \mathbf{g} &&\text{\emph{force balance}} \\
+\mathbf{D}_{ij} &= A \tau^2 \tau_{ij} &&\text{\emph{flow law}}
+\end{align*}
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{``slow'' means no memory of velocity (i.e.~momentum)}
+
+\begin{itemize}
+\item a time-stepping ice sheet code \dots
+  \begin{itemize}
+  \item[$\circ$] recomputes the full velocity field at every time step, and
+  \item[$\circ$] does not require velocity from the previous step\footnote{to be a weatherman you've got to know which way the wind blows \dots but don't expect that from a glaciologist}
+  \end{itemize}
+
+\medskip
+\item because there is no memory of previous velocity,
+
+\smallskip
+\emph{velocity is a ``diagnostic'' output of ice flow models}
+\end{itemize}
+\end{frame}
+
+
+\subsection{slab-on-a-slope}
+
+\begin{frame}{plane flow Stokes}
+
+\begin{itemize}
+\item recall the Glen-law ($n=3$) Stokes model:
+\begin{align*}
+\nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \\
+0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \mathbf{g} &&\text{\emph{force balance}} \\
+\mathbf{D}_{ij} &= A \tau^2 \tau_{ij} &&\text{\emph{flow law}}
+\end{align*}
+
+\bigskip
+\item now work in a $x,z$ \alert{plane}
+  \begin{itemize}
+  \item[$\circ$] like the centerline of a glacier
+  \item[$\circ$] or in a cross-flow plane
+  \end{itemize}
+
+\item notation on next slide:
+  \begin{itemize}
+  \item[$\circ$] $x,z$ subscripts are partial derivatives
+  \item[$\circ$] $\tau_{13}$ is the ``vertical'' shear stress
+  \item[$\circ$] $\tau_{11}$ and $\tau_{33}=-\tau_{11}$ are (deviatoric) longitudinal stresses 
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{plane flow Stokes  \quad 2}
+
+\begin{itemize}
+\item in the $x,z$ plane flow case the Stokes equations say
+\begin{empheq}[]{align}
+u_x + w_z &= 0 &&\text{\emph{incompressibility}}\notag \\
+p_x &= \tau_{11,x} + \tau_{13,z} &&\text{\emph{stress balance} ($x$)} \notag \\
+p_z &= \tau_{13,x} - \tau_{11,z} - \rho g &&\text{\emph{stress balance} ($z$)} \notag \\
+u_x &= A \tau^2 \tau_{11} &&\text{\emph{flow law} (diagonal)}\notag \\
+u_z + w _x &= 2 A \tau^2 \tau_{13} &&\text{\emph{flow law} (off-diagonal)} \notag
+\end{empheq}
+\item we have five equations in five unknowns ($u,w,p,\tau_{11},\tau_{13}$)
+\item complicated enough \dots what about in a simplified situation?
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{slab-on-a-slope}
+
+\vspace{-0.05in}
+\small
+
+\begin{columns}
+
+\begin{column}{0.5\textwidth}
+\begin{itemize}
+\item suppose we have constant thickness and tilt the bed
+\item rotated coordinates:
+  $$\mathbf{g} = g \sin\theta\, \hat x - g \cos \theta \,\hat z$$
+\item so $p_x,p_z$ equations are now:
+\begin{align}
+p_x &= \tau_{11,x} + \tau_{13,z} + \rho g \sin\theta \notag \\
+p_z &= \tau_{13,x} - \tau_{11,z} - \rho g \cos\theta \notag
+\end{align}
+\end{itemize}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+\includegraphics[width=1.0\textwidth]{slab}
+\end{column}
+
+\end{columns}
+
+\begin{itemize}
+\item for such a \alert{slab-on-a-slope} there is \emph{no variation in} $x$
+\item the equations simplify:
+\small
+\begin{empheq}[box=\fbox]{align}
+w_z &= 0 &   0 &= \tau_{11} \notag \\
+\tau_{13,z} &= - \rho g \sin\theta &   u_z &= 2 A \tau^2 \tau_{13} \notag \\
+p_z &= - \rho g \cos\theta \notag
+\end{empheq}
+\normalsize
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{slab-on-a-slope 2}
+
+\begin{itemize}
+\item add some boundary conditions:
+	$$w(\text{base})=0, \qquad p(\text{surface})=0, \qquad u(\text{base})=u_0$$
+\item by integrating vertically, get:
+  $$w=0, \qquad p = \rho g \cos\theta (H-z), \qquad \tau_{13} = \rho g \sin\theta (H-z)$$
+\item and from ``$u_z = 2 A \tau^2 \tau_{13}$'' get \alert{velocity formula}
+\vspace{-0.05in}
+\begin{align*}
+u(z) &= u_0 + 2 A (\rho g \sin\theta)^3 \int_0^z (H-z')^3\,dz' \\
+     &= u_0 + \frac{1}{2} A (\rho g \sin\theta)^3  \left(H^4 - (H-z)^4\right)
+\end{align*}
+\end{itemize}
+
+\begin{center}
+\includegraphics[width=0.4\textwidth]{slabshear}
+\end{center}
+\end{frame}
+
+
+\begin{frame}{slab-on-a-slope 3}
+
+\begin{columns}
+\begin{column}{0.6\textwidth}
+\begin{itemize}
+\item do we believe these equations?
+\item velocity formula on last slide gives figure below
+\item compare to observations at right
+\end{itemize}
+\begin{center}
+% NOT preserving aspect ratio
+\includegraphics[width=0.6\textwidth,height=0.5\textheight]{slabvel}
+\end{center}
+\end{column}
+
+\begin{column}{0.4\textwidth}
+\includegraphics[width=1.0\textwidth]{athabasca_deform}
+
+\medskip
+\scriptsize
+Velocity profile of the Athabasca Glacier, Canada, derived from inclinometry (Savage and Paterson, 1963)\nocite{SavagePaterson}
+\end{column}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}{mass continuity}
+
+\begin{itemize}
+\item now we know the velocity $u=u(t,x,z)$ \dots so what?
+\item suppose, instead of slab-on-a-slope, that our ice flow has \alert{variable thickness} $H(t,x)$
+\item compute the vertical average of velocity:
+	$$\bar u(t,x) = \frac{1}{H}\int_0^{H} u(t,x,z)\,dz$$
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{mass continuity \quad 2}
+
+\begin{columns}
+\begin{column}{0.6\textwidth}
+\small
+\begin{itemize}
+\item $M(x)$ is climatic (surface) mass balance at $x$
+\item consider change of area in the figure:
+	$$\frac{dA}{dt} \stackrel{\ast}{=} \int_{x_1}^{x_2} M(x)\,dx + \bar u_1 H_1 - \bar u_2 H_2$$
+\item assume width $dx=x_2-x_1$ is small so $A\approx dx\, H$
+\item divide eqn $\ast$ by $dx$ and get
+   $$H_t = M - \left(\bar u H\right)_x$$
+\item this is a \emph{mass continuity equation}
+\end{itemize}
+\end{column}
+\begin{column}{0.4\textwidth}
+\includegraphics[width=1.0\textwidth]{slabmasscontfig}
+\end{column}
+\end{columns}
+
+\bigskip
+\small
+\begin{itemize}
+\item ``area'' in 2D becomes ``volume'' in 3D
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{combine velocity and mass-continuity equations so far \dots}
+
+\begin{itemize}
+\item from slab-on-slope velocity formula in $u_0=0$ case,
+\begin{align*}
+\bar u H &= \int_0^H \frac{1}{2} A (\rho g \sin\theta)^3  \left(H^4 - (H-z)^4\right)\,dz \\
+	&= \frac{2}{5} A (\rho g \sin\theta)^3 H^5
+\end{align*}
+\item note $\sin \theta \approx \tan\theta = - h_x$
+\item combine with mass continuity $H_t = M - \left(\bar u H\right)_x$ to get:
+  $$H_t = M + \left(\frac{2}{5} (\rho g)^5 A H^5 |h_x|^2 h_x\right)_x$$
+
+\medskip
+\item this is a rough explanation of ``shallow ice approximation'' (SIA) \dots next
+\end{itemize}
+\end{frame}
