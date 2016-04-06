@@ -1,0 +1,28 @@
+
+PROJECT 7:  Ice rheology from symmetric flows
+STUDENTS: XXX
+ADVISOR: Ed Bueler
+DESCRIPTION:  There are simple models for how circularly-symmetric flows of ice or other viscous fluids evolve.  This theory, used quantitatively, allows us to convert observations of real flows, whether approximately circular (polar caps on Mars) or deliberately circular (laboratory), into estimates of the rheology of the fluid.  The project will use pencil and paper calculations and some processing of data on computer.
+SOFTWARE REQUIREMENTS: Matlab or Octave
+REQUIRED STUDENT BACKGROUND: Basic exposure to (1) differential equations and (2) Matlab or similar.
+
+
+PROJECT 8: Glaciating random terrain
+STUDENTS: XXX
+ADVISOR: Ed Bueler
+DESCRIPTION: How does the glacier-covered area, or glacier volume, depend on the roughness of topography?  In this modeling project we will generate random terrain, assume altitude-accumulation feedback, model the steady states of the glaciers under such assumptions, and measure the modeled glaciated area and glacier volume.  How does glaciation change as equilibrium line altitude and/or lapse rates change on random terrain of different steepness?
+SOFTWARE REQUIREMENTS: Python and Linux/Unix
+REQUIRED STUDENT BACKGROUND: Basic exposure to (1) differential equations, (2) some numerical methods, and (3) use of Python and unix-type command line.
+
+
+notes to self:
+
+both: get extra laptop; case for both laptops; extra battery;
+
+project 7:   explores the methods and flow solutions used in two papers, namely Nye (2000; "A flow model for the polar caps of Mars") and Sayag and Worster (2013; "Axisymmetric gravity currents of power-law fluids over a rigid horizontal surface");  will provide those papers including data from latter; buy xanthan gum (Bobs Red Mill) and bring surgical tubing and funnel
+
+project 8:  graph glaciated-area vs ELA for several random terrains; steepness = inverse of correlation distance;  random generation based on
+*  https://en.wikipedia.org/wiki/Gaussian_process
+*  perlin noise? (python) https://github.com/caseman/noise
+need to have C/python code for nonsliding SIA on arbitrary bed ready to go; need to check scaling of bed generation code or pre-generate
+
