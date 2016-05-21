@@ -2,14 +2,9 @@
 # (C) 2015 Ed Bueler
 
 import argparse
-import sys
-
 import numpy as np
 from scipy.sparse.linalg import eigs
 from numpy.random import randn
-
-import PetscBinaryIO as pbio
-import petsc_conf
 
 parser = argparse.ArgumentParser(description=
 '''Generate PETSc binary files with random (Gaussian-process-generated) periodic
@@ -28,8 +23,6 @@ Gaussian process generated using the above covariance function then
 ''',
 #formatter_class=argparse.RawDescriptionHelpFormatter,  # irritation: want BOTH of these formatters
 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('outname', metavar='OUTNAME',
-                    help='output PETSc binary file with variables x,y,b')
 parser.add_argument("--amplitude", default=1000.0, metavar='A', type=float,
                     help="amplitude A of variation of b(x,y), in meters")
 parser.add_argument("--lengthscale", default=20000.0, metavar='L', type=float,
@@ -44,11 +37,14 @@ parser.add_argument("-Nx", default=20, metavar='NX', type=int,
                     help="number of grid points (and intervals) in x direction")
 parser.add_argument("-Ny", default=20, metavar='NY', type=int,
                     help="number of grid points (and intervals) in y direction")
+parser.add_argument('-o', dest='outname', default='', metavar='FILENAME',
+                    help='output PETSc binary file with variables x,y,b,... in same format as from sia-fve/petsc/nc2petsc.py')
 #FIXME: add ability to do many samples
 #parser.add_argument("-P", default=1, metavar='P', type=int,
 #                    help="number of beds to generate (samples)")
-parser.add_argument("--plotit", action="store_true",
-                    help="show with matplotlib and a wire frame")
+#FIXME: add --snowcentered which writes a CMB, with positive values in center and negative at edge, into output file
+parser.add_argument("--plotbed", action="store_true",
+                    help="show bed elevation with matplotlib and a wire frame")
 args = parser.parse_args()
 
 dx = args.Lx / float(args.Nx)
@@ -80,7 +76,7 @@ b0 = args.meanelevation
 Z = np.dot(V, Dhalf * np.dot(V.transpose(),randn(N)))
 b = A * np.reshape(Z,(args.Nx,args.Ny)) + b0
 
-if args.plotit:
+if args.plotbed:
     import matplotlib.pyplot as plt
     from matplotlib import cm
     from mpl_toolkits.mplot3d import axes3d
@@ -95,15 +91,21 @@ if args.plotit:
     fig.colorbar(surf,shrink=0.8,aspect=8)
     plt.show()
 
-# convert to PETSc-type vecs
-xvec = x.view(pbio.Vec)
-yvec = y.view(pbio.Vec)
-bvec = b.flatten().view(pbio.Vec)
+if len(args.outname) > 0:
+    import PetscBinaryIO as pbio
+    import petsc_conf
+    # convert to PETSc-type vecs
+    xvec = x.view(pbio.Vec)
+    yvec = y.view(pbio.Vec)
+    bvec = b.flatten().view(pbio.Vec)
+    zerosvec = np.zeros((args.Nx,args.Ny)).flatten().view(pbio.Vec)
 
-# open petsc binary file
-io = pbio.PetscBinaryIO()
+    # open petsc binary file
+    io = pbio.PetscBinaryIO()
 
-# write fields **in a particular order**  (names do not matter)
-print "writing vars x,y,b into %s ..." % args.outname
-io.writeBinaryFile(args.outname, [xvec,yvec,bvec,])
+    # write fields **in a particular order**  (names do not matter)
+    # COMPARE sia-fve/petsc/nc2petsc.py:
+    #   io.writeBinaryFile(args.outname, [x1vec,y1vec,topgvec,cmbvec,thk_obsvec,thk_initvec,])
+    print "writing vars x,y,b into %s ..." % args.outname
+    io.writeBinaryFile(args.outname, [xvec,yvec,bvec,zerosvec,zerosvec,zerosvec,])
 

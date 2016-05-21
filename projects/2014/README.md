@@ -1,5 +1,5 @@
-mccarthy/projects/
-========
+projects/2014/
+==============
 
 These are notes and data and codes for my suggested projects for the McCarthy
 summer school in 2014.
