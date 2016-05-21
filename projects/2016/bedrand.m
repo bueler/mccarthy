@@ -1,5 +1,5 @@
-function lamlims = bedrand2d(l,Nx,Ny,P,periodic)
-% BEDRAND2D  Generate and plot P samples of 2d random bed topography on unit
+function lamlims = bedrand(l,Nx,Ny,P,periodic)
+% BEDRAND  Generate and plot P samples of 2d random bed topography on unit
 % square [0,1]x[0,1], with Nx by Ny grid.  By default uses periodized
 % squared-exponential covariance function
 %     K(x,x') = exp(- (sin(pi(x1-x1')^2+sin(pi(x2-x2')^2) / (2*l^2))
@@ -7,14 +7,14 @@ function lamlims = bedrand2d(l,Nx,Ny,P,periodic)
 %     K(x,x') = exp(- ((x1-x1')^2+(x2-x2')^2) / (2*l^2))
 % with correlation length l.
 % Examples:
-%    >> bedrand2d(0.1,40,40)           # one sample, periodic
-%    >> bedrand2d(1,40,40,4,false)     # four samples, smooth, not periodic
+%    >> bedrand(0.1,40,40)           # one sample, periodic
+%    >> bedrand(1,40,40,4,false)     # four samples, smooth, not periodic
 % Suggests convergence:
-%    >> bedrand2d(.1,20,20)
-%    >> bedrand2d(.1,40,40)
-%    >> bedrand2d(.1,80,80)
+%    >> bedrand(.1,20,20)
+%    >> bedrand(.1,40,40)
+%    >> bedrand(.1,80,80)
 % Probably o.k. for glacier use (with appropriate multiply and shift):
-%    >> bedrand2d(.1,100,100,10)
+%    >> bedrand(.1,100,100,10)
 
 if nargin < 4
     P = 1;
