@@ -33,7 +33,10 @@ Run an example  FIXME does not work yet:
 
         ./mahaffy -mah_read foo.dat -mah_showdata -draw_pause 2 -mah_cmbmodel -cmb_ela 3000.0 -cmb_lapse 0.001
 
+FIXME this makes more progress:
 
+        ./bedrand.py --plotbed -Nx 21 -Ny 21 -o foo.dat
+        ./mahaffy -mah_read foo.dat -mah_showdata -draw_pause 2 -mah_cmbmodel -cmb_ela 3000.0 -cmb_lapse 0.0001 -snes_type vinewtonssls -snes_fd_color -snes_max_it 400
 
 
 Ice rheology from symmetric flows
