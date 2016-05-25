@@ -14,6 +14,7 @@ Build PETSc code
 Generate links:
 
         ln -s ~/repos/sia-fve/petsc/mahaffy
+        ln -s ~/repos/sia-fve/petsc/figsmahaffy.py
         ln -s ~/petsc/bin/PetscBinaryIO.py
         ln -s ~/petsc/bin/petsc_conf.py
 
@@ -23,20 +24,25 @@ Generate and view example bed:
 
 Generate and save example bed:
 
-        ./bedrand.py --plotbed -o foo.dat
+        ./bedrand.py --plotbed -o low.dat
 
-FIXME converges trivially:
+Run a low-resolution example using the bed:
 
-        ./mahaffy -mah_read foo.dat -mah_showdata -draw_pause 2
+        mkdir testlow
+        ./mahaffy -mah_read low.dat -mah_showdata -draw_pause 2 -mah_cmbmodel -cmb_ela 2500.0 -cmb_lapse 0.002 -cs_D0 1.0 -mah_dump testlow/
 
-Run an example  FIXME does not work yet:
+Look at result:
 
-        ./mahaffy -mah_read foo.dat -mah_showdata -draw_pause 2 -mah_cmbmodel -cmb_ela 3000.0 -cmb_lapse 0.001
+        cd testlow/
+        ../figsmahaffy.py --observed
 
-FIXME this makes more progress:
+Run a higher-resolution example, in parallel:
 
-        ./bedrand.py --plotbed -Nx 21 -Ny 21 -o foo.dat
-        ./mahaffy -mah_read foo.dat -mah_showdata -draw_pause 2 -mah_cmbmodel -cmb_ela 3000.0 -cmb_lapse 0.0001 -snes_type vinewtonssls -snes_fd_color -snes_max_it 400
+        ./bedrand.py --plotbed -Nx 100 -Ny 100 -o high.dat
+        mkdir testhigh
+        mpiexec -n 4 ./mahaffy -mah_read high.dat -mah_showdata -draw_pause 2 -mah_cmbmodel -cmb_ela 2500.0 -cmb_lapse 0.002 -cs_D0 1.0 -mah_dtrecovery 10 -snes_max_it 400 -pc_type asm -sub_pc_type lu -mah_dump testhigh/
+        cd testhigh/
+        ../figsmahaffy.py --observed
 
 
 Ice rheology from symmetric flows

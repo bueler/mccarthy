@@ -2,4 +2,6 @@
 PetscBinaryIO.py*
 petsc_conf.py*
 mahaffy
+figsmahaffy.py
+test*/
 
