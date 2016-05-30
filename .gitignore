@@ -1,2 +1,13 @@
 *~
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
+slides/lecture.pdf
+slides/printable.pdf
+slides/lecture-nup.pdf
+slides/tmp/
 
