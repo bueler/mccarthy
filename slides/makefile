@@ -8,7 +8,7 @@ msource := $(addprefix tmp/,$(mslim))
 
 # FIXME: much to do here
 # FIXME need to do "make" in karthaus/, and add links to all graphics, for this too work
-lecture.pdf: $(msource) lecture.tex style.tex preamble.tex sia.tex masscont.tex ssa.tex advanced.tex
+lecture.pdf: $(msource) lecture.tex style.tex preamble.tex sia.tex masscont.tex ssa.tex
 	pdflatex lecture
 	pdflatex lecture
 
@@ -21,16 +21,9 @@ tmp/%.slim.m: ../mfiles/%.m
 	sed -e 's/ *fprintf/%/' -e 's/ *%/%/' -e '/^%/ d' -e 's/%.*//' $@.tmp > $@
 	rm -rf $@.tmp
 
-# a good way to get a copy for print with multiple pages per sheet is:
-printable.pdf:
-	pdfnup --nup '1x2' --scale 0.9 --frame true --no-landscape -- lecture.pdf -
-	pdftk lecture-nup.pdf ../extras/refs_stable.pdf cat output printable.pdf
-	rm -rf lecture-nup.pdf
-
 .PHONY: clean
 
 clean:
 	@rm -f *~ *.out *.aux *.log *.bbl *.blg *.snm *.toc *.nav *.vrb *.synctex.gz
 	@rm -rf tmp/
-	@rm -rf printable.pdf
 
