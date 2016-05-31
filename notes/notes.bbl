@@ -32,6 +32,11 @@
 {\sc E.~Bueler}, {\em An exact solution for a steady, flow-line marine ice
   sheet}, J.~Glaciol., 60 (2014), pp.~1117--1125.
 
+\bibitem{Bueler2016}
+{\sc E.~Bueler}, {\em Stable finite volume element schemes for the
+  shallow-ice approximation}, J.~Glaciol. (2016).
+\newblock doi:10.1017/jog.2015.3.
+
 \bibitem{BBssasliding}
 {\sc E.~Bueler and J.~Brown}, {\em Shallow shelf approximation as a ``sliding
   law'' in a thermodynamically coupled ice sheet model}, J. Geophys. Res., 114
