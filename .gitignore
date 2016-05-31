@@ -6,6 +6,7 @@
 *.snm
 *.toc
 *.vrb
+*.synctex.gz
 slides/lecture.pdf
 slides/printable.pdf
 slides/lecture-nup.pdf

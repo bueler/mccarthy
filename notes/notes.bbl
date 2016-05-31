@@ -28,6 +28,11 @@
   applications in elasticity theory}, Cambridge University Press, 3rd~ed.,
   2007.
 
+\bibitem{Brown2013}
+{\sc J.~Brown, B.~Smith, and A.~Ahmadia}, {\em Achieving textbook multigrid
+  efficiency for hydrostatic ice sheet flow}, SIAM J. Sci. Computing,
+  35 (2013), pp.~B359--B375.
+
 \bibitem{Bueler2014exactmarine}
 {\sc E.~Bueler}, {\em An exact solution for a steady, flow-line marine ice
   sheet}, J.~Glaciol., 60 (2014), pp.~1117--1125.

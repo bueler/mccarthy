@@ -152,11 +152,10 @@ $n$ & exponent in Glen flow law & & 3 \\
 $\nu$ & viscosity & Pa s \\
 $p$ & pressure & Pa \\
 $\bq$ & map-plane ice flux: $\bq = \int_{b}^{h} \bU\,dx = \bar{\bU} H$ & $\text{m}^2\,\text{s}^{-1}$ \\
-$\rho$ & (1) density in general & kg m$^{-3}$ & \\
-  & (2) density of ice & kg m$^{-3}$ & 910 \\
+$\rho$ & density of ice & kg m$^{-3}$ & 910 \\
 $\rho_w$ & density of sea water & kg m$^{-3}$ & 1028 \\
 $T$ & temperature & K \\
-$\tau$ & magnitude of $\tau_{ij}$: $2 \tau^2 = \sum_{ij} \tau_{ij}^2$ & Pa \\
+$\tau$ & norm (second invariant) of $\tau_{ij}$: $2 \tau^2 = \sum_{ij} \tau_{ij}^2$ & Pa \\
 $\tau_{ij}$ & deviatoric stress tensor & Pa \\
 $Du_{ij}$ & strain rate tensor & s$^{-1}$ \\
 $\mathbf{U}$ & $=(u,v)$ horizontal ice velocity & m s$^{-1}$ \\
@@ -269,13 +268,13 @@ Because the (Cauchy) stress tensor $\sigma_{ij}$ is related to the deviatoric st
 p + \tau_{11} = \rho g (h-z). \label{hydrostaticitself}
 \end{equation}
 
-Equation \eqref{hydrostaticitself} allows one to eliminate $p$ from the model equations.  Furthermore, taking the $x$-derivative of \eqref{hydrostaticitself} and substituting into \eqref{stokespx}, then using the viscosity form \eqref{viscosityflowlaw}, leads to this equation \cite{GreveBlatter2009}:
+Equation \eqref{hydrostaticitself} allows one to eliminate $p$ from the model equations.  Furthermore, taking the $x$-derivative of \eqref{hydrostaticitself} and substituting into \eqref{stokespx}, then using the viscosity form \eqref{viscosityflowlaw}, leads to this equation (Notes and References and \cite{GreveBlatter2009}):
 \begin{equation}
 \left(4 \nu u_x\right)_x + \left(\nu (u_z+w_x)\right)_z = \rho g h_x \qquad\text{\emph{hydrostatic stress balance}} \label{stresshydrostatic}
 \end{equation}
 The hydrostatic stress balance equation \eqref{stresshydrostatic} is nontrivially-coupled to incompressibility \eqref{incompressiblexz} because derivatives of the vertical velocity $w$ appear in both equations, though $p$ is gone.  Nonetheless coupled equations \eqref{incompressiblexz} and \eqref{stresshydrostatic}, along with the formula $\nu = (1/2) A^{-1/3} |Du|^{-2/3}$ and appropriate boundary conditions, determine $u$ and $w$.
 
-If we drop $w_x$ from equation \eqref{stresshydrostatic} then we get the Blatter-Pattyn model \cite{Blatter,Pattyn03}:
+If we drop $w_x$ from equation \eqref{stresshydrostatic} then we get the Blatter-Pattyn model:
 \begin{equation}
 \left(4 \nu u_x\right)_x + \left(\nu u_z\right)_z = \rho g h_x \qquad\text{\emph{Blatter-Pattyn stress balance}} \label{stressblatter}
 \end{equation}
@@ -298,7 +297,7 @@ Note $\sin \alpha \approx \tan\alpha = - h_x$.  Combining these statements with 
   H_t = M + \left(\frac{2}{5} (\rho g)^3 A H^5 |h_x|^2 h_x\right)_x. \label{sia1D}
 \end{equation}
 
-Equation \eqref{sia1D} is the SIA equation for nonsliding plane flow.  It is the promised first usable model for the evolution of an ice sheet's thickness $H$ in terms of surface mass balance $M$, ice softness $A$, and bed elevation $b$ (because $h=H+b$).  The model must, however, be solved subject to the constraint that the thickness is positive \cite{Bueler2016}: $H\ge 0$.
+Equation \eqref{sia1D} is the SIA equation for nonsliding plane flow.  It is the promised first usable model for the evolution of an ice sheet's thickness $H$ in terms of surface mass balance $M$, ice softness $A$, and bed elevation $b$ (because $h=H+b$).  The model must, however, be solved subject to the constraint that the thickness is positive ($H\ge 0$); see Notes and References.
 
 Additional arguments are needed to demonstrate that the SIA is more general-purpose than the special case of a simple slab; see Notes and References.  Such arguments reduce the Stokes equations under the assumption that the surface and bed slopes, and the depth-to-width ratio, are small.
 
@@ -358,23 +357,25 @@ SIA:\, $H$ is ice thickness & \phantom{foo bar} heat: $T$ is temperature\phantom
 Notice that the number of derivatives (one time and two space derivatives) and the signs are the same.  Surface mass balance $M$ is analogous to heat source $F$.  
 
 The analogy suggests that we identify the \emph{diffusivity in the SIA} as:
-	$$D = {\color{red}\Gamma H^{n+2} |\grad h|^{n-1}}.$$
+\begin{equation}
+	D = {\color{red}\Gamma H^{n+2} |\grad h|^{n-1}}.  \label{siadiffusivity}
+\end{equation}
 A non-sliding SIA flow diffuses the thickness of the ice sheet, and when this $D$ comes out large then the diffusion acts most quickly.  Being a product of $\Gamma$ and the powers of $H$ and $|\grad h|$, this diffusivity $D$ is large if the ice is both thick and steep.  In summary, ice diffuses (i.e.~flows downhill) more when it is thick and steep.
 
 This diffusion equation analogy explains generally why the surfaces of ice sheets are smooth, at least if we overlook non-flow processes like crevassing and wind-driven (snow) dunes.  There are, however, some practical and conceptual issues with the analogy:
 \begin{itemize}
-\item The diffusivity $D$ depends on the solution, namely both on the thickness $H$ and the surface slope $|\grad h|$.  This fact affects how we reason about diffusivity, and it makes numerical solution processes more difficult because nonlinear equations are harder to solve.
-\item The diffusivity $D$ goes to zero at margins, where $H\to 0$, and at divides and domes, where $|\grad h|\to 0$.  This means that the solution is not smooth, even though the thickness is continuous everywhere (and zero outside the ice sheet).  A non-smooth solution generates larger numerical errors.
+\item The diffusivity $D$ in \eqref{siadiffusivity} depends on the solution, both thickness $H$ and surface slope $|\grad h|$.  This affects how we reason about diffusivity.  Numerical solution processes are more difficult because nonlinear equations are harder to solve.
+\item The diffusivity $D$ in \eqref{siadiffusivity} goes to zero at margins, where $H\to 0$, and at divides and domes, where $|\grad h|\to 0$.  This means that the solution is not smooth, even though the thickness is continuous everywhere (and zero outside the ice sheet).  A non-smooth solution generates larger numerical errors.
 \end{itemize}
-More important is a deficiency of the SIA model and not \emph{per se} the analogy, namely
+More important is a deficiency of the SIA model, and not the analogy \emph{per se}, namely
 \begin{itemize}
-\item Ice flow is much less diffusive when longitudinal (membrane) stresses are important, as when ice is floating or sliding or when the flow is confined by terrain.
+\item Ice flow is much less diffusive when significant longitudinal (membrane) stresses are present, as when ice is floating or sliding or when the flow is confined by terrain.
 \end{itemize}
-But we will continue with the SIA, working toward a verified numerical scheme for \eqref{sia} in Section \ref{sec:numericalsia}.
+Nonetheless we continue toward a verified numerical scheme for the SIA model \eqref{sia} (Section \ref{sec:numericalsia}).  The next Section introduces some numerical PDE methods in general.
 
 \section{Finite difference numerics} 
 
-Numerical schemes for the heat equation are a good starting place for solving the SIA equation \eqref{sia}.  Here we demonstrate only finite difference (FD) schemes.  These schemes replace derivatives in a differential equation by mere arithmetic.
+The diffusivity analogy above suggests that numerical schemes for the heat equation are a starting point for solving the SIA equation \eqref{sia}.  Here we demonstrate only finite difference (FD) schemes, in which we replace derivatives by mere arithmetic.
 
 The basic fact on which FD schemes are based is \emph{Taylor's theorem}, which says that for a smooth function $f(x)$,
 	$$f(x+\Delta) = f(x) + f'(x) \Delta + \frac{1}{2} f''(x) \Delta^2 + \frac{1}{3!} f'''(x) \Delta^3 + \dots$$
@@ -383,7 +384,7 @@ You can replace ``$\Delta$'' by its multiples, for example:
 f(x+2\Delta) &= f(x) + 2 f'(x) \Delta + 2 f''(x) \Delta^2 + \frac{4}{3} f'''(x) \Delta^3 + \dots \\
 f(x-\Delta) &= f(x) - f'(x) \Delta + \frac{1}{2} f''(x) \Delta^2 - \frac{1}{3!} f'''(x) \Delta^3 + \dots
 \end{align*}
-The idea for constructing FD schemes is to combine expressions like these to give approximations of derivatives.  Thereby function values on a grid combine to approximate the differential equation.
+The idea for constructing FD schemes is to combine expressions like these to give approximations of derivatives.  Thereby an equation relating values on a grid serves to approximate the differential equation.
 
 Here we want partial derivative approximations, so we apply the Taylor's expansions one variable at a time.  For example, with a general function $u=u(t,x)$,
 \begin{align*}
@@ -394,24 +395,30 @@ u_{xx}(t,x) &= \frac{u(t,x+\Delta x) - 2\, u(t,x) + u(t,x-\Delta x)}{\Delta x^2}
 \end{align*}
 Note that if $\Delta$ is a small number then ``$+O(\Delta^2)$'' is smaller than ``$+O(\Delta)$'', so the approximation is closer when you drop it.
 
-\subsection*{Explicit scheme for the heat equation}  We can build the simplest ``explicit'' scheme which approximates the 1D heat equation \eqref{heat1D} by observing that these two FD expressions are nearly equal:
+\subsection*{Explicit scheme for the heat equation}  We first build the simplest ``explicit'' scheme which approximates the 1D heat equation \eqref{heat1D}.  It is based on the fact that because $T_t$ and $D T_{xx}$ are equal, these two FD expressions are nearly equal:
 \begin{equation}
 \frac{T(t+\Delta t,x) - T(t,x)}{\Delta t} \approx D\,\frac{T(t,x+\Delta x) - 2\, T(t,x) + T(t,x-\Delta x)}{\Delta x^2}.  \label{heat1Dapproximated}
 \end{equation}
-The FD scheme itself is not just an approximation of a PDE, like \eqref{heat1Dapproximated}, but an actual method for computing numbers on a grid.  Let $(t_n,x_j)$ denote the time-space grid points.  Denote our approximation of the solution value $T(t_n,x_j)$ by $T_j^n$.  Then the finite difference scheme is
+The scheme itself is a method for computing numbers on a grid.  That is, \eqref{heat1Dapproximated} approximates the PDE, but making it into an equality tells how to \emph{determine} grid values.
+
+Let $(t_n,x_j)$ denote the points of the time-space grid shown in Figure \ref{fig:timespacegrid}.  Denote our approximation of the solution value $T(t_n,x_j)$ by $T_j^n$.  Then the finite difference scheme is
 	$$\frac{T_j^{n+1} - T_j^n}{\Delta t} = D\,\frac{T_{j+1}^n - 2\, T_j^n + T_{j-1}^n}{\Delta x^2}.$$
 To get a computable formula, let $\mu = D \Delta t / (\Delta x)^2$ and solve for $T_j^{n+1}$:
 \begin{equation}
   T_j^{n+1} = \mu T_{j+1}^n + (1 - 2 \mu) T_j^n + \mu T_{j-1}^n \label{heat1Dfd}
 \end{equation}
 
-FD scheme \eqref{heat1Dfd} is \emph{explicit} because it directly computes $T_j^{n+1}$ in terms of values at time $t_n$.  Figure \ref{fig:expstencil} shows the ``stencil'' for scheme \eqref{heat1Dfd}: three values at the current time $t_n$ are combined to update the one value at the next time $t_{n+1}$.
+\onefigsize{timespacegrid}{A grid for a finite difference solution to \eqref{heat1D}.}{2.0in}
 
-Before moving on, notice that evaluating a heat equation solution at a grid point (i.e.~the expression ``$T(t_n,x_j)$'') generally gives a different value from the value $T_j^n$ computed by a scheme like \eqref{heat1Dfd}.  Of course we plan that these numbers will be close, but that needs checking (``verification'') or an \emph{a priori} proof.  Specifically we intend that the numbers $T(t_n,x_j)$ and $T_j^n$ become close to each other when the grid is made finer (i.e.~$\Delta t \to 0$ and $\Delta x \to 0$), as the FD expressions become closer to the derivatives they approximate.  That is, we intend our FD scheme to \emph{converge} under \emph{grid refinement}.
+FD scheme \eqref{heat1Dfd} is \emph{explicit} because it directly computes $T_j^{n+1}$ in terms of values at time $t_n$.  Figure \ref{fig:expstencil} (left) shows the ``stencil'' for scheme \eqref{heat1Dfd}: three values at the current time $t_n$ are combined to update the one value at the next time $t_{n+1}$.
+
+Before moving on, notice that evaluating a heat equation solution at a grid point (i.e.~the expression ``$T(t_n,x_j)$'') is generally a different number from the value $T_j^n$ computed by a scheme like \eqref{heat1Dfd}.  We intend that the numbers $T(t_n,x_j)$ and $T_j^n$ become closer together as the grid is made finer (i.e.~$\Delta t \to 0$ and $\Delta x \to 0$), because the FD expressions become closer to the derivatives they approximate.  That is, we intend our FD scheme to \emph{converge} under \emph{grid refinement}.  For now we \emph{plan} and \emph{hope} that convergence happens, but it needs checking (``verification''; Section \ref{sec:exactsolutions}) or perhaps a proof.
+
+\twofigsizes{expstencil}{exp2dstencil}{Left: Space-time stencil for the explicit scheme \eqref{heat1Dfd} for the 1D heat equation.  Right: Spatial-only stencil for scheme \eqref{heat2dexplicit}.}{2.0in}{2.1in}
 
 How accurate is scheme \eqref{heat1Dfd}?  Its construction tells us that the difference between the scheme \eqref{heat1Dfd} and the PDE \eqref{heat1D} is $O(\Delta t + (\Delta x)^2)$, so this difference goes to zero as we refine the grid in space and time, a property called \emph{consistency}.  With care about the smoothness of boundary conditions, and using mathematical facts about the heat equation itself, one can show that the difference between $T_j^n$ and $T(t_n,x_j)$ is also $O(\Delta t + (\Delta x)^2)$, which is thus the \emph{convergence rate}; see Notes and References.
 
-To get convergence the PDE problem must generate adequately smooth solutions, and also scheme \eqref{heat1Dfd} must be \emph{stable}, which we address below.  (The main theorem for numerical PDE schemes is ``consistency plus stability implies convergence''; see Notes and References.)  In these notes we do something rather practical, namely verification.  We find problems for which we already know an exact solution $T(t,x)$, and then we compute the differences $|T_j^n - T(t_n,x_j)|$.  This determines directly whether the \emph{implementation} (i.e.~computer code form) of our FD scheme actually converges, not just in theory.
+To get convergence the PDE problem must generate adequately smooth solutions, and also scheme \eqref{heat1Dfd} must be \emph{stable}, which we address below.  The main theorem for numerical PDE schemes is ``consistency plus stability implies convergence''; see Notes and References.  Instead of pursuing such theory, however, these notes we do something rather practical, namely verification.  We find problems for which we already know an exact solution $T(t,x)$, and then we compute the differences $|T_j^n - T(t_n,x_j)|$.  This determines directly whether our actual \emph{implementation} (i.e.~computer code form of the scheme) actually does converge, not just whether it should in theory.
 
 \subsection*{A first implemented scheme}  Our first Matlab implementation we consider the two spatial dimension Equation \eqref{heat} with $D$ constant and $F=0$:
 \begin{equation}
@@ -422,8 +429,6 @@ Writing $T_{jk}^n \approx T(t_n,x_j,y_k)$, the 2D explicit scheme is
 	\frac{T_{jk}^{n+1} - T_{jk}^n}{\Delta t} = D\,\left(\frac{T_{j+1,k}^n - 2\, T_{jk}^n + T_{j-1,k}^n}{\Delta x^2} + \frac{T_{j,k+1}^n - 2\, T_{jk}^n + T_{j,k-1}^n}{\Delta y^2}\right). \label{heat2dexplicit}
 \end{equation}
 The stencil for the right-hand side of \eqref{heat2dexplicit} is in Figure \ref{fig:expstencil}.
-
-\twofigsizes{expstencil}{exp2dstencil}{Left: Space-time stencil for the explicit scheme \eqref{heat1Dfd} for the 1D heat equation.  Right: Spatial-only stencil for scheme \eqref{heat2dexplicit}.}{2.0in}{2.1in}
 
 Scheme \eqref{heat2dexplicit} has implementation \texttt{heat.m} below.  For simplicity we set $T=0$ on the boundary of the square $-1 < x < 1$, $-1 < y < 1$.  The initial condition is gaussian: $T(0,x,y) = \exp(-30 (x^2+y^2))$.  The code uses Matlab ``colon'' notation to remove loops over spatial variables.  Here is an example run:
 \begin{Verbatim}
@@ -442,14 +447,6 @@ Both runs compute temperature $T$ on the same spatial grid, for the same final t
 
 \twofig{stability}{instability}{Numerically-computed temperature on $40\times 40$ grids.  The two runs are the same except that the left has $\Delta t=0.0005$ so $D\Delta t/(\Delta x)^2= 0.2$, while the right has $\Delta t=0.001$ so $D\Delta t/(\Delta x)^2= 0.4$.  Compare \eqref{stabcrit}.}
 
-%>> heat(1.0,40,40,0.001,50);
-%  doing N = 50 steps of dt = 0.00100 for 0.0 < t < 0.050
-%  nu = 1 * dt / dx^2 = 0.40000
-%>> print -dpdf instability.pdf
-%>> heat(1.0,40,40,0.0005,100);
-%  doing N = 100 steps of dt = 0.00050 for 0.0 < t < 0.050
-%  nu = 1 * dt / dx^2 = 0.20000
-%>> print -dpdf stability.pdf
 
 \subsection*{Stability criteria and adaptive time stepping}  To avoid the instability shown at right in Figure \ref{fig:stability}, we need to understand the scheme better.  It turns out we have not made an implementation error, but more care is required when choosing space and time steps.
 
@@ -507,7 +504,7 @@ Second, for numerical stability and mass conservation we should compute $D$ on a
 \minput{siaflat}
 
 
-\section{Exact solutions and verification}
+\section{Exact solutions and verification} \label{sec:exactsolutions}
 
 In \texttt{siaflat.m}, which calls \texttt{diffusion.m}, we already have a fairly complicated code.  How do we make sure that such an implemented numerical scheme is correct?  Here are three proposed techniques:
 \begin{enumerate}
@@ -784,7 +781,7 @@ Regarding the specific ice flow models covered in these notes, here are three hi
 
 Recent and recommended books and reviews which extend the continuum modeling content of these notes include \cite{CuffeyPaterson,GreveBlatter2009,SchoofHewitt2013,vanderVeen}.
 
-The SIA model, which was derived by several authors \cite{FowlerLarson1978,Hutter,MorlandJohnson}, follows by scaling the Stokes equations using the aspect ratio $\eps = [H]/[L]$, where $[H]$ is a typical thickness of an ice sheet and $[L]$ is a typical horizontal dimension.  After scaling one drops the terms that are small if $\eps$ is small \cite{Fowler,Hutter}; this is a ``small-parameter argument''.  In one scaling there are no $O(\eps)$ terms in the scaled equations so one only drops $O(\eps^2)$ terms \cite{Fowler}.  The SIA is re-formulated as a well-posed free boundary problem in \cite{JouvetBueler2012}, which provides the correct boundary condition at grounded margins.  The Mahaffy \cite{Mahaffy} scheme for diffusivity used here is not the only one \cite{HindmarshPayne}.
+The SIA model, which was derived by several authors \cite{FowlerLarson1978,Hutter,MorlandJohnson}, follows by scaling the Stokes equations using the aspect ratio $\eps = [H]/[L]$, where $[H]$ is a typical thickness of an ice sheet and $[L]$ is a typical horizontal dimension.  After scaling one drops the terms that are small if $\eps$ is small \cite{Fowler,Hutter}; this is a ``small-parameter argument''.  In one scaling there are no $O(\eps)$ terms in the scaled equations so one only drops $O(\eps^2)$ terms \cite{Fowler}.  The SIA is re-formulated as a well-posed free boundary problem in \cite{JouvetBueler2012}, which provides the correct boundary condition at grounded margins by adding the constraint that the thickness is positive; another approach is in \cite{Bueler2016}.  The Mahaffy \cite{Mahaffy} scheme for diffusivity used here is not the only one \cite{HindmarshPayne}.
 
 The SSA model \cite{WeisGreveHutter} was derived in \cite{Morland} for ice shelves and in \cite{MacAyeal} for ice streams.  In deriving the SSA, the aspect ratio $\eps$ above is one small parameter but additionally a second parameter describing the magnitude of surface undulations must be assumed to be small  \cite{SchoofStream,SchoofHindmarsh}.  A well-posed model for the emergence of ice streams though till failure, using only the SSA, is in \cite{SchoofStream}.
 
@@ -794,7 +791,7 @@ Pressurized basal water is required for most ice sliding.  To model the producti
 
 One of the most significant issues in modelling ice sheets using shallow models is to describe the ``switch'', in space and time, between shear-dominated and membrane-stress-dominated flow.  It is not a good idea to abruptly switch from the SIA model to the SSA model at the edge of an ice stream, by whatever criterion that switch might be applied, though this has been attempted \cite{HulbeMacAyeal,Ritzetal2001}.  However, ``hybrid'' schemes exist which solve the SIA and SSA everywhere in the ice sheet \cite{BBssasliding,Winkelmannetal2011}, or solve a related vertically-integrated model \cite{Goldberg2011,PollardDeConto}, then combining the stresses or velocities according to different schemes.
 
-``Higher-order'' three-dimensional approximations of the Stokes stress balance, such as the Blatter-Pattyn model \cite{Blatter,Pattyn03}, also use shallow approximations, at minimum including both the most-basic shallow assumption of well-defined thickness (see main text) \emph{and} an assumption of hydrostatic normal stress \cite{GreveBlatter2009}.  Computational limitations generally restrict either the spatial extent, the spatial resolution, or the run duration of these more complete models, primarily because 3D stress balances involve more memory.  Vertically-integrated hybrids can generally be used at higher spatial resolution and longer time scales than higher-order models because the 2D stress balance equations are easier to solve.
+``Higher-order'' three-dimensional approximations of the Stokes stress balance, such as the Blatter-Pattyn model \cite{Blatter,Pattyn03}, also use shallow approximations, at minimum including both the most-basic shallow assumption of well-defined thickness (see main text) \emph{and} an assumption of hydrostatic normal stress \cite{GreveBlatter2009}.  Computational limitations generally restrict either the spatial extent, the spatial resolution, or the run duration of these more complete models, primarily because 3D stress balances involve more memory, but careful numerical analysis can generate fast solutions \cite{Brown2013}.  Nonetheless, vertically-integrated hybrids can generally be used at higher spatial resolution and longer time scales than higher-order models because the 2D stress balance equations are easier to solve.
 
 As both the SIA and the SSA are derived by small-parameter arguments from the Stokes equations, one might ask whether there is a common shallow antecedent model of both SIA and SSA?  Schoof and Hindmarsh \cite{SchoofHindmarsh} answer that Blatter-Pattyn is one.
 
@@ -808,9 +805,11 @@ Where to find exact solutions for ice flow models?  The textbook Greve and Blatt
 
 As a last resort for numerical verification, one can ``manufacture'' exact solutions by starting with a specified solution and then deriving a source term so that the specified function is actually a solution \cite{Roache}.  There are such manufactured solutions to the thermomechanically-coupled SIA \cite{BBL}, plane flow Blatter-Pattyn model \cite{GlowinskiRappaz}, and Glen-law Stokes equations \cite{JouvetRappaz2011,Lengetal2012,SargentFastook2010}.
 
-\clearpage\newpage
+%\clearpage\newpage
 \footnotesize
 
+\bigskip
+\bigskip
 %\bibliography{ice-bib}
 %\bibliographystyle{siam}
 \input{notes.bbl}
