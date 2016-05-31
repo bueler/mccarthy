@@ -8,7 +8,7 @@ msource := $(addprefix tmp/,$(mslim))
 
 # FIXME: much to do here
 # FIXME need to do "make" in karthaus/, and add links to all graphics, for this too work
-lecture.pdf: $(msource) lecture.tex style.tex preamble.tex sia.tex masscont.tex ssa.tex
+lecture.pdf: $(msource) anim/halfar0.png lecture.tex style.tex preamble.tex sia.tex masscont.tex ssa.tex
 	pdflatex lecture
 	pdflatex lecture
 
@@ -21,9 +21,12 @@ tmp/%.slim.m: ../mfiles/%.m
 	sed -e 's/ *fprintf/%/' -e 's/ *%/%/' -e '/^%/ d' -e 's/%.*//' $@.tmp > $@
 	rm -rf $@.tmp
 
+anim/halfar0.png: anim/halfarfigs.tar.gz
+	(cd anim/ && tar -xzvf halfarfigs.tar.gz)
+
 .PHONY: clean
 
 clean:
 	@rm -f *~ *.out *.aux *.log *.bbl *.blg *.snm *.toc *.nav *.vrb *.synctex.gz
-	@rm -rf tmp/
+	@rm -rf tmp/ anim/halfar*png
 

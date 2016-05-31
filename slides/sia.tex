@@ -25,7 +25,7 @@
 \end{itemize}
 
 \begin{center}
-  \includegraphics[width=0.6\textwidth]{green_transect}
+  \includegraphics[width=0.6\textwidth]{green-transect}
 \end{center}
 \end{frame}
 
@@ -143,39 +143,6 @@ where $T$ is object temperature and $K$ relates to material and geometry of obje
 \end{column}
 \end{columns}
 \end{frame}
-
-\begin{comment}
-\begin{frame}{more complete and 2D version of heat equation}
-
-\small
-\begin{columns}
-\begin{column}{0.6\textwidth}
-\begin{itemize}
-\item $T(t,x,y)$ is temperature in object at position $x,y$ and time $t$
-\item Fourier rewrote Newton's law as a rule for heat flux: $\mathbf{q} = - k \grad T$
-\item allow an additional heat source $f$
-\item coefficients: $\rho$ is density, $c$ is specific heat, $k$ is conductivity
-\item by conservation of energy get heat equation:
-	$$\rho c T_t = f + \Div (k \grad T)$$
-\end{itemize}
-\end{column}
-\begin{column}{0.4\textwidth}
-\mode<presentation>{
-\animategraphics[autoplay,loop,height=2.5cm]{4}{../anim/heatmelt}{0}{16}
-}
-\end{column}
-\end{columns}
-
-\begin{itemize}
-\item define the ``diffusivity constant'' $D=k/(\rho c)$ and also $F := f/(\rho c)$
-\item for 2D object (e.g.~a plate):
-\begin{equation}
-T_t = F + \Div (D\, \grad T) \label{heat}
-\end{equation}
-\item this is like the SIA model for ice sheets: temperature $T$ solves a \emph{diffusive, time-evolving partial differential equation (PDE)}
-\end{itemize}
-\end{frame}
-\end{comment}
 
 \begin{frame}{analogy: SIA versus 2D heat equation}
 
@@ -575,7 +542,7 @@ in stencil at right:
 \begin{frame}{Halfar solution to the SIA: the movie}
 \label{slide:plothalfar}
 
-\animategraphics[autoplay,loop,height=7.0cm]{4}{../anim/halfar}{0}{26}
+\animategraphics[autoplay,loop,height=7.0cm]{4}{anim/halfar}{0}{26}
 
 \par
 \scriptsize 
