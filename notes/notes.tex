@@ -420,7 +420,7 @@ How accurate is scheme \eqref{heat1Dfd}?  Its construction tells us that the dif
 
 To get convergence the PDE problem must generate adequately smooth solutions, and also scheme \eqref{heat1Dfd} must be \emph{stable}, which we address below.  The main theorem for numerical PDE schemes is ``consistency plus stability implies convergence''; see Notes and References.  Instead of pursuing such theory, however, these notes we do something rather practical, namely verification.  We find problems for which we already know an exact solution $T(t,x)$, and then we compute the differences $|T_j^n - T(t_n,x_j)|$.  This determines directly whether our actual \emph{implementation} (i.e.~computer code form of the scheme) actually does converge, not just whether it should in theory.
 
-\subsection*{A first implemented scheme}  Our first Matlab implementation we consider the two spatial dimension Equation \eqref{heat} with $D$ constant and $F=0$:
+\subsection*{A first implemented scheme}  Our first Matlab implementation is for the 2D Equation \eqref{heat} with $D$ constant and $F=0$:
 \begin{equation}
 T_t = D (T_{xx}+T_{yy}).\label{heat2D}
 \end{equation}
@@ -428,7 +428,7 @@ Writing $T_{jk}^n \approx T(t_n,x_j,y_k)$, the 2D explicit scheme is
 \begin{equation}
 	\frac{T_{jk}^{n+1} - T_{jk}^n}{\Delta t} = D\,\left(\frac{T_{j+1,k}^n - 2\, T_{jk}^n + T_{j-1,k}^n}{\Delta x^2} + \frac{T_{j,k+1}^n - 2\, T_{jk}^n + T_{j,k-1}^n}{\Delta y^2}\right). \label{heat2dexplicit}
 \end{equation}
-The stencil for the right-hand side of \eqref{heat2dexplicit} is in Figure \ref{fig:expstencil}.
+The stencil for the right-hand side of \eqref{heat2dexplicit} is shown in Figure \ref{fig:expstencil} (right).
 
 Scheme \eqref{heat2dexplicit} has implementation \texttt{heat.m} below.  For simplicity we set $T=0$ on the boundary of the square $-1 < x < 1$, $-1 < y < 1$.  The initial condition is gaussian: $T(0,x,y) = \exp(-30 (x^2+y^2))$.  The code uses Matlab ``colon'' notation to remove loops over spatial variables.  Here is an example run:
 \begin{Verbatim}
@@ -438,40 +438,38 @@ This sets $D=1.0$ and uses a $30\times 30$ spatial grid.  We take $N=20$ time st
 
 \minput{heat}
 
-However, very similar runs seem to succeed or fail according to some yet unclear circumstance.  For example, results from these calls are shown in Figure \ref{fig:stability}:
+However, very similar runs seem to succeed or fail according to some as-yet unclear circumstances.  For example, results from these calls are shown in Figure \ref{fig:stability}:
 \begin{Verbatim}
->> heat(1.0,40,40,0.0005,100);    % Figure 7, left
->> heat(1.0,40,40,0.001,50);      % Figure 7, right
+>> heat(1.0,40,40,0.0005,100);    % Figure 8, left
+>> heat(1.0,40,40,0.001,50);      % Figure 8, right
 \end{Verbatim}
-Both runs compute temperature $T$ on the same spatial grid, for the same final time $t_f = N \Delta t = 0.05$, but with different time steps.  The second run clearly shows instability.
+Both runs compute temperature $T$ on the same spatial grid, for the same final time $t_f = N \Delta t = 0.05$, but with different time steps.  Noting the vertical axes, the second run clearly shows ``instability,'' an extreme form of inaccuracy characterized in practice by numbers of a totally different magnitude than expected.
 
 \twofig{stability}{instability}{Numerically-computed temperature on $40\times 40$ grids.  The two runs are the same except that the left has $\Delta t=0.0005$ so $D\Delta t/(\Delta x)^2= 0.2$, while the right has $\Delta t=0.001$ so $D\Delta t/(\Delta x)^2= 0.4$.  Compare \eqref{stabcrit}.}
 
 
-\subsection*{Stability criteria and adaptive time stepping}  To avoid the instability shown at right in Figure \ref{fig:stability}, we need to understand the scheme better.  It turns out we have not made an implementation error, but more care is required when choosing space and time steps.
+\subsection*{Stability criteria and adaptive time stepping}  To avoid the instability shown at right in Figure \ref{fig:stability}, we need to understand the scheme better.  It turns out we have not made an implementation error.  Instead, care is required when choosing space and time steps.
 
-Recall the 1D explicit scheme in form \eqref{heat1Dfd}: $T_j^{n+1} = \mu T_{j+1}^n + (1 - 2 \mu) T_j^n + \mu T_{j-1}^n$.  The new value $T_j^{n+1}$ is an average of the old values, in the sense that the coefficients add to one.  Averaging is stable because averaged wiggles are smaller than the wiggles themselves.  Actually, however, the scheme is only an average \emph{if} the middle coefficient is positive, as a linear combination with coefficients which add to one is not an average if any coefficients are negative.  (For example, we would not accept 15 as an ``average'' of 5 and 7, but we can write $15 = -4 \times 5 + 5 \times 7$, and $-4+5=1$.)
+Recall the 1D explicit scheme in form \eqref{heat1Dfd}: $T_j^{n+1} = \mu T_{j+1}^n + (1 - 2 \mu) T_j^n + \mu T_{j-1}^n$.  The new value $T_j^{n+1}$ is an average of the old values, in the sense that the coefficients add to one.  Averaging is stable because averaged wiggles are smaller than the wiggles themselves.  Actually, however, the scheme is only an average \emph{if} the middle coefficient is positive, as a linear combination with coefficients which add to one is not an average if any coefficients are negative.  (For example, one would not accept 15 as an ``average'' of 5 and 7, but: $15 = -4 \times 5 + 5 \times 7$, and $-4+5=1$.)
 
 So, what follows from requiring the middle coefficient in \eqref{heat1Dfd} to be positive so it computes such an average?  A \emph{stability criterion} follows, with these equivalent forms:
 \begin{equation}
    1 - 2 \mu \ge 0 \quad \iff \quad \frac{D\Delta t}{\Delta x^2} \le \frac{1}{2} \quad \iff \quad \Delta t \le \frac{\Delta x^2}{2 D}.  \label{stabcrit}
 \end{equation}
-This condition on the size of $\Delta t$ is a \emph{sufficient} stability criterion; it is enough to guarantee stability, though something weaker might do.  In summary, for given $\Delta x$, shortening the time steps $\Delta t$ so that \eqref{stabcrit} holds will make FD scheme \eqref{heat1Dfd} into an averaging process.
+The third form states the condition as a limitation on the size of $\Delta t$.  It is a \emph{sufficient} stability criterion; it is enough to guarantee stability, though something weaker might do.  In summary, for given $\Delta x$, shortening the time steps $\Delta t$ so that \eqref{stabcrit} holds will make FD scheme \eqref{heat1Dfd} into an averaging process.
 
-Applying this same idea to the 2D heat equation \eqref{heat2D} leads to the stability condition that $1-2\mu^x-2\mu^y \ge 0$ where $\mu^x = D \Delta t / (\Delta x^2)$ and $\mu^y = D \Delta t / (\Delta y^2)$.  In the cases like those shown in Figure \ref{fig:stability} with $\Delta x=\Delta y$, this condition requires $D \Delta t /(\Delta x^2) \le 0.25$, which precisely distinguishes between the two parts of the Figure.  Runs of \texttt{heat.m} are unstable if the time step $\Delta t$ is too big relative to the spacing $\Delta x$.
+Applying this same idea to the 2D heat equation \eqref{heat2D} leads to the stability condition that $1-2\mu^x-2\mu^y \ge 0$ where $\mu^x = D \Delta t / (\Delta x^2)$ and $\mu^y = D \Delta t / (\Delta y^2)$.  In the cases shown in Figure \ref{fig:stability}, wherein $\Delta x=\Delta y$, this condition requires $D \Delta t /(\Delta x^2) \le 0.25$.  This inequality precisely distinguishes between the two parts of Figure \ref{fig:stability}.
 
-The stability criterion above is easily satisfied by making each time step shorter.  Doing so at each time step makes an \emph{adaptive} implementation which can be stable even if the diffusivity $D$ is changing in time.  To show how easy this is to implement, \texttt{heatadapt.m} (not shown) is the same as \texttt{heat.m} except that the time step comes from the stability criterion, so it cannot generate the instability seen in Figure \ref{fig:stability}.  However, if the diffusivity $D$ is large or the grid spacings $\Delta x$, $\Delta y$ are small, then adaptive explicit implementations must take many short time steps to assure stability.
+In summary, runs of \texttt{heat.m} are unstable if the time step $\Delta t$ is too big relative to the spacing $\Delta x$.  The stability criterion is, however, satisfied by making each time step shorter.  Enforcing the criterion inside the code itself is an \emph{adaptive} implementation.  Such an implementation can be stable even if the diffusivity $D$ is changing in time.  To show how easy this is to implement, \texttt{heatadapt.m} (not shown) is the same as \texttt{heat.m} except that the time step comes from the stability criterion.  However, if the diffusivity $D$ is large or the grid spacings $\Delta x$, $\Delta y$ are small, then adaptive explicit implementations must take many short time steps to assure stability.  Adaptive explicit schemes can be slow.
 
 
 \subsection*{Implicit schemes}  There is an alternative stability fix instead of adaptivity, namely ``implicitness.''  For example, the finite difference scheme
 \begin{equation}
   \frac{T_j^{n+1} - T_j^n}{\Delta t} = D\,\frac{T_{j+1}^{n+1} - 2\, T_j^{n+1} + T_{j-1}^{n+1}}{\Delta x^2} \label{implicit1D}
 \end{equation}
-is an $O(\Delta t + (\Delta x)^2)$ implicit scheme for Equation \eqref{heat1D}.  Such implicit schemes for the heat equation are stable for \emph{any} positive time step $\Delta t>0$ (``unconditionally stable''); see Notes and References.  Another well-known implicit scheme is \emph{Crank-Nicolson}, which is unconditionally stable for the heat equation, but with smaller error $O((\Delta t)^2 +(\Delta x)^2)$.
+is an $O(\Delta t + (\Delta x)^2)$ implicit scheme for Equation \eqref{heat1D}.  This implicit scheme for the heat equation is stable for \emph{any} positive time step $\Delta t>0$ (``unconditionally stable''); see Notes and References.  Another well-known implicit scheme is \emph{Crank-Nicolson}, which is unconditionally stable for the heat equation, but with smaller error $O((\Delta t)^2 +(\Delta x)^2)$.
 
-Implicit schemes are harder to implement because the unknown solution values at time step $t_{n+1}$ are treated as a vector in a large system of equations which must be formed and solved at each time step.  If the PDE is nonlinear then the system of equations may be hard to solve.  Of course, the SIA is a highly nonlinear diffusion equation.
-
-Generally, there is a tradeoff between the easy implementability of adaptive explicit schemes and the better stability of implicit schemes.  For these notes we stay with adaptive explicit FD schemes.
+Implicit schemes are harder to implement because the unknown solution values at time step $t_{n+1}$ are treated as a vector in a large system of equations which must be formed and solved at each time step.  If the PDE is nonlinear then the system of equations may be hard to solve.  Though the SIA is a highly nonlinear diffusion equation, implicit schemes are becoming useful \cite{Bueler2016}.  Because of the tradeoff between the easy implementability of adaptive explicit schemes and the better stability of implicit schemes, for these notes we stay with adaptive explicit (FD) schemes.
 
 \subsection*{Numerical solution of diffusion equations}  We are trying to numerically model ice flows, not heat conduction.  We have an analogy, however, which says that the SIA is diffusive like the heat equation.  In this section, because we wish to solve the SIA on real bedrock, we construct a numerical scheme for a more general diffusion equation which has an extra ``shift'' inside the gradient, namely
 \begin{equation}
@@ -497,9 +495,9 @@ The user supplies the diffusivity $D(x,y)$ to \texttt{diffusion.m} on the stagge
 
 \section{Numerically solving the SIA} \label{sec:numericalsia}
 
-In SIA equation \eqref{sia} we have diffusivity $D = \Gamma H^{n+2} |\grad h|^{n-1}$.  There are two interesting aspects of this formula.  First, as already noted, $D$ goes to zero, i.e.~it ``degenerates,'' when either $H\to 0$ or $\grad h \to 0$.  Degenerate diffusion equations are automatically free boundary problems, but this aspect of the thickness evolution problem is no surprise to a glaciologist.  Determining the location of the margin is an obvious part of modelling a glacier or ice sheet.  To address this free boundary issue in our explicit time-stepping code it suffices to numerically compute new thicknesses and then set them to zero if they come out negative.
+In SIA equation \eqref{sia} we have diffusivity $D = \Gamma H^{n+2} |\grad h|^{n-1}$.  As already noted, an interesting aspects of this formula is that $D$ goes to zero, the diffusion ``degenerates,'' when either $H\to 0$ or $\grad h \to 0$.  Degenerate diffusion equations are automatically free boundary problems, but this aspect of the thickness evolution problem should be no surprise to a glaciologist.  Determining the location of the margin is an obvious part of modelling a glacier or ice sheet.  To address this free boundary issue in our explicit time-stepping code it suffices to numerically compute new thicknesses and then set them to zero if they come out negative.
 
-Second, for numerical stability and mass conservation we should compute $D$ on a ``staggered'' grid.  Various finite difference schemes for computing it have been proposed.  All of these schemes involve averaging $H$ and differencing $h$ in a ``balanced'' way onto the staggered grid.  In the code \texttt{siaflat.m} below we use the Mahaffy \cite{Mahaffy} method, with the stencil for computing $D$ shown in Figure \ref{fig:diffstencil}.  This code only works for the flat bed, zero surface mass balance case, but we will correct these deficiencies later.
+Second, for numerical stability and mass conservation we should compute $D$ on a ``staggered'' grid.  Various finite difference schemes for computing it have been proposed.  All of these schemes involve averaging $H$ and differencing $h$ in a ``balanced'' way onto the staggered grid.  In the code \texttt{siaflat.m} below we use the Mahaffy \cite{Mahaffy} method, with the stencil for computing $D$ shown in Figure \ref{fig:diffstencil} (right).  This code only works for the flat bed, zero surface mass balance case, but we will correct these deficiencies later.
 
 \minput{siaflat}
 
@@ -511,31 +509,32 @@ In \texttt{siaflat.m}, which calls \texttt{diffusion.m}, we already have a fairl
   \item don't make any mistakes, or
   \item compare your numerical results with results from other researchers, and hope that the outliers are in error, or
   \item compare your numerical results to an exact solution.   \end{enumerate}
-The last one of these, which we prefer to the first two when possible, is called ``verification.''  That is, when we build a new computer code we should test it in cases where we know the right answer.  To do so we need to return to the PDE itself, to get useful exact solutions.
+The first two of these, which we call ``implied infallibility'' and ``intercomparison,'' respectively, should be less common approaches than they are.  The last one of these, preferred to the first two by the CFD community generally \cite{Wesseling}, is called ``verification.''
 
-\subsection*{Exact solution of heat equation}  First we consider the simpler case of the 1D heat equation with constant $D$, namely $T_t = D T_{xx}$.  Many exact solutions $T(t,x)$ to this heat equation are known, but let's consider the time-dependent ``Green's function,'' also known as the ``heat kernel''.  It starts at time $t=0$ with a delta function $T(0,x)=\delta(x)$ of heat at the origin $x=0$.  Then it spreads out over time.  It is a solution of the heat equation on the whole line $-\infty<x<\infty$ and for all $t>0$.
+It is a simple idea:  When we build a new computer code we should test it in cases where we know the right answer.  To do so we need to return to the PDE itself, to get useful exact solutions.
 
-We will calculate this exact solution by a method which generalizes to the SIA.  The Green's function of the heat equation is ``self-similar'' over time, in the sense that it changes shape \emph{only} by shrinking the output (vertical) axis and lengthening the input (horizontal) axis, as shown in Figure \ref{fig:heatscaling}.  These scalings are related to each other by conservation of energy, which says that the total heat energy is independent of time.
+\subsection*{Exact solution of heat equation}  First we return to the simpler case of the 1D heat equation with constant $D$, namely $T_t = D T_{xx}$.  Many exact solutions $T(t,x)$ to this heat equation are known, but let's consider the time-dependent ``Green's function,'' also known as the ``heat kernel''.  It starts at time $t=0$ with a delta function $T(0,x)=\delta(x)$ of heat at the origin $x=0$.  Then it spreads out over time.  It is a solution of the heat equation on the whole line $-\infty<x<\infty$ and for all $t>0$.
+
+We will calculate this exact solution by a method which generalizes to the SIA.  In both cases the Green's function is ``self-similar'' over time, in the sense that it changes shape \emph{only} by shrinking the output (vertical) axis and lengthening the input (horizontal) axis, as shown in Figure \ref{fig:heatscaling} for the heat equation.  These scalings are related to each other by conservation of energy, which says that the total heat energy is independent of time.
 
 \onefigsize{heatscaling}{The heat equation Green's function in 1D has the same shape at each time, but with time-dependent input- and output-scalings.}{2.4in}
 
-In particular, the Green's function of the 1D heat equation is
+The Green's function of the 1D heat equation is
   $$T(t,x) = (4 \pi D t)^{-1/2}\, e^{-x^2/(4Dt)}.$$
 ``Similarity'' variables for this solution, the above-mentioned scalings, involving multiplying the input and output of an invariant shape function $\phi(s) = (4 \pi D)^{-1/2}\, e^{-s^2/(4D)}$ by the same power of $t$:
 \begin{equation}
 s \stackrel{\text{\emph{input scaling}}}{\phantom{\Big|}=\phantom{\Big|}} t^{-1/2} x, \qquad\qquad T(t,x) \stackrel{\text{\emph{output scaling}}}{\phantom{\Big|}=\phantom{\Big|}} t^{-1/2} \phi(s).  \label{heatscalings}
 \end{equation}
-Note that all time-dependence is from the input and output scalings.
 
 A numerical solver for the 1D heat equation which starts with initial values $T(t_0,x)$ taken from this exact solution should, at a later time $t$, produce numbers which are close to the exact solution $T(t,x)$; see the Exercises.
 
-\subsection*{Halfar's similarity solution to the SIA}  Now we jump from Green's idea in about 1830 to the year 1981.  That is when P.~Halfar published the similarity solution of the SIA in the case of flat bed and zero surface mass balance.  Halfar's solution to the 2D SIA model \eqref{sia}, using a Glen exponent $n=3$, has scalings which are powers of $t$ like \eqref{heatscalings} above:
+\subsection*{Halfar's similarity solution to the SIA}  Now we jump from Green's idea in about 1830 to the year 1981.  That is when P.~Halfar published the similarity solution of the SIA in the case of flat bed and zero surface mass balance.  Halfar's solution to the 2D SIA model \eqref{sia}, using a Glen exponent $n=3$, has scalings similar to \eqref{heatscalings} above:
 \begin{equation}
 s = t^{-1/18} r, \qquad \qquad H(t,r)=t^{-1/9} \phi(s). \label{halfarscalings}
 \end{equation}
-Here $r=(x^2+y^2)^{1/2}$ is the distance from the origin.  These scalings are related to each other by conservation of mass, because no mass is gained or lost through the surface. Scalings \eqref{halfarscalings} imply that, quite differently from heat, the diffusion of ice slows down severely as the shape flattens out.  The powers $t^{-1/9}$ and $t^{-1/18}$ change very slowly for large times $t$.
+Here $r=(x^2+y^2)^{1/2}$ is the distance from the origin.  These scalings are related to each other by conservation of mass, because no mass is gained or lost through the surface. Scalings \eqref{halfarscalings} imply that, quite differently from heat, the diffusion of ice slows down severely as the shape flattens out.  Said directly, the powers $t^{-1/9}$ and $t^{-1/18}$ change very slowly for large times $t$.
 
-\onefigsize{siascaling}{A case of Halfar's solution \eqref{halfar} of the SIA equation \eqref{sia} on a flat bed with zero mass balance.  The solution is shown on $H$ (m) versus $r$ (km) axes for times $t=1,10,100,1000,10000$ years.}{5.5in}
+\onefigsize{siascaling}{Radial sections of Halfar's solution \eqref{halfar} of the SIA equation \eqref{sia} on a flat bed with zero mass balance.  The solution is shown on $H$ (m) versus $r$ (km) axes for times $t=1,10,100,1000,10000$ years.}{5.5in}
 
 The formula for the Halfar solution to the SIA is remarkably simple given all that it accomplishes:
 \begin{equation}
@@ -543,9 +542,9 @@ H(t,r) = H_0 \left(\frac{t_0}{t}\right)^{1/9} \left[1 - \left(\left(\frac{t_0}{t
 \end{equation}
 Here the ``characteristic time'' $t_0 = (18 \Gamma)^{-1} (7/4)^3 R_0^4 H_0^{-7}$ is a parameter which can be determined by choosing center height $H_0$ and radius $R_0$.
 
-Formula \eqref{halfar} is plotted in Figure \ref{fig:siascaling}.  We see that for times significantly greater than $t_0$ (i.e.~$t/t_0 \gg 1$) the solution changes very slowly.  For example, the change between years $1$ and $100$ is larger than that between years $1000$ and $10000$.  The \emph{volume} of ice in this Halfar ice cap is, however, constant with $t$; see the Exercises.
+Formula \eqref{halfar} is plotted in Figure \ref{fig:siascaling}.  We see that for times significantly greater than $t_0$ (i.e.~$t/t_0 \gg 1$) the solution changes very slowly.  For example, the change between years $1$ and $100$ is larger than that between years $1000$ and $10000$.  The \emph{volume} of ice is, however, constant with $t$; see the Exercises.
 
-\subsection*{Using Halfar's solution}  Formula \eqref{halfar} is simple enough to use for verifying time-dependent SIA models.  The code \texttt{verifysia.m} (not shown) takes as input the number of grid points in each ($x,y$) direction.  It uses the Halfar solution at 200 a as the initial condition, does a numerical run of \texttt{siaflat.m} above to a final time 20000 a, and then compares to the Halfar formula for that time.  By ``compares'' we mean it computes the thickness error, the absolute values of the differences between the numerical and exact thickness solutions at the final time:
+\subsection*{Using Halfar's solution}  Formula \eqref{halfar} is simple enough to use for verifying time-dependent SIA models.  The code \texttt{verifysia.m} (not shown) takes as input the number of grid points in each ($x,y$) direction.  It uses the Halfar solution at 200 a as the initial condition, does a numerical run of \texttt{siaflat.m} above to a final time 20000 a, and then compares to the Halfar formula for that time.  By ``compares'' we mean it computes the thickness \emph{numerical error}, the absolute values of the differences between the numerical and exact thickness solutions at the final time:
 \small
 \begin{verbatim}
 >> verifysia(20)
