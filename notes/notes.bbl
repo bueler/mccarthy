@@ -19,6 +19,11 @@
   simple algorithm for including deviatoric stress gradients}, J. Glaciol., 41
   (1995), pp.~333--344.
 
+\bibitem{Blatteretal2010}
+{\sc H.~Blatter, R.~Greve, and A.~Abe-Ouchi}, {\em A short history of the
+  thermomechanical theory and modelling of glaciers and ice sheets},
+  J. Glaciol., 56 (2010), pp.~1087--1094.
+
 \bibitem{Bodvardsson}
 {\sc G.~Bodvardsson}, {\em On the flow of ice-sheets and glaciers}, J{\"o}kull,
   5 (1955), pp.~1--8.
@@ -27,6 +32,12 @@
 {\sc D.~Braess}, {\em Finite {E}lements: {T}heory, fast solvers, and
   applications in elasticity theory}, Cambridge University Press, 3rd~ed.,
   2007.
+
+\bibitem{BrinkerhoffJohnson2013}
+{\sc D.~J.~Brinkerhoff and J.~Johnson}, {\em Data assimilation and prognostic
+  whole ice sheet modelling with the variationally derived, higher order,
+  open source, and fully parallel ice sheet model VarGlaS}, The Cryosphere,
+  7 (2013), pp.~1161--1184.
 
 \bibitem{Brown2013}
 {\sc J.~Brown, B.~Smith, and A.~Ahmadia}, {\em Achieving textbook multigrid
@@ -58,6 +69,11 @@
   Bowman}, {\em Exact solutions and numerical verification for isothermal ice
   sheets}, J. Glaciol., 51 (2005), pp.~291--306.
 
+\bibitem{BuelervanPelt2015}
+{\sc E.~Bueler and W.~van Pelt}, {\em Mass-conserving subglacial hydrology
+  in the Parallel Ice Sheet Model version 0.6}, Geosci. Model Dev., 8 (2015),
+  pp.~1613--1635.
+
 \bibitem{Clarke05}
 {\sc G.~K.~C. Clarke}, {\em Subglacial processes}, Annu. Rev. Earth Planet.
   Sci., 33 (2005), pp.~247--276.
@@ -65,6 +81,12 @@
 \bibitem{CuffeyPaterson}
 {\sc K.~M. Cuffey and W.~S.~B. Paterson}, {\em The {P}hysics of {G}laciers},
   Elsevier, 4th~ed., 2010.
+
+\bibitem{Feldmannetal2014}
+{\sc J.~Feldmann, T.~Albrecht, C.~Khroulev, F.~Pattyn, and A.~Levermann},
+  {\em Resolution-dependent performance of grounding line motion in a shallow
+  model compared to a full-Stokes model according to the MISMIP3d
+  intercomparison}, J. Glaciol., 60 (220), pp.~353--360.
 
 \bibitem{Fowler}
 {\sc A.~C. Fowler}, {\em Mathematical Models in the Applied Sciences},
@@ -99,6 +121,11 @@
 {\sc R.~Greve and H.~Blatter}, {\em Dynamics of {I}ce {S}heets and {G}laciers},
   Advances in Geophysical and Environmental Mechanics and Mathematics,
   Springer, 2009.
+
+\bibitem{GreveBlatter2016}
+{\sc R.~Greve and H.~Blatter}, {\em Comparison of thermodynamics solvers in
+  the polythermal ice sheet model SICOPOLIS}, Polar Science, 10 (2016),
+  pp.~11--23.
 
 \bibitem{Halfar81}
 {\sc P.~Halfar}, {\em On the dynamics of the ice sheets}, J. Geophys. Res., 86
