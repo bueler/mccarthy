@@ -509,7 +509,7 @@ In \texttt{siaflat.m}, which calls \texttt{diffusion.m}, we already have a fairl
   \item don't make any mistakes, or
   \item compare your numerical results with results from other researchers, and hope that the outliers are in error, or
   \item compare your numerical results to an exact solution.   \end{enumerate}
-The first two of these, which we call ``implied infallibility'' and ``intercomparison,'' respectively, should be less common approaches than they are.  The last one of these, preferred to the first two by the CFD community generally \cite{Wesseling}, is called ``verification.''
+The first two of these, which one might call ``infallibility'' and ``intercomparison,'' respectively, should be less common approaches than they are.  The last one of these, preferred to the first two by the CFD community generally \cite{Wesseling}, is called ``verification.''
 
 It is a simple idea:  When we build a new computer code we should test it in cases where we know the right answer.  To do so we need to return to the PDE itself, to get useful exact solutions.
 
@@ -641,48 +641,46 @@ Like most ice sheet models, we use the mass continuity equation \eqref{masscont}
 
 The above ``standard'' ice sheet model has many variations.  Some glaciological questions are answered just by solving the stress balance for the velocity.  Sometimes the goal is the steady state configuration of the glacier.  This may be computed more quickly than via physical time-stepping physical evolution equations to steady state, but the thickness-positive constraint then, necessarily, becomes a focus of the analysis \cite{Bueler2016,JouvetBueler2012}.  Other processes are usually simulated at each time step, such as the conservation of energy within the ice, or subglacial and supraglacial processes.  Understanding the diverse time scales associated to these processes is always an important step in designing a model which is more complete than the isothermal SIA.
 
-When using the SIA equation \eqref{sia}, one can seemingly bypass the computation of the velocity.  That is because we could write the mass continuity equation as a diffusion, with $\bq=-D\nabla h$ for the flux instead of the more general $\bq = \bar{\bU} H$.  Fast flow in ice sheets is associated with sliding and floating ice, however, and for these flows the ice geometry evolution is not a diffusion, and so only ``$\bq = \bar{\bU} H$'' applies.  Solving the stress balance for the velocity field is then an obligatory, and usually nontrivial, step.  We consider such a stress balance next.
+When using the SIA equation \eqref{sia}, one can apparently bypass the computation of the velocity.  That is because the mass continuity equation can be written as a diffusion, with $\bq=-D\nabla h$ for the flux, instead of with the more general formula $\bq = \bar{\bU} H$.  Fast flow in ice sheets is associated with sliding and floating ice, however, and for these flows the ice geometry evolution is not a diffusion.  While the formula $\bq = \bar{\bU} H$ applies, both for the SIA and fast flow, an ice flow model is also not hyperbolic.  Fundamentally, that is because the velocity is related to the local surface gradient.  In any case, solving the stress balance for the velocity field is generally a nontrivial and obligatory step in a numerical ice flow model.  We get started on one such case in the next Section.
 
 
 \section{Shelves and streams} \label{sec:shelvesandstreams}
 
-The shallow shelf approximation (SSA) stress balance applies to ice shelves as its name suggests.  The SSA also applies reasonably well to ice streams, like those in Figure \ref{fig:siple} which have not-too-steep bed topography and low basal resistance.
+As its name suggests, the shallow shelf approximation (SSA) stress balance applies to ice shelves.  The SSA also applies reasonably well to ice streams which have not-too-steep bed topography and low basal resistance, like those in Figure \ref{fig:siple}.
 
-\twofigsizes{siple}{streamisbrae}{Left:  The SSA model applies to ice streams like these on the Siple Coast in Antarctica.  Color shows radar-derived surface speed.  Right: Cross sections, \emph{without} vertical exaggeration, of the Jakobshavns Isbrae outlet glacier in Greenland (\textbf{a}) and the Whillans Ice Stream on the Siple Coast (\textbf{b}); this is Figure 1 in \cite{TrufferEchelmeyer}.}{2.8in}{2.9in}
+\twofigsizes{siple}{streamisbrae}{Left:  The SSA model applies to ice streams like these on the Siple Coast in Antarctica.  Color shows radar-derived surface speed.  Right: Cross sections, \emph{without} vertical exaggeration, of (\textbf{a}) the Jakobshavns Isbrae outlet glacier in Greenland and (\textbf{b}) the Whillans Ice Stream on the Siple Coast \cite{TrufferEchelmeyer}.}{2.8in}{2.9in}
 
-But what is, and is not, an ice stream?  Ice streams slide at $50$ to $1000 \,\text{m}\,\text{a}^{-1}$, they have a concentration of vertical shear in a thin layer near base, and typically they flow into ice shelves.  Pressurized liquid water at their beds plays a critical role enabling their fast flow.  There are other fast-flowing grounded parts of ice sheets, however, called ``outlet glaciers''.  They can have even faster surface speed (up to $10 \,\text{km}\,\text{a}^{-1}$), but it is typically uncertain how much of this speed is from sliding at the base.  In an outlet glacier there is substantial vertical shear ``up'' in the ice column, sometimes caused by soft temperate ice in a significant fraction of the thickness.  Furthermore, outlet glaciers are strongly controlled by fjord-like, high slope bedrock topography.  Figure \ref{fig:siple} (right) compares the shallowness and bedrock topography of an outlet glacier and an ice stream.  Thus, few simplifying assumptions are appropriate for outlet glaciers, and the SSA may not be a sufficient model.
+But what is, and is not, an ice stream?  Ice streams slide at $50$ to $1000 \,\text{m}\,\text{a}^{-1}$, they have a concentration of vertical shear in a thin layer near base, and typically they flow into ice shelves.  Pressurized liquid water at their beds plays a critical role enabling their fast flow.  There are other fast-flowing grounded parts of ice sheets, however, called ``outlet glaciers''.  They can have even faster surface speed (up to $10 \,\text{km}\,\text{a}^{-1}$), but it is typically uncertain how much of this speed is from sliding at the base.  In an outlet glacier there is substantial vertical shear ``up'' in the ice column, sometimes caused by soft temperate ice in a significant fraction of the thickness.  Furthermore, outlet glaciers are strongly controlled by fjord-like, large-slope bedrock topography.  Figure \ref{fig:siple} (right) compares the shallowness and bedrock topography of an outlet glacier and an ice stream.  Few simplifying assumptions are appropriate for outlet glaciers, and the SSA may not be a sufficient model.
 
-\subsection*{The shallow shelf approximation (SSA)}  We state this stress balance equation only in the plane flow (``flow-line'') case:
+\subsection*{The shallow shelf approximation (SSA)}  We state this stress balance equation only in the plane flow (``flow-line'') and isothermal case:
 \begin{equation}
   \left(2 B H |u_x|^{1/n - 1} u_x\right)_x - C|u|^{m-1}u = \rho g H h_x \label{ssaearly}
 \end{equation}
-The term in parentheses is the vertically-integrated longitudinal stress, also called the ``membrane'' stress when there are two horizontal variables.  The second term $\tau_b = - C|u|^{m-1}u$ is the basal resistance, which is zero (i.e.~$C=0$) in an ice shelf.  The term on the right is the driving stress ($\tau_d = - \rho g H h_x$).  Thus the SSA equation is a balance wherein longitudinal strain rates are determined by the integrated ice hardness (i.e.~the coefficient $BH$), the slipperyness of the bed (i.e.~by the coefficient $C$ and the power $m$) and the geometry of the ice sheet (i.e.~the thickness $H$ and the surface slope $h_x$).
+The term in parentheses is the vertically-integrated longitudinal stress.  (It is called the ``membrane'' stress when there are two horizontal dimensions.)  The second term $\tau_b = - C|u|^{m-1}u$ is the basal resistance, which is zero (i.e.~$C=0$) in an ice shelf.  The term on the right is the negative of the driving stress ($\tau_d = - \rho g H h_x$).  Thus the longitudinal strain rates are determined by the integrated ice hardness (i.e.~the coefficient $BH$), the slipperyness of the bed (i.e.~by the coefficient $C$ and the power $m$) and the geometry of the ice sheet (i.e.~the thickness $H$ and the surface slope $h_x$).  The power-law formula for the basal resistance $\tau_b$ is often called a ``sliding law.''
 
-In \eqref{ssaearly} the velocity $u$ is independent of the vertical coordinate $z$.  We assume that the ice hardness $B=A^{-1/n}$ is also independent of depth.  Models which are not isothermal compute the vertical average of the temperature-dependent hardness.  The formula for the basal resistance $\tau_b$ is often called a ``sliding law'' in power law form.
-
-The coefficient $\bar \nu = B |u_x|^{1/n-1}$ in \eqref{ssaearly} is called the ``effective viscosity'', so that \eqref{ssaearly} can be written
+In \eqref{ssaearly} the velocity $u$ is independent of the vertical coordinate $z$.  We assume that the ice hardness $B=A^{-1/n}$ is also independent of depth.  Models which are not isothermal must compute the vertical average of the temperature-dependent hardness.  In any case the coefficient $\bar \nu = B |u_x|^{1/n-1}$ is the ``effective viscosity'', and \eqref{ssaearly} can be written
 \begin{equation}
   \left(2 \,\bar \nu\, H u_x\right)_x - C |u|^{m-1} u = \rho g H h_x.  \label{ssa}
 \end{equation}
-In form \eqref{ssa} it is understood that the viscosity $\bar\nu$ depends on the velocity solution $u$.
+In form \eqref{ssa} it must be understood that the viscosity $\bar\nu$ depends on $u$.
 
-The inequality ``$\,\rho H < - \rho_w b\,$'' is sometimes called the \emph{flotation criterion}.  For grounded ice we know $\rho H > - \rho_w b$ and the driving stress $\tau_d = - \rho g H h_x$ uses $h = H+b$.  On the floating side we know $\rho H < - \rho_w b$ and, by Archimedes principle, we use $h = (1-\rho/\rho_w) H$ in the driving stress.
+The inequality ``$\,\rho H < - \rho_w b\,$'' is called the \emph{flotation criterion}.  For grounded ice $\rho H > - \rho_w b$ holds, in which case the driving stress $\tau_d$ uses $h = H+b$.
 
-Equation \eqref{ssa} simplifies if the ice is floating.  The ice surface elevation is proportional to the thickness if the ice is floating.  Also we assume zero resistance ($C=0$) is applied by the ocean.  Thus the SSA becomes
+Floating ice satisfies $\rho H < - \rho_w b$, and $h = (1-\rho/\rho_w) H$ is used in the driving stress.  Equation \eqref{ssa} therefore simplifies if the ice is floating:
 \begin{equation}
-   \left(2 \,\bar\nu\, H u_x\right)_x = \rho g (1-\rho/\rho_w) H H_x \label{ssafloat}
+   \left(2 \,\bar\nu\, H u_x\right)_x = \rho g (1-\rho/\rho_w) H H_x. \label{ssafloat}
 \end{equation}
-for floating ice.  A useful observation about flow line equation \eqref{ssafloat} is that both left- and right-hand expressions are derivatives; this can be used to build a 1D exact solution.
 
-\subsection*{Steady ice shelf exact solution}  For a steady 1D ice shelf, in which $H_t=0$, the mass continuity equation \eqref{masscont} reduces to $M=(uH)_x$.  Because of the relative simplicity of the SSA equation \eqref{ssafloat} and the steady mass continuity equation for 1D floating ice, the exact velocity and thickness for a steady ice shelf can be computed \cite{vanderVeen83}.  This exact solution depends on the ice thickness $H_g$ and velocity $u_g$ at the grounding line.  For the surface mass balance $M$ we choose a positive constant $M_0$.  These choices determine a unique solution, the derivation of which is left to the exercises.
 
-Supposing $H_g=500$ m, $u_g = 50 \,\text{m}\,\text{a}^{-1}$, and $M_0=30 \,\text{cm}\,\text{a}^{-1}$ we get the results in Figure \ref{fig:steadyshelfprofile}, which are from code \texttt{exactshelf.m} (not shown).  We will use this exact solution to verify a numerical SSA code.  Note that driving stresses are much higher near the grounding line than away from it, and thus the highest longitudinal stresses, strain rates, and thinning rates occur near the grounding line.
+\subsection*{Steady ice shelf exact solution}  Note that both the left- and right-hand expressions in equation \eqref{ssafloat} are derivatives.  For a steady 1D ice shelf, in which $H_t=0$, van der Veen \cite{vanderVeen83} built an exact solution from this property of \eqref{ssafloat}.  That is, because the mass continuity equation \eqref{masscont} reduces to $M=(uH)_x$ in the steady case, both a velocity and a thickness can be computed \cite{vanderVeen83} which solve \eqref{ssafloat} and \eqref{masscont} simultaneously as long as $M$ is constant ($M=M_0>0$).  This exact solution depends on the ice thickness $H_g$ and velocity $u_g$ at the grounding line.  These choices determine a unique solution, the derivation of which is left to the exercises.
+
+Supposing $H_g=500$ m, $u_g = 50 \,\text{m}\,\text{a}^{-1}$, and $M_0=30 \,\text{cm}\,\text{a}^{-1}$ we get the results in Figure \ref{fig:steadyshelfprofile} from plotting program \texttt{exactshelf.m} (not shown).  We will use this exact solution to verify a numerical SSA code.  Note that driving stresses are much higher near the grounding line than away from it, and thus the highest longitudinal stresses, strain rates, and thinning rates occur near the grounding line.
 
 \twofig{steadyshelfprofile}{steadyshelfvelocity}{The upper and lower surface elevation (m; left) of the exact ice shelf solution and its velocity (m/a; right); $x=0$ is the grounding line.}
 
-\subsection*{Numerical solution of the SSA}  Suppose the ice thickness is a fixed function $H(x)$.  To find the velocity we must solve the nonlinear PDE \eqref{ssa} or \eqref{ssafloat} for the unknown $u(x)$.  When we do this numerically an iteration is needed because of the nonlinearity.  The simplest iteration idea is to use an initial guess at the velocity, which allows us to compute an effective viscosity and then get a new velocity solution from a linear PDE problem.  Then we recompute the effective viscosity, solve for a new velocity, and repeat until things stop changing.  This is often called a ``Picard'' iteration, in contrast to a ``Newton'' iteration which should converge faster.
+\subsection*{Numerical solution of the SSA}  Suppose the ice thickness is a fixed function $H(x)$.  To find the velocity we must solve the nonlinear PDE \eqref{ssa} or \eqref{ssafloat} for $u(x)$.  When we do this numerically an iteration is needed because of the nonlinearity.  The simplest iterative approach is to use an initial guess at the velocity, then compute an effective viscosity, then get a new velocity solution from a linear PDE problem, and repeat until the change is as small as desired.  This is often called a ``Picard'' iteration.  Newton iteration should converge faster but it is more complicated to implement and it may require a better initial guess to converge at all.
 
-Denote the previous velocity iterate as $u^{(k-1)}$ and the current iterate as $u^{(k)}$.  Compute $\bar \nu^{(k-1)} = B |u^{(k-1)}_x|^{1/n-1}$ and define $W^{(k-1)} = 2 \bar \nu^{(k-1)} H$.  Solving this linear elliptic PDE for the unknown $u^{(k)}$ is a Picard iteration for \eqref{ssa}:
+Denote the previous velocity iterate as $u^{(k-1)}$ and the current iterate as $u^{(k)}$.  Compute $\bar \nu^{(k-1)} = B |u^{(k-1)}_x|^{1/n-1}$ and define $W^{(k-1)} = 2 \bar \nu^{(k-1)} H$.  Solving the following linear elliptic PDE for the unknown $u^{(k)}$ is a Picard iteration for \eqref{ssa}:
 \begin{equation}
    \left(W^{(k-1)} u^{(k)}_x\right)_x - C |u^{(k-1)}|^{m-1} u^{(k)} = \rho g H h_x. \label{picardssa}
 \end{equation}
@@ -692,26 +690,28 @@ Equation \eqref{picardssa} is a linear boundary value problem.  We can write it 
 \begin{equation}
   \left(W(x)\, u_x\right)_x - \alpha(x)\, u = \beta(x)  \label{innerlinear}
 \end{equation}
-where the functions $W(x)$, $\alpha(x)$, $\beta(x)$ are known.  Equation \eqref{innerlinear} applies on an interval of the $x$-axis.  For one boundary condition we will suppose that $x=x_g$ is a location where the velocity is known, $u(x_g)=u_g$, as in Figure \ref{fig:steadyshelfprofile}.  In the ice shelf case we also have the calving front condition (see Notes and References)
+where the functions $W(x)$, $\alpha(x)$, $\beta(x)$ are known.  Equation \eqref{innerlinear} applies for $x$ in an interval $[x_g,x_c]$ where $x_g$, the ``grounding line'', is a location where the velocity is known, and $x_c$ is the calving front.  Thus $u(x_g)=u_g$ and, in the ice shelf case, we also have the calving front condition (see Notes and References)
 \begin{equation}
   2 B H |u_x|^{1/n - 1} u_x = \frac{1}{2}\rho (1-\rho/\rho_w) g H^2  \label{calvingstress}
 \end{equation}
-at the end of the ice shelf $x=x_c$.  Boundary condition \eqref{calvingstress} can be solved for $u_x(x_c)=\gamma$ in terms of known quantities including the thickness at the calving front.
+at $x=x_c$.  Notice that \eqref{calvingstress} can be solved for $u_x(x_c)=\gamma$ in terms of the thickness $H(x_c)$ at the calving front.
 
-Where to get an initial guess $u^{(0)}$?  Generally this may require effort, but we will use these choices for our 1D case.  For floating ice, an initial velocity comes from assuming a uniform strain rate provided by the calving front condition: $u^{(0)}(x) = \gamma (x-x_g) + u_g$.  For grounded ice, we may assume ice is held by basal resistance only: $u^{(0)}(x) = \left(-C^{-1} \rho g H h_x\right)^{1/m}$.
+Where to get an initial guess $u^{(0)}$?  Generally this may require effort, but the choice is straightforward in our 1D case.  For grounded ice, we may assume ice is held by basal resistance only: $u^{(0)}(x) = \left(-C^{-1} \rho g H h_x\right)^{1/m}$.  For floating ice, an initial velocity iterate comes from assuming a uniform strain rate provided by the calving front condition: $u^{(0)}(x) = \gamma (x-x_g) + u_g$
 
-\subsection*{Numerics of the linear boundary value problem}  Suppose equation \eqref{innerlinear} applies on $[x_g,x_c]=[0,L]$.  We choose a grid with equal spacing $\Delta x$ and index $j=1,2,\dots,J+1$, so that $x_1 = 0$ and $x_{J+1} = L$ are endpoints.  The coefficient $W(x)$ is needed on a staggered grid, for stability and accuracy reasons similar to those for the SIA diffusivity.  Our finite difference approximation of \eqref{innerlinear} is, therefore,
+\subsection*{Numerics of the linear boundary value problem}  Suppose equation \eqref{innerlinear} applies on $[x_g,x_c]=[0,L]$.  We choose a grid with equal spacing $\Delta x$.  For $j=1,2,\dots,J+1$ we let $x_j=(j-1)\Delta x$ so that $x_1 = 0$ and $x_{J+1} = L$ are the boundary points.
+
+The coefficient $W(x)$ is needed on a staggered grid, for stability and accuracy reasons similar to those for the SIA diffusivity: $W_{j+1/2}$ at $x_{j+1/2} = x_j + \Delta x/2$.  Our finite difference approximation of \eqref{innerlinear} is, therefore,
 \begin{equation}
   \frac{W_{j+1/2} (u_{j+1} - u_j) - W_{j-1/2} (u_{j} - u_{j-1})}{\Delta x^2} - \alpha_j u_j = \beta_j  \label{discreteinnerlinear}
 \end{equation}
 
-For the left end boundary condition we have $u_1 = u_g$ given, which is easy to include in the linear system (below).  For the right end boundary condition we have $u_x(L)=\gamma$, which requires more thought.  First introduce a notional point $x_{J+2}$.  Now require $(u_{J+2} - u_J)/(2 \Delta x) = \gamma$, which is a centered approximation to ``$u_x(x_c)=\gamma$.''  Using equation \eqref{discreteinnerlinear} in $j=J+1$ case, eliminate the $u_{J+2}$ variable ``by-hand''.  This determines the form of the last equation in our linear system.
+For the left end boundary condition we have $u_1 = u_g$ given, which is easy to include in the linear system (below).  For the right end boundary condition we have $u_x(L)=\gamma$, which requires more thought.  First introduce a notional point $x_{J+2}$.  Now require $(u_{J+2} - u_J)/(2 \Delta x) = \gamma$, which is a centered approximation to ``$u_x(x_c)=\gamma$.''  Then, using equation \eqref{discreteinnerlinear} in the $j=J+1$ case, eliminate the $u_{J+2}$ variable.  This procedure generates the last equation in our linear system.
 
-Now observe that each iteration to solve the SSA stress balance has the form
+Thus each iteration to solve the SSA stress balance requires solving a finite, $J+1$ equation, linear system of the form
 \begin{equation}
    A \mathbf{v} = \mathbf{b}. \label{Aveqb}
 \end{equation}
-Indeed, at each location $x_1,\dots,x_{J+1}$ we can write an equation, including a row of the matrix $A$ in \eqref{Aveqb}, involving the unknown velocities.  It is this linear system of $J+1$ equations:
+Indeed, at each location $x_1,\dots,x_{J+1}$ we can write an equation, namely a row of the matrix $A$ in \eqref{Aveqb}, involving the unknown velocities:
 \begin{equation}
 \begin{bmatrix}
 1 &  &  &  &  \\
@@ -729,29 +729,29 @@ u_1 \\ u_2 \\ u_3 \\ \vdots \\ u_J \\ u_{J+1}
 u_g \\ \beta_2 \Delta x^2 \\ \beta_3 \Delta x^2 \\ \vdots \\ \beta_J \Delta x^2 \\ b_{J+1}
 \end{bmatrix}  \label{discretematrixform}
 \end{equation}
-The diagonal entries ``$A_{ij}$'' are
-  $$A_{22} = -(W_{3/2}+W_{5/2}+\alpha_2 \Delta x^2), \quad \dots, \quad A_{JJ} = -(W_{J-1/2}+W_{J+1/2}+\alpha_J \Delta x^2),$$
-except for special cases for the coefficients in the last equation,
+The diagonal entries $A_{jj}$ are
+  $$A_{22} = -(W_{3/2}+W_{5/2}+\alpha_2 \Delta x^2), \quad \dots, \quad A_{JJ} = -(W_{J-1/2}+W_{J+1/2}+\alpha_J \Delta x^2).$$
+There are special cases for the coefficients in the last equation:
   $$A_{J+1,J} = 2 W_{J+1/2}, \quad A_{J+1,J+1} = -(2 W_{J+1/2}+\alpha_{J+1}\Delta x^2).$$
 For the right side of the last equation, $b_{J+1} = -2 \gamma \Delta x W_{J+3/2} + \beta_{J+1} \Delta x^2$.
 
-System \eqref{discretematrixform} is a tridiagonal linear system.  But don't bother looking up how to solve such a linear system unless you really need to!  It is fully appropriate to give system \eqref{discretematrixform} to Matlab's linear solver, the ``backslash'' operator $\mathbf{v} = A\, \backslash\, \mathbf{b}$, especially at this initial implementation stage.  In these notes we will not worry further about solving finite linear systems.  We now have a code to solve \eqref{innerlinear} by finite differences and linear algebra, namely \texttt{flowline.m} below.
+System \eqref{discretematrixform} is a \emph{tridiagonal} linear system, but there is no need to look up how to solve such a linear system, except for general knowledge.  It is fully-appropriate to hand-off the system \eqref{discretematrixform} to Matlab's linear solver, the ``backslash'' operator ($\mathbf{v} = A\, \backslash\, \mathbf{b}$), especially at this initial implementation stage.  Matlab can identify a tridiagonal system and solve it efficiently.  (In \emph{these} notes we will not worry further about solving finite linear systems.)  Thus we now have a code to solve the abstracted Picard-step problem \eqref{innerlinear} by finite differences and linear algebra, namely \texttt{flowline.m} below.
 
 \minput{flowline}
 
-By ``manufacturing'' exact solutions to \eqref{innerlinear}---see Notes and References---we can test this first piece of our SSA-solving codes before proceeding to solve the actual nonlinear SSA problem.   In fact, results from \texttt{testflowline.m} (not shown) demonstrate that our implemented numerical scheme converges at the optimal rate $O(\Delta x^2)$.
+By ``manufacturing'' exact solutions to \eqref{innerlinear}---see Notes and References---we can test this first piece of our SSA-solving codes before proceeding to solve the actual nonlinear SSA problem.   In fact, results from \texttt{testflowline.m} (not shown) demonstrate that our implemented numerical scheme converges at the expected rate $O(\Delta x^2)$ for a correct implementation.
 
-\subsection*{Solving the stress balance for an ice shelf}  The code \texttt{ssaflowline.m} (below) numerically computes the velocity for an ice shelf.  The thickness is assumed to be given, so we are not yet addressing the full, ``coupled'' ice shelf problem, simultaneously solving the applicable mass continuity \eqref{masscont1D} and stress balance \eqref{ssafloat} equations.  We are only solving the latter.
+\subsection*{Solving the stress balance for an ice shelf}  The code \texttt{ssaflowline.m} (below) numerically computes the velocity for an ice shelf, i.e.~in the floating case.  The thickness $H(x)$ is assumed to be given, so we are not yet addressing the full, ``coupled'' ice shelf problem.  In that coupled problem one would simultaneously solve the mass continuity \eqref{masscont1D} and stress balance \eqref{ssafloat} equations, but here we are only solving the latter.
 
-This code implements Picard iteration \eqref{picardssa}, in the floating case, to solve the nonlinear equation \eqref{ssafloat}.  It calls \texttt{ssainit.m} (not shown) to get the initial iterate $u^{(0)}(x)$, as already described, and it calls \texttt{flowline.m} at each iteration.  It also calls small helper functions \texttt{stagav(),regslope(),stagslope()}, at the end of the code, to computed certain gridded values.
+This code implements Picard iteration \eqref{picardssa} to solve the nonlinear equation \eqref{ssafloat}.  It calls \texttt{ssainit.m} (not shown) to get the initial iterate $u^{(0)}(x)$, as already described, and it calls \texttt{flowline.m} at each iteration.  It also calls small helper functions at the end of the code to computed certain gridded values (not shown; they are named \texttt{stagav()}, \texttt{regslope()}, and \texttt{stagslope()}).
 
 \minput{ssaflowline}
 
-Now we can ask precisely: Does \texttt{ssaflowline.m} work correctly?  The exact velocity solution shown in Figure \ref{fig:steadyshelfprofile}, computed by \texttt{exactshelf.m}, allows us to compare the numerical to the exact velocities by finding the maximum difference between them.  For this to work we take the exact thickness shown in Figure \ref{fig:steadyshelfprofile}, also from \texttt{exactshelf.m}.  A convergence comparison, shown in Figure \ref{fig:shelfconv}, is done by codes \texttt{testshelf.m} and \texttt{shelfconv.m} (not shown).  Each circle in the Figure gives the maximum velocity error on a given grid.
+Does \texttt{ssaflowline.m} work correctly?  The exact velocity solution shown in Figure \ref{fig:steadyshelfprofile}, as computed by \texttt{exactshelf.m} (not shown, but mentioned earlier), allows us to evaluate the numerical error.  For this to work we take the exact thickness shown in Figure \ref{fig:steadyshelfprofile}, also from \texttt{exactshelf.m}.  A convergence comparison, shown in Figure \ref{fig:shelfconv}, is done by codes \texttt{testshelf.m} and \texttt{shelfconv.m} (not shown).  Each circle in the Figure gives the maximum velocity error on a given grid.
 
 \onefig{shelfconv}{The numerical SSA velocity solution from \texttt{ssaflowline.m} converges to the exact solution, at nearly the optimal rate $O(\Delta x^2)$, as the grid is refined from spacing $\Delta x=4$ km to $\Delta x=62$ m.}
 
-Even on the coarsest $\Delta x = 4$ km grid we see in Figure \ref{fig:shelfconv} that the maximum velocity error (i.e.~difference) is less than 1 m/a, while the maximum velocity itself is $\sim 300$ m/a.  We can conclude from this comparison that, at screen resolution, our numerical velocity solutions are essentially identical to that shown in the right part of Figure \ref{fig:steadyshelfprofile}.  There is not even a reason to show the numerical solutions!
+Even on the coarsest $\Delta x = 4$ km grid we see in Figure \ref{fig:shelfconv} that the maximum velocity error (i.e.~difference) is less than 1 m/a, while the maximum velocity itself is $\sim 300$ m/a.  We can conclude from this comparison that at screen resolution our numerical velocity solutions are as shown in Figure \ref{fig:steadyshelfprofile}.
 
 \subsection*{Realistic ice shelf modelling}  Real ice shelves have two horizontal variables.  They are frequently confined in bays, and thus they experience ``side drag''.  Their velocities vary spatially and temporally along their grounding lines, which are the curves where the flotation criterion is an equality.  Furthermore real ice shelves have interesting boundary processes, including high basal melt near grounding lines, marine ice basal freeze-on, and fracturing which nears full thickness at the calving front.  It is a bit complicated.
 
