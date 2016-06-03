@@ -7,6 +7,9 @@ These are slides, notes, and codes on numerical glacier and ice sheet modeling, 
 
 http://glaciers.gi.alaska.edu/courses/summerschool
 
+PDFs
+----
+
 The notes (`notes/notes.pdf`) plus their exercises plus the Matlab codes form a self-contained course.
 
 The slides (`slides/lecture.pdf`) cover the same material in a more informal style.
