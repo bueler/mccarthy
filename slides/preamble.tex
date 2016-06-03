@@ -2,13 +2,6 @@
 
 %\subsection{preamble}
 
-\begin{frame}{what are you trying to do with this thing?}
-
-\begin{center}
-\includegraphics[width=0.8\textwidth]{computer}
-\end{center}
-\end{frame}
-
 
 \begin{frame}{slogans \& scope}
 
@@ -111,17 +104,17 @@ scope: I will cover these
 \end{frame}
 
 
-\section[introduction]{introduction: view from outside glaciology}
+\section[introduction]{introduction: a view from outside glaciology}
 
 \subsection{ice flow equations}
 
-\begin{frame}{ice in glaciers is a \emph{fluid}}
+\begin{frame}{ice in glaciers is treated a \emph{fluid}}
 
 \begin{itemize}
 \item what's a fluid?
 
 \bigskip\bigskip
-\item at minimum, we describe fluids by
+\item<2> at minimum, we describe fluids by
   \begin{itemize}
   \item[$\circ$] a \emph{density field}\quad $\rho(t,x,y,z)$
   \item[$\circ$] a vector \emph{velocity field}\quad $\mathbf{u}(t,x,y,z)$
@@ -129,27 +122,30 @@ scope: I will cover these
 \end{itemize}
 \end{frame}
 
+
 \begin{frame}{ice in glaciers is a \emph{fluid} \quad 2}
 
 \begin{itemize}
-\item if ice fluid were
+\item if the ice were
   \begin{itemize}
   \item[$\circ$] faster-moving than it actually is, and
   \item[$\circ$] linearly-viscous like liquid water
   \end{itemize}
   
-  then ice flow would be a ``typical'' fluid
+  then it would be a ``typical'' fluid
 
 \bigskip
-\item for typical fluids one uses the Navier-Stokes equations as the model:
+\item for some typical fluids one uses the Navier-Stokes equations as the model:
 \begin{align*}
 \nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \\
 \rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) &= -\nabla p + \nabla \cdot \tau_{ij} + \rho \mathbf{g} &&\text{\emph{force balance}} \\
 2 \nu \mathbf{D}_{ij} &= \tau_{ij} &&\text{\emph{flow law}}
 \end{align*}
 
-\bigskip
-\item  force balance equation is ``$m a = F$''
+\medskip
+    \begin{itemize}
+    \item[$\circ$] force balance equation is ``$m a = F$''    
+    \end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -167,11 +163,11 @@ scope: I will cover these
   \item[$\circ$] turbulence
   \item[$\circ$] convection
   \item[$\circ$] coriolis force
-  \item[$\circ$] density/salinity variation
+  \item[$\circ$] density/salinity stratification
   \item[$\circ$] chemistry (methane, ozone, \dots)
   \end{itemize}
 \item none of the above list is relevant to ice flow
-\item so what could be interesting about the flow of slow, cold, stiff, laminar, inert old ice?
+\item what could be interesting about the flow of slow, cold, stiff, laminar, inert old ice?
   \begin{itemize}
   \item[$\circ$] it's \emph{ice dynamics!}
   \end{itemize}
@@ -182,7 +178,7 @@ scope: I will cover these
 \begin{frame}{ice is a slow, shear-thinning fluid}
 
 \begin{itemize}
-\item our fluid is
+\item ice fluid is
 
 \smallskip
   \begin{tabular}{lc}
@@ -195,13 +191,13 @@ scope: I will cover these
   $$\rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) \approx 0 \qquad \iff \qquad \begin{pmatrix} \text{forces of inertia} \\ \text{are neglected} \end{pmatrix}$$
 
 \medskip
-\item non-Newtonian in a ``shear-thinning'' way
+\item ice is non-Newtonian in a ``shear-thinning'' way
   \begin{itemize}
   \item[$\circ$] higher strain rates means lower viscosity
   \end{itemize}
 
 \bigskip
-\item \emph{so} the standard ``full'' model is Glen-law ($n=3$) \alert{Stokes}:
+\item so the standard ``full'' model is Glen-law ($n=3$) \alert{Stokes}:
 \begin{align*}
 \nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \\
 0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \mathbf{g} &&\text{\emph{force balance}} \\
@@ -215,17 +211,22 @@ scope: I will cover these
 \begin{frame}{``slow'' means no memory of velocity (i.e.~momentum)}
 
 \begin{itemize}
-\item a time-stepping ice sheet code \dots
+\item note \emph{no time derivatives} in Stokes model:
+\scriptsize
+\begin{align*}
+\nabla \cdot \mathbf{u} &= 0 \\
+0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \mathbf{g} \\
+\mathbf{D}_{ij} &= A \tau^2 \tau_{ij}
+\end{align*}
+\normalsize
+\item thus a time-stepping ice sheet code
   \begin{itemize}
   \item[$\circ$] recomputes the full velocity field at every time step, and
-  \item[$\circ$] does not require velocity from the previous step\footnote{to be a weatherman you've got to know which way the wind blows \dots but don't expect that from a glaciologist}
+  \item[$\circ$] does not require velocity from the previous time step\footnote{to be a weatherman you've got to know which way the wind blows \dots but don't expect that from a glaciologist}
   \end{itemize}
 
 \medskip
-\item because there is no memory of previous velocity,
-
-\smallskip
-\emph{velocity is a ``diagnostic'' output of ice flow models}
+\item because there is no memory of previous velocity, velocity is a ``diagnostic'' output, not needed for (e.g.) restarting the model
 \end{itemize}
 \end{frame}
 
@@ -235,23 +236,21 @@ scope: I will cover these
 \begin{frame}{plane flow Stokes}
 
 \begin{itemize}
-\item recall the Glen-law ($n=3$) Stokes model:
+\item recall the Stokes model:
+\small
 \begin{align*}
 \nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \\
 0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \mathbf{g} &&\text{\emph{force balance}} \\
 \mathbf{D}_{ij} &= A \tau^2 \tau_{ij} &&\text{\emph{flow law}}
 \end{align*}
+\normalsize
 
 \bigskip
-\item now work in a $x,z$ \alert{plane}
-  \begin{itemize}
-  \item[$\circ$] like the centerline of a glacier
-  \item[$\circ$] or in a cross-flow plane
-  \end{itemize}
+\item suppose we work in a $x,z$ plane, such as the centerline of a glacier, \emph{or} in a cross-flow plane
 
-\item notation on next slide:
+\item notation on next several slides:
   \begin{itemize}
-  \item[$\circ$] $x,z$ subscripts are partial derivatives
+  \item[$\circ$] $x,z$ as subscripts denote partial derivatives
   \item[$\circ$] $\tau_{13}$ is the ``vertical'' shear stress
   \item[$\circ$] $\tau_{11}$ and $\tau_{33}=-\tau_{11}$ are (deviatoric) longitudinal stresses 
   \end{itemize}
@@ -270,7 +269,7 @@ u_x &= A \tau^2 \tau_{11} &&\text{\emph{flow law} (diagonal)}\notag \\
 u_z + w _x &= 2 A \tau^2 \tau_{13} &&\text{\emph{flow law} (off-diagonal)} \notag
 \end{empheq}
 \item we have five equations in five unknowns ($u,w,p,\tau_{11},\tau_{13}$)
-\item complicated enough \dots what about in a simplified situation?
+\item this is complicated enough \dots what about in a simplified situation?
 \end{itemize}
 \end{frame}
 
@@ -284,7 +283,7 @@ u_z + w _x &= 2 A \tau^2 \tau_{13} &&\text{\emph{flow law} (off-diagonal)} \nota
 
 \begin{column}{0.5\textwidth}
 \begin{itemize}
-\item suppose we have constant thickness and tilt the bed
+\item suppose: constant thickness, tilted bedrock
 \item rotated coordinates:
   $$\mathbf{g} = g \sin\theta\, \hat x - g \cos \theta \,\hat z$$
 \item so $p_x,p_z$ equations are now:
@@ -302,7 +301,7 @@ p_z &= \tau_{13,x} - \tau_{11,z} - \rho g \cos\theta \notag
 \end{columns}
 
 \begin{itemize}
-\item for such a \alert{slab-on-a-slope} there is \emph{no variation in} $x$
+\item for this \alert{slab-on-a-slope} there is \emph{no variation in} $x$
 \item the equations simplify:
 \small
 \begin{empheq}[box=\fbox]{align}
@@ -362,18 +361,22 @@ Velocity profile of the Athabasca Glacier, Canada, derived from inclinometry (Sa
 \end{frame}
 
 
-\begin{frame}{mass continuity}
+\begin{frame}{mass conservation}
 
 \begin{itemize}
-\item now we know the velocity $u=u(t,x,z)$ \dots so what?
-\item suppose, instead of slab-on-a-slope, that our ice flow has \alert{variable thickness} $H(t,x)$
-\item compute the vertical average of velocity:
+\item \emph{Q}: having computed the velocity $u=u(t,x,z)$ \dots so what?
+\item<2> \emph{A}: velocity moves the ice around \dots we want to predict where it goes 
+
+\bigskip
+\item<2> here we start to take \alert{a ``glacier-suitable'' view of mass conservation}
+\item<2> suppose, instead of slab-on-a-slope, that our ice flow has variable thickness $H(t,x)$
+\item<2> compute the vertical average of velocity:
 	$$\bar u(t,x) = \frac{1}{H}\int_0^{H} u(t,x,z)\,dz$$
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{mass continuity \quad 2}
+\begin{frame}{mass conservation \quad 2}
 
 \begin{columns}
 \begin{column}{0.6\textwidth}
@@ -386,6 +389,7 @@ Velocity profile of the Athabasca Glacier, Canada, derived from inclinometry (Sa
 \item divide eqn $\ast$ by $dx$ and get
    $$H_t = M - \left(\bar u H\right)_x$$
 \item this is a \emph{mass continuity equation}
+\item area in 2D becomes volume in 3D
 \end{itemize}
 \end{column}
 \begin{column}{0.4\textwidth}
@@ -393,11 +397,6 @@ Velocity profile of the Athabasca Glacier, Canada, derived from inclinometry (Sa
 \end{column}
 \end{columns}
 
-\bigskip
-\small
-\begin{itemize}
-\item ``area'' in 2D becomes ``volume'' in 3D
-\end{itemize}
 \end{frame}
 
 

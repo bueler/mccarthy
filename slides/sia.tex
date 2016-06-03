@@ -19,9 +19,7 @@
 
 \begin{itemize}
 \item below in \alert{red} is a no-vertical-exaggeration cross section of Greenland at $71^\circ$
-\small
 \item green and blue: standard vertically-exaggerated cross section
-\item you can scale Stokes equation using smallness of $\eps = [H]/[L]$, where $[H]$ is a typical thickness of an ice sheet and $[L]$ is a typical horizontal dimension, \dots (Fowler, 1997)\nocite{Fowler}
 \end{itemize}
 
 \begin{center}
@@ -38,7 +36,7 @@ a model which applies to
 \begin{itemize}
 \item small depth-to-width ratio (``shallow'') grounded ice sheets
 \item on not-too-rough bed topography,
-\item whose flow is not dominated by sliding and/or liquid water at the base or margin
+\item whose flow is \emph{not} dominated by sliding and/or liquid water at the base or margin
 \end{itemize}
 
 \begin{center}
@@ -60,8 +58,8 @@ a model which applies to
 \end{center}
 \item shear stress approximation:
 	$$(\tau_{13},\tau_{23}) = - \rho g (h-z) \nabla h$$
-\item let $\mathbf{u} = (u,v)$, the horizontal velocity
-\item we further approximate
+\item let $\mathbf{u} = (u,v)$ be the horizontal velocity
+\item use this approximation:
 \begin{align*}
 \mathbf{u}_z &= 2 A |(\tau_{13},\tau_{23})|^{n-1} (\tau_{13},\tau_{23}) \\
      &= - 2 A (\rho g)^n (h-z)^n |\nabla h|^{n-1} \nabla h
@@ -120,7 +118,7 @@ H_t = M + \Div \left(\Gamma H^{n+2} |\grad h|^{n-1} \grad h \right) \label{sia}
 \begin{columns}
 \begin{column}{0.6\textwidth}
 \begin{itemize}
-\item for understanding SIA, recall heat equation
+\item to understand SIA, see heat equation
 \item recall Newton's law of cooling
 	$$\frac{dT}{dt} = -K (T-T_{\text{ambient}})$$
 where $T$ is object temperature and $K$ relates to material and geometry of object (e.g.~cup of coffee)
@@ -131,7 +129,6 @@ where $T$ is object temperature and $K$ relates to material and geometry of obje
 \end{align*}
 \item this has limit as segments shrink:
 	$$T_t = D T_{xx}$$
-\item compare: finite difference approximations to derivatives
 \end{itemize}
 \end{column}
 
@@ -147,19 +144,20 @@ where $T$ is object temperature and $K$ relates to material and geometry of obje
 \begin{frame}{analogy: SIA versus 2D heat equation}
 
 \begin{itemize}
+\item general heat eqn: $T_t = F + \Div (D\, \grad T)$
 \item side-by-side comparison:
-\begin{center}
-\begin{tabular}{cc}
-\scriptsize SIA:\, $H(t,x,y)$ is ice thickness & \scriptsize heat: $T(t,x,y)$ is temperature \normalsize \\
-	\boxed{H_t = M + \Div \left({\color{red}\Gamma H^{n+2} |\grad h|^{n-1}}\, \grad h \right)}  &  \boxed{T_t = F + \Div (D\, \grad T)}
-\end{tabular}
-\end{center}
 
 \medskip
-\item we identify the diffusivity in the SIA:
+\begin{tabular}{cc}
+\scriptsize SIA for ice thickness \, $H(t,x,y)$ & \scriptsize heat eqn for temperature $T(t,x,y)$ \normalsize \medskip \\
+	\hspace{-6mm} $H_t = M + \Div \left({\color{red}\Gamma H^{n+2} |\grad h|^{n-1}}\, \grad h \right)$  &  $T_t = F + \Div (D\, \grad T)$
+\end{tabular} 
+
+\medskip
+\item identify the diffusivity in the SIA:
 	$$D = {\color{red}\Gamma H^{n+2} |\grad h|^{n-1}}$$
-\item \emph{non-sliding shallow ice flow \alert{diffuses} the ice sheet}
-\item some issues with this analogy:
+\item non-sliding shallow ice flow \emph{diffuses} the ice sheet
+\item ``issues'' with this analogy:
   \begin{itemize}
   \item[$\circ$]  $D$ depends on solution $H(t,x,y)$
   \item[$\circ$]  $D\to 0$ at margin, where $H\to 0$
@@ -185,7 +183,7 @@ f(x-\Delta x) &= f(x) - f'(x) \Delta x + \frac{1}{2} f''(x) \Delta x^2 - \frac{1
 f(x+2\Delta x) &= f(x) + 2 f'(x) \Delta x + 2 f''(x) \Delta x^2 + \frac{4}{3} f'''(x) \Delta x^3 + \dots
 \end{align*}
 \normalsize
-\item \emph{combine expressions like these to give approximations of derivatives, from values on a grid}
+\item \emph{main idea}:  combine expressions like these to give approximations of derivatives, from values on a grid
 \end{itemize}
 \end{frame}
 
@@ -217,14 +215,14 @@ and so on
 
 \begin{itemize}
 \item consider 1D heat equation $T_t = D T_{xx}$
-\item an \emph{explicit} scheme comes from:
+\item approximately true:
 \small
 	$$\frac{T(t+\Delta t,x) - T(t,x)}{\Delta t} \approx D\,\frac{T(t,x+\Delta x) - 2 T(t,x) + T(t,x-\Delta x)}{\Delta x^2}$$
 \normalsize
 \item the difference between the equation $T_t = D T_{xx}$ and the scheme is $O(\Delta t,\Delta x^2)$ (Morton and Mayers, 2005)\nocite{MortonMayers}
 \item notation: $(t_n,x_j)$ is a point in the time-space grid
-\item notation: $T_j^n \approx T(t_n,x_j)$
-\item let $\nu = D \Delta t / (\Delta x)^2$, so scheme is
+\item notation: $T_j^n \approx T(t_n,x_j)$  \only<2>{\hfill \alert{$\longleftarrow$ can you distinguish these?}}
+\item let $\nu = D \Delta t / (\Delta x)^2$, so ``explicit'' scheme is
 \small
 	$$T_j^{n+1} = \nu T_{j+1}^n + (1 - 2 \nu) T_j^n + \nu T_{j-1}^n$$
 \normalsize
@@ -232,7 +230,7 @@ and so on
 \begin{columns}
 \begin{column}{0.55\textwidth}
 \begin{itemize}
-\item scheme has stencil at right \large $\to$ \normalsize
+\item ``stencil'' at right \large $\to$ \normalsize
 \end{itemize}
 \end{column}
 \begin{column}{0.45\textwidth}
@@ -242,19 +240,20 @@ and so on
 \end{frame}
 
 
-\begin{frame}{explicit scheme in two space dimensions}
+\begin{frame}{explicit scheme in 2D}
 
 \begin{itemize}
-\item recall heat equation in 2D: $T_t = D(T_{xx} + T_{yy})$
-\item in two spatial variables we write $T_{jk}^n \approx T(t_n,x_j,y_k)$
-\item so the 2D explicit scheme is
+\item recall heat equation two spatial variables (2D):
+    $$T_t = D(T_{xx} + T_{yy})$$
+\item again: $T_{jk}^n \approx T(t_n,x_j,y_k)$
+\item the 2D explicit scheme is
 \small
 	$$\frac{T_{jk}^{n+1} - T_{jk}^n}{\Delta t} = D\,\left(\frac{T_{j+1,k}^n - 2 T_{jk}^n + T_{j-1,k}^n}{\Delta x^2} + \frac{T_{j,k+1}^n - 2 T_{jk}^n + T_{j,k-1}^n}{\Delta y^2}\right)$$
 \end{itemize}
 
 \bigskip
 \begin{center}
-\includegraphics[width=0.45\textwidth]{exp2dstencil}
+\includegraphics[width=0.35\textwidth]{exp2dstencil}
 \end{center}
 \end{frame}
 
@@ -316,16 +315,14 @@ approximate solution $T(t,x,y)$ at $t=0.02$ with $\Delta t=0.001$
 \begin{center}
 \includegraphics[width=1.0\textwidth]{stability}
 
-%$D=1,\Delta t = 0.00064286,\Delta x = \Delta y = 0.04$ so
-\uncover<2->{$$\frac{D\Delta t}{\Delta x^2}= 0.402$$}
+\uncover<2->{$$\frac{D\Delta t}{\Delta x^2}= 0.2$$}
 \end{center}
 \end{column}
 \begin{column}{0.5\textwidth}
 \begin{center}
 \includegraphics[width=1.0\textwidth]{instability}
 
-%$D=1,\Delta t = 0.001,\Delta x = \Delta y = 0.04$ so
-\uncover<2->{$$\frac{D\Delta t}{\Delta x^2}= 0.625$$}
+\uncover<2->{$$\frac{D\Delta t}{\Delta x^2}= 0.4$$}
 \end{center}
 \end{column}
 \end{columns}
@@ -341,7 +338,7 @@ approximate solution $T(t,x,y)$ at $t=0.02$ with $\Delta t=0.001$
 \item thus the new value $u_j^{n+1}$ is an \emph{average} of the old values, \emph{if the middle coefficient is positive}:
 	$$1 - 2 \nu \ge 0 \quad \iff \quad  \frac{D\Delta t}{\Delta x^2} \le \frac{1}{2} \quad \iff \quad \Delta t \le \frac{\Delta x^2}{2 D}$$
 \item averaging is always stable because averaged wiggles are always smaller than the original wiggles
-\item \dots so this condition is a sufficient \emph{stability criterion}
+\item this condition is a sufficient \emph{stability criterion}
 \item so:
 
 \begin{center}
@@ -367,15 +364,15 @@ approximate solution $T(t,x,y)$ at $t=0.02$ with $\Delta t=0.001$
 \begin{frame}{alternative instability fix: implicitness}
 
 \begin{itemize}
-\item \alert{implicit} methods can be stable for \emph{any} positive time step $\Delta t$
+\item \alert{implicit} methods can be designed to be stable for \emph{any} positive time step $\Delta t$
 \end{itemize}
 
 \begin{columns}
 \begin{column}{0.7\textwidth}
 \small
 \begin{itemize}
-\item an implicit scheme is \emph{Crank-Nicolson} $\longrightarrow$
-\item Crank-Nicolson has smaller error too: $O(\Delta t^2,\Delta x^2)$
+\item example is \emph{Crank-Nicolson} scheme $\longrightarrow$
+\item has smaller error too: $O(\Delta t^2,\Delta x^2)$
 \end{itemize}
 \normalsize
 \end{column}
@@ -384,8 +381,9 @@ approximate solution $T(t,x,y)$ at $t=0.02$ with $\Delta t=0.001$
 \end{column}
 \end{columns}
 
+\bigskip
 \begin{itemize}
-\item \emph{but} you have to solve linear (or nonlinear) systems of equations to take each time step
+\item \emph{but} you must solve linear (or nonlinear) systems of equations to take each time step
 \medskip
 
 \item \scriptsize Donald Knuth has advice for ice sheet modelers: \begin{quote}
@@ -421,7 +419,7 @@ in stencil at right:
 \end{column}
 \begin{column}{0.45\textwidth}
 \begin{center}
-\includegraphics[width=1.0\textwidth]{diffstencil}
+\includegraphics[width=0.8\textwidth]{diffstencil}
 \end{center}
 \end{column}
 \end{columns}
@@ -443,9 +441,9 @@ in stencil at right:
 
 \subsection{solutions}
 
-\begin{frame}{verification of numerical ice flow codes}
+\begin{frame}{interruption: verification}
 \begin{itemize}
-\item how do we make sure an \emph{implemented} numerical scheme is correct?
+\item how do you make sure your \emph{implemented} numerical ice flow code is correct?
   \begin{itemize}
   \item[$\circ$] \emph{technique} 1: don't make any mistakes
   \item[$\circ$] \emph{technique} 2: compare your model with others, and hope that the outliers are the ones with errors
@@ -455,25 +453,25 @@ in stencil at right:
 \medskip
 \item where to get exact solutions for ice flow models?
   \begin{itemize}
-  \item[$\circ$] textbook: Greve and Blatter (2009)\nocite{GreveBlatter2009}
-  \item[$\circ$] similarity solutions to SIA (Halfar 1983\nocite{Halfar83}; Bueler et al 2005\nocite{BLKCB})
-  \item[$\circ$] manufactured solutions to thermo-coupled SIA (Bueler et al 2007\nocite{BBL})
-  \item[$\circ$] flowline and cross-flow SSA solutions (Bodvardsson, 1955; van der Veen, 1985; Schoof, 2006)\nocite{SchoofStream,vanderVeen85}
-  \item[$\circ$] flowline Blatter solutions (Glowinski and Rappaz 2003)\nocite{GlowinskiRappaz}
-  \item[$\circ$] flowline Stokes solutions for constant viscosity (Ladyzhenskaya 1963\nocite{Ladyzhenskaya}, Balise and Raymond 1985\nocite{BaliseRaymond1985})
-  \item[$\circ$] manufactured solutions to the Stokes equations (Sargent and Fastook 2010; Jouvet and Rappaz 2011)\nocite{JouvetRappaz2011,SargentFastook2010}
+  \item[$\circ$] textbooks: Greve and Blatter (2009), van der Veen (2013)
+  \item[$\circ$] similarity solns to SIA (Halfar 1983; Bueler et al 2005)
+  \item[$\circ$] manufactured solns to thermo-coupled SIA (Bueler et al 2007)
+  \item[$\circ$] flowline and cross-flow SSA solns (Bodvardsson, 1955; van der Veen, 1985; Schoof, 2006; Bueler 2014)
+  \item[$\circ$] flowline Blatter solns (Glowinski and Rappaz 2003)
+  \item[$\circ$] constant viscosity flowline Stokes solns (Ladyzhenskaya 1963, Balise and Raymond 1985)
+  \item[$\circ$] manufactured solns to Stokes equations (Sargent and Fastook 2010; Jouvet and Rappaz 2011; Leng et al 2013)
   \end{itemize}
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{exact solution of heat equation}
+\begin{frame}{an exact solution of heat equation}
 
 \begin{itemize}
 \item the simple heat equation in 1D with constant diffusivity $D>0$ is:
 	$$T_t = D T_{xx}$$
 \item many \emph{exact} solutions to the heat equation are known
-\item I'll show the ``Green's function'' (a.k.a.~``fundamental solution'' or ``heat kernel'')
+\item I'll show the Green's function solution (a.k.a.~``fundamental solution'' or ``heat kernel'')
 \item it starts at time $t=0$ with a ``delta function'' of heat at the origin $x=0$ and then it spreads out over time
 \item we find it by a method which generalizes to the SIA
 \end{itemize}
@@ -512,12 +510,12 @@ in stencil at right:
 \begin{columns}
 \begin{column}{0.6\textwidth}
 \begin{itemize}
-\item \emph{historical note}:  in 1905 Einstein saw that the average distance traveled by particles in thermal motion scales like $\sqrt{t}$, so $s = t^{-1/2}x$ is an invariant
+\item \emph{1905}: Einstein discovers that the average distance traveled by particles in thermal motion scales like $\sqrt{t}$, so $s = t^{-1/2}x$ is an invariant
 \end{itemize}
 \end{column}
 \begin{column}{0.4\textwidth}
 \begin{center}
-\includegraphics[width=1.0\textwidth]{brownian}
+\includegraphics[width=0.8\textwidth]{brownian}
 \end{center}
 \end{column}
 \end{columns}
@@ -530,9 +528,8 @@ in stencil at right:
 \begin{frame}{similarity solution to SIA}
 
 \begin{itemize}
-\item jump forward to 1981
-\item P.~Halfar found the similarity solution of the SIA in the case of flat bed and no surface mass balance \nocite{Halfar81,Halfar83}
-\item Halfar's 2D solution for Glen flow law with $n=3$ has scalings
+\item \emph{1981}:  P.~Halfar discovers the similarity solution of the SIA in the case of flat bed and no surface mass balance
+\item Halfar's 2D solution (1983) for Glen flow law with $n=3$ has scalings
    $$H(t,r)=t^{-1/9} \phi(s), \qquad s = t^{-1/18} r$$
 \item \dots so the diffusion of ice really slows down as the shape flattens out!
 \end{itemize}
@@ -578,37 +575,11 @@ if $H_0$, $R_0$ are central height and ice cap radius at $t=t_0$
 \end{frame}
 
 
-\begin{comment}
-\begin{frame}{on ``degenerate'' diffusivity}
-
-\begin{itemize}
-\item recall that the SIA is
-\small
-	$$H_t = M + \Div \left(D\, \grad h \right) \quad \text{where} \quad D = \Gamma H^{n+2} |\grad h|^{n-1}$$
-\normalsize
-\item thus the diffusivity ``degenerates'', $D \to 0$, when either $H\to 0$ or $\grad h \to 0$
-\item summary:
-\small
-\begin{tabular}{l|c|c}
- & why $D\to 0$ & so what? \\ \hline
-domes    & $\grad h \to 0$ & \begin{tabular}{c}
-$H$ and $\grad h$ are continuous \\ but $\grad^2 h$ is singular
-\end{tabular} \\ \hline
-margins  & $H \to 0$       & \begin{tabular}{c}
-$H$ is continuous \\ but $\grad h$ is singular
-\end{tabular}
-\end{tabular}
-\normalsize
-\item in terms of numerical error, margin is worse than dome
-\item degenerate diffusion equations are automatically free boundary problems
-\end{itemize}
-\end{frame}
-\end{comment}
-
 \begin{frame}
   \frametitle{computing diffusivity in SIA}
 
 \begin{itemize}
+\item back to numerics \dots
 \item for numerical stability we compute $D = \Gamma H^{n+2} |\grad h|^{n-1}$ on the staggered grid
 \item various schemes proposed \small (Mahaffy, 1976\nocite{Mahaffy}; van der Veen 1999\nocite{vanderVeen}; Hindmarsh and Payne 1996\nocite{HindmarshPayne})
 \item all schemes involve
