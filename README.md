@@ -10,12 +10,12 @@ http://glaciers.gi.alaska.edu/courses/summerschool
 PDFs
 ----
 
-The notes (`notes/notes.pdf`) plus their exercises plus the Matlab codes form a self-contained course.
+The notes (`notes/notes.pdf`) plus their exercises plus the Matlab/Octave codes form a self-contained course.
 
 The slides (`slides/lecture.pdf`) cover the same material in a more informal style.
 
-download codes
---------------
+download Matlab/Octave codes
+----------------------------
 
 The codes are in subdirectory `mfiles/`.  Download these codes either by cloning this repo or by getting a "release" in `.zip` or `.tar.gz` archive format at
 
