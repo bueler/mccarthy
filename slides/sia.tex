@@ -541,7 +541,10 @@ in stencil at right:
 
 \medskip
 \small
-frames from $t=4$ months to $t = 10^6$ years, equal spaced in \emph{exponential} time
+frames from $t=0.3$ to $t = 10^6$ years
+
+\medskip
+nearly equally-spaced in \emph{exponential} time
 
 \begin{center}
 \multiinclude[format=png,graphics={width=10cm}]{anim/halfar}
@@ -554,10 +557,9 @@ frames from $t=4$ months to $t = 10^6$ years, equal spaced in \emph{exponential}
 \begin{itemize}
 \item for $n=3$ the solution formula is:
   $$H(t,r) = H_0 \left(\frac{t_0}{t}\right)^{1/9} \left[1 - \left(\left(\frac{t_0}{t}\right)^{1/18} \frac{r}{R_0}\right)^{4/3}\right]^{3/7}$$
-\item the ``characteristic time'' is
+if $H_0$, $R_0$ are central height and ice cap radius
+\item \dots at the ``characteristic time''
   $$t_0 = \frac{1}{18 \Gamma} \left(\frac{7}{4}\right)^3 \frac{R_0^4}{H_0^{7}}$$
-if $H_0$, $R_0$ are central height and ice cap radius at $t=t_0$
-\item you choose $H_0$ and $R_0$ and then determine $t_0$
 \item it is a simple formula to use for verification!
 \end{itemize}
 \end{frame}
@@ -581,16 +583,15 @@ if $H_0$, $R_0$ are central height and ice cap radius at $t=t_0$
   \frametitle{computing diffusivity in SIA}
 
 \begin{itemize}
-\item back to numerics \dots
-\item for numerical stability we compute $D = \Gamma H^{n+2} |\grad h|^{n-1}$ on the staggered grid
+\item back to numerics \dots we need diffusivity $D = \Gamma H^{n+2} |\grad h|^{n-1}$ on the staggered grid
 \item various schemes proposed \small (Mahaffy, 1976; van der Veen 1999; Hindmarsh and Payne 1996)
 \item all schemes involve
   \begin{itemize}
-  \item[$\circ$] averaging $H$
-  \item[$\circ$] differencing $h$
+  \item[$\circ$] averaging thickness $H$
+  \item[$\circ$] differencing surface elevation $h$
   \item[$\circ$] in a ``balanced'' way, for better accuracy,
   \end{itemize}
-to get the diffusivity on staggered grid
+to get the diffusivity on staggered grid (triangle below)
 \end{itemize}
 
 \begin{columns}
@@ -623,16 +624,16 @@ to get the diffusivity on staggered grid
 \begin{column}{0.6\textwidth}
 \scriptsize
 \begin{verbatim}
-octave:40> verifysia(20)
+>> verifysia(20)
 average abs error            = 22.310
 maximum abs error            = 227.849
-octave:41> verifysia(40)
+>> verifysia(40)
 average abs error            = 9.490
 maximum abs error            = 241.470
-octave:42> verifysia(80)
+>> verifysia(80)
 average abs error            = 2.800
 maximum abs error            = 155.796
-octave:43> verifysia(160)
+>> verifysia(160)
 average abs error            = 1.059
 maximum abs error            = 109.466
 \end{verbatim}
@@ -642,14 +643,7 @@ maximum abs error            = 109.466
 \end{column}
 
 \begin{column}{0.4\textwidth}
-\small
-\emph{Trust but verify.}
-\medskip
-
-\scriptsize
-(Ronald Reagan)
-
-\bigskip\bigskip\bigskip
+\vspace{4cm}
 
 \includegraphics[width=1.0\textwidth]{eismintone}
 
@@ -661,7 +655,7 @@ maximum abs error            = 109.466
 
 \begin{frame}{demonstrate robustness}
 
-see \texttt{roughice.m}, which calls \texttt{siaflat.m} after setting-up the nasty initial state at left:
+\texttt{roughice.m} sets-up the nasty initial state at left and then calls \texttt{siaflat.m} to evolve it for 50 years \dots it becomes nice dome at right
 \medskip
 
 \begin{columns}
@@ -683,15 +677,14 @@ see \texttt{roughice.m}, which calls \texttt{siaflat.m} after setting-up the nas
 
 \normalsize
 \begin{itemize}
-\item with careful-but-small modifications of \texttt{siaflat.m}, which make a good exercise:
+\item modify \texttt{siaflat.m} into \texttt{siageneral.m}:
   \begin{itemize}
   \item[$\circ$] observed accumulation as surface mass balance,
   \item[$\circ$] allow non-flat bed (so $H\ne h$),
-  \item[$\circ$] compute surface slopes correctly where floating, and
-  \item[$\circ$] calve at current calving front location
+  \item[$\circ$] calve any ice that is floating
   \end{itemize}
-here are results from this \emph{toy} Antarctic flow model
-\item a 2000 model year run on a $\Delta x=50$ km grid; runtime a few seconds
+\item this makes a good exercise \dots only 10 additional lines \dots
+\item results from this \emph{toy} Antarctic flow model, a 2000 model year run on a $\Delta x=50$ km grid; runtime a few seconds
 \end{itemize}
 
 \bigskip
@@ -705,18 +698,3 @@ here are results from this \emph{toy} Antarctic flow model
 \end{column}
 \end{columns}
 \end{frame}
-
-
-\begin{comment}
-\begin{frame}{final comments on SIA: origin and rigor}
-
-where does the ``shallow ice approximation'' come from?:
-\bigskip
-
-\begin{itemize}
-\item historically, Fowler and Larson (1978), Morland and Johnson (1980), and Hutter (1983) \dots thus recent
-\item logically, by a ``small-parameter argument'', based on a small depth-to-width ratio, from the more complete Stokes model for slow ice flow
-\item more precisely, by using the small aspect ratio \, $\eps = [H]/[L]$ \, of ice sheets to scale the Stokes model to see which terms make small contributions
-\end{itemize}
-\end{frame}
-\end{comment}

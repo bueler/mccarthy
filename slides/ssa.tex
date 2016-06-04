@@ -47,11 +47,11 @@ SSA also applies reasonably well to \alert{ice streams}
 \item ice streams 
   \small
   \begin{itemize}
-  \item[$\circ$] slide ($100$ to $1000 \,\text{m}\,\text{a}^{-1}$)
-  \item[$\circ$] have concentrated vertical shear in thin layer near base
+  \item[$\circ$] fast surface speed (up to $1 \,\text{m}\,\text{a}^{-1}$)
+  \item[$\circ$] have concentrated vertical shear in thin layer near base (``sliding'')
   \end{itemize}
   \normalsize
-\item ``outlet glaciers''
+\item outlet glaciers
   \begin{itemize}
   \item[$\circ$] fast surface speed (up to $10 \,\text{km}\,\text{a}^{-1}$)
   \item[$\circ$] uncertain how much is sliding
@@ -68,7 +68,7 @@ SSA also applies reasonably well to \alert{ice streams}
 
 \bigskip
 \scriptsize 
-Jakobshavns Isbrae (\textbf{a}) and Whillans Ice Stream (\textbf{b}); plotted without vertical exaggeration (\tiny Truffer and Echelmeyer (2003), \emph{Of isbrae and ice streams}\scriptsize)
+Jakobshavns Isbrae (\textbf{a}) and Whillans Ice Stream (\textbf{b}); plotted without vertical exaggeration (\tiny Truffer and Echelmeyer 2003)\scriptsize)
 \end{column}
 \end{columns}
 \end{frame}
@@ -77,8 +77,8 @@ Jakobshavns Isbrae (\textbf{a}) and Whillans Ice Stream (\textbf{b}); plotted wi
 \begin{frame}{SSA stress balance equation}
 
 \begin{itemize}
-\item only plane flow case (``flow line'') here
-\item the stress balance equation which determines velocity in an \emph{ice stream}:
+\item only plane flow case (``flow line'') shown here
+\item the stress balance equation determines velocity (\emph{ice stream case}):
 \begin{empheq}[box=\fbox]{equation}
   \left({\color{red}2 A^{-1/n} H |u_x|^{1/n - 1} u_x}\right)_x - {\color{blue}C|u|^{m-1}u} = {\color{green}\rho g H h_x} \label{ssa}
 \end{empheq}
@@ -88,6 +88,23 @@ Jakobshavns Isbrae (\textbf{a}) and Whillans Ice Stream (\textbf{b}); plotted wi
 \item derived originally by Morland (1987), MacAyeal (1989)
 \item \emph{how to think about this equation}?
 \item \emph{how do you solve it numerically}?
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{flotation criterion and grounding line}
+
+\begin{itemize}
+\item the inequality ``$\rho H < - \rho_w b$'' is the \alert{flotation criterion}
+\item at the grounding line $x=x_g$ the above inequality switches
+\item \dots and the driving stress switches form:
+  \begin{itemize}
+  \item[$\circ$] on the grounded side we know $\rho H > - \rho_w b$ so
+  	$$\rho g H h_x = \rho g H (H_x + b_x)$$
+  \item[$\circ$] on the floating side we know $\rho H < - \rho_w b$ so $h = (1-\rho/\rho_w) H$ and so
+  	$$\rho g H h_x = \rho(1-\rho/\rho_w) g H H_x$$
+  \end{itemize}
+\item also: $H,u,u_x$ are all continuous at $x=x_g$
 \end{itemize}
 \end{frame}
 
@@ -116,24 +133,6 @@ Jakobshavns Isbrae (\textbf{a}) and Whillans Ice Stream (\textbf{b}); plotted wi
 \end{frame}
 
 
-\begin{frame}{flotation criterion and grounding line}
-
-\begin{itemize}
-\item the inequality ``$\rho H < - \rho_w b$'' is the \alert{flotation criterion}
-\item at the grounding line $x=x_g$ the above inequality switches
-\item \dots and the driving stress switches form:
-  \begin{itemize}
-  \item[$\circ$] on the grounded side we know $\rho H > - \rho_w b$ so
-  	$$\rho g H h_x = \rho g H (H_x + b_x)$$
-  \item[$\circ$] on the floating side we know $\rho H < - \rho_w b$ so $h = (1-\rho/\rho_w) H$ and so
-  	$$\rho g H h_x = \rho(1-\rho/\rho_w) g H H_x$$
-  \end{itemize}
-\item also: $H,u,u_x$ are all continuous at $x=x_g$
-\end{itemize}
-\end{frame}
-
-
-
 \subsection{ice shelf flow line solution}
 
 
@@ -141,7 +140,7 @@ Jakobshavns Isbrae (\textbf{a}) and Whillans Ice Stream (\textbf{b}); plotted wi
 
 \begin{itemize}
 \item limited goal here: describe a steady state, 1D ice shelf
-\item there is a nice \alert{by-hand} result (next slide): the thickness and velocity in the ice shelf can be completely determined in terms of the 
+\item there is a nice \alert{by-hand} result (van der Veen 1983; next slide): the thickness and velocity in the ice shelf can be completely determined in terms of the 
   \begin{enumerate}
   \item ice thickness $H_g$ at the grounding line and
   \item ice velocity $u_g$ at the grounding line
@@ -191,9 +190,9 @@ Jakobshavns Isbrae (\textbf{a}) and Whillans Ice Stream (\textbf{b}); plotted wi
 \item \emph{simplest iteration idea}: use old effective viscosity to get new velocity solution, and repeat until things stop changing
   \begin{itemize}
   \item[$\circ$] this is ``Picard'' iteration
-  \item[$\circ$] Newton iteration is a superior alternative
+  \item[$\circ$] (Newton iteration is a superior alternative)
   \end{itemize}
-\item specifically:
+\item specifically for Picard:
   \begin{itemize}
   \item[$\circ$] last iterate $u^{(k-1)}$
   \item[$\circ$] define $W^{(k-1)} = 2 \bar \nu H = 2 A^{-1/n} |u^{(k-1)}_x|^{1/n-1} H$
@@ -351,7 +350,7 @@ lines below are a convergence analysis of \texttt{testshelf.m}, which calls \tex
   \begin{itemize}
   \item[$\circ$] high basal melt near grounding lines
   \item[$\circ$] marine ice can freeze-on at bottom (below)
-  \item[$\circ$] ``reverse slope'' bed instability and WAIS \dots
+  \item[$\circ$] reverse sloped-bed (marine ice sheet) instability
   \end{itemize}
 \end{itemize}
 
@@ -390,46 +389,37 @@ lines below are a convergence analysis of \texttt{testshelf.m}, which calls \tex
   \item[$\circ$] nonlinear so iteration is necessary
   \item[$\circ$] at each iteration a sparse matrix ``inner'' problem is solved \dots give it to a matrix solver software package
   \end{itemize}
-
-\bigskip
-\item general principles:
-  \begin{itemize}
-  \item[$\circ$] \alert{modularize your code}
-  \item[$\circ$] \alert{test the parts}
-  \end{itemize}
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{the mass continuity equation: a summary}
+\begin{frame}{conclusion: general principles}
 
 \begin{itemize}
-\item the \emph{mass continuity equation} is
-  $$H_t = M - \nabla \cdot (\mathbf{u} H)$$
-\item the numerical nature of this equation depends on the stress balance:
-  \begin{itemize}
-  \item[$\circ$] the equation is a diffusion for frozen bed, large scale flows (i.e.~SIA)
-  \item[$\circ$] it is \emph{not} very diffusive for membrane stresses and no basal resistance (e.g.~SSA for ice shelves)
-  \item[$\circ$] it is diffusive for ice streams (but how much?)
-  \item[$\circ$] there is \emph{not} much helpful theory on this transport problem
-  \item[$\circ$] \dots maybe you will help find this theory!
-  \end{itemize}
+\item \alert{learn a version-control system} (\texttt{git})
+\item \alert{modularize your codes}
+\item \alert{test the parts, and make testing repeatable} (\texttt{make test})
+\item \alert{if you are stuck, write documentation for what you have}
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{last idea}
+\begin{frame}{conclusion: a last take-away}
 \begin{itemize}
 \item this thing
 \begin{center}
 \includegraphics[width=0.3\textwidth]{computer}
 \end{center}
-\alert{does not know what you \emph{intend}}, but it does ``know'' your discrete model, i.e.~the program you wrote
-\item \alert{all you can aspire to} is for your computer to ``know'' your continuum model, the one that you write as equations
+\alert{does not know what you \emph{intend}}, i.e.~your physical modelling goal
    \begin{itemize}
-   \item[$\circ$] achieve this through e.g.~verification with exact solutions
+   \item[$\circ$] it does ``know'' your discrete equations, the program you wrote
    \end{itemize}
-\item but it will never hold your physical intention for the model
+
+\bigskip
+\item you \emph{can} aspire for your computer to ``know'' your continuum model, the one that you write as equations with derivatives
+   \begin{itemize}
+   \item[$\circ$] achieve this through verification with exact solutions
+   \end{itemize}
 \end{itemize}
 
 \end{frame}

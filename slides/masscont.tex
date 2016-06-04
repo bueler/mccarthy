@@ -14,7 +14,7 @@
 \alert{the surface and base of the ice are given by functions $z=h(t,x,y)$ and $z=b(t,x,y)$}
 \end{center}
 \item surface overhang is not allowed
-\item most Stokes models make this assumption too?
+\item (and most Stokes models make this assumption too)
 \end{itemize}
 \end{column}
 
@@ -59,8 +59,7 @@
 
 \begin{itemize}
 \item what does the ``most basic shallow assumption'' get you?
-\item \emph{answer 1}: a (map-plane) mass continuity equation from the kinematical equations and incompressibility
-\item \emph{answer 2}: of these three equations,
+\item \emph{answer}: of these three equations,
   \begin{itemize}
   \item[$\circ$]  surface kinematical
   \item[$\circ$]  base kinematical
@@ -99,8 +98,25 @@
   \begin{enumerate}
   \item numerical implementation of a stress balance: compute velocity $(u,v,w)$
   \item from the horizontal velocity $(u,v)$ and the surface balance, do time-step of mass continuity equation to get $H_t$
-  \item update surface elevation (and bed elevation)
-  \item decide on time-step, and repeat at 1.
+  \item update surface elevation
+  \item decide on time-step from size of diffusivity $D$, and repeat at 1.
   \end{enumerate}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{the mass continuity equation: a summary}
+
+\begin{itemize}
+\item the \emph{mass continuity equation} is
+  $$H_t = M - \nabla \cdot (\mathbf{u} H)$$
+\item the numerical nature of this equation depends on the stress balance:
+  \begin{itemize}
+  \item[$\circ$] the equation is a diffusion for frozen bed, large scale flows (i.e.~SIA)
+  \item[$\circ$] it is \emph{not} very diffusive for membrane stresses and no basal resistance (e.g.~SSA for ice shelves)
+  \item[$\circ$] it is diffusive for ice streams (but how much?)
+  \item[$\circ$] there is \emph{not} much helpful theory on this transport problem
+  \item[$\circ$] \dots maybe you will help find this theory!
+  \end{itemize}
 \end{itemize}
 \end{frame}
