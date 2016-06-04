@@ -42,7 +42,7 @@ a model which applies to
 \begin{center}
   \includegraphics[width=0.65\textwidth]{polaris}
 
-\tiny ``Polaris Glacier,'' northwest Greenland, photo 122, Post \& LaChapelle (2000)\nocite{PostLaChapelle}
+\tiny ``Polaris Glacier,'' northwest Greenland, photo 122, Post \& LaChapelle (2000)
 \end{center}
 
 \end{frame}
@@ -88,7 +88,7 @@ H_t = M + \Div \left(\Gamma H^{n+2} |\grad h|^{n-1} \grad h \right) \label{sia}
   \item[$\circ$] $n$ is the exponent in the Glen flow law
   \item[$\circ$] $\Gamma = 2 A (\rho g)^n / (n+2)$ is a positive constant
   \end{itemize}
-\item numerically solve (1) and you've got a usable model for \dots \emph{the Barnes ice cap} (Mahaffy, 1976)\nocite{Mahaffy}
+\item numerically solve (1) and you've got a usable model for \dots \emph{the Barnes ice cap} (Mahaffy, 1976)
 \end{itemize}
 \medskip
 
@@ -219,7 +219,7 @@ and so on
 \small
 	$$\frac{T(t+\Delta t,x) - T(t,x)}{\Delta t} \approx D\,\frac{T(t,x+\Delta x) - 2 T(t,x) + T(t,x-\Delta x)}{\Delta x^2}$$
 \normalsize
-\item the difference between the equation $T_t = D T_{xx}$ and the scheme is $O(\Delta t,\Delta x^2)$ (Morton and Mayers, 2005)\nocite{MortonMayers}
+\item the difference between the equation $T_t = D T_{xx}$ and the scheme is $O(\Delta t,\Delta x^2)$ (Morton and Mayers, 2005)
 \item notation: $(t_n,x_j)$ is a point in the time-space grid
 \item notation: $T_j^n \approx T(t_n,x_j)$  \only<2>{\hfill \alert{$\longleftarrow$ can you distinguish these?}}
 \item let $\nu = D \Delta t / (\Delta x)^2$, so ``explicit'' scheme is
@@ -539,11 +539,13 @@ in stencil at right:
 \begin{frame}{Halfar solution to the SIA: the movie}
 \label{slide:plothalfar}
 
-\animategraphics[autoplay,loop,height=7.0cm]{4}{anim/halfar}{0}{26}
-
-\par
-\scriptsize 
+\medskip
+\small
 frames from $t=4$ months to $t = 10^6$ years, equal spaced in \emph{exponential} time
+
+\begin{center}
+\multiinclude[format=png,graphics={width=10cm}]{anim/halfar}
+\end{center}
 \end{frame}
 
 
@@ -564,7 +566,7 @@ if $H_0$, $R_0$ are central height and ice cap radius at $t=t_0$
 \begin{frame}{is the Halfar solution \emph{good for any modeling}?}
 
 \begin{itemize}
-\item John Nye and others (2000)\nocite{NyeIcarus2000} compared different flow laws for the South Polar Cap on Mars
+\item John Nye and others (2000) compared different flow laws for the South Polar Cap on Mars
 \item they evaluated $\text{CO}_2$ ice and $\text{H}_2\text{O}$ ice softness parameters by comparing the long-time behavior of the corresponding Halfar solutions
 \item conclusions:
   \begin{quote}
@@ -581,7 +583,7 @@ if $H_0$, $R_0$ are central height and ice cap radius at $t=t_0$
 \begin{itemize}
 \item back to numerics \dots
 \item for numerical stability we compute $D = \Gamma H^{n+2} |\grad h|^{n-1}$ on the staggered grid
-\item various schemes proposed \small (Mahaffy, 1976\nocite{Mahaffy}; van der Veen 1999\nocite{vanderVeen}; Hindmarsh and Payne 1996\nocite{HindmarshPayne})
+\item various schemes proposed \small (Mahaffy, 1976; van der Veen 1999; Hindmarsh and Payne 1996)
 \item all schemes involve
   \begin{itemize}
   \item[$\circ$] averaging $H$
@@ -651,7 +653,7 @@ maximum abs error            = 109.466
 
 \includegraphics[width=1.0\textwidth]{eismintone}
 
-\scriptsize \emph{figure 2 in Huybrechts et al.~(1996)}\nocite{EISMINT96}
+\scriptsize \emph{figure 2 in Huybrechts et al.~(1996)}
 \end{column}
 \end{columns}
 \end{frame}
@@ -712,7 +714,7 @@ where does the ``shallow ice approximation'' come from?:
 \bigskip
 
 \begin{itemize}
-\item historically, Fowler and Larson (1978)\nocite{FowlerLarson1978}, Morland and Johnson (1980)\nocite{MorlandJohnson}, and Hutter (1983)\nocite{Hutter} \dots thus recent
+\item historically, Fowler and Larson (1978), Morland and Johnson (1980), and Hutter (1983) \dots thus recent
 \item logically, by a ``small-parameter argument'', based on a small depth-to-width ratio, from the more complete Stokes model for slow ice flow
 \item more precisely, by using the small aspect ratio \, $\eps = [H]/[L]$ \, of ice sheets to scale the Stokes model to see which terms make small contributions
 \end{itemize}
