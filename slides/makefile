@@ -8,7 +8,7 @@ msource := $(addprefix tmp/,$(mslim))
 
 # FIXME: much to do here
 # FIXME need to do "make" in karthaus/, and add links to all graphics, for this too work
-lecture.pdf: $(msource) anim/halfar-0.png lecture.tex style.tex preamble.tex sia.tex masscont.tex ssa.tex
+lecture.pdf: $(msource) anim/halfar-0.png lecture.tex preamble.tex sia.tex masscont.tex ssa.tex
 	pdflatex lecture
 	pdflatex lecture
 
