@@ -17,12 +17,6 @@ REQUIRED STUDENT BACKGROUND: Basic exposure to (1) differential equations, (2) s
 
 notes to self:
 
-both: get extra laptop; case for both laptops; extra battery;
-
 project 7:   explores the methods and flow solutions used in two papers, namely Nye (2000; "A flow model for the polar caps of Mars") and Sayag and Worster (2013; "Axisymmetric gravity currents of power-law fluids over a rigid horizontal surface");  will provide those papers including data from latter; buy xanthan gum (Bobs Red Mill) and bring surgical tubing and funnel
 
-project 8:  graph glaciated-area vs ELA for several random terrains; steepness = inverse of correlation distance;  random generation based on
-*  https://en.wikipedia.org/wiki/Gaussian_process
-*  perlin noise? (python) https://github.com/caseman/noise
-need to have C/python code for nonsliding SIA on arbitrary bed ready to go; need to check scaling of bed generation code or pre-generate
 
