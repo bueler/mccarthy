@@ -25,7 +25,7 @@ Gaussian process generated using the above covariance function then
 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("--amplitude", default=1000.0, metavar='A', type=float,
                     help="amplitude A of variation of b(x,y), in meters")
-parser.add_argument("--lengthscale", default=20000.0, metavar='L', type=float,
+parser.add_argument("--lengthscale", default=30000.0, metavar='L', type=float,
                     help="distance scale l, in meters, used in periodized squared-exponential covariance function")
 parser.add_argument("-Lx", default=100000.0, metavar='LX', type=float,
                     help="x extent of region, in meters")
@@ -42,23 +42,22 @@ parser.add_argument('-o', dest='outname', default='', metavar='FILENAME',
 #FIXME: add ability to do many samples
 #parser.add_argument("-P", default=1, metavar='P', type=int,
 #                    help="number of beds to generate (samples)")
-#FIXME: add --snowcentered which writes a CMB, with positive values in center and negative at edge, into output file
 parser.add_argument("--plotbed", action="store_true",
                     help="show bed elevation with matplotlib and a wire frame")
 args = parser.parse_args()
 
+print 'random bed topography on %d x %d grid:' % (args.Nx,args.Ny)
+
+print '    generating covariance matrix ...'
 dx = args.Lx / float(args.Nx)
 dy = args.Ly / float(args.Ny)
 x = np.linspace(0,args.Lx-dx,args.Nx)
 y = np.linspace(0,args.Ly-dy,args.Ny)
-
 xx, yy = np.meshgrid(x,y)
 xxx = xx.flatten()
 yyy = yy.flatten()
-
 N = args.Nx * args.Ny  # total number of points
 Sigma = np.zeros((N,N))
-
 l = args.lengthscale
 for k in range(args.Ny):
     for j in range(args.Nx):
@@ -66,17 +65,24 @@ for k in range(args.Ny):
         SY = args.Ly * np.sin(np.pi * abs(yyy-y[k]) / args.Ly)
         Sigma[:][(k-1)*args.Nx + j] = np.exp(- (SX**2 + SY**2) / (2.0 * l * l) )
 
+print '    computing eigenvalues and eigenvectors ...'
 D, V = eigs(Sigma, k=200)
+# FIXME The parameter k, which is the number of computed eigenvalues and
+# vectors, is very important in both success (generating the right kind of
+# variation) and to speed.  But I do not know how to set it optimally.
+# Looking at the range of the eigenvalues (below) is recommended anyway.
+print '      [D range is from %.6f to %.6f]' % (min(abs(D)),max(abs(D)))
+
+print '    generating random bed elevations ...'
 V = np.real(V)
 Dhalf = np.sqrt(abs(D))
-print 'Dhalf range is from %.6f to %.6f' % (min(Dhalf),max(Dhalf))
-
 A = args.amplitude
 b0 = args.meanelevation
 Z = np.dot(V, Dhalf * np.dot(V.transpose(),randn(N)))
 b = A * np.reshape(Z,(args.Nx,args.Ny)) + b0
 
 if args.plotbed:
+    print '    plotting to screen ...'
     import matplotlib.pyplot as plt
     from matplotlib import cm
     from mpl_toolkits.mplot3d import axes3d
@@ -92,6 +98,7 @@ if args.plotbed:
     plt.show()
 
 if len(args.outname) > 0:
+    print '    saving to file %s in petsc binary format (for reading by mahaffy) ...' % args.outname
     import PetscBinaryIO as pbio
     import petsc_conf
     # convert to PETSc-type vecs
