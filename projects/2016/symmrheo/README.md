@@ -2,7 +2,6 @@
 Ice rheology from symmetric flows
 ---------------------------------
 
-FIXME project 7:   explores the methods and flow solutions used in two papers, namely Nye (2000; "A flow model for the polar caps of Mars") and Sayag and Worster (2013; "Axisymmetric gravity currents of power-law fluids over a rigid horizontal surface");  will provide those papers including data from latter; buy xanthan gum (Bobs Red Mill) and bring surgical tubing and funnel
 
 description
 -----------
@@ -25,15 +24,21 @@ The original description:
 references
 ----------
 
-First, see the notes (`notes/notes.pdf`).  FIXME
+First, see the notes (`notes/notes.pdf`).  They cover the shallow ice approximation (SIA; equation (26) in notes) which you will want to comprehend, and the Halfar (1983) similarity solution (equation (40) in notes).
+
+The Halfar solution is used in the following paper, a PDF of which is in the current directory: J. F. Nye, 2000. _A flow model for the polar caps of Mars_, J. Glaciol. 46 (154), 438--444.
+
+The second paper to read is the one for which I am proposing you reproduce part of the analysis of the experimental data.  It is also a PDF in the current directory:  R. Sayag and M. G. Worster, 2013. _Axisymmetric gravity currents of power-law fluids over a rigid horizontal surface_, J. Fluid Mech. 716, doi:10.1017/jfm.2012.545.  They do not use the Halfar solution, but they do give a very clear derivation of a similarity solution very close to it.  Their solution is one which closely-matches an achievable laboratory experiment.
+
+Read up!
 
 
 needed tools
 ------------
 
-FIXME
+* Matlab or Octave.
 
-* Any tools you need to post-process results and produce a short talk at the end of the school.
+* Any additional tools you need to post-process results and produce a short talk at the end of the school.
 
 
 questions
@@ -44,12 +49,16 @@ questions
 goals/mileposts
 ---------------
 
-* FIXME Decide on an initial experimental design _quickly_.  That is, understand the basic idea and the basic models, and then take a guess at what to look at.
+* Fit the data for each Q to the rN(t) curve from the similarity solution.  Do you get the same n value(s)?
 
-* Generate the first part of your presentation early.  I.e. slides stating the model, the parameters, the goals, and the initial experiment.  (You have to do this anyway, and doing it early helps reveal good questions early; that is the goal!)
+* Generate the first part of your presentation early.  I.e. slides stating the model, the parameters, the goals, and the analysis.  (You have to do this anyway, and doing it early helps reveal good questions early; that is the goal!)
 
 
 recipes
 -------
 
-FIXME
+View the data we have from Sayag and Worster:
+
+        $ octave    # or matlab
+        >> plotSWdata
+
