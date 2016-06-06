@@ -3,6 +3,16 @@ Glaciating random terrain
 =========================
 
 
+reassurance
+-----------
+
+The point of the project is not to get you to a particular spot!  The point is to _help you learn fast from whereever you currently are_.
+
+So please be honest with yourself about what you don't know, and please ask about that!  Another student may program better than you, or have seen more differential equations, or have more glaciers background, or whatever.  This is irrelevant to my goal, which is to help you move fast, in one intense week.
+
+So, though I want to help you go forward in the direction of this project and topic, it must be from the things _you_ do understand into things _you_ do not understand.
+
+
 description
 -----------
 
@@ -21,8 +31,8 @@ The original description:
 > REQUIRED STUDENT BACKGROUND: Basic exposure to (1) differential equations, (2) some numerical methods, and (3) use of Python and unix-type command line.
 
 
-references
-----------
+references and reading
+----------------------
 
 First, see the notes (`notes/notes.pdf`).  Pay special attention to the parts about the 2D SIA model.  For that model there are issues to discuss about degenerate diffusivity and the fact that the thickness is constrained to be nonnegative.
 
@@ -34,7 +44,9 @@ Third, regarding generating a random bed, see https://en.wikipedia.org/wiki/Gaus
 needed tools
 ------------
 
-_Ideally_ all tools would work on your laptop, but we can manage if not.  The first two PETSc items may be hard to install.  The tools are:
+_Ideally_ all tools would work on your laptop, but we can manage if not.  The first two PETSc items may be hard to install; try quick but skip those if it does not work out, and make sure the others work.  The extra laptop I brought should have all of these things already.
+
+The tools are:
 
 * PETSc.  See http://www.mcs.anl.gov/petsc/ and follow download and install instructions.
 
