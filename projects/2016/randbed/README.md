@@ -9,20 +9,16 @@ description
 The original description:
 
 > PROJECT 8: Glaciating random terrain
+
 > STUDENTS: XXX
+
 > ADVISOR: Ed Bueler
-> DESCRIPTION: How does glacier-covered area, or glacier volume, depend
-> on the roughness of topography?  In this modeling project we will
-> generate random terrain, assume altitude-accumulation feedback, model
-> the corresponding steady states of the glaciers, and measure the modeled
-> glaciated area and glacier volume.  How does glaciation change as
-> equilibrium line altitude and/or lapse rates change on random terrain of
-> different steepness?  This project will involve running laptop-suitable
-> glacier models and processing their output.
+
+> DESCRIPTION: How does glacier-covered area, or glacier volume, depend on the roughness of topography?  In this modeling project we will generate random terrain, assume altitude-accumulation feedback, model the corresponding steady states of the glaciers, and measure the modeled glaciated area and glacier volume.  How does glaciation change as equilibrium line altitude and/or lapse rates change on random terrain of different steepness?  This project will involve running laptop-suitable glacier models and processing their output.
+
 > SOFTWARE REQUIREMENTS: Python and Linux/Unix
-> REQUIRED STUDENT BACKGROUND: Basic exposure to (1) differential
-> equations, (2) some numerical methods, and (3) use of Python and
-> unix-type command line.
+
+> REQUIRED STUDENT BACKGROUND: Basic exposure to (1) differential equations, (2) some numerical methods, and (3) use of Python and unix-type command line.
 
 
 references

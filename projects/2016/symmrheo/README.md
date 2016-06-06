@@ -10,18 +10,16 @@ description
 The original description:
 
 > PROJECT 7:  Ice rheology from symmetric flows
+
 > STUDENTS: XXX
+
 > ADVISOR: Ed Bueler
-> DESCRIPTION:  There are simple models for the evolution of
-> circularly-symmetric flows of ice (or other viscous fluids).  This
-> theory, used quantitatively, allows us to convert observations of
-> real flows, whether approximately circular (polar caps on Mars) or
-> deliberately circular (laboratory), into estimates of the rheology
-> of the fluid.  The project will use pencil and paper calculations,
-> some processing of data on computer, and modest experimentation.
+
+> DESCRIPTION:  There are simple models for the evolution of circularly-symmetric flows of ice (or other viscous fluids).  This theory, used quantitatively, allows us to convert observations of real flows, whether approximately circular (polar caps on Mars) or deliberately circular (laboratory), into estimates of the rheology of the fluid.  The project will use pencil and paper calculations, some processing of data on computer, and modest experimentation.
+
 > SOFTWARE REQUIREMENTS: Matlab or Octave
-> REQUIRED STUDENT BACKGROUND: Basic exposure to (1) differential
-> equations and (2) Matlab or similar.
+
+> REQUIRED STUDENT BACKGROUND: Basic exposure to (1) differential equations and (2) Matlab or similar.
 
 
 references
