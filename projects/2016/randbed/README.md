@@ -36,7 +36,7 @@ references and reading
 
 First, see the notes (`notes/notes.pdf`).  Pay special attention to the parts about the 2D SIA model.  For that model there are issues to discuss about degenerate diffusivity and the fact that the thickness is constrained to be nonnegative.
 
-Second, this is available on paper and in the current directory: E. Bueler, 2016.  _Stable finite volume element schemes for the shallow-ice approximation_, J. Glaciol. (published online) doi:10.1017/jog.2015.3.
+Second, the following paper is available on paper and in the current directory: E. Bueler, 2016.  _Stable finite volume element schemes for the shallow-ice approximation_, J. Glaciol. 62 (232), 230--242.
 
 Third, regarding generating a random bed, see https://en.wikipedia.org/wiki/Gaussian_process.
 
@@ -50,7 +50,15 @@ The tools are:
 
 * PETSc.  See http://www.mcs.anl.gov/petsc/ and follow download and install instructions.
 
-* My SIA-solving program, written in C and using PETSc, in support of Bueler (2016) above.  Clone my repo https://github.com/bueler/sia-fve.  The code is documented by Bueler (2016) above, except for the elevation-dependence of the climatic mass balance (CMB).  This part is  m(x,y) = lapse * (s(x,y) - ela)  where m(x,y) is the CMB (m s^-1) and where  s(x,y) = b(x,y) + H(x,y)  is the surface elevation (m).
+* My SIA-solving program, written in C and using PETSc, in support of Bueler (2016) above.  Clone my repo https://github.com/bueler/sia-fve.  The code is documented by Bueler (2016) above, except for the elevation-dependence of the climatic mass balance (CMB).  This part of the model is described by the two formulas
+
+        m(x,y) = lapse * (s(x,y) - ela)
+
+where `m(x,y)` is the CMB (ice equivalent m s^-1) and where, as before,
+
+        s(x,y) = b(x,y) + H(x,y)
+
+is the surface elevation (m).
 
 * python with numerical and graphical libraries.  See https://www.python.org/, http://www.scipy.org/, http://matplotlib.org/.
 
@@ -68,7 +76,7 @@ questions
 
 * What kinds of things are known and not known about the model?  (Solutions?  Numerical solutions?  Appropriateness of the continuum model?)
 
-* Someone might say that the steady state may not be unique if the CMB is elevation-dependent.  What does this mean?
+* Someone might say that the steady state may not be unique if the CMB is elevation-dependent.  What does this mean?  If there are multiple solutions, how would you describe which one you find.
 
 * How do you measure the extent/magnitude/coverage of the glaciation of a mountain range?
 
@@ -78,7 +86,7 @@ questions
 
 * What are the additional parameters controlling the _numerical_ ice flow model?  What cases/values should be studied?
 
-* Why do lower resolution runs converge less reliably than higher resoluion?  (See below for examples of lower and higher.  This is a hard question ... I do not really know but I can guess!)
+* Why do lower resolution runs converge less reliably than higher resoluion?  (See below for examples of lower and higher.  This is a _hard_ question ... I do not really know the answer but I can guess.)
 
 
 goals/mileposts
