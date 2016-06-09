@@ -36,11 +36,13 @@ references and reading
 
 First, see the notes (`notes/notes.pdf`).  They cover the shallow ice approximation (SIA; equation (26) in notes) which you will want to comprehend, and the Halfar (1983) similarity solution (equation (40) in notes).
 
-The Halfar solution is used in the following paper, a PDF of which is in the current directory: J. F. Nye, 2000. _A flow model for the polar caps of Mars_, J. Glaciol. 46 (154), 438--444.  It has a good derivation of the Halfar solution.  More of the Nye argument that the caps are not primarily CO2 ice is in Nye, J. F., Durham, W. B., Schenk, P. M., & Moore, J. M., 2000. _The instability of a south polar cap on Mars composed of carbon dioxide_, Icarus 144 (2), 449--455.
+The Halfar solution is used in the following paper, a PDF of which is in the current directory: J. F. Nye, 2000. _A flow model for the polar caps of Mars_, J. Glaciol. 46 (154), 438--444.  It has a good derivation of the Halfar solution.
 
-Also the Halfar solution is derived in the 2nd edition of van der Veen's textbook.  Namely starting on page 313 of C. J. van der Veen, 2013. _Fundamentals of Glacier Dynamics_, 2nd ed., CRC Press.
+More of the Nye argument that the caps are not primarily CO2 ice is in this reference, for which there is also a PDF: Nye, J. F., Durham, W. B., Schenk, P. M., & Moore, J. M., 2000. _The instability of a south polar cap on Mars composed of carbon dioxide_, Icarus 144 (2), 449--455.
 
-The single most important paper to read is the one for which I am proposing you reproduce part of the analysis of the experimental data.  It is also a PDF in the current directory:  R. Sayag and M. G. Worster, 2013. _Axisymmetric gravity currents of power-law fluids over a rigid horizontal surface_, J. Fluid Mech. 716, doi:10.1017/jfm.2012.545.  They do not use the Halfar solution, but they do give a very clear derivation of a similarity solution very close to it.  Their solution is one which closely-matches an achievable laboratory experiment.
+Also the Halfar solution is derived in the 2nd edition of van der Veen's textbook.  Namely starting on page 313 of C. J. van der Veen, 2013. _Fundamentals of Glacier Dynamics_, 2nd ed., CRC Press.  A copy of this textbook is in the lecture room.
+
+The single most important paper to read is this one, for which I am proposing you reproduce part of the analysis of the experimental data.  It is also a PDF in the current directory:  R. Sayag and M. G. Worster, 2013. _Axisymmetric gravity currents of power-law fluids over a rigid horizontal surface_, J. Fluid Mech. 716, doi:10.1017/jfm.2012.545.  They do not use the Halfar solution, but they do give a very clear derivation of a similarity solution which is closely-related to it.  Their solution is one which closely-matches an achievable laboratory experiment.
 
 Read up and ask lots of questions!
 
@@ -64,6 +66,9 @@ questions
 
 * Why do Sayag & Worster (2013) NOT use all the data to determine their best fit values of n and mu?
 
+* Suppose you did not have an exact (e.g. similarity) solution.  Could you re-do the experimental analysis without the exact solution but instead only using numerical solutions?  What are the issues?
+
+
 goals/mileposts
 ---------------
 
@@ -71,11 +76,11 @@ goals/mileposts
 
 * Similarly, be able to derive the SIA evolution equation for the thickness, equation (26) in the notes.
 
-* Follow the derivation of the Halfar solution in Nye (2000) or van der Veen.
+* Follow and understand the derivation of the Halfar solution in Nye (2000) or van der Veen.
 
-* Fit the data for each Q (three different values) to the rN(t) curve from the similarity solution in Sayag & Worster (2013).  Do you get the same n value(s) as they do?
+* Fit the data for each Q (three different values) to the rN(t) curve from the similarity solution in Sayag & Worster (2013).  Do you get the same n value(s) as they do?  Which data do they fit to?
 
-* Generate the first part of your presentation early.  I.e. slides stating the model, the parameters, the goals, and the analysis.  (You have to do this anyway, and doing it early helps reveal good questions early; that is the goal!)
+* Generate the first part of your presentation early.  I.e. slides stating the model, the parameters, the goals, and the analysis.  In the initial draft, _make up_ the analysis; this exercise will help you understand what you want to do.  (_You have to build the presentation anyway, and doing it early helps reveal good questions early.  Good questions are the goal!_)
 
 
 recipes
