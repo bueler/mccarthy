@@ -124,7 +124,7 @@ Generate/view, and then save, example bed:
 Run a low-resolution example using the bed:
 
         mkdir testlow
-        ./mahaffy -mah_read low.dat -mah_showdata -draw_pause 2 -mah_cmbmodel -cmb_ela 2500.0 -cmb_lapse 0.002 -cs_D0 1.0 -snes_max_it 400 -mah_dump testlow/
+        ./mahaffy -mah_read low.dat -mah_showdata -draw_pause 2 -mah_cmbmodel -cmb_ela 2500.0 -cmb_zgrad 0.002 -cs_D0 1.0 -snes_max_it 400 -mah_dump testlow/
 
 Look at result:
 
@@ -135,7 +135,7 @@ Run a higher-resolution example, in parallel:
 
         ./bedrand.py --plotbed -Nx 100 -Ny 100 -o high.dat
         mkdir testhigh
-        mpiexec -n 4 ./mahaffy -mah_read high.dat -mah_showdata -draw_pause 2 -mah_cmbmodel -cmb_ela 2500.0 -cmb_lapse 0.002 -cs_D0 1.0 -mah_dtrecovery 10 -snes_max_it 400 -pc_type asm -sub_pc_type lu -mah_dump testhigh/
+        mpiexec -n 4 ./mahaffy -mah_read high.dat -mah_showdata -draw_pause 2 -mah_cmbmodel -cmb_ela 2500.0 -cmb_zgrad 0.002 -cs_D0 1.0 -mah_dtrecovery 10 -snes_max_it 400 -pc_type asm -sub_pc_type lu -mah_dump testhigh/
         cd testhigh/
         ../figsmahaffy.py --observed
 
