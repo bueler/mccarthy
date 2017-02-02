@@ -90,10 +90,10 @@ if args.plotbed:
     ax = fig.gca(projection='3d')
     surf = ax.plot_surface(xx/1000.0,yy/1000.0,b,rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0)
     #plt.pcolor(xx/1000.0,yy/1000.0,b)
-    ax.set_xlabel('x in km')
-    ax.set_ylabel('y in km')
-    ax.set_zlabel('b(x,y) in m')
+    ax.set_xlabel('x  (km)')
+    ax.set_ylabel('y  (km)')
     ax.set_zlim3d(0.0, max(b.flatten()))
+    ax.set_title('bed elevations  (m)')
     fig.colorbar(surf,shrink=0.8,aspect=8)
     plt.show()
 
