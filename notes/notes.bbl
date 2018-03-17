@@ -50,8 +50,7 @@
 
 \bibitem{Bueler2016}
 {\sc E.~Bueler}, {\em Stable finite volume element schemes for the
-  shallow-ice approximation}, J.~Glaciol. (2016).
-\newblock doi:10.1017/jog.2015.3.
+  shallow-ice approximation}, J.~Glaciol., 62 (2016), pp.~230--242.
 
 \bibitem{BBssasliding}
 {\sc E.~Bueler and J.~Brown}, {\em Shallow shelf approximation as a ``sliding
@@ -86,7 +85,7 @@
 {\sc J.~Feldmann, T.~Albrecht, C.~Khroulev, F.~Pattyn, and A.~Levermann},
   {\em Resolution-dependent performance of grounding line motion in a shallow
   model compared to a full-Stokes model according to the MISMIP3d
-  intercomparison}, J. Glaciol., 60 (220), pp.~353--360.
+  intercomparison}, J. Glaciol., 60 (2014), pp.~353--360.
 
 \bibitem{Fowler}
 {\sc A.~C. Fowler}, {\em Mathematical Models in the Applied Sciences},
@@ -156,7 +155,7 @@
 \bibitem{JouvetRappaz2011}
 {\sc G.~Jouvet and J.~Rappaz}, {\em Analysis and finite element approximation
   of a nonlinear stationary {S}tokes problem arising in glaciology}, Advances
-  in Numerical Analysis, 2011 (2011), p.~24 pages.
+  in Numerical Analysis, (2011).
 
 \bibitem{Kelley}
 {\sc C.~T. Kelley}, {\em Solving Nonlinear Equations with Newton's Method},
