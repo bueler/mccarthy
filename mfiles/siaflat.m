@@ -36,8 +36,10 @@ fprintf('solving SIA for 0.0 < t < %.3f a\n',tf/secpera)
 t = 0;   dtlist = [];
 for n=1:N
   % staggered grid thicknesses
-  Hup = 0.5 * ( H(j,nk) + H(j,k) );   Hdn = 0.5 * ( H(j,k) + H(j,sk) ); % up and down
-  Hrt = 0.5 * ( H(ej,k) + H(j,k) );   Hlt = 0.5 * ( H(j,k) + H(wj,k) ); % right and left
+  Hup = 0.5 * ( H(j,nk) + H(j,k) );   % up and down
+  Hdn = 0.5 * ( H(j,k) + H(j,sk) );
+  Hrt = 0.5 * ( H(ej,k) + H(j,k) );   % right and left
+  Hlt = 0.5 * ( H(j,k) + H(wj,k) );
   % staggered grid value of |grad h|^2 = "alpha^2"
   a2up = (H(ej,nk) + H(ej,k) - H(wj,nk) - H(wj,k)).^2 / (4*dx)^2 + ...
          (H(j,nk) - H(j,k)).^2 / dy^2;
@@ -49,11 +51,14 @@ for n=1:N
          (H(wj,nk) + H(j,nk) - H(wj,sk) - H(j,sk)).^2 / (4*dy)^2;     
   % Mahaffy evaluation of staggered grid diffusivity
   %   D = Gamma H^{n+2} |grad h|^{n-1}
-  Dup = Gamma * Hup.^5 .* a2up;  Ddn = Gamma * Hdn.^5 .* a2dn;
-  Drt = Gamma * Hrt.^5 .* a2rt;  Dlt = Gamma * Hlt.^5 .* a2lt;
+  Dup = Gamma * Hup.^5 .* a2up;
+  Ddn = Gamma * Hdn.^5 .* a2dn;
+  Drt = Gamma * Hrt.^5 .* a2rt;
+  Dlt = Gamma * Hlt.^5 .* a2lt;
   % call *adaptive* diffusion() to time step H
   [H,dtadapt] = diffusion(Lx,Ly,J,K,Dup,Ddn,Drt,Dlt,H,deltat);
-  t = t + deltat;    dtlist = [dtlist dtadapt];
+  t = t + deltat;
+  dtlist = [dtlist dtadapt];
   fprintf('.')
 end
 fprintf('\nSIA solver done\n')
