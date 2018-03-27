@@ -3,7 +3,8 @@
 
 \usepackage[total={6.2in,9.0in},top=1.2in,left=1.1in]{geometry}
 
-\usepackage{natbib}
+%\usepackage{natbib}
+\newcommand{\citep}[1]{\cite{#1}}
 
 \usepackage{amssymb,alltt,verbatim,xspace,fancyvrb,color,empheq}
 \usepackage{palatino}
@@ -204,6 +205,7 @@ The other interesting aspect is in equation (3.9a,b).  The unknown location of t
 
 \small
 \bibliography{ice-bib}  % generally requires link to pism/doc/ice-bib.bib
-\bibliographystyle{agu}
+%\bibliographystyle{agu}
+\bibliographystyle{siam}
 
 \end{document}
