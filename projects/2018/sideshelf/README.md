@@ -1,12 +1,11 @@
-Ice shelves: sidewall stresses and universal profiles
-=====================================================
+Ice shelf dynamics with side-wall stresses
+==========================================
+
 
 reassurance
 -----------
 
-The point of the project is not to get you to a particular spot!  The point is to _help you learn fast from whereever you currently are_.
-
-So please be honest with yourself about what you don't know, and please ask about that!  Another student may program better than you, or have seen more differential equations, or have more glaciers background, or whatever.  This is irrelevant to my goal, which is to help you move forward as far as possible in one intense week.
+The point of the project is not to get you to a particular spot!  The point is to _help you learn fast from whereever you currently are_.  So please be honest with yourself about what you don't know, and please ask about it!  Another student may know more programming than you, or have seen more differential equations, or have more glaciers background, or whatever.  This is irrelevant to my goal, which is to help you move forward as far as possible in one intense week.
 
 Though I intend to help you go forward in the direction of this project and topic, it must be from the things _you_ do understand into things _you_ do not understand.
 
@@ -14,11 +13,11 @@ Though I intend to help you go forward in the direction of this project and topi
 description
 -----------
 
-PROJECT XX: Ice shelves: sidewall stresses and universal profiles
+PROJECT XX: Ice shelf dynamics with side-wall stresses
 
 ADVISOR: Ed Bueler
 
-DESCRIPTION: FIXME
+DESCRIPTION: Recent theoretical and laboratory work by Pegler (2016) extends understanding of steady state ice shelf shapes to include side-wall stresses.  A wide range of ice shelf profiles are now understood, which gives a tool for understanding the dynamical configuration of present-day ice shelves in Antarctica in particular.  We will explore these ideas via by-hand analysis,  numerical computations, and analysis of observed ice thicknesses.  FIXME
 
 SOFTWARE REQUIREMENTS: Matlab/Octave or Python (with numpy and matplotlib).
 
