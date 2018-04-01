@@ -769,21 +769,21 @@ These notes are brief and they give an incomplete view of numerical models for g
 \item Test the parts: Is the component robust? Does it show convergence?
 \end{itemize}
 
-Here are four high-level points regarding ice flow models.  They form a kind of meager conclusion:
+As a meager conclusion here are four high-level ideas about ice flow models:
 \begin{itemize}
 \item The mass continuity equation is the part of an ice sheet model which describes how the ice geometry evolves.  It is a conservation equation in the map-plane with the thickness as the unknown.   The numerical approach to this equation depends on the form of the stress balance which supplies the ice velocity, but, since it is a conservation equation, it is common to evaluate the ice flux on the staggered grid (finite difference thinking) or on the boundaries of cells (finite volume thinking).
 \item The mass continuity equation has diffusive character at larger spatial scales and in areas with significant basal resistance (SIA-like).  Mass continuity is \emph{not} very diffusive for membrane stresses (e.g.~SSA), especially with no basal resistance as in ice shelves.  It has some diffusiveness for ice streams, though how much is hard to quantify.
 \item The SIA stress balance is exceptional because it contains no horizontal derivatives of horizontal velocities.  It follows that, in this stress balance, velocity can be found by vertical integration of the driving stress.
-\item Membrane stress balance equations like the SSA (and the Blatter-Pattyn, hydrostatic, and Stokes models also) determine horizontal velocity from geometry and boundary conditions.  Because of the Glen law these equations are nonlinear, so iteration is necessary.  At each iteration a sparse matrix ``inner'' problem is solved; non-experts should give this matrix problem to a solver package.
+\item Membrane stress balance equations like the SSA (and the Blatter-Pattyn, hydrostatic, and Stokes models also) determine horizontal velocity from geometry and boundary conditions.  Because of the Glen law these equations are nonlinear, so iteration is necessary.  At each iteration a sparse matrix ``inner'' problem is solved using a linear-algebra solver package.
 \end{itemize}
 
 
 %\small
 \section{Notes} \label{sec:nr}
 
-Recent and recommended books and reviews which extend the continuum modelling content of these notes include \cite{CuffeyPaterson,GreveBlatter2009,SchoofHewitt2013,vanderVeen}.
+Continuum modelling of ice flows is covered in \cite{CuffeyPaterson,GreveBlatter2009,SchoofHewitt2013,vanderVeen} among other sources.
 
-The SIA model, which is originally derived by several authors \cite{FowlerLarson1978,Hutter,MorlandJohnson}, follows by scaling the Stokes equations using the aspect ratio $\eps = [H]/[L]$, where $[H]$ is a typical thickness of an ice sheet and $[L]$ is a typical horizontal dimension.  After scaling one drops the terms that are small if $\eps$ is small \cite{Fowler,Hutter}; this is a ``small-parameter argument''.  In Fowler's form of the scaling argument \cite{Fowler} there are no $O(\eps)$ terms in the scaled equations so one only drops $O(\eps^2)$ terms.  The SIA is re-formulated in \cite{JouvetBueler2012} as a well-posed free boundary problem, by adding the constraint that the thickness is positive, thereby providing the correct boundary condition at grounded margins; a similar approach is in \cite{Bueler2016}.  The Mahaffy \cite{Mahaffy} scheme for diffusivity used here is not the only one \cite{HindmarshPayne}; it can be improved to an unconditionally-stable implicit time-stepping model \cite{Bueler2016}.
+The SIA model, which is originally derived by several authors \cite{FowlerLarson1978,Hutter,MorlandJohnson}, follows by scaling the Stokes equations using the aspect ratio $\eps = [H]/[L]$, where $[H]$ is a typical thickness of an ice sheet and $[L]$ is a typical horizontal dimension.  After scaling one drops the terms that are small if $\eps$ is small \cite{Fowler,Hutter}, a ``small-parameter argument''.  In Fowler's form of the scaling argument \cite{Fowler} there are no $O(\eps)$ terms in the scaled equations so one only drops $O(\eps^2)$ terms.  The SIA is re-formulated in \cite{JouvetBueler2012} as a well-posed free boundary problem, by adding the constraint that the thickness is positive, thereby providing the correct boundary condition at grounded margins; a similar approach is in \cite{Bueler2016}.  The Mahaffy \cite{Mahaffy} scheme for diffusivity used here is not the only one \cite{HindmarshPayne}; it can be improved to an unconditionally-stable implicit time-stepping model \cite{Bueler2016}.
 
 The SSA model \cite{WeisGreveHutter} was derived in \cite{Morland} for ice shelves and in \cite{MacAyeal} for ice streams.  In deriving the SSA, the aspect ratio $\eps$ is one of two small parameters.  The other describes the magnitude of surface undulations \cite{SchoofStream,SchoofHindmarsh}.  A well-posed model for the emergence of ice streams though till failure, using only the SSA, is in \cite{SchoofStream}, but little is known, in terms of theory, about the well-posedness of the SSA+mass continuity combination.
 
