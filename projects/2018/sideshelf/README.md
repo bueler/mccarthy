@@ -1,39 +1,40 @@
-Ice shelf dynamics with side-wall stresses
-==========================================
+Ice shelves with side-wall stresses
+===================================
 
 
 reassurance
 -----------
 
-The point of the project is not to get you to a particular spot!  The point is to _help you learn fast from whereever you currently are_.  So please be honest with yourself about what you don't know, and please ask about it!  Another student may know more programming than you, or have seen more differential equations, or have more glaciers background, or whatever.  This is irrelevant to my goal, which is to help you move forward as far as possible in one intense week.
-
-Though I intend to help you go forward in the direction of this project and topic, it must be from the things _you_ do understand into things _you_ do not understand.
+The point of the project is not to reach a particular destination!  The point is to _help you learn fast from whereever you currently are_.  So please be honest with yourself about what you don't know, and please ask about it.  Another student may know more programming than you, or have seen more differential equations, or have more glaciers background, or whatever.  This is irrelevant to my goal, which is to help you move forward as far as possible in one intense week.  Forward progress must be from the things _you_ do understand into things _you_ do not understand.
 
 
 description
 -----------
 
-PROJECT XX: Ice shelf dynamics with side-wall stresses
+PROJECT 3: Ice shelves with side-wall stresses
 
 ADVISOR: Ed Bueler
 
-DESCRIPTION: Recent theoretical and laboratory work by Pegler (2016) extends understanding of steady state ice shelf shapes to include side-wall stresses.  A wide range of ice shelf profiles are now understood, which gives a tool for understanding the dynamical configuration of present-day ice shelves in Antarctica in particular.  We will explore these ideas via by-hand analysis,  numerical computations, and analysis of observed ice thicknesses.  FIXME
+DESCRIPTION: Recent theoretical and laboratory work by Pegler (2016) extends understanding of steady-state ice shelf shapes to include side-wall stresses.  A wide range of theoretical ice shelf profiles have now been analyzed.  This is a toolset for understanding the dynamical configuration of the present-day ice shelves in Antarctica (in particular).  We will explore these ideas via by-hand analysis,  numerical computations, and analysis of observed ice shelves in Antarctica.  The starting point will be a numerical solution of a standard model of a steady-state ice shelf.
 
-SOFTWARE REQUIREMENTS: Matlab/Octave or Python (with numpy and matplotlib).
+SOFTWARE REQUIREMENTS: Matlab/Octave or (numerical) Python.
 
-REQUIRED STUDENT BACKGROUND: Exposure to differential equations and linear algebra, and 
+REQUIRED STUDENT BACKGROUND: Exposure to differential equations and linear algebra.  Basic programming with Matlab/Octave or Python.
 
 
 references and reading
 ----------------------
 
-First, see the notes (`notes/notes.pdf`).  Pay special attention to section 9 about the SSA model of ice shelves.  This project will directly extend that material.
+First, see the notes, namely `notes/notes-bueler-2018.pdf` in the current repository.  Pay special attention to section 9 about the SSA model of ice shelves.  This project directly extends that material.
 
-The following papers are available on paper and in the current directory:
+The following papers are available in the current directory (and possibly on paper):
 
-    * S. Pegler, 2016.  _The dynamics of confined extensional flows_, J. Fluid Mech. 804, 24--57.
+  * S. Pegler, 2016.  _The dynamics of confined extensional flows_, J. Fluid Mech. 804, 24--57.  https://doi.org/10.1017/jfm.2016.516
 
-    * S. Pegler and G. Worster, 2012.  _Dynamics of a viscous layer flowing radially over an inviscid ocean_, J. Fluid Mech. 696, 152--174.
+  * S. Pegler, K. Kowal, L. Hasenclever, and G. Worster, 2013. _Lateral controls
+on grounding-line dynamics_, J. Fluid Mech. 722, R1.  https://doi.org/10.1017/jfm.2013.140
 
-The first of these papers is the one we will follow closely, but the second is useful comparison/background.
+  * S. Pegler and G. Worster, 2012.  _Dynamics of a viscous layer flowing radially over an inviscid ocean_, J. Fluid Mech. 696, 152--174.  https://doi.org/10.1017/jfm.2012.21
+
+The first of these papers is the one we will follow closely.  The others are useful comparison/background.
 
