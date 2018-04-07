@@ -5,7 +5,7 @@ Ice shelves with side-wall stresses
 reassurance
 -----------
 
-The point of the project is not to reach a particular destination!  The point is to _help you learn fast from whereever you currently are_.  So please be honest with yourself about what you don't know, and please ask about it.  Another student may know more programming than you, or have seen more differential equations, or have more glaciers background, or whatever.  This is irrelevant to my goal, which is to help you move forward as far as possible in one intense week.  Forward progress must be from the things _you_ do understand into things _you_ do not understand.
+The point of the project is not to reach a particular destination!  The point is to _help you learn fast from whereever you currently are_.  So please be honest with yourself about what you don't know, and ask about it.  Another student may know more programming than you, or have seen more differential equations, or have more glaciers background, or whatever.  But things like that are irrelevant to my goal, which is to help you move forward as far as possible in one intense week.  Forward progress must be from the things _you_ understand into things _you_ do not understand.
 
 
 description
@@ -15,7 +15,7 @@ PROJECT 3: Ice shelves with side-wall stresses
 
 ADVISOR: Ed Bueler
 
-DESCRIPTION: Recent theoretical and laboratory work by Pegler (2016) extends understanding of steady-state ice shelf shapes to include side-wall stresses.  A wide range of theoretical ice shelf profiles have now been analyzed.  This is a toolset for understanding the dynamical configuration of the present-day ice shelves in Antarctica (in particular).  We will explore these ideas via by-hand analysis,  numerical computations, and analysis of observed ice shelves in Antarctica.  The starting point will be a numerical solution of a standard model of a steady-state ice shelf.
+DESCRIPTION: Recent theoretical and laboratory work by Pegler (2016) examines steady-state ice shelf shapes including side-wall stresses.  As a result of this and related work, a wide range of theoretical ice shelf profiles have now been analyzed.  These profiles are a toolset for understanding the dynamical configuration of the present-day ice shelves in Antarctica.  We will explore these ideas via by-hand analysis and numerical computations, and using observations of ice shelves in Antarctica.  The starting point will be a numerical solution of a standard model of a steady-state ice shelf.
 
 SOFTWARE REQUIREMENTS: Matlab/Octave or (numerical) Python.
 
