@@ -1,5 +1,5 @@
-FIXME
-=========================
+Glacier flow over a step
+========================
 
 reassurance
 -----------
@@ -10,7 +10,7 @@ The point of the project is not to reach a particular destination!  The point is
 description
 -----------
 
-PROJECT XX: FIXME
+PROJECT 4: Glacier flow over a step
 
 STUDENTS: XXX
 
@@ -18,6 +18,9 @@ ADVISOR: Ed Bueler
 
 DESCRIPTION: FIXME
 
-SOFTWARE REQUIREMENTS: FIXME
+SOFTWARE REQUIREMENTS: Numerical Python (Python3+numpy+matplotlib).  The Firedrake finite element library, also in Python, will be used, but it will be installed on a provided laptop.
 
-REQUIRED STUDENT BACKGROUND: FIXME
+REQUIRED STUDENT BACKGROUND: Exposure to differential equations and linear algebra.  Basic programming with numerical Python.
+
+
+
