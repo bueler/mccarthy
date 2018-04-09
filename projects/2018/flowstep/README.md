@@ -14,11 +14,21 @@ PROJECT 4: Glacier flow over a step
 
 ADVISOR: Ed Bueler
 
-DESCRIPTION: How does a glacier flow over a submerged cliff or a step in the bedrock?  Such a geometry can be put into in a complete (Stokes) flow model, and we will work with one of those.  On the other hand, the shallow models used for large-scale ice sheet studies must also produce reasonable results for bedrock configurations including steep cliffs and steps.  This project will work back and forth with the equations and numerical models, aiming to build an understanding of the flow and glacial profiles associated to such bad bed topography.
+DESCRIPTION: How does a glacier flow over a submerged cliff or step in the bedrock?  This geometry can be put into in a complete Stokes flow model.  We will work with one of such a model and thereby get a pretty good answer.  On the other hand, the shallow models used for large-scale ice sheet studies must also produce reasonable results for bedrock configurations including such steep cliffs and other bad bedrock topography.  This project will work with the equations and numerical models associated to both Stokes and shallow stress balances.  We aim to build an understanding of the flow and glacial profiles associated to bad topography, and perhaps figure out good ways to modify a shallow model so as to handle bed cliffs effectively.
 
-SOFTWARE REQUIREMENTS: Numerical Python (Python3+numpy+matplotlib).  The Firedrake finite element Python library will be used, but it will be installed on a provided laptop.
+SOFTWARE REQUIREMENTS: Numerical Python (Python+numpy+matplotlib).  The Firedrake finite element Python library will also be used, but that will come installed on a provided laptop.
 
 REQUIRED STUDENT BACKGROUND: Exposure to differential equations and linear algebra.  Basic programming with numerical Python.
 
 
+references and reading
+----------------------
+
+See the notes `notes/notes-bueler-2018.pdf` in the current repository.  This project directly extends the material in section 2 regarding the planar Stokes model and the slab-on-slope case.  Equally relevant is the derivation of the SIA (shallow ice approximation) model in sections 2 and 3 of the notes.
+
+A closely-related study of the differences between planar Stokes flow and the SIA appears in
+
+  * G. J. Leysinger Vieli and G. H. Gudmundsson, 2004.  _On estimating length fluctuations of glaciers caused by changes in climatic forcing_, J. Geophys. Res.: Earth Surface 109, F01007, https://doi.org/10.1029/2003JF000027.
+
+This article is available in the current directory (and possibly on paper).  Leysinger-Vieli and Gudmundson show that the SIA is actually rather good at tracking changes in ice geometry, even with far-from-shallow ice geometry, assuming smooth bed topography.  I'm curious what is the best way to fix the SIA to get results which are close to the Stokes solution.
 

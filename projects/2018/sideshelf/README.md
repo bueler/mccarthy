@@ -25,7 +25,7 @@ REQUIRED STUDENT BACKGROUND: Exposure to differential equations and linear algeb
 references and reading
 ----------------------
 
-First, see the notes, namely `notes/notes-bueler-2018.pdf` in the current repository.  Pay special attention to section 9 about the SSA model of ice shelves.  This project directly extends that material.
+See the notes `notes/notes-bueler-2018.pdf` in the current repository.  Pay special attention to section 9 about the SSA model of ice shelves.  This project directly extends that material.
 
 The following papers are available in the current directory (and possibly on paper):
 
