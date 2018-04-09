@@ -1,5 +1,5 @@
-Glacier flow over a step
-========================
+Glacier flow over a cliff
+=========================
 
 reassurance
 -----------
@@ -10,7 +10,7 @@ The point of the project is not to reach a particular destination!  The point is
 description
 -----------
 
-PROJECT 4: Glacier flow over a step
+PROJECT 4: Glacier flow over a cliff
 
 ADVISOR: Ed Bueler
 
