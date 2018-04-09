@@ -29,14 +29,14 @@ disp(['reading variables x,y,lat,lon,acca,thk,topg,usrf from NetCDF file ' filen
 S = netcdf(filename);  % reads NetCDF file into a large structure
 
 % the order of variables seems unclear and special to the file!
-x = double(S.VarArray(8).Data);
-y = double(S.VarArray(9).Data);
+prcp = squeeze(double(S.VarArray(1).Data));
 lat = squeeze(double(S.VarArray(2).Data));
 lon = squeeze(double(S.VarArray(3).Data));
-prcp = squeeze(double(S.VarArray(1).Data));
-thk = squeeze(double(S.VarArray(4).Data));
-topg = squeeze(double(S.VarArray(6).Data));
-usrf = squeeze(double(S.VarArray(7).Data));
+thk = squeeze(double(S.VarArray(5).Data));
+topg = squeeze(double(S.VarArray(7).Data));
+usrf = squeeze(double(S.VarArray(8).Data));
+x = double(S.VarArray(9).Data);
+y = double(S.VarArray(10).Data);
 
 if doplot==0, return; end
 
