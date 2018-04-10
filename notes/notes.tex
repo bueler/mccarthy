@@ -17,7 +17,7 @@ colorlinks=true,
 plainpages=false, % only if colorlinks=true
 linkcolor=blue,   % only if colorlinks=true
 citecolor=Red,   % only if colorlinks=true
-urlcolor=ForestGreen     % only if colorlinks=true
+urlcolor=black     % only if colorlinks=true
 ]{hyperref}
 
 \pdfinfo{
@@ -115,23 +115,27 @@ urlcolor=ForestGreen     % only if colorlinks=true
 %\setcounter{section}{1}
 \section{Introduction}  \label{sec:intro}
 
-The greatest importance of numerical models in science, and glaciology in particular, is a kind of introspection.  In building and using a model you are asking yourself: When I combine my imperfect and incomplete understanding of glacier processes into this mathematical model, which I put on a computer, does it behave as I expect?  Numerical models can show how processes interact to give overall behavior, and they can demonstrate flaws in our understanding of those processes.  But they should be built with care.  An avoidable bad outcome is to spend time---or worse, reputation---interpreting, explaining, or justifying model behavior that is actually an artifact of poor computer programming or numerical analysis.
+The greatest importance of mathematical and numerical models in science, and glaciology in particular, is a kind of introspection.  In building and using a model you are asking yourself: When I combine my imperfect and incomplete understanding of glacier processes into this model does it behave as I expect?  When you put the mathematical model on a computer it will not nod and say ``yes, I understand'' like a person would---who might not actually understand.  The dumb computer can only tell you consequences of your model, inadequacies and all.
 
-The reader may be surprised that a continuum model, and not a computer code, seems to be the focus of these notes much of the time.  While all codes produce numbers, we want numbers that actually come from the intended continuum model.  Careful analysis of a numerical implementation can confirm that it matches the model equations.
+Thus numerical models can show how processes interact to give overall behavior, and they can demonstrate flaws in understanding of those processes.  But they should be built with care.  An avoidable bad outcome is to spend time---or worse, reputation---interpreting, explaining, or justifying model behavior that is actually an artifact of buggy computer programming or flawed numerical analysis.
 
-These notes have a limited scope:
+The reader may be surprised that continuum models, and not computer codes, seem to be the focus of these notes much of the time.  While all codes produce numbers, we want numbers that actually come from the intended continuum model.  Only careful analysis of a numerical implementation can confirm that it matches the model equations.
+
+\subsection*{Scope}  These notes have a limited scope:
   \begin{quote}\emph{shallow approximations of ice flow.}\end{quote}
 They adopt a constructive approach:
   \begin{quote}\emph{we provide numerical codes that actually work.}\end{quote}
-Within our scope are the shallow ice approximation (SIA) in two horizontal dimensions (2D), the shallow shelf approximation (SSA) in 1D, and the mass continuity and surface kinematical equations.  (All of these terms will be defined in due course!)  We recall the Stokes model, but we do not address its numerical solution.  Numerical concepts include finite difference schemes, solving algebraic systems from stress balances, and the verification of codes using exact solutions.
+Within our scope are the shallow ice approximation (SIA) in two horizontal dimensions (2D), the shallow shelf approximation (SSA) in 1D, and the mass continuity and surface kinematical equations; these terms will be defined in due course!  We recall the Stokes model, but we do not address its numerical solution.
 
-Our notation, which generally follows \cite{GreveBlatter2009}, is covered by Table \ref{tab:notation}.  Cartesian coordinates are $x,y,z$ with $z$ positive-upward.  If these coordinates or time $t$ appear as subscripts then they denote partial derivatives: $u_x = \partial u/\partial x$.  Tensor notation uses subscripts from the list $\{1,2,3,i,j\}$; e.g.~``$\tau_{ij}$'' or ``$\tau_{13}$'' denote entries of the deviatoric stress tensor.
+Numerical concepts within our scope include finite difference schemes, solving algebraic systems from stress balances, and the verification of codes using exact solutions.
 
-These notes are based on nineteen Matlab codes, each about one-half page.  All have been tested in Matlab and Octave.  They are distributed by cloning the repository at
+These notes are based on nineteen Matlab codes, each about one-half page.  All have been tested in Matlab and Octave.  They are distributed by cloning the \texttt{git} repository at
 \begin{quote}
 \url{https://github.com/bueler/mccarthy}
 \end{quote}
-\noindent and looking in the \texttt{mfiles/} subdirectory.  Five of these codes are printed here, with their comments stripped for compactness and clarity.  The electronic versions have generous comments and help files.
+\noindent The codes are in the \texttt{mfiles/} subdirectory.  Five of them are printed below, but with their comments stripped for compactness and clarity.  The electronic versions all have generous comments and help files.
+
+\subsection*{Notation}  Our notation, which generally follows \cite{GreveBlatter2009}, is covered by Table \ref{tab:notation}.  Cartesian coordinates are $x,y,z$ with $z$ positive-upward.  If these coordinates, or the letter $t$, appear as subscripts then they denote partial derivatives: $u_x = \partial u/\partial x$.  Tensor notation also uses subscripts, but from the list $\{1,2,3,i,j\}$.  Thus ``$\tau_{ij}$'' and ``$\tau_{13}$'' denote entries of the deviatoric stress tensor.
 
 \begin{table}[ht]
 \caption{Notation used in these notes, with values for some constants.}
@@ -172,33 +176,34 @@ Our initial goal is an equation for which one may say:
 \begin{center}
 \emph{by numerically solving this equation, we have a usable model for an ice sheet.}
 \end{center}
-\noindent This first model will not be complete by any modern standard, but a ``usable'' model tends to be \emph{understood} as much as it is \emph{correct}.  First we (briefly!) recall the continuum mechanical equations of ice flow.
+\noindent This initial model will not be complete by any modern standard.  However, a ``usable'' model tends to be \emph{understood} as much as it is \emph{correct}.
 
-Ice in glaciers is a moving fluid so we describe its motion by a velocity field $\mathbf{u}(t,x,y,z)$.  If the ice fluid were faster-moving than it actually is, and if it were linearly-viscous like liquid water, then it would be a ``typical'' incompressible fluid and we would use the Navier-Stokes equations as the model:
+First we (briefly!) recall the continuum mechanical equations of ice flow.  Ice in glaciers is a moving fluid so we describe its motion by a velocity field $\mathbf{u}(t,x,y,z)$.  If the ice fluid were faster-moving than it actually is, and if it were linearly-viscous like liquid water, then it would be a ``typical'' incompressible fluid and we would use the Navier-Stokes equations as the model:
 \begin{align}
 \nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \label{incompressible} \\
 \rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) &= -\nabla p + \nabla \cdot (\nu \nabla \mathbf{u}) + \rho \mathbf{g} &&\text{\emph{stress balance}} \label{navierstokes}
 \end{align}
-In equation \eqref{navierstokes} the term $\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}$ is an acceleration.  The right-hand side of \eqref{navierstokes} is the total stress, and equation \eqref{navierstokes} says ``$ma=F$'', i.e.~it is Newton's second law.  Much time has been spent to get partial understanding of the rich solutions of these Navier-Stokes equations; a book-length introduction like \cite{Acheson} is recommended, but not at all needed here.
+The term $\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}$ is an acceleration and the right-hand side of \eqref{navierstokes} is the total stress, so equation \eqref{navierstokes} says ``$ma=F$'', i.e.~it is Newton's second law.  Much investigation has yielded only partial understanding of the rich solutions of equations \eqref{incompressible} and \eqref{navierstokes}.  A book-length introduction like \cite{Acheson} is recommended, but not at all needed here.  The numerical solution of the Navier-Stokes equations is \emph{computational fluid dynamics} (CFD).  One might ask whether ice flow modelling is a part of CFD?  Or would a good general-purpose CFD text like \cite{Wesseling} help a glaciers student?
 
-The numerical solution of these equations is \emph{computational fluid dynamics} (CFD), but is ice flow modelling a part of CFD?  Does a good general-purpose CFD text like \cite{Wesseling} help the glaciers student?  While ice sheet flow is a large-scale fluid problem like atmosphere and ocean circulation in climate systems, it is an odd one.  Consider some topics which might make ocean circulation exciting, for example:
+From the point of view of CFD, glacier flow is odd.  It is a large-scale fluid problem like atmosphere and ocean circulation in climate systems, but consider some topics which might make ocean circulation exciting, for example:
   \begin{center} turbulence \qquad convection \qquad  coriolis force  \qquad density stratification
   \end{center}
-None of these topics are relevant to ice flow.  What could be interesting about the flow of slow, and surely boring, ice?
+None of these topics are relevant to ice flow.  What could be interesting about the flow of slow, thick ice?
 
-Glacier ice is indeed a slow fluid.  In terms of equation \eqref{navierstokes}, ``slow'' means $\rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) \approx 0$, which says that the forces (stresses) of inertia are negligible.  However, ice is also a shear-thinning fluid with a specific kind of nonlinearly-viscous (``non-Newtonian'') behavior in which larger shear strain rates imply smaller viscosity.  The viscosity $\nu$ in \eqref{navierstokes} is therefore not constant, and so one must separately state an empirically-based flow law.  Combining these ideas gives the standard equations.
-
-\subsection*{Stokes equations}  The standard model for isothermal ice flow is this set of equations:
+\subsection*{The Glen-Stokes equations}  Glacier ice is a slow fluid.  In terms of equation \eqref{navierstokes}, ``slow'' is a reasonably-precise term which means that $\rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) \approx 0$, in other words that the forces (stresses) of inertia are negligible.  However, ice is also a shear-thinning fluid with a specific kind of nonlinearly-viscous (``non-Newtonian'') behavior in which larger shear strain rates imply smaller viscosity.  The viscosity $\nu$ in \eqref{navierstokes} is therefore not constant, and so one must add an empirically-based flow law.  Combining these ideas gives the standard model for isothermal ice flow:
 \begin{align}
 \nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \label{incompressibleagain} \\
 0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho \mathbf{g} &&\text{\emph{stress balance}} \label{forcebalance} \\
 Du_{ij} &= A \tau^2 \tau_{ij} &&\text{\emph{$n$=3 Glen flow law}} \label{flowlaw}
 \end{align}
-In the flow law \eqref{flowlaw}, the deviatoric stress tensor $\tau_{ij}$ and the strain rate tensor $Du_{ij}$ appear; previous lectures cover these.  By definition $Du_{ij} = (1/2)((u_i)_{x_j}+(u_j)_{x_i})$ when we index coordinates by $x_1,x_2,x_3=x,y,z$.  Each tensor in \eqref{flowlaw} is symmetric and has trace zero, and $\tau^2 = (1/2) \tau_{ij} \tau_{ij}$, using the summation convention, is the \emph{effective stress} or \emph{second invariant of the stress tensor}.
 
-Because the Stokes equations do not contain a time derivative, the combined effect of boundary stresses, gravity $\rho \mathbf{g}$, and ice softness $A$ determine the velocity and stress fields ($\bu$, $p$, $\tau_{ij}$) instantaneously.  Thus ice flow simulation codes have no memory of prior momentum or velocity.  Said another way, velocity is a ``diagnostic'' output of ice flow models, in the sense that the value of velocity is not needed for (re)starting a simulation, as it would be in a Navier-Stokes based simulation.
+In \eqref{flowlaw} the deviatoric stress tensor $\tau_{ij}$ and the strain rate tensor $Du_{ij}$ appear.  Other McCarthy lectures cover these but recall that by definition
+    $$Du_{ij} = \frac{1}{2} \left((u_i)_{x_j}+(u_j)_{x_i}\right)$$
+when we denote coordinates by $x_1,x_2,x_3=x,y,z$.  Both tensors in \eqref{flowlaw} are symmetric and have trace zero.  Note that $\tau^2 = (1/2) \tau_{ij} \tau_{ij}$ using the summation convention; this is the \emph{effective stress} or \emph{second invariant of the stress tensor}.
 
-Consider now the $x,z$-plane case of equations \eqref{incompressibleagain}, \eqref{forcebalance}, and \eqref{flowlaw}.  ``Plane-flow'' means that velocity component $v$ is zero and that all derivatives with respect to $y$ are zero:
+Because the Stokes equations do not contain a time derivative, the combined effect of boundary stresses, gravity $\rho \mathbf{g} = \left<0,0,-\rho g\right>$, and ice softness $A>0$ will determine the velocity and stress fields ($\bu$, $p$, $\tau_{ij}$), i.e.~the solution to \eqref{incompressibleagain}--\eqref{flowlaw}, instantaneously.  Thus ice flow simulation codes have no memory of prior momentum or velocity.  Said another way, velocity is a ``diagnostic'' output of ice flow models.  Unlike in a Navier-Stokes-based simulation, velocity is not needed for (re)starting a simulation.
+
+Consider now the $x,z$-plane case of equations \eqref{incompressibleagain}--\eqref{flowlaw}.  Such a planar flow has velocity component $v$ of zero and all derivatives with respect to $y$ are zero:
 \begin{align}
 u_x + w_z &= 0 &&\text{\emph{incompressibility}} \label{incompressiblexz} \\
 p_x &= \tau_{11,x} + \tau_{13,z} &&\text{\emph{stress balance} ($x$)} \label{stokespx} \\
