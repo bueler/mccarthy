@@ -25,7 +25,7 @@ The PDFs above are the major documentation of these programs, but they also have
 stokes solver
 -------------
 
-The Python tools in `stokes/` are used to generate some images in the slides, and for some student projects.  They exploit the Firedrake finite element framework (https://www.firedrakeproject.org/) and the PETSc solver library (http://www.mcs.anl.gov/petsc/), and such numerical technology is well outside the scope of my notes and slides for the Summer School.  Do not expect good introductory documentation when looking in this directory.
+The Python tools in `stokes/` are used to generate some images in the slides, and for some student projects.  They exploit the Firedrake finite element framework (https://www.firedrakeproject.org/), the Gmsh mesh generator (http://gmsh.info/), and the PETSc solver library (http://www.mcs.anl.gov/petsc/).  Such numerical technology is well outside the scope of my notes and slides for the Summer School.  Do not expect good introductory documentation when looking in this directory.
 
 
 versions
