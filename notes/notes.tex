@@ -129,12 +129,6 @@ Within our scope are the shallow ice approximation (SIA) in two horizontal dimen
 
 Numerical concepts within our scope include finite difference schemes, solving algebraic systems from stress balances, and the verification of codes using exact solutions.
 
-These notes are based on nineteen Matlab codes, each about one-half page.  All have been tested in Matlab and Octave.  They are distributed by cloning the \texttt{git} repository at
-\begin{quote}
-\url{https://github.com/bueler/mccarthy}
-\end{quote}
-\noindent The codes are in the \texttt{mfiles/} subdirectory.  Five of them are printed below, but with their comments stripped for compactness and clarity.  The electronic versions all have generous comments and help files.
-
 \subsection*{Notation}  Our notation, which generally follows \cite{GreveBlatter2009}, is covered by Table \ref{tab:notation}.  Cartesian coordinates are $x,y,z$ with $z$ positive-upward.  If these coordinates, or the letter $t$, appear as subscripts then they denote partial derivatives: $u_x = \partial u/\partial x$.  Tensor notation also uses subscripts, but from the list $\{1,2,3,i,j\}$.  Thus ``$\tau_{ij}$'' and ``$\tau_{13}$'' denote entries of the deviatoric stress tensor.
 
 \begin{table}[ht]
@@ -168,6 +162,12 @@ $\mathbf{u}$ & $=(u,v,w)$ 3D ice velocity & m s$^{-1}$ \\
 \end{tabular}
 \label{tab:notation}
 \end{table}
+
+\subsection*{Download codes}  These notes are based on nineteen Matlab codes, each about one-half page.  All have been tested in Matlab and Octave.  They are distributed by cloning the \texttt{git} repository at
+\begin{quote}
+\url{https://github.com/bueler/mccarthy}
+\end{quote}
+\noindent The codes are in the \texttt{mfiles/} subdirectory.  Five of them are printed below, but with their comments stripped for compactness and clarity.  The electronic versions all have generous comments and help files.
 
 
 \section{Ice flow equations}  \label{sec:continuum}
