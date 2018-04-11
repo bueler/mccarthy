@@ -84,11 +84,12 @@ a = ( nu_e * inner(grad(u), grad(v)) - p * div(v) - div(u) * q ) * dx
 # concentration at bottom of outflow:
 #a = ( 0.5 * nu_e * inner(grad(v)+grad(v).T, grad(u)+grad(u).T)
 #      - p * div(v) - div(u) * q ) * dx
+# also consider using nabla_grad() instead of grad()?  but seems to make no difference ...
 
 # define body force
 f = Constant((g * rho * sin(alpha), - g * rho * cos(alpha)))
 
-# right side includes hydrostatic normal force on outflow
+# right side outflow: apply hydrostatic normal force, nonhomogeneous Neumann
 x,z = SpatialCoordinate(mesh)
 outflow_sigma = as_vector([- rho * g * cos(alpha) * (H - z), 0.0])
 L = inner(f, v) * dx + inner(outflow_sigma, v) * ds(outflow_id)
@@ -131,9 +132,9 @@ solve(a == L, up, bcs=bcs,
 u,p = up.split()
 u.rename('velocity')
 p.rename('pressure')
+# examine values directly:   print(p.vector().array())
 
-one = Function(W)
-one.interpolate(0.0*one + 1.0)
+one = Constant(1.0, domain=mesh)
 area = assemble(dot(one,one) * dx)
 print('domain area = %.2e m2' % area)
 pav = assemble(sqrt(dot(p, p)) * dx) / area
