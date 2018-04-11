@@ -52,7 +52,7 @@ Ls = 1300.0      # location of bedrock step (x)
 Ks = 150.0       # distance over which transition in surface happens (x)
 
 # mesh parameters
-lc = 100.0 / args.refine
+lc = 400.0 / args.refine
 geo.write('lc = %f;\n' % lc)    # put target characteristic mesh size
 
 # points on boundary
