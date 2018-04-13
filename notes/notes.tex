@@ -288,13 +288,21 @@ This differential equation for mass continuity describes change in the ice thick
 
 \section{Shallow ice sheets}   \label{sec:sia}
 
-Ice sheet flow has four outstanding properties as a fluids problem.  Ice sheets are (\emph{i}) slow, (\emph{ii}) shallow,  and (\emph{iii}) non-Newtonian, and (\emph{iv}) they experience some contact slip (basal sliding).  The first numerical ice flow model in these notes, which accounts for the first three properties only, is the non-sliding, isothermal \emph{shallow ice approximation} (SIA).
+Ice sheet flow has four outstanding properties as a fluids problem.  Ice sheets are
+\renewcommand{\labelenumi}{(\emph{\roman{enumi}})}
+\begin{enumerate}
+\item slow,
+\item shallow,
+\item non-Newtonian (shear-thinning), and
+\item capable of widespread contact slip (basal sliding).
+\end{enumerate}
+The first numerical ice flow model in these notes, which accounts for the first three properties only, is the non-sliding, isothermal \emph{shallow ice approximation} (SIA).
 
-Regarding the property of shallowness, Figure \ref{fig:green-transect} shows both a no-vertical-exaggeration cross-section of Greenland at $71^\circ$ and the standard vertically-exaggerated version which is more familiar in the glaciological literature.  Without vertical exaggeration we see the ice sheet as a thin blanket, barely three-dimensional.  In other words, ice sheets \emph{are} shallow.  (Though the portion of an ice sheet which you want to model may not be.)
+Regarding shallowness (\emph{ii}), Figure \ref{fig:green-transect} shows both a no-vertical-exaggeration cross-section of Greenland at $71^\circ$ and the standard vertically-exaggerated version which is more familiar in the glaciological literature.  Without vertical exaggeration we see the ice sheet as a thin blanket, barely three-dimensional.  In other words, ice sheets \emph{are} shallow.  (Note, however, that the portion of an ice sheet which you want to model may not be.)
 
-\onefigsize{green-transect}{A vertically-exaggerated cross-section of the Greenland ice sheet ($71^\circ$ N) is shown by the upper two curves.  Without exaggeration it appears as merely a thickened horizontal line.}{3.5in}
+\onefigsize{green-transect}{A vertically-exaggerated cross-section of the Greenland ice sheet ($71^\circ$ N) is shown by the upper two curves.  Without exaggeration it appears as merely a thickened horizontal line (bottom).}{3.5in}
 
-Our slab-on-a-slope example can be converted into a rough derivation of the SIA in its plane-flow form.  We vertically integrate velocity formula \eqref{uslab} in the $u_0=0$ (non-sliding) case to get
+Our slab-on-a-slope example can be converted into a rough derivation of the plane-flow SIA.  We vertically integrate velocity formula \eqref{uslab} in the $u_0=0$ case to get
 \begin{equation}
 \bar u H = \int_0^H \frac{1}{2} A (\rho g \sin\alpha)^3  \left(H^4 - (H-z)^4\right)\,dz = \frac{2}{5} A (\rho g \sin\alpha)^3 H^5. \label{siaubar}
 \end{equation}
@@ -303,11 +311,9 @@ Note $\sin \alpha \approx \tan\alpha = - h_x$ when $\alpha$ is a small angle.  C
   H_t = M + \left(\frac{2}{5} (\rho g)^3 A H^5 |h_x|^2 h_x\right)_x. \label{sia1D}
 \end{equation}
 
-Equation \eqref{sia1D} is the SIA equation for nonsliding plane flow.  It is the promised first ``usable model'' for the evolution of an ice sheet's thickness $H$ in terms of surface mass balance $M$, ice softness $A$, and bed elevation $b$ (because $h=H+b$).  The model should, however, be solved subject to the constraint that the thickness is positive ($H\ge 0$); see Notes and References.
+Equation \eqref{sia1D} is the SIA equation for nonsliding plane flow.  It models the evolution of an ice sheet's thickness $H$ in terms of surface mass balance $M$, ice softness $A$, and bed elevation $b$.  (Note $h=H+b$.)  The model should, however, be solved subject to the constraint that the thickness is positive ($H\ge 0$) \cite{Bueler2016,JouvetBueler2012}.
 
-Additional arguments are needed to demonstrate that the SIA is more general-purpose than the special case of a simple slab; see Notes and References.  Such arguments reduce the Stokes equations under the assumption that the surface and bed slopes, and the depth-to-width ratio, are small.
-
-We will numerically solve the SIA in section \ref{sec:numericalsia}, but first we state it in two horizontal dimensions (2D).  Let $\mathbf{U} = (u,v)$ be the vector horizontal velocity.  The shear stress approximation is $(\tau_{13},\tau_{23}) \approx - \rho g (h-z) \nabla h$.  Equation \eqref{flowlaw} then gives the SIA formula for shear strain rates
+Additional arguments are needed to derive the SIA in the general case.  (Such arguments reduce the Stokes equations under the assumption of small surface and bed slopes, and small depth-to-width ratio; see Notes and References.)  Here we state the model in two horizontal dimensions (2D) in preparation for numerical solutions in section \ref{sec:numericalsia}.  Let $\mathbf{U} = (u,v)$ be the vector horizontal velocity.  The shear stress approximation is $(\tau_{13},\tau_{23}) \approx - \rho g (h-z) \nabla h$.  Equation \eqref{flowlaw} then gives the SIA formula for shear strain rates
 \begin{equation*}
 \mathbf{U}_z = 2 A |(\tau_{13},\tau_{23})|^{n-1} (\tau_{13},\tau_{23}) = - 2 A (\rho g)^n (h-z)^n |\nabla h|^{n-1} \nabla h.
 \end{equation*}
@@ -319,23 +325,19 @@ Mass continuity in 2D, which generalizes the 1D version \eqref{masscont1D}, appl
 \begin{equation}
     H_t = M - \Div\left(\bar{\mathbf{U}} H\right)  \label{masscont}
 \end{equation}
-Equation \eqref{masscont} may also be written $H_t = M - \Div \bq$ in terms of the map-plane flux $\bq = \int_{b}^{h} \mathbf{U}\,dz = \bar{\mathbf{U}}\,H$.  Combining Equations \eqref{siavelocity} and \eqref{masscont}, we get an equation for the rate of thickness change in terms of mass balance $M$, thickness, and surface gradient $\grad h$:
+Equation \eqref{masscont} may also be written $H_t = M - \Div \bq$ in terms of the map-plane flux $\bq = \int_{b}^{h} \mathbf{U}\,dz = \bar{\mathbf{U}}\,H$.
+
+Combining Equations \eqref{siavelocity} and \eqref{masscont}, we get an equation for the rate of thickness change in terms of mass balance $M$, thickness $H$, and surface gradient $\grad h$:
 \begin{equation}
 H_t = M + \Div \left(\Gamma H^{n+2} |\grad h|^{n-1} \grad h \right). \label{sia}
 \end{equation}
-We have defined the positive constant $\Gamma = 2 A (\rho g)^n / (n+2)$ merely to improve appearance.
+We have defined the positive constant $\Gamma = 2 A (\rho g)^n / (n+2)$ only to improve appearance.  Equation \eqref{sia} is the SIA in 2D.  Recalling our earlier promise, if we can solve \eqref{sia} numerically then we have, following Mahaffy \cite{Mahaffy}, a usable model for the Barnes ice cap in Canada, a particularly-simple ice sheet on a rather flat bed.
 
-Equation \eqref{sia} is the SIA in 2D.  Recalling our earlier promise, if we can solve \eqref{sia} numerically then we have, following Mahaffy \cite{Mahaffy}, a usable model for the Barnes ice cap in Canada, a particularly-simple ice sheet on a rather flat bed.
-
-\subsection*{Analogy with the heat equation}  The SIA model is easy to compare with the better-known heat equation.  Numerical methods for solving \eqref{sia} can be understood as modifications of well-known heat equation methods.
-
-In the simplest one-dimensional (1D) case, the heat equation for the temperature $T(t,x)$ of a conducting rod is
+\subsection*{Analogy with the heat equation}  Numerical methods for solving \eqref{sia} are modifications of methods for the better-known heat equation, which we state in the simplest 1D case:
 \begin{equation}
-  T_t = D T_{xx}. \label{heat1D}
+T_t = D T_{xx} \label{heat1D}
 \end{equation}
-This form applies when material properties are constant and there are no heat sources.  The positive constant $D$ is the ``diffusivity,'' with SI units which can be read from comparing sides of the equation: $D\sim \text{m}^2 \text{s}^{-1}$.
-
-Equation \eqref{heat1D} has a smoothing effect on the solution $T$ as it evolves in time, because any local maximum in the temperature is flattened (i.e.~$T_{xx}<0$ implies $T_t<0$ so $T$ decreases).  Similarly, any local minimum is also flattened (i.e.~$T_{xx}>0$ implies $T_t>0$ so $T$ increases).
+This equation might model the temperature $T(t,x)$ of a conducting rod.  This model applies when material properties are constant and when there are no heat sources.  The positive constant $D$ is the ``diffusivity,'' with SI units which can be read from comparing sides of the equation: $D\sim \text{m}^2 \text{s}^{-1}$.  Not that equation \eqref{heat1D} has a smoothing effect on the solution $T$ as it evolves in time, because any local maximum or minimum in the temperature is flattened.  In fact, $T_{xx}<0$ implies $T_t<0$, so $T$ decreases near a maximum, while $T_{xx}>0$ implies $T_t>0$ so $T$ increases near a minimum.
 
 The 2D heat equation describes the temperature $T(t,x,y)$ of a planar object.  Recall that Fourier's law for conduction is the formula $\mathbf{Q} = - \kappa \grad T$ for heat flux $\mathbf{Q}$, where $\kappa$ is conductivity.  We will assume, for the purposes of analogy to the SIA, that $\kappa(x,y)$ may vary in space.  Also suppose there is a variable heat source $f(t,x,y)$, with units of Watts per cubic meter.  Then conservation of internal energy says
 \begin{equation}
