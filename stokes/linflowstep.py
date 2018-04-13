@@ -12,7 +12,7 @@
 #     (firedrake) $ paraview glacier.pvd  # visualize
 
 # Note that the genstepmesh.py script allows uniform refinement
-# (-refine X) and refinement at interior corner (-refine_factor X).
+# (-refine X) and refinement at interior corner (-refine_corner X).
 
 # Usage with zero bedstep for slab-on-slope:
 #     $ ./genstepmesh.py -bs 0.0 slab.geo
@@ -47,7 +47,7 @@ A_ice = 3.1689e-24         # Pa-3 s-1; EISMINT I value of ice softness
 B_ice = A_ice**(-1.0/3.0)  # Pa s0.33333;  ice hardness
 secpera = 31556926.0       # seconds per year
 D_typical = 10.0 / secpera
-nu_e = B_ice * D_typical**(-2.0/3.0)  # effective viscosity FIXME for Glen law
+nu_e = B_ice * D_typical**(-2.0/3.0)  # effective viscosity
 print('effective viscosity %.2e Pa s' % nu_e)
 
 # input mesh and define geometry
@@ -81,9 +81,8 @@ v,q = TestFunctions(Z)
 a = ( nu_e * inner(grad(u), grad(v)) - p * div(v) - div(u) * q ) * dx
 
 # alternative from Mitchell thesis (2012) seems to cause pressure
-# concentration at bottom of outflow:
-#a = ( 0.5 * nu_e * inner(grad(v)+grad(v).T, grad(u)+grad(u).T)
-#      - p * div(v) - div(u) * q ) * dx
+# concentration at bottom of outflow or SEG fault ???:
+#a = ( 0.25 * nu_e * inner(grad(u)+grad(u).T,grad(v)+grad(v).T) - p * div(v) - div(u) * q ) * dx
 # also consider using nabla_grad() instead of grad()?  but seems to make no difference ...
 
 # define body force
