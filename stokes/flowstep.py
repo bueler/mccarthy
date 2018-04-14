@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # (C) 2018 Ed Bueler
 
+# FIXME  note other FIXMEs below; this version sort of works with n=1:
+# ./flowstep.py -bs 0.0 -n_glen 1.0 -f slab -s_snes_max_it 1000 -s_snes_rtol 1.0e-4
+
 # Solve glacier bedrock-step Glen-Stokes problem.
 # See mccarthy/projects/2018/flowstep/README.md.
 
@@ -129,10 +132,14 @@ u,p = split(up)        # up.split() not equivalent here?
 D_typical = 10.0 / secpera
 eps2 = 0.0001 * D_typical**2.0
 Du = 0.5 * (grad(u) + grad(u).T)
-nu = B_ice * (0.5 * inner(Du, Du) + eps2)**(-1.0/n_glen)
-#nu = B_ice * D_typical**(-2.0/3.0)  # effective viscosity
-Dv = 0.5 * (grad(v) + grad(v).T)
-F = ( inner(2.0 * nu * Du, Dv) - p * div(v) - div(u) * q - inner(f_body, v) ) * dx \
+normsqrDu = 0.5 * inner(Du, Du) + eps2
+rr = 0.5 * (1.0/n_glen - 1.0)
+
+#F = ( inner(B_ice * normsqrDu**rr * Du, grad(v)) - p * div(v) - div(u) * q - inner(f_body, v) ) * dx \
+#    - inner(outflow_sigma, v) * ds(outflow_id)
+
+# FIXME:  choose rr=0  and  Du = grad(u)
+F = ( inner(B_ice * grad(u), grad(v)) - p * div(v) - div(u) * q - inner(f_body, v) ) * dx \
     - inner(outflow_sigma, v) * ds(outflow_id)
 
 # inflow boundary condition
@@ -161,7 +168,7 @@ if not args.initonly:
     print('solving nonlinear variational problem ...')
     solve(F == 0, up, bcs=bcs,
           options_prefix='s',
-          solver_parameters={"snes_fd": True,  # FIXME only for very coarse grids
+          solver_parameters={"snes_mf": True,  # FIXME only for very coarse grids
                              "mat_type": "aij",
                              "ksp_type": "preonly",
                              "pc_type": "svd",
