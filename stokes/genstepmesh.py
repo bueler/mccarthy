@@ -41,7 +41,7 @@ bs = args.bs
 
 # open .geo file and put in header which records creation info
 geo = open(args.filename, 'w')
-print('writing file %s ...' % args.filename)
+print('writing bedrock-step geometry to file %s ...' % args.filename)
 geo.write('// geometry-description file created %s by %s using command\n//   %s\n\n'
           % (now,platform.node(),commandline) )
 
@@ -53,6 +53,7 @@ Ks = 150.0       # distance over which transition in surface happens (x)
 
 # mesh parameters
 lc = 400.0 / args.refine
+print('setting target mesh size of %g m' % lc)
 geo.write('lc = %f;\n' % lc)    # put target characteristic mesh size
 
 # points on boundary
@@ -66,6 +67,7 @@ geo.write('Point(6) = {%f,%f,0,lc};\n' % (0.0,H+bs))
 geo.write('Point(7) = {%f,%f,0,lc};\n' % (0.0,bs))
 if abs(bs) >= 1.0:
     lc_corner = lc / args.refine_corner
+    print('setting target mesh size of %g m at interior corner' % lc_corner)
     geo.write('lc_corner = %f;\n' % lc_corner)
     geo.write('Point(8) = {%f,%f,0,lc_corner};\n' % (Ls,bs))
 else:
@@ -103,4 +105,5 @@ geo.write('Physical Surface(41) = {21};\n')   # ensure all interior elements wri
 
 # finish up
 geo.close()
+print('done')
 
