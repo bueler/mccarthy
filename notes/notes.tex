@@ -339,20 +339,19 @@ T_t = D T_{xx} \label{heat1D}
 \end{equation}
 This equation might model the temperature $T(t,x)$ of a conducting rod.  This model applies when material properties are constant and when there are no heat sources.  The positive constant $D$ is the ``diffusivity,'' with SI units which can be read from comparing sides of the equation: $D\sim \text{m}^2 \text{s}^{-1}$.  Not that equation \eqref{heat1D} has a smoothing effect on the solution $T$ as it evolves in time, because any local maximum or minimum in the temperature is flattened.  In fact, $T_{xx}<0$ implies $T_t<0$, so $T$ decreases near a maximum, while $T_{xx}>0$ implies $T_t>0$ so $T$ increases near a minimum.
 
-The 2D heat equation describes the temperature $T(t,x,y)$ of a planar object.  Recall that Fourier's law for conduction is the formula $\mathbf{Q} = - \kappa \grad T$ for heat flux $\mathbf{Q}$, where $\kappa$ is conductivity.  We will assume, for the purposes of analogy to the SIA, that $\kappa(x,y)$ may vary in space.  Also suppose there is a variable heat source $f(t,x,y)$, with units of Watts per cubic meter.  Then conservation of internal energy says
+The 2D heat equation, which describes the temperature $T(t,x,y)$ of a planar object, is a better analogy to \eqref{sia}.  Recall that Fourier's law for conduction is the formula $\mathbf{Q} = - \kappa \grad T$ for heat flux $\mathbf{Q}$, where $\kappa$ is conductivity.  We will assume, for the analogy to the SIA, that $\kappa(x,y)$ may vary in space, and we suppose there is a variable heat source $f(t,x,y)$.  Then conservation of internal energy says
 \begin{equation}
 \rho c T_t = f + \Div (\kappa \grad T). \label{heatearly}
 \end{equation}
 Here $\rho$ is density and $c$ is specific heat capacity.  Assuming $\rho c$ is constant, define the ``diffusivity'' $D=\kappa/(\rho c)$ and the rescaled source term $F = f/(\rho c)$.  The revised 2D heat equation is
 \begin{equation}
-T_t = F + \Div (D\, \grad T). \label{heat}
+T_t = F + \Div (D\, \grad T), \label{heat}
 \end{equation}
+which is similar to \eqref{heat1D} but with variable diffusivity and an additional heat source.  Figure \ref{fig:initialheat} shows a solution of \eqref{heat} in which the initial condition is a localized ``hot spot''.  Solutions of the heat equation always involve the spreading, in all directions, of any local maxima or minima, that is, diffusion.
 
-Figure \ref{fig:initialheat} shows a solution\eqref{heat} in which the initial condition is a localized ``hot spot''.  Solutions of the heat equation always involve the spreading, in all directions, of any local heat maxima or minima, that is, diffusion.
+\twofigsizes{initialheat}{finalheat}{Left: Initial condition $T(0,x,y)$.   Right: A solution $T(t,x,y)$ of  \eqref{heat}, with $D=1$ and $F=0$, at $t=0.02$.}{2.8in}{2.8in}
 
-\twofigsizes{initialheat}{finalheat}{A solution of heat equation \eqref{heat} with $D=1$ and $F=0$.  Left: Initial condition $T(0,x,y)$.   Right: Solution $T(t,x,y)$ at $t=0.02$.}{2.8in}{2.8in}
-
-The SIA equation \eqref{sia} and the heat equation \eqref{heat} are each diffusive, time-evolving partial differential equations (PDEs).  A side-by-side comparison is illuminating:
+The SIA equation \eqref{sia} and the heat equation \eqref{heat} are each diffusive, time-evolving partial differential equations (PDEs).  A side-by-side comparison is appropriate:
 \begin{center}
 \begin{tabular}{cc}
 \vspace{1mm}
@@ -362,15 +361,15 @@ SIA:\, $H$ is ice thickness & \phantom{foo bar} heat: $T$ is temperature\phantom
 \end{tabular}
 \end{center}
 \vspace{1mm}
-Notice that the number of derivatives (one time and two space) and the signs are the same.  Surface mass balance $M$ is analogous to heat source $F$.
+Notice that the number of derivatives (one time and two space) and the signs of the various terms are the same.  Surface mass balance $M$ is analogous to heat source $F$.
 
 The analogy suggests that we identify the \emph{SIA diffusivity} as:
 \begin{equation}
 	D = {\color{red}\Gamma H^{n+2} |\grad h|^{n-1}}.  \label{siadiffusivity}
 \end{equation}
-A non-sliding SIA flow diffuses the thickness of the ice sheet.  When this $D$ comes out large then the diffusion acts most quickly.  As a product of powers of $H$ and $|\grad h|$, $D$ is large if the ice is both thick and steep.  In summary, ice diffuses more when it is thick and steep, because it flows downhill more strongly.
+Thus a non-sliding SIA flow \emph{diffuses} the surface of the ice sheet.  When this $D$ comes out large then the diffusion acts most quickly.  As a product of powers of $H$ and $|\grad h|$, $D$ is large if the ice is both thick and steep.  In summary, an ice sheet or glacier diffuses more when it is thick and steep, because then ice flows downhill more strongly.
 
-This diffusion equation analogy explains generally why the surfaces of ice sheets are smooth, at least if we overlook non-flow processes like crevassing and wind-driven (snow) dunes.  There are, however, some practical and conceptual concerns about the analogy:
+This diffusion equation analogy explains generally why the surfaces of ice sheets are smooth, at least if we overlook non-flow processes like crevassing and wind-driven (snow) dunes.  There are, however, some conceptual and practical concerns about the analogy:
 \begin{itemize}
 \item The diffusivity $D$ in \eqref{siadiffusivity} depends on the solution, both thickness $H$ and surface slope $|\grad h|$.  This affects how we reason about diffusivity.  Numerical solution processes are more difficult because nonlinear equations are harder to solve.
 \item The diffusivity $D$ in \eqref{siadiffusivity} goes to zero at margins, where $H\to 0$, and at divides and domes, where $|\grad h|\to 0$.  This means that the solution is not smooth, even though the thickness is continuous everywhere (and zero outside the ice sheet).  A non-smooth solution generates larger numerical errors.
