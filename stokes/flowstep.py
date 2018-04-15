@@ -26,16 +26,15 @@
 import argparse
 
 # process options
-defaultmix = 'P2P1'
 mixchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
-defaultf = 'glacier'
 parser = argparse.ArgumentParser(description='Solve glacier bedrock-step Glen-Stokes problem.')
-parser.add_argument('-elements', metavar='X', default=defaultmix, choices=mixchoices,
-                    help='stable mixed finite elements from: %s (default=%s)' % (','.join(mixchoices),defaultmix) )
-parser.add_argument('-f', metavar='ROOT', default=defaultf,
-                    help='input/output file name root (default=%s)' % defaultf)
 parser.add_argument('-bs', type=float, default=120.0, metavar='X',
                     help='height of bed step (m; default = 120.0)')
+parser.add_argument('-elements', metavar='X', default='P2P1', choices=mixchoices,
+                    help='stable mixed finite elements from: %s (default=P2P1)' \
+                         % (','.join(mixchoices)) )
+parser.add_argument('-f', metavar='ROOT', default='glacier',
+                    help='input/output file name root (default=glacier)')
 parser.add_argument('-initonly', action='store_true')
 parser.add_argument('-n_glen', type=float, default=3.0, metavar='X',
                     help='Glen flow law exponent (default = 3.0)')
@@ -45,14 +44,14 @@ outname = args.f + '.pvd'
 bs = args.bs
 n_glen = args.n_glen
 
-from firedrake import *
-
 # glacier physical constants
 secpera = 31556926.0       # seconds per year
 g = 9.81                   # m s-2
 rho = 910.0                # kg m-3
 A_ice = 3.1689e-24         # Pa-3 s-1; EISMINT I value of ice softness; tied to n=3
 B_ice = A_ice**(-1.0/3.0)  # Pa s(1/3);  ice hardness
+
+from firedrake import *
 
 # input mesh and define geometry
 print('reading mesh from %s ...' % inname)
@@ -90,40 +89,6 @@ noslip = Constant((0.0, 0.0))
 x,z = SpatialCoordinate(mesh)
 outflow_sigma = as_vector([- rho * g * cos(alpha) * (H - z), 0.0])
 
-# linear problem is how we generate initial iterate
-def initialiterate(Z):
-    # assume Newtonian slab-on-slope inflow
-    D_typical = 10.0 / secpera
-    nulin = B_ice * D_typical**(-2.0/3.0)  # effective viscosity
-    print('effective viscosity in initialization %.2e Pa s' % nulin)
-    Clin = rho * g * sin(alpha) / nulin
-    inflowlin = as_vector([Clin * ((H + bs) * (z - bs) + (bs*bs - z*z)/2.0), 0.0])
-    ulin,plin = TrialFunctions(Z)
-    bcslin = [ DirichletBC(Z.sub(0), noslip, (base_id,)),
-               DirichletBC(Z.sub(0), inflowlin, (inflow_id,)) ]
-    # Newtonian weak form
-    alin = ( nulin * inner(grad(ulin), grad(v)) - plin * div(v) - div(ulin) * q ) * dx
-    Llin = inner(f_body, v) * dx + inner(outflow_sigma, v) * ds(outflow_id)
-    print('solving linear variational problem for initial iterate ...')
-    uplin = Function(Z)   # put solution here
-    solve(alin == Llin, uplin, bcs=bcslin,
-          options_prefix='lin',
-          solver_parameters={#"ksp_view": True,
-                             "ksp_converged_reason": True,
-                             "ksp_monitor": True,
-                             "ksp_type": "fgmres",  # or "gmres" or "minres"
-                             "pc_type": "fieldsplit",
-                             "pc_fieldsplit_type": "schur",
-                             "pc_fieldsplit_schur_factorization_type": "full",  # or "diag"
-                             "fieldsplit_0_ksp_type": "preonly",
-                             "fieldsplit_0_pc_type": "lu",
-                             #"fieldsplit_0_ksp_converged_reason": True,
-                             "fieldsplit_1_ksp_converged_reason": True,
-                             "fieldsplit_1_ksp_rtol": 1.0e-3,
-                             "fieldsplit_1_ksp_type": "gmres",
-                             "fieldsplit_1_pc_type": "none"})
-    return uplin
-
 # put solution here
 up = Function(Z)       # *not* TrialFunctions(Z)
 u,p = split(up)        # up.split() not equivalent here?
@@ -142,46 +107,34 @@ rr = 0.5 * (1.0/n_glen - 1.0)
 F = ( inner(B_ice * grad(u), grad(v)) - p * div(v) - div(u) * q - inner(f_body, v) ) * dx \
     - inner(outflow_sigma, v) * ds(outflow_id)
 
-# inflow boundary condition
+# slab-on-slope inflow boundary condition
 Hin = H + bs
-if False:
-    # assume Newtonian slab-on-slope inflow
-    nulin = B_ice * D_typical**(-2.0/3.0)  # effective viscosity
-    Clin = rho * g * sin(alpha) / nulin
-    inflow_u = as_vector([Clin * (Hin * (z - bs) + (bs*bs - z*z)/2.0), 0.0])
-else:
-    # assume slab-on-slope inflow
-    C = 2.0 * A_ice * (rho * g * sin(alpha))**n_glen / (n_glen + 1.0)
-    inflow_u = as_vector([C * (H**(n_glen+1.0) - (Hin - z)**(n_glen+1.0)), 0.0])
+C = 2.0 * A_ice * (rho * g * sin(alpha))**n_glen / (n_glen + 1.0)
+inflow_u = as_vector([C * (H**(n_glen+1.0) - (Hin - z)**(n_glen+1.0)), 0.0])
+print(inflow_u.vector().array())
 
 bcs = [ DirichletBC(Z.sub(0), noslip, (base_id,)),
         DirichletBC(Z.sub(0), inflow_u, (inflow_id,)) ]
 
 # solve
-up0 = initialiterate(Z)
-u0,p0 = up0.split()
-u,p = up.split()
-u.interpolate(u0)
-p.interpolate(p0)
-
-if not args.initonly:
-    print('solving nonlinear variational problem ...')
-    solve(F == 0, up, bcs=bcs,
-          options_prefix='s',
-          solver_parameters={"snes_mf": True,  # FIXME only for very coarse grids
-                             "mat_type": "aij",
-                             "ksp_type": "preonly",
-                             "pc_type": "svd",
-                             #"snes_rtol": 1.0e-14,
-                             #"snes_stol": 0.0,
-                             "snes_monitor": True,
-                             "snes_max_funcs": 100000,
-                             "snes_converged_reason": True,
-                             "ksp_converged_reason": True,
-                             "ksp_monitor": True})
+print('solving nonlinear variational problem with n_glen = %.3f ...' % n_glen)
+solve(F == 0, up, bcs=bcs,
+      options_prefix='s',
+      solver_parameters={"snes_mf": True,  # FIXME only for very coarse grids
+                         "mat_type": "aij",
+                         "ksp_type": "preonly",
+                         "pc_type": "svd",
+                         #"snes_rtol": 1.0e-14,
+                         #"snes_stol": 0.0,
+                         #"snes_monitor": True,
+                         "snes_max_funcs": 100000,
+                         "snes_converged_reason": True})
+                         #"ksp_converged_reason": True,
+                         #"ksp_monitor": True})
 
 # see linflowstep.py for more solver combinations
 
+# report on and save solution parts
 u,p = up.split()
 u.rename('velocity')
 p.rename('pressure')
@@ -197,5 +150,6 @@ print('average velocity magnitude = %.2f m a-1' % (secpera * velmagav))
 
 # write the solution to a file for visualisation with paraview
 print('writing (velocity,pressure) to %s ...' % outname)
+u.interpolate(inflow_u)
 File(outname).write(u,p)
 
