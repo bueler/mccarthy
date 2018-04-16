@@ -333,21 +333,23 @@ H_t = M + \Div \left(\Gamma H^{n+2} |\grad h|^{n-1} \grad h \right). \label{sia}
 \end{equation}
 We have defined the positive constant $\Gamma = 2 A (\rho g)^n / (n+2)$ only to improve appearance.  Equation \eqref{sia} is the SIA in 2D.  Recalling our earlier promise, if we can solve \eqref{sia} numerically then we have, following Mahaffy \cite{Mahaffy}, a usable model for the Barnes ice cap in Canada, a particularly-simple ice sheet on a rather flat bed.
 
-\subsection*{Analogy with the heat equation}  Numerical methods for solving \eqref{sia} are modifications of methods for the better-known heat equation, which we state in the simplest 1D case:
+\subsection*{Analogy with diffusion equations}  Numerical methods for solving \eqref{sia} are modifications of methods for the better-known heat equation, which we first state in the simplest 1D case:
 \begin{equation}
 T_t = D T_{xx} \label{heat1D}
 \end{equation}
-This equation might model the temperature $T(t,x)$ of a conducting rod.  This model applies when material properties are constant and when there are no heat sources.  The positive constant $D$ is the ``diffusivity,'' with SI units which can be read from comparing sides of the equation: $D\sim \text{m}^2 \text{s}^{-1}$.  Not that equation \eqref{heat1D} has a smoothing effect on the solution $T$ as it evolves in time, because any local maximum or minimum in the temperature is flattened.  In fact, $T_{xx}<0$ implies $T_t<0$, so $T$ decreases near a maximum, while $T_{xx}>0$ implies $T_t>0$ so $T$ increases near a minimum.
+This equation, which might model the temperature $T(t,x)$ of a conducting rod, applies when material properties are constant and there are no heat sources.  The positive constant $D$ is the ``diffusivity,'' with SI units which can be read from comparing sides of the equation: $D\sim \text{m}^2 \text{s}^{-1}$.  Not that equation \eqref{heat1D} has a smoothing effect on the solution $T$ as it evolves in time, because any local maximum or minimum in the temperature is flattened.  In fact, $T_{xx}<0$ implies $T_t<0$, so $T$ decreases near a maximum, while $T_{xx}>0$ implies $T_t>0$ so $T$ increases near a minimum.
 
-The 2D heat equation, which describes the temperature $T(t,x,y)$ of a planar object, is a better analogy to \eqref{sia}.  Recall that Fourier's law for conduction is the formula $\mathbf{Q} = - \kappa \grad T$ for heat flux $\mathbf{Q}$, where $\kappa$ is conductivity.  We will assume, for the analogy to the SIA, that $\kappa(x,y)$ may vary in space, and we suppose there is a variable heat source $f(t,x,y)$.  Then conservation of internal energy says
+The 2D heat equation, which describes the temperature $T(t,x,y)$ of a planar object, is a better analogy to \eqref{sia}.  Recall that Fourier's law for conduction is the formula $\mathbf{Q} = - \kappa \grad T$ for heat flux $\mathbf{Q}$, where $\kappa$ is conductivity.  We will assume, so as to help the analogy to the SIA, that $\kappa(x,y)$ may vary in space, and we suppose there is a variable heat source $f(t,x,y)$.  Then conservation of internal energy says
 \begin{equation}
 \rho c T_t = f + \Div (\kappa \grad T). \label{heatearly}
 \end{equation}
-Here $\rho$ is density and $c$ is specific heat capacity.  Assuming $\rho c$ is constant, define the ``diffusivity'' $D=\kappa/(\rho c)$ and the rescaled source term $F = f/(\rho c)$.  The revised 2D heat equation is
+Here $\rho$ is density and $c$ is specific heat capacity.  Assuming $\rho c$ is constant, define the ``diffusivity'' $D=\kappa/(\rho c)$.  Let $F = f/(\rho c)$, a rescaled source term.  Then the revised 2D heat equation is
 \begin{equation}
 T_t = F + \Div (D\, \grad T), \label{heat}
 \end{equation}
-which is similar to \eqref{heat1D} but with variable diffusivity and an additional heat source.  Figure \ref{fig:initialheat} shows a solution of \eqref{heat} in which the initial condition is a localized ``hot spot''.  Solutions of the heat equation always involve the spreading, in all directions, of any local maxima or minima, that is, diffusion.
+which is similar to \eqref{heat1D} but with variable diffusivity and an additional heat source.
+
+Figure \ref{fig:initialheat} shows a solution of \eqref{heat} in which the initial condition is a localized ``hot spot''.  Solutions of the heat equation always involve the spreading, in all directions, of any local maxima or minima, that is, diffusion.
 
 \twofigsizes{initialheat}{finalheat}{Left: Initial condition $T(0,x,y)$.   Right: A solution $T(t,x,y)$ of  \eqref{heat}, with $D=1$ and $F=0$, at $t=0.02$.}{2.8in}{2.8in}
 
@@ -355,7 +357,7 @@ The SIA equation \eqref{sia} and the heat equation \eqref{heat} are each diffusi
 \begin{center}
 \begin{tabular}{cc}
 \vspace{1mm}
-SIA:\, $H$ is ice thickness & \phantom{foo bar} heat: $T$ is temperature\phantom{foo bar}  \\
+SIA:\, $H$ is ice thickness & \phantom{foo bar} heat (diffusion): $T$ is temperature\phantom{foo bar}  \\
 \vspace{1mm}
 	$H_t = M + \Div \left({\color{red}\Gamma H^{n+2} |\grad h|^{n-1}}\, \grad h \right)$  &  $T_t = F + \Div (D\, \grad T)$
 \end{tabular}
@@ -367,32 +369,33 @@ The analogy suggests that we identify the \emph{SIA diffusivity} as:
 \begin{equation}
 	D = {\color{red}\Gamma H^{n+2} |\grad h|^{n-1}}.  \label{siadiffusivity}
 \end{equation}
-Thus a non-sliding SIA flow \emph{diffuses} the surface of the ice sheet.  When this $D$ comes out large then the diffusion acts most quickly.  As a product of powers of $H$ and $|\grad h|$, $D$ is large if the ice is both thick and steep.  In summary, an ice sheet or glacier diffuses more when it is thick and steep, because then ice flows downhill more strongly.
+When $D$ is large then the diffusion acts most quickly.  As a product of powers of $H$ and $|\grad h|$, $D$ is large if the ice is both thick and steep, because then ice flows downhill most strongly.  This analogy explains generally why the surfaces of ice sheets are smooth, at least if we overlook non-flow processes like crevassing and wind-driven (snow) dunes.
 
-This diffusion equation analogy explains generally why the surfaces of ice sheets are smooth, at least if we overlook non-flow processes like crevassing and wind-driven (snow) dunes.  There are, however, some conceptual and practical concerns about the analogy:
+There are, however, conceptual and practical concerns about the analogy:
 \begin{itemize}
-\item The diffusivity $D$ in \eqref{siadiffusivity} depends on the solution, both thickness $H$ and surface slope $|\grad h|$.  This affects how we reason about diffusivity.  Numerical solution processes are more difficult because nonlinear equations are harder to solve.
-\item The diffusivity $D$ in \eqref{siadiffusivity} goes to zero at margins, where $H\to 0$, and at divides and domes, where $|\grad h|\to 0$.  This means that the solution is not smooth, even though the thickness is continuous everywhere (and zero outside the ice sheet).  A non-smooth solution generates larger numerical errors.
+\item The letters ``$H$'' and ``$h$'' denote different quantities in \eqref{sia}.  Are we allowed to regard \eqref{sia} as a diffusion anyway, when the bed is not flat?
+\item The diffusivity $D$ in \eqref{siadiffusivity} depends on the solution---both on thickness $H$ and surface slope $|\grad h|$---so equation \eqref{sia} is a nonlinear PDE.  Numerical solution processes for nonlinear equations are more difficult to implement and analyze.
+\item The diffusivity $D$ in \eqref{siadiffusivity} goes to zero at margins, where $H\to 0$, and at divides and domes, where $|\grad h|\to 0$.  This ultimately means that the solution $h$ is not smooth, even though the thickness is continuous everywhere (and zero outside the ice sheet) and even if the bed $b$ and surface mass balance $M$ \emph{are} smooth.  A non-smooth solution inevitably generates larger numerical errors.
 \end{itemize}
-More important is a deficiency of the SIA model, and not the analogy \emph{per se}, namely
+Just as important is a deficiency of the SIA model, namely
 \begin{itemize}
-\item Ice flow is much less diffusive when significant longitudinal (membrane) stresses are present, as when ice is floating or sliding or when the flow is confined by terrain.
+\item Ice flow is not evidently diffusive when significant longitudinal (membrane) stresses are present, as when ice is floating or sliding or when the flow is confined by terrain.
 \end{itemize}
-Nonetheless we continue toward a verified numerical scheme for the SIA model \eqref{sia} (Section \ref{sec:numericalsia}).  The next Section introduces some numerical PDE methods in general.
+(This last item is a deficiency of the model, not just the analogy.)
+
+All of these concerns are areas of active research in mathematical glaciology; see the Notes and References.  For now we continue toward a verified numerical scheme for \eqref{sia}.  The next Section first introduces numerical PDE methods.
 
 
 \section{Finite difference numerics}  \label{sec:fd}
 
-The diffusivity analogy above suggests that numerical schemes for the heat equation are a starting point for solving the SIA equation \eqref{sia}.  Here we demonstrate only finite difference (FD) schemes, in which we replace derivatives by mere arithmetic.
-
-The basic fact on which FD schemes are based is \emph{Taylor's theorem}, which says that for a smooth function $f(x)$,
+The diffusivity analogy above suggests that numerical schemes for the heat equation are a starting point for solving the SIA equation \eqref{sia}.  Here we demonstrate only finite difference (FD) schemes, which replace derivatives by mere arithmetic.  These schemes are based on Taylor's theorem, which says that for a smooth function $f(x)$,
 	$$f(x+\Delta) = f(x) + f'(x) \Delta + \frac{1}{2} f''(x) \Delta^2 + \frac{1}{3!} f'''(x) \Delta^3 + \dots$$
 In Taylor's theorem one may also replace ``$\Delta$'' by its multiples, for example:
 \begin{align*}
 f(x+2\Delta) &= f(x) + 2 f'(x) \Delta + 2 f''(x) \Delta^2 + \frac{4}{3} f'''(x) \Delta^3 + \dots \\
 f(x-\Delta) &= f(x) - f'(x) \Delta + \frac{1}{2} f''(x) \Delta^2 - \frac{1}{3!} f'''(x) \Delta^3 + \dots
 \end{align*}
-When constructing FD schemes the idea is to combine expressions like these to give approximations of derivatives.  Thereby an equation relating values on a grid serves to approximate the differential equation.
+When constructing FD schemes the idea is to combine expressions like these to give approximations of derivatives.  Thereby an equation relating grid values will approximate the differential equation.
 
 Here we want partial derivative approximations, so we apply the Taylor's expansions one variable at a time.  For example, for $u=u(t,x)$ we have
 \begin{align*}
