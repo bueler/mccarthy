@@ -171,6 +171,10 @@
   high-order accurate finite element nonlinear {S}tokes ice sheet model and
   benchmark experiments}, J. Geophys. Res., 117 (2012).
 
+\bibitem{LeVequeFD}
+{\sc R.~J. LeVeque}, {\em Finite Difference Methods for Ordinary and
+  Partial Differential Equations}, SIAM Press, 2007.
+
 \bibitem{LeVeque}
 {\sc R.~J. LeVeque}, {\em Finite Volume Methods for Hyperbolic Problems},
   Cambridge Texts in Applied Mathematics, Cambridge University Press, 2002.
