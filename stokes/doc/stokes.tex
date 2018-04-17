@@ -1,0 +1,101 @@
+\documentclass[letterpaper,final,12pt,reqno]{amsart}
+
+\usepackage[total={6.3in,9.2in},top=1.1in,left=1.1in]{geometry}
+
+\usepackage{verbatim}
+\usepackage{empheq}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{animate}
+\usepackage{graphicx}
+\usepackage{fancyvrb}
+
+%\usepackage{palatino}
+
+% hyperref should be the last package we load
+\usepackage[pdftex,
+colorlinks=true,
+plainpages=false, % only if colorlinks=true
+linkcolor=blue,   % only if colorlinks=true
+citecolor=Red,   % only if colorlinks=true
+urlcolor=black     % only if colorlinks=true
+]{hyperref}
+
+\renewcommand{\baselinestretch}{1.05}
+
+\newcommand{\ddt}[1]{\ensuremath{\frac{\partial #1}{\partial t}}}
+\newcommand{\ddx}[1]{\ensuremath{\frac{\partial #1}{\partial x}}}
+\newcommand{\ddy}[1]{\ensuremath{\frac{\partial #1}{\partial y}}}
+\newcommand{\pp}[2]{\ensuremath{\frac{\partial #1}{\partial #2}}}
+\renewcommand{\t}[1]{\texttt{#1}}
+\newcommand{\Matlab}{\textsc{Matlab}\xspace}
+\newcommand{\bq}{\mathbf{q}}
+\newcommand{\bu}{\mathbf{u}}
+\newcommand{\bU}{\mathbf{U}}
+\newcommand{\eps}{\epsilon}
+\newcommand{\grad}{\nabla}
+\newcommand{\Div}{\nabla\cdot}
+\newcommand{\devstress}{\tau}
+
+
+
+\begin{document}
+\graphicspath{{../figures/}}
+
+\title{A 2D finite element Stokes solver for glacier flow}
+
+\author{Ed Bueler}
+
+\date{\today}
+
+\maketitle
+
+\section{Introduction}  \label{sec:intro}
+
+
+
+
+\footnotesize
+
+\bigskip
+%\bibliography{ice-bib}
+%\bibliographystyle{siam}
+\begin{thebibliography}{8}
+
+\bibitem{Acheson}
+{\sc D.~J. Acheson}, {\em Elementary {F}luid {D}ynamics}, Oxford University
+  Press, Oxford, 1990.
+
+\bibitem{BaliseRaymond1985}
+{\sc M.~Balise and C.~Raymond}, {\em Transfer of basal sliding variations to
+  the surface of a linearly-viscous glacier}, J. Glaciol., 31 (1985),
+  pp.~308--318.
+
+\bibitem{Brown2013}
+{\sc J.~Brown, B.~Smith, and A.~Ahmadia}, {\em Achieving textbook multigrid
+  efficiency for hydrostatic ice sheet flow}, SIAM J. Sci. Computing,
+  35 (2013), pp.~B359--B375.
+
+\bibitem{Elman}
+{\sc H.~C. Elman and D.~J. Silvester and A.~J. Wathen}, {\em Finite Elements
+  and Fast Iterative Solvers: with Applications in Incompressible Fluid Dynamics},
+  Oxford University Press, 2nd~ed., 2014.
+
+\bibitem{GreveBlatter2009}
+{\sc R.~Greve and H.~Blatter}, {\em Dynamics of {I}ce {S}heets and {G}laciers},
+  Advances in Geophysical and Environmental Mechanics and Mathematics,
+  Springer, 2009.
+
+\bibitem{JouvetRappaz2011}
+{\sc G.~Jouvet and J.~Rappaz}, {\em Analysis and finite element approximation
+  of a nonlinear stationary {S}tokes problem arising in glaciology}, Advances
+  in Numerical Analysis, (2011).
+
+\bibitem{Lengetal2012}
+{\sc W.~Leng, L.~Ju, M.~Gunzburger, S.~Price, and T.~Ringler}, {\em A parallel
+  high-order accurate finite element nonlinear {S}tokes ice sheet model and
+  benchmark experiments}, J. Geophys. Res., 117 (2012).
+
+\end{thebibliography}
+
+
+\end{document}

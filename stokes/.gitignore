@@ -1,6 +1,6 @@
-*.m
-*.geo
-*.msh
-*.vtu
-*.pvd
+/*.m
+/*.geo
+/*.msh
+/*.vtu
+/*.pvd
 
