@@ -100,7 +100,15 @@ where $B_n = A_n^{-1/n}$ is the ice hardness.  With this expression we rewrite e
 - \nabla \cdot \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu\right) + \nabla p = \rho \mathbf{g} \label{stokes}
 \end{equation}
 
-The Stokes model in strong form is, from now on, equations \eqref{incompressible} and \eqref{stokes} with certain boundary conditions.  FIXME
+The Stokes model in strong form is, from now on, equations \eqref{incompressible} and \eqref{stokes} with certain boundary conditions.  To explain these boundary conditions consider the numerical solution shown in Figure \ref{fig:stepflowlin}
+
+\begin{figure}
+\label{fig:stepflowlin}
+\includegraphics[width=0.95\textwidth]{stepflowlin}
+\caption{A 2D Stokes problem for a glacier flowing over a bedrock step.  Arrows show velocity $\bu$ and shading is by pressure $p$.  Note the mesh of triangular finite elements.}
+\end{figure}
+
+FIXME
 
 The model applies on a domain $\Omega\subset \RR^3$ or $\Omega \subset \RR^2$ according to the context.  This domain must have a smooth enough boundary to apply the prescribed normal stress boundary condition but it is otherwise general.  In the model the solution is the pair $(\bu,p)$ where $\bu\in V_D$ and $p \in Q$ for function spaces $V_D,Q$ precisely identified in \cite{JouvetRappaz2011}.  In fact the weak formulation of the model is proven in \cite{JouvetRappaz2011} to be well-posed under reasonable assumptions which will be satisfied in the cases we consider.
 
