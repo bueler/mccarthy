@@ -60,11 +60,12 @@ urlcolor=black     % only if colorlinks=true
 
 This document is an appendix to my notes \emph{Numerical modelling of glaciers, ice sheets, and ice shelves}---here called ``the notes''---which are used for the International Summer School in Glaciology in McCarthy, Alaska.
 
-We start by restating the Stokes model for any Glen exponent $n$, with glacier-suitable boundary conditions, and then we derive the ``weak form,'' as explained below.  A finite element (FE) method \cite{Elmanetal2014} is always based on the weak form of a differential equation.  Then we give an overview of how an FE method is set up using triangular elements for an arbitrary planar region.  We briefly discuss issues of stable mixed FE choices for Stokes problem.  We rebuild slab-on-a-slope solutions both for verification and for boundary condition purposes.  Then we describe how three open-source Python/C toolboxes/libraries are using to generate a numerical solution:
+We start by restating the Stokes model for any Glen exponent $n$, with glacier-suitable boundary conditions, and then we derive the ``weak form,'' as explained below.  A finite element (FE) method \cite{Elmanetal2014} is always based on the weak form of a differential equation.  Then we give an overview of how an FE method is set up using triangular elements for an arbitrary planar region.  We briefly discuss issues of stable mixed FE choices for Stokes problem.  We rebuild slab-on-a-slope solutions both for verification and for boundary condition purposes.  Then we describe how four open-source tools/libraries are using to generate a numerical solution:
 \begin{itemize}
-\item  Gmsh \hfill \url{http://gmsh.info/}
-\item Firedrake \hfill \url{https://www.firedrakeproject.org/}
-\item PETSc \hfill \url{http://www.mcs.anl.gov/petsc/}
+\item Gmsh, a mesh generator \hfill \url{http://gmsh.info/}
+\item Firedrake, an FE library \hfill \url{https://www.firedrakeproject.org/}
+\item PETSc, a solver library \hfill \url{http://www.mcs.anl.gov/petsc/}
+\item Paraview, visualization tool \hfill \url{https://www.paraview.org/}
 \end{itemize}
 Finally a relatively-short Python code is shown and demonstrated.
 
@@ -101,18 +102,21 @@ where $B_n = A_n^{-1/n}$ is the ice hardness.  With this expression we rewrite e
 
 The Stokes model in strong form is, from now on, equations \eqref{incompressible} and \eqref{stokes} with certain boundary conditions.  FIXME
 
-The model applies on a domain $\Omega\subset \RR^3$ or $\Omega \subset \RR^2$ according to the context.  This domain must have a smooth enough boundary to apply the prescribed normal stress boundary condition but it is otherwise general.  In the model the solution is the pair $(\bu,p)$ where $\bu\in V$ and $p \in Q$ for function spaces $V,Q$ precisely identified in \cite{JouvetRappaz2011}.  In fact the weak formulation of the model is proven in \cite{JouvetRappaz2011} to be well-posed under reasonable assumptions which will be satisfied in the cases we consider.
+The model applies on a domain $\Omega\subset \RR^3$ or $\Omega \subset \RR^2$ according to the context.  This domain must have a smooth enough boundary to apply the prescribed normal stress boundary condition but it is otherwise general.  In the model the solution is the pair $(\bu,p)$ where $\bu\in V_D$ and $p \in Q$ for function spaces $V_D,Q$ precisely identified in \cite{JouvetRappaz2011}.  In fact the weak formulation of the model is proven in \cite{JouvetRappaz2011} to be well-posed under reasonable assumptions which will be satisfied in the cases we consider.
 
-This weak formulation is derived by multiplying the equations by arbitrary test functions and then integrating by parts using the divergence theorem.  Specifically we define a nonlinear functional by multiplying \eqref{incompressible} by test function $q\in Q$ and \eqref{stokes} by test function $\bv\in V$ and combining these equations.  Thereby we get a nonlinear functional which must be zero at the solution $(\bu,p)$:
+This weak formulation is derived by multiplying the equations by arbitrary test functions and then integrating by parts using the divergence theorem.  We define a nonlinear functional $F$ by multiplying \eqref{incompressible} by test function $q\in Q$ and \eqref{stokes} by test function $\bv\in V$ and combining these equations:
 \begin{equation}
 F(\bu,p;\bv,q) = \int_\Omega - \left(\nabla \cdot \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu\right)\right)\cdot \bv + \nabla p \cdot \bv - \rho \mathbf{g} \cdot \bv - \left(\nabla \cdot \bu\right) q \label{nonfuncone}
 \end{equation}
-The integration-by-parts step uses the product rule $\nabla \cdot(f\bX) = \grad f\cdot \bX + f \nabla \cdot \bX$ and the divergence theorem
-    $$\int_\Omega \nabla \cdot \bX = \int_{\partial \Omega} \bX \cdot \hbn$$
-Recalling $\tau = B_n |D\bu|^{\frac{1}{n} - 1} D\bu$ and $\bv = (v_1,v_2,v_3)$ then
+This nonlinear functional must be zero at the solution $(\bu,p)$:
+\begin{equation}
+F(\bu,p;\bv,q) = 0 \qquad \text{ for all } \bv\in V \text{ and } q\in Q
+\end{equation}
+
+The integration-by-parts step uses the product rule $\nabla \cdot(f\bX) = \grad f\cdot \bX + f \nabla \cdot \bX$ and the divergence theorem $\int_\Omega \nabla \cdot \bX = \int_{\partial \Omega} \bX \cdot \hbn$.  Recalling $\tau = B_n |D\bu|^{\frac{1}{n} - 1} D\bu$ then
 \begin{align*}
 \int_\Omega \left(\nabla \cdot \tau\right)\cdot \bv &= \sum_{j=1}^3 \int_\Omega \nabla \cdot (\tau_{\circ j})\, v_j = \sum_{j=1}^3 \int_\Omega \nabla \cdot (\tau_{\circ j} v_j) - \tau_{\circ j} \nabla v_j \\
-  &= \sum_{j=1}^3 \int_{\partial \Omega} (\tau_{\circ j} v_j) \cdot \hbn - \int_\Omega \tau_{\circ j} \nabla v_j = \int_{\partial \Omega} (\tau \hbn)\cdot \bv - \int_\Omega \tau \cdot \nabla \bv,
+  &= \sum_{j=1}^3 \int_{\partial \Omega} (\tau_{\circ j} v_j) \cdot \hbn - \int_\Omega \tau_{\circ j} \nabla v_j = \int_{\partial \Omega} (\tau \hbn)\cdot \bv - \int_\Omega \tau \cdot \nabla \bv
 \end{align*}
 where $\circ$ denotes an index iterated-over, and similarly
     $$\int_\Omega \nabla p \cdot \bv = \int_\Omega \nabla\cdot (p\,\bv) - p (\nabla \cdot \bv) = \int_{\partial \Omega} (p I\hbn)\cdot \bv - \int_\Omega p (\nabla \cdot \bv)$$
