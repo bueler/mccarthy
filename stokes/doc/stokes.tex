@@ -36,6 +36,7 @@ urlcolor=black     % only if colorlinks=true
 
 \newcommand{\hbn}{\hat{\mathbf{n}}}
 
+\newcommand{\bg}{\mathbf{g}}
 \newcommand{\bu}{\mathbf{u}}
 \newcommand{\bv}{\mathbf{v}}
 
@@ -57,33 +58,39 @@ urlcolor=black     % only if colorlinks=true
 \renewcommand{\theequation}{A\arabic{equation}}
 
 
-\section{Introduction}
+This document is an appendix to my notes \emph{Numerical modelling of glaciers, ice sheets, and ice shelves}---here called ``the notes''---which are used for the International Summer School in Glaciology in McCarthy, Alaska.
 
-These notes are an appendix to my notes \emph{Numerical modelling of glaciers, ice sheets, and ice shelves}---here called ``the notes''---which are used for the International Summer School in Glaciology in McCarthy, Alaska.
-
-Here we restate the Stokes model for any Glen exponent $n$ and we derive the corresponding weak form.  Then we sketch how a finite element (FE) method \cite{Elmanetal2014} is set up using triangular elements for an arbitrary planar region.  We briefly discuss issues of stable mixed FE choices and of verification using slab-on-a-slope solutions.  Then we describe how Gmsh\footnote{\url{http://gmsh.info/}}, Firedrake\footnote{\url{https://www.firedrakeproject.org/}}, and PETSc\footnote{\url{http://www.mcs.anl.gov/petsc/}} are used in a numerical solution.
-
+We start by restating the Stokes model for any Glen exponent $n$, with glacier-suitable boundary conditions, and then we derive the ``weak form,'' as explained below.  A finite element (FE) method \cite{Elmanetal2014} is always based on the weak form of a differential equation.  Then we give an overview of how an FE method is set up using triangular elements for an arbitrary planar region.  We briefly discuss issues of stable mixed FE choices for Stokes problem.  We rebuild slab-on-a-slope solutions both for verification and for boundary condition purposes.  Then we describe how three open-source Python/C toolboxes/libraries are using to generate a numerical solution:
+\begin{itemize}
+\item  Gmsh \hfill \url{http://gmsh.info/}
+\item Firedrake \hfill \url{https://www.firedrakeproject.org/}
+\item PETSc \hfill \url{http://www.mcs.anl.gov/petsc/}
+\end{itemize}
+Finally a relatively-short Python code is shown and demonstrated.
 
 \section{Stokes equations and the weak form}
 
 Recall the Glen-Stokes model in equations (3), (4), (5) from the notes---also in \cite{GreveBlatter2009,JouvetRappaz2011}---but now allowing any Glen exponent $n\ge 1$:
 \begin{align}
-\nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \label{incompressible} \\
-- \nabla \cdot \tau + \nabla p &= \rho \mathbf{g} &&\text{\emph{stress balance}} \label{forcebalance} \\
+\nabla \cdot \bu &= 0 &&\text{\emph{incompressibility}} \label{incompressible} \\
+- \nabla \cdot \tau + \nabla p &= \rho \bg &&\text{\emph{stress balance}} \label{forcebalance} \\
 D\bu &= A_n |\tau|^{n-1} \tau &&\text{\emph{Glen flow law}} \label{flowlaw}
 \end{align}
-Here $A_n$ is the $n$-dependent ice softness; in Table 1 we have $A = A_3 = 10^{-16} \,\text{Pa}^{-3}\,\text{a}^{-1} = 3.1689 \times 10^{-24} \,\text{Pa}^{-3}\,\text{s}^{-1}$ while generally the units of $A_n$ are $\text{Pa}^{-n}\,\text{s}^{-1}$.
+The \emph{velocity} $\bu$, \emph{pressure} $p$, \emph{ice density} $\rho$, \emph{acceleration of gravity} $\bg$, \emph{deviatoric stress tensor} $\tau$ and the \emph{strain rate tensor} $D\bu$ appear in these equations.  Note that $A_n$ in \eqref{flowlaw} is the $n$-dependent ice softness.  In Table 1 in the notes we have $A = A_3 = 10^{-16} \,\text{Pa}^{-3}\,\text{a}^{-1} = 3.1689 \times 10^{-24} \,\text{Pa}^{-3}\,\text{s}^{-1}$, and generally the units of $A_n$ are $\text{Pa}^{-n}\,\text{s}^{-1}$.
 
-Though notation generally follows Table 1 in the notes, some of the usage here is more general or flexible.  This especially regards how tensors and tensor norms are used.  Here are the concrete definitions and relationships wherein $\sigma$, $\tau$, $I$, and $D\bu$ all denote tensors and $|D\bu|$, $|\tau|$ denote tensor norms:
+Though the notation here generally follows Table 1 in the notes, some of usage is more general or flexible especially regarding how tensors and tensor norms are used.  Here are the concrete definitions for tensor $D\bu$ and tensor norms $|D\bu|$, $|\tau|$:
 \begin{align*}
-\sigma &= \tau - p\,I \\
 (D\bu)_{ij} &= \frac{1}{2} \left((u_i)_{x_j} + (u_j)_{x_i}\right) \\
 |\tau|^2 &= \frac{1}{2} \tau^\top \tau = \frac{1}{2} \tau_{ij} \tau_{ij} \\
 |D\bu|^2 &= \frac{1}{2} (D\bu)^\top D\bu = \frac{1}{2} (D\bu)_{ij} (D\bu)_{ij}
 \end{align*}
-In the last two expressions the Einstein summation is used, either over indices $i,j=1,2,3$ or $i,j=1,2$ according to the context.
+In the last two expressions the Einstein summation is used, either over indices $i,j=1,2,3$ or $i,j=1,2$ according to the context.  Note that the tensors $D\bu$ and $\tau$ are symmetric and have trace zero.
 
-Also recall the viscosity form of flow law which is equation (15) in the notes.  Here that equation is
+The deviatoric stress tensor $\tau$ is the full (Cauchy) stress tensor with the pressure removed:
+    $$\sigma = \tau - p\,I$$
+(One may then derive $p = -\frac{1}{3} \sigma_{ii}$, from the fact that $\tau$ has trace zero, thus that the pressure is the negative of the average normal stress, but we will not need this fact.)
+
+Recall the viscosity form of flow law, namely equation (15) in the notes:
 \begin{equation}
 \tau = 2\nu D\bu = B_n |D\bu|^{\frac{1}{n} - 1} D\bu  \label{viscflowlaw}
 \end{equation}
@@ -92,9 +99,9 @@ where $B_n = A_n^{-1/n}$ is the ice hardness.  With this expression we rewrite e
 - \nabla \cdot \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu\right) + \nabla p = \rho \mathbf{g} \label{stokes}
 \end{equation}
 
-FIXME strong form boundary conditions
+The Stokes model in strong form is, from now on, equations \eqref{incompressible} and \eqref{stokes} with certain boundary conditions.  FIXME
 
-The Stokes model in strong form is, from now on, equations \eqref{incompressible} and \eqref{stokes} with boundary conditions FIXME.  It applies on a domain $\Omega\subset \RR^3$ or $\Omega \subset \RR^2$ according to the context.  This domain must have a smooth enough boundary to apply the prescribed normal stress boundary condition but it is otherwise general.  In the model the solution is the pair $(\bu,p)$ where $\bu\in V$ and $p \in Q$ for function spaces $V,Q$ precisely identified in \cite{JouvetRappaz2011}.  In fact the weak formulation of the model is proven in \cite{JouvetRappaz2011} to be well-posed under reasonable assumptions which will be satisfied in the cases we consider.
+The model applies on a domain $\Omega\subset \RR^3$ or $\Omega \subset \RR^2$ according to the context.  This domain must have a smooth enough boundary to apply the prescribed normal stress boundary condition but it is otherwise general.  In the model the solution is the pair $(\bu,p)$ where $\bu\in V$ and $p \in Q$ for function spaces $V,Q$ precisely identified in \cite{JouvetRappaz2011}.  In fact the weak formulation of the model is proven in \cite{JouvetRappaz2011} to be well-posed under reasonable assumptions which will be satisfied in the cases we consider.
 
 This weak formulation is derived by multiplying the equations by arbitrary test functions and then integrating by parts using the divergence theorem.  Specifically we define a nonlinear functional by multiplying \eqref{incompressible} by test function $q\in Q$ and \eqref{stokes} by test function $\bv\in V$ and combining these equations.  Thereby we get a nonlinear functional which must be zero at the solution $(\bu,p)$:
 \begin{equation}
