@@ -60,26 +60,26 @@ urlcolor=black     % only if colorlinks=true
 
 This document is an appendix to my notes \emph{Numerical modelling of glaciers, ice sheets, and ice shelves}---here called ``the notes''---which are used for the International Summer School in Glaciology in McCarthy, Alaska.
 
-We start by restating the Stokes model for any Glen exponent $n$, with glacier-suitable boundary conditions, and then we derive the ``weak form,'' as explained below.  A finite element (FE) method \cite{Elmanetal2014} is always based on the weak form of a differential equation.  Then we give an overview of how an FE method is set up using triangular elements for an arbitrary planar region.  We briefly discuss issues of stable mixed FE choices for Stokes problem.  We rebuild slab-on-a-slope solutions both for verification and for boundary condition purposes.  Then we describe how four open-source tools/libraries are using to generate a numerical solution:
+We start by stating the Stokes model with glacier-suitable boundary conditions.  Then we derive the ``weak form,'' as explained below.  A finite element (FE) method \cite{Elmanetal2014} is based on this weak form.  An overview of our FE method follows; it uses triangular elements for an arbitrary planar region.  We briefly discuss choosing stable mixed elements for the Stokes problem.  We then construct slab-on-a-slope solutions both for verification and to clarify the boundary conditions.  Then we describe how four open-source tools/libraries are using to generate a numerical solution:
 \begin{itemize}
 \item Gmsh, a mesh generator \hfill \url{http://gmsh.info/}
 \item Firedrake, an FE library \hfill \url{https://www.firedrakeproject.org/}
 \item PETSc, a solver library \hfill \url{http://www.mcs.anl.gov/petsc/}
 \item Paraview, visualization tool \hfill \url{https://www.paraview.org/}
 \end{itemize}
-Finally a relatively-short Python code is shown and demonstrated.
+These notes end by demonstrating a relatively-short Python code.
 
 \section{Stokes equations and the weak form}
 
-Recall the Glen-Stokes model in equations (3), (4), (5) from the notes---also in \cite{GreveBlatter2009,JouvetRappaz2011}---but now allowing any Glen exponent $n\ge 1$:
+Recall the Glen-Stokes model in equations (3), (4), (5) from the notes---it is also stated in \cite{GreveBlatter2009,JouvetRappaz2011}.  The following form allows any Glen exponent $n\ge 1$:
 \begin{align}
 \nabla \cdot \bu &= 0 &&\text{\emph{incompressibility}} \label{incompressible} \\
 - \nabla \cdot \tau + \nabla p &= \rho \bg &&\text{\emph{stress balance}} \label{forcebalance} \\
 D\bu &= A_n |\tau|^{n-1} \tau &&\text{\emph{Glen flow law}} \label{flowlaw}
 \end{align}
-The \emph{velocity} $\bu$, \emph{pressure} $p$, \emph{ice density} $\rho$, \emph{acceleration of gravity} $\bg$, \emph{deviatoric stress tensor} $\tau$ and the \emph{strain rate tensor} $D\bu$ appear in these equations.  Note that $A_n$ in \eqref{flowlaw} is the $n$-dependent ice softness.  In Table 1 in the notes we have $A = A_3 = 10^{-16} \,\text{Pa}^{-3}\,\text{a}^{-1} = 3.1689 \times 10^{-24} \,\text{Pa}^{-3}\,\text{s}^{-1}$, and generally the units of $A_n$ are $\text{Pa}^{-n}\,\text{s}^{-1}$.
+The velocity $\bu$, pressure $p$, ice density $\rho$, acceleration of gravity $\bg$, deviatoric stress tensor $\tau$ and strain rate tensor $D\bu$ appear in these equations.  Note that $A_n$ in \eqref{flowlaw} is the $n$-dependent ice softness.
 
-Though the notation here generally follows Table 1 in the notes, some of usage is more general or flexible especially regarding how tensors and tensor norms are used.  Here are the concrete definitions for tensor $D\bu$ and tensor norms $|D\bu|$, $|\tau|$:
+Though the notation here generally follows Table 1 in the notes, some of usage is more general or flexible.  For example, Table 1 shows $A = A_3 = 10^{-16} \,\text{Pa}^{-3}\,\text{a}^{-1} = 3.1689 \times 10^{-24} \,\text{Pa}^{-3}\,\text{s}^{-1}$, but generally the units of $A_n$ are $\text{Pa}^{-n}\,\text{s}^{-1}$. especially regarding how tensors and tensor norms are used.  The concrete definitions for tensor $D\bu$ and tensor norms $|D\bu|$, $|\tau|$ are:
 \begin{align*}
 (D\bu)_{ij} &= \frac{1}{2} \left((u_i)_{x_j} + (u_j)_{x_i}\right) \\
 |\tau|^2 &= \frac{1}{2} \tau^\top \tau = \frac{1}{2} \tau_{ij} \tau_{ij} \\
@@ -105,7 +105,7 @@ The Stokes model in strong form is, from now on, equations \eqref{incompressible
 \begin{figure}
 \label{fig:stepflowlin}
 \includegraphics[width=0.95\textwidth]{stepflowlin}
-\caption{A 2D Stokes problem for a glacier flowing over a bedrock step.  Arrows show velocity $\bu$ and shading is by pressure $p$.  Note the mesh of triangular finite elements.}
+\caption{A 2D Stokes problem for a glacier flowing over a bedrock step.  Arrows show velocity $\bu$ and shading is by pressure $p$.  Note the (coarse) mesh of triangular finite elements.}
 \end{figure}
 
 FIXME
