@@ -29,10 +29,12 @@ urlcolor=black     % only if colorlinks=true
 \renewcommand{\t}[1]{\texttt{#1}}
 \newcommand{\Matlab}{\textsc{Matlab}\xspace}
 \newcommand{\eps}{\epsilon}
+\newcommand{\RR}{\mathbb{R}}
+
 \newcommand{\grad}{\nabla}
 \newcommand{\Div}{\nabla\cdot}
-\newcommand{\devstress}{\tau}
-\newcommand{\RR}{\mathbb{R}}
+\newcommand{\trace}{\operatorname{tr}}
+
 
 \newcommand{\hbn}{\hat{\mathbf{n}}}
 
@@ -47,7 +49,7 @@ urlcolor=black     % only if colorlinks=true
 \begin{document}
 \graphicspath{{../figures/}}
 
-\title{Appendix A: A finite element Stokes solver \\ for glacier flow}
+\title[Appendix A: A finite element Stokes solver for glacier flow]{Appendix A: A finite element Stokes solver \\ for glacier flow}
 
 \author{Ed Bueler}
 
@@ -60,7 +62,7 @@ urlcolor=black     % only if colorlinks=true
 
 This document is an appendix to my notes \emph{Numerical modelling of glaciers, ice sheets, and ice shelves}---here called ``the notes''---which are used for the International Summer School in Glaciology in McCarthy, Alaska.
 
-We start by stating the Stokes model with glacier-suitable boundary conditions.  Then we derive the ``weak form,'' as explained below.  A finite element (FE) method \cite{Elmanetal2014} is based on this weak form.  An overview of our FE method follows; it uses triangular elements for an arbitrary planar region.  We briefly discuss choosing stable mixed elements for the Stokes problem.  We then construct slab-on-a-slope solutions both for verification and to clarify the boundary conditions.  Then we describe how four open-source tools/libraries are using to generate a numerical solution:
+We start by stating the Stokes model with glacier-suitable boundary conditions.  Then we derive the ``weak form,'' as explained below.  A finite element (FE) method \cite{Elmanetal2014} is based on this weak form.  An overview of our FE method follows; it uses triangular elements for an arbitrary planar region.  We briefly discuss choosing stable mixed elements for the Stokes problem.  We construct slab-on-a-slope solutions both for verification and to clarify the boundary conditions.  Then we describe how four open-source tools/libraries are using to generate a numerical solution:
 \begin{itemize}
 \item Gmsh, a mesh generator \hfill \url{http://gmsh.info/}
 \item Firedrake, an FE library \hfill \url{https://www.firedrakeproject.org/}
@@ -69,38 +71,54 @@ We start by stating the Stokes model with glacier-suitable boundary conditions. 
 \end{itemize}
 These notes end by demonstrating a relatively-short Python code.
 
-\section{Stokes equations and the weak form}
+\section{Stokes equations and their weak form}
 
-Recall the Glen-Stokes model in equations (3), (4), (5) from the notes---it is also stated in \cite{GreveBlatter2009,JouvetRappaz2011}.  The following form allows any Glen exponent $n\ge 1$:
+Recall the Glen-Stokes model in equations (3), (4), (5) from the notes---it is also stated in \cite{GreveBlatter2009,JouvetRappaz2011}.  Allowing any Glen exponent $n\ge 1$, the equations are:
 \begin{align}
 \nabla \cdot \bu &= 0 &&\text{\emph{incompressibility}} \label{incompressible} \\
 - \nabla \cdot \tau + \nabla p &= \rho \bg &&\text{\emph{stress balance}} \label{forcebalance} \\
 D\bu &= A_n |\tau|^{n-1} \tau &&\text{\emph{Glen flow law}} \label{flowlaw}
 \end{align}
-The velocity $\bu$, pressure $p$, ice density $\rho$, acceleration of gravity $\bg$, deviatoric stress tensor $\tau$ and strain rate tensor $D\bu$ appear in these equations.  Note that $A_n$ in \eqref{flowlaw} is the $n$-dependent ice softness.
+The velocity $\bu$, pressure $p$, ice density $\rho$, acceleration of gravity $\bg$, deviatoric stress tensor $\tau$ and strain rate tensor $D\bu$ all appear.  Note that $A_n$ in \eqref{flowlaw} is the $n$-dependent ice softness.  The model applies on a 3D domain $\Omega\subset \RR^3$ or 2D domain $\Omega \subset \RR^2$ according to the context.
 
-Though the notation here generally follows Table 1 in the notes, some of usage is more general or flexible.  For example, Table 1 shows $A = A_3 = 10^{-16} \,\text{Pa}^{-3}\,\text{a}^{-1} = 3.1689 \times 10^{-24} \,\text{Pa}^{-3}\,\text{s}^{-1}$, but generally the units of $A_n$ are $\text{Pa}^{-n}\,\text{s}^{-1}$. especially regarding how tensors and tensor norms are used.  The concrete definitions for tensor $D\bu$ and tensor norms $|D\bu|$, $|\tau|$ are:
+Though the notation here generally follows Table 1 in the notes, some of usage is more general or flexible.  For example, Table 1 shows $A = A_3 = 10^{-16} \,\text{Pa}^{-3}\,\text{a}^{-1} = 3.1689 \times 10^{-24} \,\text{Pa}^{-3}\,\text{s}^{-1}$, but generally the units of $A_n$ are $\text{Pa}^{-n}\,\text{s}^{-1}$.
+
+Regarding tensors and their norms we have:
 \begin{align*}
 (D\bu)_{ij} &= \frac{1}{2} \left((u_i)_{x_j} + (u_j)_{x_i}\right) \\
-|\tau|^2 &= \frac{1}{2} \tau^\top \tau = \frac{1}{2} \tau_{ij} \tau_{ij} \\
-|D\bu|^2 &= \frac{1}{2} (D\bu)^\top D\bu = \frac{1}{2} (D\bu)_{ij} (D\bu)_{ij}
+|\tau|^2 &= \frac{1}{2} \trace\left(\tau^\top \tau\right) = \frac{1}{2} \tau_{ij} \tau_{ij} \\
+|D\bu|^2 &= \frac{1}{2} \trace\left((D\bu)^\top D\bu\right) = \frac{1}{2} (D\bu)_{ij} (D\bu)_{ij}
 \end{align*}
-In the last two expressions the Einstein summation is used, either over indices $i,j=1,2,3$ or $i,j=1,2$ according to the context.  Note that the tensors $D\bu$ and $\tau$ are symmetric and have trace zero.
+In the last two expressions the Einstein summation is used, either over indices $i,j=1,2,3$ or $i,j=1,2$ according to dimension.  Note that the tensors $D\bu$ and $\tau$ are symmetric and have trace zero.  Also, the full (Cauchy) stress tensor $\sigma$ is the deviatoric stress tensor $\tau$ minus the pressure,
+\begin{equation}
+    \sigma = \tau - p\,I,  \label{cauchystress}
+\end{equation}
+so equation \eqref{forcebalance} may be written as $-\Div \sigma = \rho \bg$.  One may derive from \eqref{cauchystress} that $p = -\frac{1}{3} \trace(\sigma)$, because $\tau$ has trace zero, thus that the pressure is the negative of the average normal stress.  Finally, by definition the divergence of the tensor $\tau$ has components which we regard as the divergences of the rows:
+    $$\left(\nabla \cdot \tau\right)_i = \left(\tau_{i1}\right)_{x_1} + \left(\tau_{i2}\right)_{x_2} + \left(\tau_{i3}\right)_{x_3},$$
+Then $\nabla\cdot \tau$ would be a column vector, necessarily like $\nabla p$ and $\bg$ in \eqref{forcebalance}.
 
-The deviatoric stress tensor $\tau$ is the full (Cauchy) stress tensor with the pressure removed:
-    $$\sigma = \tau - p\,I$$
-(One may then derive $p = -\frac{1}{3} \sigma_{ii}$, from the fact that $\tau$ has trace zero, thus that the pressure is the negative of the average normal stress, but we will not need this fact.)
-
-Recall the viscosity form of flow law, namely equation (15) in the notes:
+Recall the viscosity form of flow law \eqref{flowlaw}, namely equation (15) in the notes:
 \begin{equation}
 \tau = 2\nu D\bu = B_n |D\bu|^{\frac{1}{n} - 1} D\bu  \label{viscflowlaw}
 \end{equation}
-where $B_n = A_n^{-1/n}$ is the ice hardness.  With this expression we rewrite equations \eqref{forcebalance}, \eqref{flowlaw} and eliminate the deviatoric stress tensor $\tau$:
-\begin{equation}
-- \nabla \cdot \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu\right) + \nabla p = \rho \mathbf{g} \label{stokes}
-\end{equation}
+Here $B_n = A_n^{-1/n}$ is the $n$-dependent ice hardness.  With this expression we can eliminate $\tau$ and rewrite equations \eqref{incompressible}, \eqref{forcebalance} as
+\begin{align}
+\Div \bu &= 0 \label{incompagain} \\
+- \nabla \cdot \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu\right) + \nabla p &= \rho \mathbf{g} \label{stokes}
+\end{align}
+The Stokes model in strong form is, from now on, equations \eqref{incompagain}, \eqref{stokes} with certain boundary conditions, and the solution is the velocity-pressure pair $(\bu,p)$.
 
-The Stokes model in strong form is, from now on, equations \eqref{incompressible} and \eqref{stokes} with certain boundary conditions.  To explain these boundary conditions consider the numerical solution shown in Figure \ref{fig:stepflowlin}
+The domain $\Omega$ must have a smooth-enough boundary to apply the boundary conditions but it is otherwise general.  To explain the boundary conditions consider the numerical solution shown in Figure \ref{fig:stepflowlin}.  The particular problems solved here will have well-defined base, top, inflow, and outflow boundary surfaces.  On the base we set a Dirichlet condition of no slip:
+\begin{align*}
+\bu &= 0  &&\text{(\emph{base})} \\
+\intertext{On the top we set a condition of zero normal stress, $\sigma\hbn=0$ or equivalently:}
+\left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= 0  &&\text{(\emph{top})} \\
+\intertext{On the inflow boundary, the left side in Figure \ref{fig:stepflowlin}, a surface with outward normal $\hbn=\left<-1,0,0\right>^\top$ in the cases we solve, we set a nonzero inflow (normal) Dirichlet condition:}
+\bu &= \left<f(z),0,0\right>^\top  &&\text{(\emph{inflow})}
+\intertext{The inflow function $f(z)$ will be defined later as satisfying the slab-on-slope equations.  Finally for the outflow boundary we se a nonzero normal stress condition bases on assuming hydrostatic normal stress:}
+\left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= \left<-\rho g (h-z),0,0\right>^\top  &&\text{(\emph{outflow})}
+\end{align*}
+where the outward normal is $\hbn=\left<1,0,0\right>^\top$, $h$ is the surface elevation, and $g=|\bg|$.
 
 \begin{figure}
 \label{fig:stepflowlin}
@@ -108,23 +126,19 @@ The Stokes model in strong form is, from now on, equations \eqref{incompressible
 \caption{A 2D Stokes problem for a glacier flowing over a bedrock step.  Arrows show velocity $\bu$ and shading is by pressure $p$.  Note the (coarse) mesh of triangular finite elements.}
 \end{figure}
 
-FIXME
-
-The model applies on a domain $\Omega\subset \RR^3$ or $\Omega \subset \RR^2$ according to the context.  This domain must have a smooth enough boundary to apply the prescribed normal stress boundary condition but it is otherwise general.  In the model the solution is the pair $(\bu,p)$ where $\bu\in V_D$ and $p \in Q$ for function spaces $V_D,Q$ precisely identified in \cite{JouvetRappaz2011}.  In fact the weak formulation of the model is proven in \cite{JouvetRappaz2011} to be well-posed under reasonable assumptions which will be satisfied in the cases we consider.
-
-This weak formulation is derived by multiplying the equations by arbitrary test functions and then integrating by parts using the divergence theorem.  We define a nonlinear functional $F$ by multiplying \eqref{incompressible} by test function $q\in Q$ and \eqref{stokes} by test function $\bv\in V$ and combining these equations:
+The solution is the pair $(\bu,p)$ where $\bu\in V_D$ and $p \in Q$ for function spaces $V_D,Q$ precisely identified in \cite{JouvetRappaz2011}.  The weak formulation is derived by multiplying the equations by arbitrary test functions, from nearly the same spaces as the solution, to define a nonlinear functional $F$.  Specifically we multiply \eqref{incompressible} by test function $q\in Q$ and \eqref{stokes} by test function $\bv\in V_0$, and we combine:
 \begin{equation}
 F(\bu,p;\bv,q) = \int_\Omega - \left(\nabla \cdot \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu\right)\right)\cdot \bv + \nabla p \cdot \bv - \rho \mathbf{g} \cdot \bv - \left(\nabla \cdot \bu\right) q \label{nonfuncone}
 \end{equation}
-This nonlinear functional must be zero at the solution $(\bu,p)$:
+The difference between spaces $V_D$ and $V_0$ only relates to the value of Dirichlet boundary conditions \cite{JouvetRappaz2011}.  The nonlinear functional must be zero at the solution $(\bu,p)$:
 \begin{equation}
-F(\bu,p;\bv,q) = 0 \qquad \text{ for all } \bv\in V \text{ and } q\in Q
+F(\bu,p;\bv,q) = 0 \qquad \text{ for all } \bv\in V_0 \text{ and } q\in Q
 \end{equation}
 
-The integration-by-parts step uses the product rule $\nabla \cdot(f\bX) = \grad f\cdot \bX + f \nabla \cdot \bX$ and the divergence theorem $\int_\Omega \nabla \cdot \bX = \int_{\partial \Omega} \bX \cdot \hbn$.  Recalling $\tau = B_n |D\bu|^{\frac{1}{n} - 1} D\bu$ then
+Integration-by-parts allows the solution (trial) and test functions to actually live in spaces of functions with comparable smoothness, as already claimed.  That is, the nonlinear functional $F$ can be rewritten to use the same number of derivatives on $(\bv,q)$ as appear on $(\bu,p)$.  Recall integration-by-parts combines the product rule $\nabla \cdot(f\bX) = \grad f\cdot \bX + f \nabla \cdot \bX$ and the divergence theorem $\int_\Omega \nabla \cdot \bX = \int_{\partial \Omega} \bX \cdot \hbn$.  Denoting $\tau = B_n |D\bu|^{\frac{1}{n} - 1} D\bu$ for simplicity,
 \begin{align*}
-\int_\Omega \left(\nabla \cdot \tau\right)\cdot \bv &= \sum_{j=1}^3 \int_\Omega \nabla \cdot (\tau_{\circ j})\, v_j = \sum_{j=1}^3 \int_\Omega \nabla \cdot (\tau_{\circ j} v_j) - \tau_{\circ j} \nabla v_j \\
-  &= \sum_{j=1}^3 \int_{\partial \Omega} (\tau_{\circ j} v_j) \cdot \hbn - \int_\Omega \tau_{\circ j} \nabla v_j = \int_{\partial \Omega} (\tau \hbn)\cdot \bv - \int_\Omega \tau \cdot \nabla \bv
+\int_\Omega \left(\nabla \cdot \tau\right)\cdot \bv &= \sum_{j=1}^3 \int_\Omega \nabla \cdot (\tau_{j\circ})\, v_j = \sum_{j=1}^3 \int_\Omega \nabla \cdot (\tau_{j\circ} v_j) - \tau_{j\circ} \nabla v_j \\
+  &= \sum_{j=1}^3 \int_{\partial \Omega} (\tau_{j\circ} v_j) \cdot \hbn - \int_\Omega \tau_{j\circ} \nabla v_j = \int_{\partial \Omega} (\tau \hbn)\cdot \bv - \int_\Omega \tau \cdot \nabla \bv
 \end{align*}
 where $\circ$ denotes an index iterated-over, and similarly
     $$\int_\Omega \nabla p \cdot \bv = \int_\Omega \nabla\cdot (p\,\bv) - p (\nabla \cdot \bv) = \int_{\partial \Omega} (p I\hbn)\cdot \bv - \int_\Omega p (\nabla \cdot \bv)$$
@@ -133,6 +147,7 @@ These expressions allow us to rewrite \eqref{nonfuncone} with an integral of the
 F(\bu,p;\bv,q) &= -\int_{\partial\Omega} ((\tau-pI) \hbn)\cdot \bv + \int_\Omega \tau \cdot \nabla \bv - p (\nabla \cdot \bv) - \rho \mathbf{g} \cdot \bv - \left(\nabla \cdot \bu\right) q \label{nonfunctwo}
 \end{align}
 
+The weak formulation of the model, as follows, is proven in \cite{JouvetRappaz2011} to be well-posed under reasonable assumptions which will be satisfied in the cases we consider.
 
 
 
