@@ -86,8 +86,8 @@ Though the notation here generally follows Table 1 in the notes, some of usage i
 Regarding tensors and their norms we have:
 \begin{align*}
 (D\bu)_{ij} &= \frac{1}{2} \left((u_i)_{x_j} + (u_j)_{x_i}\right) \\
-|\tau|^2 &= \frac{1}{2} \trace\left(\tau^\top \tau\right) = \frac{1}{2} \tau_{ij} \tau_{ij} \\
-|D\bu|^2 &= \frac{1}{2} \trace\left((D\bu)^\top D\bu\right) = \frac{1}{2} (D\bu)_{ij} (D\bu)_{ij}
+|\tau|^2 &= \frac{1}{2} \trace\left(\tau^2\right) = \frac{1}{2} \tau_{ij} \tau_{ij} \\
+|D\bu|^2 &= \frac{1}{2} \trace\left((D\bu)^2\right) = \frac{1}{2} (D\bu)_{ij} (D\bu)_{ij}
 \end{align*}
 In the last two expressions the Einstein summation is used, either over indices $i,j=1,2,3$ or $i,j=1,2$ according to dimension.  Note that the tensors $D\bu$ and $\tau$ are symmetric and have trace zero.  Also, the full (Cauchy) stress tensor $\sigma$ is the deviatoric stress tensor $\tau$ minus the pressure,
 \begin{equation}
@@ -108,16 +108,16 @@ Here $B_n = A_n^{-1/n}$ is the $n$-dependent ice hardness.  With this expression
 \end{align}
 The Stokes model in strong form is, from now on, equations \eqref{incompagain}, \eqref{stokes} with certain boundary conditions, and the solution is the velocity-pressure pair $(\bu,p)$.
 
-The domain $\Omega$ must have a smooth-enough boundary to apply the boundary conditions but it is otherwise general.  To explain the boundary conditions consider the numerical solution shown in Figure \ref{fig:stepflowlin}.  The particular problems solved here will have well-defined base, top, inflow, and outflow boundary surfaces.  On the base we set a Dirichlet condition of no slip:
-\begin{align*}
-\bu &= 0  &&\text{(\emph{base})} \\
+The domain $\Omega$ must have a smooth-enough boundary to apply the boundary conditions but it is otherwise general.  To explain the boundary conditions consider the numerical solution shown in Figure \ref{fig:stepflowlin}.  The particular problems solved here will have well-defined base, top, inflow, and outflow boundary surfaces.  On the base we require no slip:
+\begin{align}
+\bu &= 0  &&\text{\emph{base}} \label{basebc} \\
 \intertext{On the top we set a condition of zero normal stress, $\sigma\hbn=0$ or equivalently:}
-\left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= 0  &&\text{(\emph{top})} \\
-\intertext{On the inflow boundary, the left side in Figure \ref{fig:stepflowlin}, a surface with outward normal $\hbn=\left<-1,0,0\right>^\top$ in the cases we solve, we set a nonzero inflow (normal) Dirichlet condition:}
-\bu &= \left<f(z),0,0\right>^\top  &&\text{(\emph{inflow})}
+\left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= 0  &&\text{\emph{top}} \label{topbc} \\
+\intertext{On the inflow boundary, the left side in Figure \ref{fig:stepflowlin}, a surface with outward normal $\hbn=\left<-1,0,0\right>^\top$ in the cases we solve, we set a nonzero inflow velocity:}
+\bu &= \left<f(z),0,0\right>^\top  &&\text{\emph{inflow}} \label{inflowbc} \\
 \intertext{The inflow function $f(z)$ will be defined later as satisfying the slab-on-slope equations.  Finally for the outflow boundary we se a nonzero normal stress condition bases on assuming hydrostatic normal stress:}
-\left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= \left<-\rho g (h-z),0,0\right>^\top  &&\text{(\emph{outflow})}
-\end{align*}
+\left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= \left<-\rho g (h-z),0,0\right>^\top  &&\text{\emph{outflow}} \label{outflowbc}
+\end{align}
 where the outward normal is $\hbn=\left<1,0,0\right>^\top$, $h$ is the surface elevation, and $g=|\bg|$.
 
 \begin{figure}
@@ -126,21 +126,21 @@ where the outward normal is $\hbn=\left<1,0,0\right>^\top$, $h$ is the surface e
 \caption{A 2D Stokes problem for a glacier flowing over a bedrock step.  Arrows show velocity $\bu$ and shading is by pressure $p$.  Note the (coarse) mesh of triangular finite elements.}
 \end{figure}
 
-The solution is the pair $(\bu,p)$ where $\bu\in V_D$ and $p \in Q$ for function spaces $V_D,Q$ precisely identified in \cite{JouvetRappaz2011}.  The weak formulation is derived by multiplying the equations by arbitrary test functions, from nearly the same spaces as the solution, to define a nonlinear functional $F$.  Specifically we multiply \eqref{incompressible} by test function $q\in Q$ and \eqref{stokes} by test function $\bv\in V_0$, and we combine:
+The solution is the pair $(\bu,p)$ where $\bu\in V_D$ and $p \in Q$ for function spaces $V_D,Q$ precisely identified in \cite{JouvetRappaz2011}.  The weak formulation is derived by multiplying the equations by arbitrary test functions, from nearly the same spaces as the solution, to define a scalar-valued nonlinear functional $F$.  (The differences between spaces $V_D$ and $V_0$, explained below, relate only to the value of Dirichlet boundary conditions \cite{JouvetRappaz2011}.)  Specifically we multiply \eqref{incompagain} by test function $q\in Q$ and \eqref{stokes} by test function $\bv\in V_0$, and combine:
 \begin{equation}
 F(\bu,p;\bv,q) = \int_\Omega - \left(\nabla \cdot \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu\right)\right)\cdot \bv + \nabla p \cdot \bv - \rho \mathbf{g} \cdot \bv - \left(\nabla \cdot \bu\right) q \label{nonfuncone}
 \end{equation}
-The difference between spaces $V_D$ and $V_0$ only relates to the value of Dirichlet boundary conditions \cite{JouvetRappaz2011}.  The nonlinear functional must be zero at the solution $(\bu,p)$:
+The nonlinear functional must be zero at the solution $(\bu,p)$:
 \begin{equation}
 F(\bu,p;\bv,q) = 0 \qquad \text{ for all } \bv\in V_0 \text{ and } q\in Q
 \end{equation}
 
-Integration-by-parts allows the solution (trial) and test functions to actually live in spaces of functions with comparable smoothness, as already claimed.  That is, the nonlinear functional $F$ can be rewritten to use the same number of derivatives on $(\bv,q)$ as appear on $(\bu,p)$.  Recall integration-by-parts combines the product rule $\nabla \cdot(f\bX) = \grad f\cdot \bX + f \nabla \cdot \bX$ and the divergence theorem $\int_\Omega \nabla \cdot \bX = \int_{\partial \Omega} \bX \cdot \hbn$.  Denoting $\tau = B_n |D\bu|^{\frac{1}{n} - 1} D\bu$ for simplicity,
+Integration-by-parts rewrites $F$ to use the same number of derivatives on $(\bv,q)$ as on $(\bu,p)$.  Recall integration-by-parts combines the product rule $\nabla \cdot(f\bX) = \grad f\cdot \bX + f \nabla \cdot \bX$ and the divergence theorem $\int_\Omega \nabla \cdot \bX = \int_{\partial \Omega} \bX \cdot \hbn$.  Denoting $\tau = B_n |D\bu|^{\frac{1}{n} - 1} D\bu$ we have
 \begin{align*}
-\int_\Omega \left(\nabla \cdot \tau\right)\cdot \bv &= \sum_{j=1}^3 \int_\Omega \nabla \cdot (\tau_{j\circ})\, v_j = \sum_{j=1}^3 \int_\Omega \nabla \cdot (\tau_{j\circ} v_j) - \tau_{j\circ} \nabla v_j \\
-  &= \sum_{j=1}^3 \int_{\partial \Omega} (\tau_{j\circ} v_j) \cdot \hbn - \int_\Omega \tau_{j\circ} \nabla v_j = \int_{\partial \Omega} (\tau \hbn)\cdot \bv - \int_\Omega \tau \cdot \nabla \bv
+\int_\Omega \left(\nabla \cdot \tau\right)\cdot \bv &= \sum_{j=1}^3 \int_\Omega \nabla \cdot (\tau_{j\circ})\, v_j = \sum_{j=1}^3 \int_\Omega \nabla \cdot (\tau_{j\circ}^\top v_j) - \tau_{j\circ}^\top \nabla v_j \\
+  &= \sum_{j=1}^3 \int_{\partial \Omega} (\tau_{j\circ}^\top v_j) \cdot \hbn - \int_\Omega \tau_{j\circ}^\top \cdot \nabla v_j = \int_{\partial \Omega} (\tau \hbn)\cdot \bv - \int_\Omega \trace(\tau \nabla \bv)
 \end{align*}
-where $\circ$ denotes an index iterated-over, and similarly
+where $\circ$ denotes an index iterated-over.  FIXME, and similarly
     $$\int_\Omega \nabla p \cdot \bv = \int_\Omega \nabla\cdot (p\,\bv) - p (\nabla \cdot \bv) = \int_{\partial \Omega} (p I\hbn)\cdot \bv - \int_\Omega p (\nabla \cdot \bv)$$
 These expressions allow us to rewrite \eqref{nonfuncone} with an integral of the normal stress over the boundary:
 \begin{align}
