@@ -27,10 +27,12 @@ import argparse
 
 # process options
 mixchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
-parser = argparse.ArgumentParser(description='Solve glacier bedrock-step Glen-Stokes problem.')
+parser = argparse.ArgumentParser(\
+    description='Solve glacier bedrock-step Glen-Stokes problem.')
 parser.add_argument('-bs', type=float, default=120.0, metavar='X',
                     help='height of bed step (m; default = 120.0)')
-parser.add_argument('-elements', metavar='X', default='P2P1', choices=mixchoices,
+parser.add_argument('-elements', metavar='X', default='P2P1',
+                    choices=mixchoices,
                     help='stable mixed finite elements from: %s (default=P2P1)' \
                          % (','.join(mixchoices)) )
 parser.add_argument('-f', metavar='ROOT', default='glacier',
@@ -48,7 +50,7 @@ n_glen = args.n_glen
 secpera = 31556926.0       # seconds per year
 g = 9.81                   # m s-2
 rho = 910.0                # kg m-3
-A_ice = 3.1689e-24         # Pa-3 s-1; EISMINT I value of ice softness; tied to n=3
+A_ice = 3.1689e-24         # Pa-3 s-1; EISMINT I value of ice softness; for n=3
 B_ice = A_ice**(-1.0/3.0)  # Pa s(1/3);  ice hardness
 
 from firedrake import *
@@ -56,7 +58,8 @@ from firedrake import *
 # input mesh and define geometry
 print('reading mesh from %s ...' % inname)
 mesh = Mesh(inname)
-print('mesh has %d vertices and %d elements' % (mesh.num_vertices(),mesh.num_cells()))
+print('mesh has %d vertices and %d elements' \
+      % (mesh.num_vertices(),mesh.num_cells()))
 base_id = 32
 inflow_id = 33
 outflow_id = 34
@@ -100,18 +103,20 @@ Du = 0.5 * (grad(u) + grad(u).T)
 normsqrDu = 0.5 * inner(Du, Du) + eps2
 rr = 0.5 * (1.0/n_glen - 1.0)
 
-#F = ( inner(B_ice * normsqrDu**rr * Du, grad(v)) - p * div(v) - div(u) * q - inner(f_body, v) ) * dx \
+#F = ( inner(B_ice * normsqrDu**rr * Du, grad(v)) - p * div(v) - div(u) * q \
+#      - inner(f_body, v) ) * dx \
 #    - inner(outflow_sigma, v) * ds(outflow_id)
 
 # FIXME:  choose rr=0  and  Du = grad(u)
-F = ( inner(B_ice * grad(u), grad(v)) - p * div(v) - div(u) * q - inner(f_body, v) ) * dx \
+F = ( inner(B_ice * grad(u), grad(v)) - p * div(v) - div(u) * q \
+      - inner(f_body, v) ) * dx \
     - inner(outflow_sigma, v) * ds(outflow_id)
 
 # slab-on-slope inflow boundary condition
 Hin = H + bs
 C = 2.0 * A_ice * (rho * g * sin(alpha))**n_glen / (n_glen + 1.0)
 inflow_u = as_vector([C * (H**(n_glen+1.0) - (Hin - z)**(n_glen+1.0)), 0.0])
-print(inflow_u.vector().array())
+#print(inflow_u.vector().array())
 
 bcs = [ DirichletBC(Z.sub(0), noslip, (base_id,)),
         DirichletBC(Z.sub(0), inflow_u, (inflow_id,)) ]
@@ -120,7 +125,7 @@ bcs = [ DirichletBC(Z.sub(0), noslip, (base_id,)),
 print('solving nonlinear variational problem with n_glen = %.3f ...' % n_glen)
 solve(F == 0, up, bcs=bcs,
       options_prefix='s',
-      solver_parameters={"snes_mf": True,  # FIXME only for very coarse grids
+      solver_parameters={"snes_fd": True,  # FIXME only for very coarse grids
                          "mat_type": "aij",
                          "ksp_type": "preonly",
                          "pc_type": "svd",
