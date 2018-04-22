@@ -140,11 +140,20 @@ Integration-by-parts rewrites $F$ to use the same number of derivatives on $(\bv
 \int_\Omega \left(\nabla \cdot \tau\right)\cdot \bv &= \sum_{j=1}^3 \int_\Omega \nabla \cdot (\tau_{j\circ})\, v_j = \sum_{j=1}^3 \int_\Omega \nabla \cdot (\tau_{j\circ}^\top v_j) - \tau_{j\circ}^\top \nabla v_j \\
   &= \sum_{j=1}^3 \int_{\partial \Omega} (\tau_{j\circ}^\top v_j) \cdot \hbn - \int_\Omega \tau_{j\circ}^\top \cdot \nabla v_j = \int_{\partial \Omega} (\tau \hbn)\cdot \bv - \int_\Omega \trace(\tau \nabla \bv)
 \end{align*}
-where $\circ$ denotes an index iterated-over.  FIXME, and similarly
-    $$\int_\Omega \nabla p \cdot \bv = \int_\Omega \nabla\cdot (p\,\bv) - p (\nabla \cdot \bv) = \int_{\partial \Omega} (p I\hbn)\cdot \bv - \int_\Omega p (\nabla \cdot \bv)$$
-These expressions allow us to rewrite \eqref{nonfuncone} with an integral of the normal stress over the boundary:
+where $\circ$ denotes an index iterated-over.  For this to make sense we define a $3\times 3$ matrix of gradients of the components of $\bv$:
+\newcommand{\trefthree}[3]{\left[\begin{array}{c|c|c} & & \\ #1 & #2 & #3 \\ & & \end{array}\right]}
+    $$\grad \bv = \trefthree{\grad v_1}{\grad v_2}{\grad v_3} = \begin{bmatrix}
+    (v_1)_{x_1} & (v_2)_{x_1} & (v_3)_{x_1} \\
+    (v_1)_{x_2} & (v_2)_{x_2} & (v_3)_{x_2} \\
+    (v_1)_{x_3} & (v_2)_{x_3} & (v_3)_{x_3}
+    \end{bmatrix}$$
+Then
+    $$\trace(\tau \grad \bv) = \sum_{j=1}^3 \tau_{j\circ}^\top \cdot \grad v_j = \sum_{i,j=1}^3 \tau_{ji} (v_j)_{x_i}$$
+In addition we do a notationally-straightforward application of integration-by-parts on the pressure portion:
+    $$\int_\Omega \nabla p \cdot \bv = \int_\Omega \nabla\cdot (p\,\bv) - p (\nabla \cdot \bv) = \int_{\partial \Omega} p\hbn \cdot \bv - \int_\Omega p (\nabla \cdot \bv)$$
+These expressions, and $\sigma=\tau-pI$, allow us to rewrite \eqref{nonfuncone} with an integral of the normal stress over the boundary:
 \begin{align}
-F(\bu,p;\bv,q) &= -\int_{\partial\Omega} ((\tau-pI) \hbn)\cdot \bv + \int_\Omega \tau \cdot \nabla \bv - p (\nabla \cdot \bv) - \rho \mathbf{g} \cdot \bv - \left(\nabla \cdot \bu\right) q \label{nonfunctwo}
+F(\bu,p;\bv,q) &= -\int_{\partial\Omega} (\sigma \hbn)\cdot \bv + \int_\Omega \trace(\tau \nabla \bv) - p (\nabla \cdot \bv) - \rho \mathbf{g} \cdot \bv - \left(\nabla \cdot \bu\right) q \label{nonfunctwo}
 \end{align}
 
 The weak formulation of the model, as follows, is proven in \cite{JouvetRappaz2011} to be well-posed under reasonable assumptions which will be satisfied in the cases we consider.
