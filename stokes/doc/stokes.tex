@@ -2,10 +2,8 @@
 
 \usepackage[total={6.3in,9.2in},top=1.1in,left=1.1in]{geometry}
 
-\usepackage{verbatim}
 \usepackage{empheq}
 \usepackage[dvipsnames]{xcolor}
-\usepackage{animate}
 \usepackage{graphicx}
 \usepackage{fancyvrb}
 
@@ -130,12 +128,9 @@ The solution is the pair $(\bu,p)$ where $\bu\in V_D$ and $p \in Q$ for function
 \begin{equation}
 F(\bu,p;\bv,q) = \int_\Omega - \left(\nabla \cdot \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu\right)\right)\cdot \bv + \nabla p \cdot \bv - \rho \mathbf{g} \cdot \bv - \left(\nabla \cdot \bu\right) q \label{nonfuncone}
 \end{equation}
-The nonlinear functional must be zero at the solution $(\bu,p)$:
-\begin{equation}
-F(\bu,p;\bv,q) = 0 \qquad \text{ for all } \bv\in V_0 \text{ and } q\in Q
-\end{equation}
+The nonlinear functional must be zero at the solution $(\bu,p)$ in the sense that $F(\bu,p;\bv,q) = 0$ for all  $\bv\in V_0$ and $q\in Q$.
 
-Integration-by-parts rewrites $F$ to use the same number of derivatives on $(\bv,q)$ as on $(\bu,p)$.  Recall integration-by-parts combines the product rule $\nabla \cdot(f\bX) = \grad f\cdot \bX + f \nabla \cdot \bX$ and the divergence theorem $\int_\Omega \nabla \cdot \bX = \int_{\partial \Omega} \bX \cdot \hbn$.  Denoting $\tau = B_n |D\bu|^{\frac{1}{n} - 1} D\bu$ we have
+Integration-by-parts rewrites $F$ using the same number of derivatives on $(\bv,q)$ as on $(\bu,p)$.  Recall integration-by-parts combines the product rule $\nabla \cdot(f\bX) = \grad f\cdot \bX + f \nabla \cdot \bX$ and the divergence theorem $\int_\Omega \nabla \cdot \bX = \int_{\partial \Omega} \bX \cdot \hbn$.  Denoting $\tau = B_n |D\bu|^{\frac{1}{n} - 1} D\bu$ we have
 \begin{align*}
 \int_\Omega \left(\nabla \cdot \tau\right)\cdot \bv &= \sum_{j=1}^3 \int_\Omega \nabla \cdot (\tau_{j\circ})\, v_j = \sum_{j=1}^3 \int_\Omega \nabla \cdot (\tau_{j\circ}^\top v_j) - \tau_{j\circ}^\top \nabla v_j \\
   &= \sum_{j=1}^3 \int_{\partial \Omega} (\tau_{j\circ}^\top v_j) \cdot \hbn - \int_\Omega \tau_{j\circ}^\top \cdot \nabla v_j = \int_{\partial \Omega} (\tau \hbn)\cdot \bv - \int_\Omega \trace(\tau \nabla \bv)
@@ -152,14 +147,37 @@ Then
 In addition we do a notationally-straightforward application of integration-by-parts on the pressure portion:
     $$\int_\Omega \nabla p \cdot \bv = \int_\Omega \nabla\cdot (p\,\bv) - p (\nabla \cdot \bv) = \int_{\partial \Omega} p\hbn \cdot \bv - \int_\Omega p (\nabla \cdot \bv)$$
 These expressions, and $\sigma=\tau-pI$, allow us to rewrite \eqref{nonfuncone} with an integral of the normal stress over the boundary:
+\begin{equation}
+F(\bu,p;\bv,q) = -\int_{\partial\Omega} (\sigma \hbn)\cdot \bv + \int_\Omega \trace(\tau \nabla \bv) - p (\nabla \cdot \bv) - \rho \mathbf{g} \cdot \bv - \left(\nabla \cdot \bu\right) q \label{nonfunctwo}
+\end{equation}
+Note that $\bu,\bv$ appear with at most first derivatives and $p,q$ appear only without derivatives in \eqref{nonfunctwo}.
+
+Boundary conditions \eqref{basebc}--\eqref{outflowbc} can now be incorporated into our formula for $F$ or into defining the space of test functions, and these actions eliminate the unknown solution functions $\bu,p$ from the integral over $\partial\Omega$.  Condition \eqref{basebc}, \eqref{inflowbc} lead us to require that $\bv\in V_0$ satisfy $\bv=0$ along the base and inflow surfaces.  Conditions \eqref{topbc}, \eqref{outflowbc} allow us to use known functions in those portions of the integral along $\partial\Omega$ (and without further requirements on $V_0$).  The velocity solution space $V_D$ is the same as $V_0$ except that along the inflow surface, where there is a nonhomogeneous Dirichlet boundary condition, a functions $\bu\in V_D$ has the boundary value $\bu=\left<f(z),0,0\right>$.
+
+FIXME note $\trace(D\bu \grad\bv) = \trace(D\bu D\bv)$ because symmetric orthogonal to antisymmetric
+
+These considerations yield our final formula for the nonlinear functional:
 \begin{align}
-F(\bu,p;\bv,q) &= -\int_{\partial\Omega} (\sigma \hbn)\cdot \bv + \int_\Omega \trace(\tau \nabla \bv) - p (\nabla \cdot \bv) - \rho \mathbf{g} \cdot \bv - \left(\nabla \cdot \bu\right) q \label{nonfunctwo}
+F(\bu,p;\bv,q) &= \int_\Omega \trace(B_n |D\bu|^{\frac{1}{n} - 1} D\bu \nabla \bv) - p (\nabla \cdot \bv) - \rho \mathbf{g} \cdot \bv - \left(\nabla \cdot \bu\right) q \label{defineF} \\
+    &\qquad -\int_{\{\text{outflow}\}} \rho g (h-z) v_1  \notag
 \end{align}
+The weak formulation of the Stokes model is the statement that $F$ is zero in all directions at the solution: the solution $\bu\in V_D$ and $p\in Q$ satisfies
+\begin{equation}
+F(\bu,p;\bv,q) = 0 \qquad \text{ for all } \bv\in V_0 \text{ and } q\in Q  \label{weak}
+\end{equation}
+Weak formulation \eqref{weak} is proven in \cite{JouvetRappaz2011} to be well-posed under reasonable assumptions about the domain $\Omega$ and boundary data which will be satisfied in the cases we consider.  Thus there is exactly one solution velocity-pressure pair $(\bu,p)$, and from now on in these notes our goal is to approximate it numerically.
 
-The weak formulation of the model, as follows, is proven in \cite{JouvetRappaz2011} to be well-posed under reasonable assumptions which will be satisfied in the cases we consider.
+\section{Slab-on-slope solutions}
 
+FIXME
 
+\section{Finite element method}
 
+FIXME
+
+\section{Firedrake code}
+
+\VerbatimInput[frame=lines,numbers=left,stepnumber=5,fontsize=\footnotesize]{../flowstep.py}
 
 \footnotesize
 
