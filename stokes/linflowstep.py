@@ -77,13 +77,22 @@ Z = V * W
 u,p = TrialFunctions(Z)
 v,q = TestFunctions(Z)
 
+def epsilon(v):
+    return 0.5*(grad(v) + grad(v).T)
+
 # define weak form
+
+#VERSION 1:
 a = ( nu_e * inner(grad(u), grad(v)) - p * div(v) - div(u) * q ) * dx
 
-# alternative from Mitchell thesis (2012) seems to cause pressure
-# concentration at bottom of outflow or SEG fault ???:
-#a = ( 0.25 * nu_e * inner(grad(u)+grad(u).T,grad(v)+grad(v).T) - p * div(v) - div(u) * q ) * dx
-# also consider using nabla_grad() instead of grad()?  but seems to make no difference ...
+#VERSION 2 seg faults:
+#a = ( nu_e * inner(epsilon(u), epsilon(v)) - p * div(v) - div(u) * q ) * dx
+
+#VERSION 3 works but different result from grad-only version:
+#a = ( 0.5 * nu_e * inner(grad(u)+grad(u).T, grad(v)+grad(v).T) - p * div(v) - div(u) * q ) * dx
+
+#VERSION 4 seg faults:
+#a = ( 0.25 * nu_e * inner(grad(u)+grad(u).T, grad(v)+grad(v).T) - p * div(v) - div(u) * q ) * dx
 
 # define body force
 f = Constant((g * rho * sin(alpha), - g * rho * cos(alpha)))
