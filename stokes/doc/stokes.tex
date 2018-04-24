@@ -101,7 +101,7 @@ Recall the viscosity form of flow law \eqref{flowlaw}, namely equation (15) in t
 \begin{equation}
 \tau = 2\nu D\bu = B_n |D\bu|^{\frac{1}{n} - 1} D\bu  \label{viscflowlaw}
 \end{equation}
-Here $B_n = A_n^{-1/n}$ is the $n$-dependent ice hardness.  With this expression we can eliminate $\tau$ and rewrite equations \eqref{incompressible}, \eqref{forcebalance} in terms of velocity and pressure as
+Here $B_n = (A_n)^{-1/n}$ is the $n$-dependent ice hardness.  With this expression we can eliminate $\tau$ and rewrite equations \eqref{incompressible}, \eqref{forcebalance} in terms of velocity and pressure as
 \begin{align}
 \Div \bu &= 0 \label{incompagain} \\
 - \nabla \cdot \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu\right) + \nabla p &= \rho \mathbf{g} \label{stokes}
@@ -154,8 +154,13 @@ The flow of a viscous, non-sliding fluid on a uniform slab will be such that $u_
     $$\left((u_z)^{1/n} \right)_z = - \frac{2^{1/n} \rho g\sin\alpha}{B_n}$$
 Again this can be integrated from the surface $z=h$, using the no-stress (no traction) condition which becomes $u_z=0$ here, to give
     $$u_z = 2 \left(\frac{\rho g\sin\alpha}{B_n}\right)^n (h-z)^n.$$
-Integrating from the base $z=b$ where $u=0$ gives
-    $$u = FIXME$$
+Integrating vertically one more time, from the base $z=b$ where $u=0$, gives
+    $$u = \frac{2}{n+1} \left(\frac{\rho g\sin\alpha}{B_n}\right)^n \left((h-b)^{n+1} - (h-z)^{n+1}\right)$$
+
+Based on ice sheet modeling traditions, and glaciological experiments starting with Glen, as noted above we have the value $A_3 = 3.1689 \times 10^{-24} \,\text{Pa}^{-3}\,\text{s}^{-1}$, so that $B_3 = (A_3)^{-1/3}$ is determined.  To give comparable solutions with glaciologically reasonable ice velocities, e.g.~on the order of tens to thousands of meters per year, we compute $B_n$ for any $n\ge 1$ so as to match the surface value in the $n=3$ case.  Thus we determine $B_n$ from the equation
+    $$\frac{2}{n+1} \left(\frac{\rho g\sin\alpha}{B_n}\right)^n (h-b)^{n+1} = \frac{1}{2} \left(\frac{\rho g\sin\alpha}{B_3}\right)^3 (h-b)^4$$
+FIXME
+
 
 \section{Weak form}
 
