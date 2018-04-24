@@ -53,6 +53,8 @@ rho = 910.0                # kg m-3
 A_ice = 3.1689e-24         # Pa-3 s-1; EISMINT I value of ice softness; for n=3
 B_ice = A_ice**(-1.0/3.0)  # Pa s(1/3);  ice hardness
 
+#FIXME  make n-dependent A_n, B_n so that slab-on-slope solutions give surface velocity that is n-independent
+
 from firedrake import *
 
 # input mesh and define geometry
@@ -96,33 +98,36 @@ outflow_sigma = as_vector([- rho * g * cos(alpha) * (H - z), 0.0])
 up = Function(Z)       # *not* TrialFunctions(Z)
 u,p = split(up)        # up.split() not equivalent here?
 
-# define the nonlinear weak form F(u;v)
-D_typical = 10.0 / secpera
-eps2 = 0.0001 * D_typical**2.0
-Du = 0.5 * (grad(u) + grad(u).T)
-normsqrDu = 0.5 * inner(Du, Du) + eps2
-rr = 0.5 * (1.0/n_glen - 1.0)
+def D(w):
+    return 0.5 * (grad(w) + grad(w).T)
 
-#F = ( inner(B_ice * normsqrDu**rr * Du, grad(v)) - p * div(v) - div(u) * q \
-#      - inner(f_body, v) ) * dx \
-#    - inner(outflow_sigma, v) * ds(outflow_id)
-
-# FIXME:  choose rr=0  and  Du = grad(u)
-F = ( inner(B_ice * grad(u), grad(v)) - p * div(v) - div(u) * q \
-      - inner(f_body, v) ) * dx \
-    - inner(outflow_sigma, v) * ds(outflow_id)
+# define the nonlinear weak form F(u,p;v,q)
+if n_glen == 1.0:
+    print('setting-up weak form in special Newtonian case (n_glen = 1.0) ...')
+    F = ( inner(B_ice * D(u), D(v)) - p * div(v) - div(u) * q \
+          - inner(f_body, v) ) * dx \
+        - inner(outflow_sigma, v) * ds(outflow_id)
+else:
+    print('setting-up weak form using n_glen = %.3f ...' % n_glen)
+    D_typical = 10.0 / secpera
+    eps2 = 0.0001 * D_typical**2.0
+    normsqrDu = 0.5 * inner(D(u), D(u)) + eps2
+    rr = 0.5 * (1.0/n_glen - 1.0)
+    F = ( inner(B_ice * normsqrDu**rr * D(u), D(v)) - p * div(v) - div(u) * q \
+          - inner(f_body, v) ) * dx \
+        - inner(outflow_sigma, v) * ds(outflow_id)
 
 # slab-on-slope inflow boundary condition
-Hin = H + bs
-C = 2.0 * A_ice * (rho * g * sin(alpha))**n_glen / (n_glen + 1.0)
-inflow_u = as_vector([C * (H**(n_glen+1.0) - (Hin - z)**(n_glen+1.0)), 0.0])
+hin = H + bs
+C = 2.0 * (rho * g * sin(alpha))**n_glen / (B_ice**n_glen * (n_glen + 1.0))
+inflow_u = as_vector([C * (hin**(n_glen+1.0) - (hin - z)**(n_glen+1.0)), 0.0])
 #print(inflow_u.vector().array())
 
 bcs = [ DirichletBC(Z.sub(0), noslip, (base_id,)),
         DirichletBC(Z.sub(0), inflow_u, (inflow_id,)) ]
 
 # solve
-print('solving nonlinear variational problem with n_glen = %.3f ...' % n_glen)
+print('solving nonlinear variational problem ...')
 solve(F == 0, up, bcs=bcs,
       options_prefix='s',
       solver_parameters={"snes_fd": True,  # FIXME only for very coarse grids
