@@ -92,13 +92,14 @@ geo.write('Line Loop(17) = {%s};\n' % loop)
 geo.write('Plane Surface(21) = {17};\n')
 
 # "Physical" for marking boundary conditions
-geo.write('Physical Line(31) = {11,12,13};\n')  # stress-free boundary (top)
+geo.write('Physical Line(30) = {9};\n')         # base of ice downstream of step
+geo.write('Physical Line(31) = {10};\n')        # outflow (right side)
+geo.write('Physical Line(32) = {11,12,13};\n')  # stress-free boundary (top)
 geo.write('Physical Line(33) = {14};\n')        # inflow (left side)
-geo.write('Physical Line(34) = {10};\n')        # outflow (right side)
-if abs(bs) >= 1.0:                              # base of ice
-    geo.write('Physical Line(32) = {9,15,16};\n')
+if abs(bs) >= 1.0:                              # base of ice upstream and step itself
+    geo.write('Physical Line(34) = {15,16};\n')
 else:
-    geo.write('Physical Line(32) = {9,15};\n')
+    geo.write('Physical Line(34) = {15};\n')
 
 # not clear following is needed
 geo.write('Physical Surface(41) = {21};\n')   # ensure all interior elements written(?)

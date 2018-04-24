@@ -55,9 +55,11 @@ print('effective viscosity %.2e Pa s' % nu_e)
 print('reading mesh from %s ...' % inname)
 mesh = Mesh(inname)
 print('mesh has %d vertices and %d elements' % (mesh.num_vertices(),mesh.num_cells()))
-base_id = 32
+basedown_id = 30
+outflow_id = 31
+top_id = 32  # unused below
 inflow_id = 33
-outflow_id = 34
+basestep_id = 34
 H = 400.0
 alpha = 0.1
 
@@ -103,7 +105,8 @@ noslip = Constant((0.0, 0.0))
 # assume Newtonian slab-on-slope inflow (uses nu_e)
 C = rho * g * sin(alpha) / nu_e
 inflow_u = as_vector([C * ((H + bs) * (z - bs) + (bs*bs - z*z)/2.0), 0.0])
-bcs = [ DirichletBC(Z.sub(0), noslip, (base_id,)),
+bcs = [ DirichletBC(Z.sub(0), noslip, (basedown_id,)),
+        DirichletBC(Z.sub(0), noslip, (basestep_id,)),
         DirichletBC(Z.sub(0), inflow_u, (inflow_id,)) ]
 
 # solve
