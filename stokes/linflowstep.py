@@ -27,12 +27,13 @@ defaultmix = 'P2P1'
 mixchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
 defaultf = 'glacier'
 parser = argparse.ArgumentParser(description='Solve Newtonian-fluid glacier bedrock step Stokes problem.')
+parser.add_argument('-bs', type=float, default=120.0, metavar='BS',
+                    help='height of bed step (m; default = 120.0)')
 parser.add_argument('-elements', metavar='X', default=defaultmix, choices=mixchoices,
                     help='stable mixed finite elements from: %s (default=%s)' % (','.join(mixchoices),defaultmix) )
 parser.add_argument('-f', metavar='ROOT', default=defaultf,
                     help='input/output file name root (default=%s)' % defaultf)
-parser.add_argument('-bs', type=float, default=120.0, metavar='BS',
-                    help='height of bed step (m; default = 120.0)')
+parser.add_argument('-epsilon', action='store_true', help='use epsilon(u) instead of grad(u) in weak form')
 args, unknown = parser.parse_known_args()
 inname = args.f + '.msh'
 outname = args.f + '.pvd'
@@ -81,18 +82,12 @@ def epsilon(v):
     return 0.5*(grad(v) + grad(v).T)
 
 # define weak form
-
-#VERSION 1:
-a = ( nu_e * inner(grad(u), grad(v)) - p * div(v) - div(u) * q ) * dx
-
-#VERSION 2 seg faults:
-#a = ( nu_e * inner(epsilon(u), epsilon(v)) - p * div(v) - div(u) * q ) * dx
-
-#VERSION 3 works but different result from grad-only version:
-#a = ( 0.5 * nu_e * inner(grad(u)+grad(u).T, grad(v)+grad(v).T) - p * div(v) - div(u) * q ) * dx
-
-#VERSION 4 seg faults:
-#a = ( 0.25 * nu_e * inner(grad(u)+grad(u).T, grad(v)+grad(v).T) - p * div(v) - div(u) * q ) * dx
+if args.epsilon:
+    print('setting up weak form using epsilon(u) ...')
+    a = ( nu_e * inner(epsilon(u), epsilon(v)) - p * div(v) - div(u) * q ) * dx
+else:
+    print('setting up weak form using grad(u) ...')
+    a = ( nu_e * inner(grad(u), grad(v)) - p * div(v) - div(u) * q ) * dx
 
 # define body force
 f = Constant((g * rho * sin(alpha), - g * rho * cos(alpha)))
