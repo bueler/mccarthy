@@ -60,26 +60,25 @@ urlcolor=black     % only if colorlinks=true
 
 This document is an appendix to my notes \emph{Numerical modelling of glaciers, ice sheets, and ice shelves}---here called ``the notes''---which are used for the International Summer School in Glaciology in McCarthy, Alaska.
 
-We start by stating the Stokes model with glacier-suitable boundary conditions.  Then we derive the ``weak form,'' as explained below.  A finite element (FE) method \cite{Elmanetal2014} is based on this weak form.  An overview of our FE method follows; it uses triangular elements for an arbitrary planar region.  We briefly discuss choosing stable mixed elements for the Stokes problem.  We construct slab-on-a-slope solutions both for verification and to clarify the boundary conditions.  Then we describe how four open-source tools/libraries are using to generate a numerical solution:
+We start by stating the Stokes model with glacier-suitable boundary conditions.  Then we derive the ``weak form,'' as explained below.  An overview of finite element (FE) methods \cite{Elmanetal2014}, which are based on such weak forms, follows.  Our particular FE method uses triangular elements for an arbitrary planar region and stable mixed elements; these ideas will be only briefly explained.  We construct slab-on-a-slope solutions both for verification and to clarify the boundary conditions.  Then we describe how four open-source tools/libraries are used to generate a numerical solution:
 \begin{itemize}
 \item Gmsh, a mesh generator \hfill \url{http://gmsh.info/}
 \item Firedrake, an FE library \hfill \url{https://www.firedrakeproject.org/}
 \item PETSc, a solver library \hfill \url{http://www.mcs.anl.gov/petsc/}
 \item Paraview, visualization tool \hfill \url{https://www.paraview.org/}
 \end{itemize}
-These notes end by demonstrating a relatively-short Python code.
+Finally we demonstrate a relatively-short Python code.
 
-\section{Stokes equations and their weak form}
 
-Recall the Glen-Stokes model in equations (3), (4), (5) from the notes---it is also stated in \cite{GreveBlatter2009,JouvetRappaz2011}.  Allowing any Glen exponent $n\ge 1$, the equations are:
+\section{Stokes equations}
+
+Recall the Glen-Stokes model in equations (3), (4), (5) from the notes.  (It is also stated in \cite{GreveBlatter2009,JouvetRappaz2011}.)  Allowing any Glen exponent $n\ge 1$, the equations are:
 \begin{align}
 \nabla \cdot \bu &= 0 &&\text{\emph{incompressibility}} \label{incompressible} \\
 - \nabla \cdot \tau + \nabla p &= \rho \bg &&\text{\emph{stress balance}} \label{forcebalance} \\
 D\bu &= A_n |\tau|^{n-1} \tau &&\text{\emph{Glen flow law}} \label{flowlaw}
 \end{align}
-The velocity $\bu$, pressure $p$, ice density $\rho$, acceleration of gravity $\bg$, deviatoric stress tensor $\tau$ and strain rate tensor $D\bu$ all appear.  Note that $A_n$ in \eqref{flowlaw} is the $n$-dependent ice softness.  The model applies on a 3D domain $\Omega\subset \RR^3$ or 2D domain $\Omega \subset \RR^2$ according to the context.
-
-Though the notation here generally follows Table 1 in the notes, some of usage is more general or flexible.  For example, Table 1 shows $A = A_3 = 10^{-16} \,\text{Pa}^{-3}\,\text{a}^{-1} = 3.1689 \times 10^{-24} \,\text{Pa}^{-3}\,\text{s}^{-1}$, but generally the units of $A_n$ are $\text{Pa}^{-n}\,\text{s}^{-1}$.
+The velocity $\bu$, pressure $p$, ice density $\rho$, acceleration of gravity $\bg$, deviatoric stress tensor $\tau$ and strain rate tensor $D\bu$ all appear.  Though the notation here generally follows Table 1 in the notes, some usage is more general or flexible.  For example, $A_n$ in \eqref{flowlaw} is the $n$-dependent ice softness.  Table 1 shows $A = A_3 = 10^{-16} \,\text{Pa}^{-3}\,\text{a}^{-1} = 3.1689 \times 10^{-24} \,\text{Pa}^{-3}\,\text{s}^{-1}$, but generally the units of $A_n$ are $\text{Pa}^{-n}\,\text{s}^{-1}$.  The model applies on a 3D or 2D domain $\Omega$ according to the context.
 
 Regarding tensors and their norms we have:
 \begin{align*}
@@ -123,6 +122,14 @@ where the outward normal is $\hbn=\left<1,0,0\right>^\top$, $h$ is the surface e
 \includegraphics[width=0.95\textwidth]{stepflowlin}
 \caption{A 2D Stokes problem for a glacier flowing over a bedrock step.  Arrows show velocity $\bu$ and shading is by pressure $p$.  Note the (coarse) mesh of triangular finite elements.}
 \end{figure}
+
+
+\section{Slab-on-slope solutions}
+
+FIXME
+
+
+\section{Weak form}
 
 The solution is the pair $(\bu,p)$ where $\bu\in V_D$ and $p \in Q$ for function spaces $V_D,Q$ precisely identified in \cite{JouvetRappaz2011}.  The weak formulation is derived by multiplying the equations by arbitrary test functions, from nearly the same spaces as the solution, to define a scalar-valued nonlinear functional $F$.  (The differences between spaces $V_D$ and $V_0$, explained below, relate only to the value of Dirichlet boundary conditions \cite{JouvetRappaz2011}.)  Specifically we multiply \eqref{incompagain} by test function $q\in Q$ and \eqref{stokes} by test function $\bv\in V_0$, and combine:
 \begin{equation}
