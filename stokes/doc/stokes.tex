@@ -45,7 +45,7 @@ urlcolor=black     % only if colorlinks=true
 
 
 \begin{document}
-\graphicspath{{../figures/}}
+\graphicspath{{figures/}}
 
 \title[Appendix A: A finite element Stokes solver for glacier flow]{Appendix A: A finite element Stokes solver \\ for glacier flow}
 
@@ -128,8 +128,34 @@ The domain $\Omega$ must have a smooth-enough boundary to apply the boundary con
 
 \section{Slab-on-slope solutions}
 
-FIXME
+Because testing a glacier model requires these tools, and because they can help in achieving convergence of our nonlinear solver, we recapitulate the construction of the slab-on-slope solutions as given in the notes.  This time we allow any Glen exponent $n$ and we determine the $n$-dependent ice hardness $B_n$ so that these solutions have the same surface velocity for any $n$.
 
+Suppose the domain $\Omega$ is 2D and is the set of points $(x,y,z)$ where $y=0$.  Also denote the components of velocity as $\bu=\left<u,v,w\right>$.  Suppose there is no variation in the cross-flow direction ($\partial/\partial y=0$) and no cross-flow velocity ($v=0$).  Finally suppose that the force of gravity is downward but at angle $\alpha$ with the $z$-direction so that $\bg = \left<g\sin\alpha,0,-g\cos\alpha\right>$ where $g=|\bg|$.  Let $\gamma=\frac{1}{n}-1$.  Then equations \eqref{incompagain}, \eqref{stokes} become the system
+\begin{align*}
+u_x + w_z &= 0 \\
+- \left(B_n |D\bu|^\gamma u_x\right)_x - \left(B_n |D\bu|^\gamma \frac{1}{2} \left(u_z+w_x\right)\right)_z + p_x &= \rho g\sin\alpha \\
+- \left(B_n |D\bu|^\gamma \frac{1}{2} \left(u_z+w_x\right)\right)_x - \left(B_n |D\bu|^\gamma w_z\right)_z + p_z &= -\rho g\cos\alpha
+\end{align*}
+and the strain-rate norm expands/simplifies to
+    $$|D\bu| = \sqrt{\frac{1}{2} \left(u_x^2 + \frac{1}{2}(u_z+w_x)^2 + w_z^2\right)}$$
+These equations are merely the 2D form of the Stokes model, as written-out using coordinates $(x,z)$ and velocity $\bu=\left<u,w\right>$.
+
+Now suppose there is no variation in $x$, i.e.~that $\partial/\partial_x=0$, and that the domain $\Omega$ is a slab such that $b < z < h$ for fixed ($x$-independent) values of the bed elevation $b$ and the surface elevation $h$.  This is the situation of an infinitely-long, or periodic, slab flow.  Then the system simplifies to
+\begin{align*}
+w_z &= 0 \\
+- \left(B_n |D\bu|^\gamma \frac{1}{2} u_z\right)_z &= \rho g\sin\alpha \\
+- \left(B_n |D\bu|^\gamma w_z\right)_z + p_z &= -\rho g\cos\alpha
+\end{align*}
+and the strain-rate norm simplifies to $|D\bu| = \sqrt{\frac{1}{2} \left(\frac{1}{2}u_z^2 + w_z^2\right)}$.
+
+From the first equation, if we furthermore assume that there is no slip at the base then $w=0$ identically.  Then the third equation allows integration with respect to $z$, and assuming zero pressure at the surface gives $p = \rho g\cos\alpha (h-z)$.  Also $|D\bu| = \frac{1}{2} |u_z|$.  We now have a single nontrivial equation to solve for the horizontal velocity:
+    $$- \left(\frac{B_n}{2^{\gamma+1}} |u_z|^\gamma u_z\right)_z = \rho g\sin\alpha$$
+The flow of a viscous, non-sliding fluid on a uniform slab will be such that $u_z>0$.  Also returning to the direct use of the Glen exponent $n$, and with some rearrangement, the last equation is
+    $$\left((u_z)^{1/n} \right)_z = - \frac{2^{1/n} \rho g\sin\alpha}{B_n}$$
+Again this can be integrated from the surface $z=h$, using the no-stress (no traction) condition which becomes $u_z=0$ here, to give
+    $$u_z = 2 \left(\frac{\rho g\sin\alpha}{B_n}\right)^n (h-z)^n.$$
+Integrating from the base $z=b$ where $u=0$ gives
+    $$u = FIXME$$
 
 \section{Weak form}
 
