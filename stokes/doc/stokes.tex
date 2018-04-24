@@ -72,55 +72,57 @@ Finally we demonstrate a relatively-short Python code.
 
 \section{Stokes equations}
 
-Recall the Glen-Stokes model in equations (3), (4), (5) from the notes.  (It is also stated in \cite{GreveBlatter2009,JouvetRappaz2011}.)  Allowing any Glen exponent $n\ge 1$, the equations are:
+Recall the Glen-Stokes model in equations (3), (4), (5) from the notes.  (It is also stated in \cite{GreveBlatter2009,JouvetRappaz2011}.)  The model applies on a 3D or 2D domain $\Omega$ according to the context.  Allowing any Glen exponent $n\ge 1$, the equations are:
 \begin{align}
 \nabla \cdot \bu &= 0 &&\text{\emph{incompressibility}} \label{incompressible} \\
 - \nabla \cdot \tau + \nabla p &= \rho \bg &&\text{\emph{stress balance}} \label{forcebalance} \\
 D\bu &= A_n |\tau|^{n-1} \tau &&\text{\emph{Glen flow law}} \label{flowlaw}
 \end{align}
-The velocity $\bu$, pressure $p$, ice density $\rho$, acceleration of gravity $\bg$, deviatoric stress tensor $\tau$ and strain rate tensor $D\bu$ all appear.  Though the notation here generally follows Table 1 in the notes, some usage is more general or flexible.  For example, $A_n$ in \eqref{flowlaw} is the $n$-dependent ice softness.  Table 1 shows $A = A_3 = 10^{-16} \,\text{Pa}^{-3}\,\text{a}^{-1} = 3.1689 \times 10^{-24} \,\text{Pa}^{-3}\,\text{s}^{-1}$, but generally the units of $A_n$ are $\text{Pa}^{-n}\,\text{s}^{-1}$.  The model applies on a 3D or 2D domain $\Omega$ according to the context.
+The velocity $\bu$, pressure $p$, ice density $\rho$, acceleration of gravity $\bg$, deviatoric stress tensor $\tau$ and strain rate tensor $D\bu$ all appear.  Recall $D\bu$ involves derivatives of velocity:
+\begin{equation}
+(D\bu)_{ij} = \frac{1}{2} \left((u_i)_{x_j} + (u_j)_{x_i}\right) \label{strainrate}
+\end{equation}
 
-Regarding tensors and their norms we have:
+Though the notation here generally follows Table 1 in the notes, some usage is more general or flexible.  For example, $A_n$ in \eqref{flowlaw} is the $n$-dependent ice softness.  Table 1 shows $A = A_3 = 10^{-16} \,\text{Pa}^{-3}\,\text{a}^{-1} = 3.1689 \times 10^{-24} \,\text{Pa}^{-3}\,\text{s}^{-1}$, but generally the units of $A_n$ are $\text{Pa}^{-n}\,\text{s}^{-1}$.  Regarding tensor norm notation we have:
 \begin{align*}
-(D\bu)_{ij} &= \frac{1}{2} \left((u_i)_{x_j} + (u_j)_{x_i}\right) \\
-|\tau|^2 &= \frac{1}{2} \trace\left(\tau^2\right) = \frac{1}{2} \tau_{ij} \tau_{ij} \\
-|D\bu|^2 &= \frac{1}{2} \trace\left((D\bu)^2\right) = \frac{1}{2} (D\bu)_{ij} (D\bu)_{ij}
+|\tau|^2 = \frac{1}{2} \trace\left(\tau^2\right) = \frac{1}{2} \tau_{ij} \tau_{ij}, \qquad |D\bu|^2 = \frac{1}{2} \trace\left((D\bu)^2\right) = \frac{1}{2} (D\bu)_{ij} (D\bu)_{ij}
 \end{align*}
-In the last two expressions the Einstein summation is used, either over indices $i,j=1,2,3$ or $i,j=1,2$ according to dimension.  Note that the tensors $D\bu$ and $\tau$ are symmetric and have trace zero.  Also, the full (Cauchy) stress tensor $\sigma$ is the deviatoric stress tensor $\tau$ minus the pressure,
+In the last two expressions the Einstein summation is used over indices $i,j=1,2,3$ or $i,j=1,2$ according to dimension.
+
+Tensors $D\bu$ and $\tau$ are symmetric and have trace zero.  The full (Cauchy) stress tensor $\sigma$ is the deviatoric stress tensor $\tau$ minus the pressure,
 \begin{equation}
     \sigma = \tau - p\,I,  \label{cauchystress}
 \end{equation}
-so equation \eqref{forcebalance} may be written as $-\Div \sigma = \rho \bg$.  One may derive from \eqref{cauchystress} that $p = -\frac{1}{3} \trace(\sigma)$, because $\tau$ has trace zero, thus that the pressure is the negative of the average normal stress.  Finally, by definition the divergence of the tensor $\tau$ has components which we regard as the divergences of the rows:
-    $$\left(\nabla \cdot \tau\right)_i = \left(\tau_{i1}\right)_{x_1} + \left(\tau_{i2}\right)_{x_2} + \left(\tau_{i3}\right)_{x_3},$$
-Then $\nabla\cdot \tau$ would be a column vector, necessarily like $\nabla p$ and $\bg$ in \eqref{forcebalance}.
+so equation \eqref{forcebalance} is simply $-\Div \sigma = \rho \bg$.  One may derive that $p = -\frac{1}{3} \trace(\sigma)$ thus that the pressure is the negative of the average normal stress.  By definition $\Div\tau$ in \eqref{forcebalance} is a vector with components which we take to be the divergences of the rows:
+    $$\left(\nabla \cdot \tau\right)_i = \left(\tau_{i1}\right)_{x_1} + \left(\tau_{i2}\right)_{x_2} + \left(\tau_{i3}\right)_{x_3}$$
+Thus $\nabla\cdot \tau$ is a column vector like $\nabla p$ and $\bg$ in \eqref{forcebalance}.
 
 Recall the viscosity form of flow law \eqref{flowlaw}, namely equation (15) in the notes:
 \begin{equation}
 \tau = 2\nu D\bu = B_n |D\bu|^{\frac{1}{n} - 1} D\bu  \label{viscflowlaw}
 \end{equation}
-Here $B_n = A_n^{-1/n}$ is the $n$-dependent ice hardness.  With this expression we can eliminate $\tau$ and rewrite equations \eqref{incompressible}, \eqref{forcebalance} as
+Here $B_n = A_n^{-1/n}$ is the $n$-dependent ice hardness.  With this expression we can eliminate $\tau$ and rewrite equations \eqref{incompressible}, \eqref{forcebalance} in terms of velocity and pressure as
 \begin{align}
 \Div \bu &= 0 \label{incompagain} \\
 - \nabla \cdot \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu\right) + \nabla p &= \rho \mathbf{g} \label{stokes}
 \end{align}
-The Stokes model in strong form is, from now on, equations \eqref{incompagain}, \eqref{stokes} with certain boundary conditions, and the solution is the velocity-pressure pair $(\bu,p)$.
+The Stokes model is, from now on, equations \eqref{incompagain}, \eqref{stokes} with certain boundary conditions.  The solution is the velocity-pressure pair $(\bu,p)$.
 
-The domain $\Omega$ must have a smooth-enough boundary to apply the boundary conditions but it is otherwise general.  To explain the boundary conditions consider the numerical solution shown in Figure \ref{fig:stepflowlin}.  The particular problems solved here will have well-defined base, top, inflow, and outflow boundary surfaces.  On the base we require no slip:
+The domain $\Omega$ must have a smooth-enough boundary to apply the boundary conditions but it is otherwise general.  However, certain glacier-suitable boundary conditions are used in this document and in the code below.  To explain these, consider the numerical solution shown in Figure \ref{fig:stepflowlin}.  We assume that base, top, inflow, and outflow boundary surfaces are all well-defined.  On the base we require no slip:
 \begin{align}
 \bu &= 0  &&\text{\emph{base}} \label{basebc} \\
 \intertext{On the top we set a condition of zero normal stress, $\sigma\hbn=0$ or equivalently:}
 \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= 0  &&\text{\emph{top}} \label{topbc} \\
-\intertext{On the inflow boundary, the left side in Figure \ref{fig:stepflowlin}, a surface with outward normal $\hbn=\left<-1,0,0\right>^\top$ in the cases we solve, we set a nonzero inflow velocity:}
+\intertext{As shown in Figure \ref{fig:stepflowlin}, the left-side inflow boundary is a surface with outward normal $\hbn=\left<-1,0,0\right>^\top$ in all cases we solve.  On this surface we set a nonzero inflow velocity:}
 \bu &= \left<f(z),0,0\right>^\top  &&\text{\emph{inflow}} \label{inflowbc} \\
-\intertext{The inflow function $f(z)$ will be defined later as satisfying the slab-on-slope equations.  Finally for the outflow boundary we se a nonzero normal stress condition bases on assuming hydrostatic normal stress:}
+\intertext{(Velocity $f(z)$ will satisfy the slab-on-slope equations; see below.)  On the outflow boundary, where $\hbn=\left<1,0,0\right>^\top$ is the outward normal, $h$ is the surface elevation, and $g=|\bg|$, we set a nonzero hydrostatic normal stress:}
 \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= \left<-\rho g (h-z),0,0\right>^\top  &&\text{\emph{outflow}} \label{outflowbc}
 \end{align}
-where the outward normal is $\hbn=\left<1,0,0\right>^\top$, $h$ is the surface elevation, and $g=|\bg|$.
 
 \begin{figure}
 \label{fig:stepflowlin}
 \includegraphics[width=0.95\textwidth]{stepflowlin}
-\caption{A 2D Stokes problem for a glacier flowing over a bedrock step.  Arrows show velocity $\bu$ and shading is by pressure $p$.  Note the (coarse) mesh of triangular finite elements.}
+\caption{A glacier flowing over a bedrock step.  Arrows show velocity $\bu$.  Shading is pressure $p$.  Note the coarse mesh of triangular finite elements.}
 \end{figure}
 
 
@@ -131,48 +133,52 @@ FIXME
 
 \section{Weak form}
 
-The solution is the pair $(\bu,p)$ where $\bu\in V_D$ and $p \in Q$ for function spaces $V_D,Q$ precisely identified in \cite{JouvetRappaz2011}.  The weak formulation is derived by multiplying the equations by arbitrary test functions, from nearly the same spaces as the solution, to define a scalar-valued nonlinear functional $F$.  (The differences between spaces $V_D$ and $V_0$, explained below, relate only to the value of Dirichlet boundary conditions \cite{JouvetRappaz2011}.)  Specifically we multiply \eqref{incompagain} by test function $q\in Q$ and \eqref{stokes} by test function $\bv\in V_0$, and combine:
+The Stokes equations \eqref{incompagain}, \eqref{stokes} are PDEs called the \emph{strong form} of the model.  The \emph{weak form}, needed to construct an FE method, is derived by multiplying the equations by arbitrary test functions and then integrating over $\Omega$ so as to define a scalar-valued nonlinear functional $F$.  In the FE method the test functions will be locally constructed from the triangular mesh.
+
+The solution is the pair $(\bu,p)$ where $\bu\in V_D$ and $p \in Q$ for function spaces precisely identified in \cite{JouvetRappaz2011}.  The test functions come from nearly the same spaces but with differences relating (only) to the value of Dirichlet boundary conditions: the solution velocity $\bu\in V_D$ satisfies \eqref{basebc}, \eqref{inflowbc} while the test functions $\bv\in V_0$ are zero on both base and inflow surfaces.  The test pressures are from $Q$ just like $p$.
+
+We multiply \eqref{incompagain} by $q\in Q$ and \eqref{stokes} by $\bv\in V_0$, and combine to define $F$:
 \begin{equation}
 F(\bu,p;\bv,q) = \int_\Omega - \left(\nabla \cdot \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu\right)\right)\cdot \bv + \nabla p \cdot \bv - \rho \mathbf{g} \cdot \bv - \left(\nabla \cdot \bu\right) q \label{nonfuncone}
 \end{equation}
 The nonlinear functional must be zero at the solution $(\bu,p)$ in the sense that $F(\bu,p;\bv,q) = 0$ for all  $\bv\in V_0$ and $q\in Q$.
 
-Integration-by-parts rewrites $F$ using the same number of derivatives on $(\bv,q)$ as on $(\bu,p)$.  Recall integration-by-parts combines the product rule $\nabla \cdot(f\bX) = \grad f\cdot \bX + f \nabla \cdot \bX$ and the divergence theorem $\int_\Omega \nabla \cdot \bX = \int_{\partial \Omega} \bX \cdot \hbn$.  Denoting $\tau = B_n |D\bu|^{\frac{1}{n} - 1} D\bu$ we have
+Integration-by-parts rewrites $F$ to balance the derivatives on $(\bv,q)$ and $(\bu,p)$.  Recall the product rule $\nabla \cdot(f\bX) = \grad f\cdot \bX + f \nabla \cdot \bX$ and the divergence theorem $\int_\Omega \nabla \cdot \bX = \int_{\partial \Omega} \bX \cdot \hbn$.  Again denoting $\tau = B_n |D\bu|^{\frac{1}{n} - 1} D\bu$ we have
 \begin{align*}
 \int_\Omega \left(\nabla \cdot \tau\right)\cdot \bv &= \sum_{j=1}^3 \int_\Omega \nabla \cdot (\tau_{j\circ})\, v_j = \sum_{j=1}^3 \int_\Omega \nabla \cdot (\tau_{j\circ}^\top v_j) - \tau_{j\circ}^\top \nabla v_j \\
   &= \sum_{j=1}^3 \int_{\partial \Omega} (\tau_{j\circ}^\top v_j) \cdot \hbn - \int_\Omega \tau_{j\circ}^\top \cdot \nabla v_j = \int_{\partial \Omega} (\tau \hbn)\cdot \bv - \int_\Omega \trace(\tau \nabla \bv)
 \end{align*}
-where $\circ$ denotes an index iterated-over.  For this to make sense we define a $3\times 3$ matrix of gradients of the components of $\bv$:
+where $\circ$ denotes an index iterated-over, $\tau_{j\circ}$ denotes the $j$th row of $\tau$, and $\tau_{j\circ}^\top$ denotes the same vector regarded as a column vector.  Also recall $\grad\bv$ defines a $3\times 3$ matrix,
 \newcommand{\trefthree}[3]{\left[\begin{array}{c|c|c} & & \\ #1 & #2 & #3 \\ & & \end{array}\right]}
     $$\grad \bv = \trefthree{\grad v_1}{\grad v_2}{\grad v_3} = \begin{bmatrix}
     (v_1)_{x_1} & (v_2)_{x_1} & (v_3)_{x_1} \\
     (v_1)_{x_2} & (v_2)_{x_2} & (v_3)_{x_2} \\
     (v_1)_{x_3} & (v_2)_{x_3} & (v_3)_{x_3}
     \end{bmatrix}$$
-Then
+so
     $$\trace(\tau \grad \bv) = \sum_{j=1}^3 \tau_{j\circ}^\top \cdot \grad v_j = \sum_{i,j=1}^3 \tau_{ji} (v_j)_{x_i}$$
-In addition we do a notationally-straightforward application of integration-by-parts on the pressure portion:
+Also, because $\trace(AB)=0$ if $A$ is symmetric and $B$ is antisymmetric, in fact $\trace(\tau \grad \bv) = \trace(\tau D\bv)$.  (To show this take $A=\tau$ and $B=\grad\bv-D\bv$.)  Regarding notation in other sources, for the Stokes equations it is common to write $A:B$ for $\trace(AB)$.
+
+In addition we do a straightforward integration-by-parts on the pressure portion:
     $$\int_\Omega \nabla p \cdot \bv = \int_\Omega \nabla\cdot (p\,\bv) - p (\nabla \cdot \bv) = \int_{\partial \Omega} p\hbn \cdot \bv - \int_\Omega p (\nabla \cdot \bv)$$
-These expressions, and $\sigma=\tau-pI$, allow us to rewrite \eqref{nonfuncone} with an integral of the normal stress over the boundary:
+These facts, plus denoting $\sigma=\tau-pI$ for clarity, allow us to rewrite \eqref{nonfuncone} with an integral of the normal stress over the boundary:
 \begin{equation}
-F(\bu,p;\bv,q) = -\int_{\partial\Omega} (\sigma \hbn)\cdot \bv + \int_\Omega \trace(\tau \nabla \bv) - p (\nabla \cdot \bv) - \rho \mathbf{g} \cdot \bv - \left(\nabla \cdot \bu\right) q \label{nonfunctwo}
+F(\bu,p;\bv,q) = -\int_{\partial\Omega} (\sigma \hbn)\cdot \bv + \int_\Omega \trace(\tau D\bv) - p (\nabla \cdot \bv) - \left(\nabla \cdot \bu\right) q - \rho \mathbf{g} \cdot \bv \label{nonfunctwo}
 \end{equation}
-Note that $\bu,\bv$ appear with at most first derivatives and $p,q$ appear only without derivatives in \eqref{nonfunctwo}.
+Note that $\bu,\bv$ now appear with at most first derivatives and $p,q$ appear only without derivatives in \eqref{nonfunctwo}.
 
-Boundary conditions \eqref{basebc}--\eqref{outflowbc} can now be incorporated into our formula for $F$ or into defining the space of test functions, and these actions eliminate the unknown solution functions $\bu,p$ from the integral over $\partial\Omega$.  Condition \eqref{basebc}, \eqref{inflowbc} lead us to require that $\bv\in V_0$ satisfy $\bv=0$ along the base and inflow surfaces.  Conditions \eqref{topbc}, \eqref{outflowbc} allow us to use known functions in those portions of the integral along $\partial\Omega$ (and without further requirements on $V_0$).  The velocity solution space $V_D$ is the same as $V_0$ except that along the inflow surface, where there is a nonhomogeneous Dirichlet boundary condition, a functions $\bu\in V_D$ has the boundary value $\bu=\left<f(z),0,0\right>$.
-
-FIXME note $\trace(D\bu \grad\bv) = \trace(D\bu D\bv)$ because symmetric orthogonal to antisymmetric
-
-These considerations yield our final formula for the nonlinear functional:
+Recall that $\bv\in V_0$ satisfies $\bv=0$ along the base and inflow surfaces so these portions of the above integral over $\partial\Omega$ are zero.  Conditions \eqref{topbc}, \eqref{outflowbc} therefore completely eliminate the unknown solution $\bu,p$ from the boundary integral, and this yields our final formula for the nonlinear functional:
 \begin{align}
-F(\bu,p;\bv,q) &= \int_\Omega \trace(B_n |D\bu|^{\frac{1}{n} - 1} D\bu \nabla \bv) - p (\nabla \cdot \bv) - \rho \mathbf{g} \cdot \bv - \left(\nabla \cdot \bu\right) q \label{defineF} \\
-    &\qquad -\int_{\{\text{outflow}\}} \rho g (h-z) v_1  \notag
+F(\bu,p;\bv,q) &= \int_\Omega B_n |D\bu|^{\frac{1}{n} - 1} \trace(D\bu D\bv) - p (\nabla \cdot \bv) - \left(\nabla \cdot \bu\right) q \label{defineF} \\
+    &\qquad  - \int_\Omega \rho \mathbf{g} \cdot \bv - \int_{\{\text{outflow}\}} \rho g (h-z) v_1  \notag
 \end{align}
+The last two integrals can be regarded as the source terms.  For example, if we replace them by zero---no gravity or outflow stress---then we expect solution $\bu=0$ and $p=0$.
+
 The weak formulation of the Stokes model is the statement that $F$ is zero in all directions at the solution: the solution $\bu\in V_D$ and $p\in Q$ satisfies
 \begin{equation}
 F(\bu,p;\bv,q) = 0 \qquad \text{ for all } \bv\in V_0 \text{ and } q\in Q  \label{weak}
 \end{equation}
-Weak formulation \eqref{weak} is proven in \cite{JouvetRappaz2011} to be well-posed under reasonable assumptions about the domain $\Omega$ and boundary data which will be satisfied in the cases we consider.  Thus there is exactly one solution velocity-pressure pair $(\bu,p)$, and from now on in these notes our goal is to approximate it numerically.
+This weak formulation is proven in \cite{JouvetRappaz2011} to be well-posed under reasonable assumptions about the domain $\Omega$ and boundary data which will be satisfied in the cases we consider.  Thus there is exactly one solution pair $(\bu,p)$.  From now on our goal is to approximate this solution numerically.
 
 
 \section{Finite element method}
