@@ -51,23 +51,36 @@ urlcolor=black     % only if colorlinks=true
 
 \author{Ed Bueler}
 
-\date{\today}
-
 \maketitle
+
+\vspace{-8mm}
+\begin{center}
+\footnotesize
+\emph{\today}
+\end{center}
+
+\bigskip
 
 \renewcommand{\theequation}{A\arabic{equation}}
 
-
 This document is an appendix to my notes \emph{Numerical modelling of glaciers, ice sheets, and ice shelves}---here called ``the notes''---which are used for the International Summer School in Glaciology in McCarthy, Alaska.
 
-We start by stating the Stokes model with glacier-suitable boundary conditions.  Then we derive the ``weak form,'' as explained below.  An overview of finite element (FE) methods \cite{Elmanetal2014}, which are based on such weak forms, follows.  Our particular FE method uses triangular elements for an arbitrary planar region and stable mixed elements; these ideas will be only briefly explained.  We construct slab-on-a-slope solutions both for verification and to clarify the boundary conditions.  Then we describe how four open-source tools/libraries are used to generate a numerical solution:
+We start by stating the Stokes model with glacier-suitable boundary conditions.  Next we construct slab-on-a-slope solutions both for verification and to clarify the boundary conditions.  Then we derive the ``weak form,'' as explained below.  An overview of finite element (FE) methods \cite{Elmanetal2014}, which are based on such weak forms, follows.  Our particular FE method uses triangular elements for an arbitrary planar region and stable mixed elements; these ideas will be only briefly explained.
+
+The main goal of this appendix comes next, namely to generate a numerical solution to a 2D glacier flow with a step in the bedrock (Figure \ref{fig:stepflowlin}).  This numerical solution uses four advanced open source tools/libraries:
 \begin{itemize}
 \item Gmsh, a mesh generator \hfill \url{http://gmsh.info/}
 \item Firedrake, an FE library \hfill \url{https://www.firedrakeproject.org/}
 \item PETSc, a solver library \hfill \url{http://www.mcs.anl.gov/petsc/}
-\item Paraview, visualization tool \hfill \url{https://www.paraview.org/}
+\item Paraview, a visualization tool \hfill \url{https://www.paraview.org/}
 \end{itemize}
-Finally we demonstrate a relatively-short Python code.
+These tools are driven by two short Python codes which are included at the end.
+
+\begin{figure}[h]
+\label{fig:stepflowlin}
+\includegraphics[width=0.8\textwidth,angle=-5.7296]{stepflowlin}  % 0.1 radian = 5.7296 degrees
+\caption{A glacier flowing over a bedrock step.  Arrows show velocity $\bu$.  Shading is pressure $p$.  Note the coarse mesh of triangular finite elements.}
+\end{figure}
 
 
 \section{Stokes equations}
@@ -119,47 +132,45 @@ The domain $\Omega$ must have a smooth-enough boundary to apply the boundary con
 \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= \left<-\rho g (h-z),0,0\right>^\top  &&\text{\emph{outflow}} \label{outflowbc}
 \end{align}
 
-\begin{figure}
-\label{fig:stepflowlin}
-\includegraphics[width=0.95\textwidth]{stepflowlin}
-\caption{A glacier flowing over a bedrock step.  Arrows show velocity $\bu$.  Shading is pressure $p$.  Note the coarse mesh of triangular finite elements.}
-\end{figure}
-
 
 \section{Slab-on-slope solutions}
 
-Because testing a glacier model requires these tools, and because they can help in achieving convergence of our nonlinear solver, we recapitulate the construction of the slab-on-slope solutions as given in the notes.  This time we allow any Glen exponent $n$ and we determine the $n$-dependent ice hardness $B_n$ so that these solutions have the same surface velocity for any $n$.
+Testing a numerical model requires verification tools, namely exact solutions.  Thus we recapitulate the construction of the slab-on-slope solutions which was given in the notes, but this time allowing any Glen exponent $n$.  We determine the $n$-dependent ice hardness $B_n$ so that these solutions have the same surface velocity for any $n$.
 
-Suppose the domain $\Omega$ is 2D and is the set of points $(x,y,z)$ where $y=0$.  Also denote the components of velocity as $\bu=\left<u,v,w\right>$.  Suppose there is no variation in the cross-flow direction ($\partial/\partial y=0$) and no cross-flow velocity ($v=0$).  Finally suppose that the force of gravity is downward but at angle $\alpha$ with the $z$-direction so that $\bg = \left<g\sin\alpha,0,-g\cos\alpha\right>$ where $g=|\bg|$.  Let $\gamma=\frac{1}{n}-1$.  Then equations \eqref{incompagain}, \eqref{stokes} become the system
-\begin{align*}
-u_x + w_z &= 0 \\
-- \left(B_n |D\bu|^\gamma u_x\right)_x - \left(B_n |D\bu|^\gamma \frac{1}{2} \left(u_z+w_x\right)\right)_z + p_x &= \rho g\sin\alpha \\
-- \left(B_n |D\bu|^\gamma \frac{1}{2} \left(u_z+w_x\right)\right)_x - \left(B_n |D\bu|^\gamma w_z\right)_z + p_z &= -\rho g\cos\alpha
-\end{align*}
-and the strain-rate norm expands/simplifies to
-    $$|D\bu| = \sqrt{\frac{1}{2} \left(u_x^2 + \frac{1}{2}(u_z+w_x)^2 + w_z^2\right)}$$
-These equations are merely the 2D form of the Stokes model, as written-out using coordinates $(x,z)$ and velocity $\bu=\left<u,w\right>$.
+Suppose the domain $\Omega$ is 2D, the points $(x,y,z)$ where $y=0$.  Denote the components of velocity as $\bu=\left<u,v,w\right>$.  Suppose there is no variation in the cross-flow direction ($\partial/\partial y=0$) and no cross-flow velocity ($v=0$).  Also assume the force of gravity is downward but at angle $\alpha$ with the $z$-direction so $\bg = \left<g\sin\alpha,0,-g\cos\alpha\right>$ where $g=|\bg|$.  Equations \eqref{incompagain}, \eqref{stokes} now become the system
+\begin{align}
+u_x + w_z &= 0 \label{planeincomp} \\
+- \left(B_n |D\bu|^{\frac{1}{n}-1} u_x\right)_x - \left(B_n |D\bu|^{\frac{1}{n}-1} \frac{1}{2} \left(u_z+w_x\right)\right)_z + p_x &= \rho g\sin\alpha \label{planestressx} \\
+- \left(B_n |D\bu|^{\frac{1}{n}-1} \frac{1}{2} \left(u_z+w_x\right)\right)_x - \left(B_n |D\bu|^{\frac{1}{n}-1} w_z\right)_z + p_z &= -\rho g\cos\alpha \label{planestressz}
+\end{align}
+The strain-rate norm expands/simplifies to
+\begin{equation}
+    |D\bu| = \sqrt{\frac{1}{2} \left(u_x^2 + \frac{1}{2}(u_z+w_x)^2 + w_z^2\right)}  \label{planeDnorm}
+\end{equation}
+These equations are the 2D (strong) form of the Stokes model, as written-out using coordinates $(x,z)$ and velocity $\bu=\left<u,w\right>$.
 
-Now suppose there is no variation in $x$, i.e.~that $\partial/\partial_x=0$, and that the domain $\Omega$ is a slab such that $b < z < h$ for fixed ($x$-independent) values of the bed elevation $b$ and the surface elevation $h$.  This is the situation of an infinitely-long, or periodic, slab flow.  Then the system simplifies to
-\begin{align*}
-w_z &= 0 \\
-- \left(B_n |D\bu|^\gamma \frac{1}{2} u_z\right)_z &= \rho g\sin\alpha \\
-- \left(B_n |D\bu|^\gamma w_z\right)_z + p_z &= -\rho g\cos\alpha
-\end{align*}
-and the strain-rate norm simplifies to $|D\bu| = \sqrt{\frac{1}{2} \left(\frac{1}{2}u_z^2 + w_z^2\right)}$.
+Now suppose there is no variation in $x$, i.e.~that $\partial/\partial_x=0$, and that the domain $\Omega$ is a slab such that $b < z < h$ for fixed ($x$-independent) values of the bed elevation $b$ and the surface elevation $h$.  This is the situation of an infinitely-long (or periodic) slab flow with $x$-independent boundary stresses (e.g.~no lubricated spots at the base).  Then the system simplifies to $w_z=0$ and the simplified stress equations
+\begin{equation}
+- \left(B_n |D\bu|^{\frac{1}{n}-1} \frac{1}{2} u_z\right)_z = \rho g\sin\alpha, \quad
+- \left(B_n |D\bu|^{\frac{1}{n}-1} w_z\right)_z + p_z = -\rho g\cos\alpha \label{slabstresses}
+\end{equation}
+The strain-rate norm simplifies to $|D\bu| = \sqrt{\frac{1}{2} \left(\frac{1}{2}u_z^2 + w_z^2\right)}$.
 
-From the first equation, if we furthermore assume that there is no slip at the base then $w=0$ identically.  Then the third equation allows integration with respect to $z$, and assuming zero pressure at the surface gives $p = \rho g\cos\alpha (h-z)$.  Also $|D\bu| = \frac{1}{2} |u_z|$.  We now have a single nontrivial equation to solve for the horizontal velocity:
+If we further assume that there is no slip at the base then $w=0$ identically.  Then the second of equations \eqref{slabstresses} allows integration with respect to $z$.  Assuming zero pressure at the surface gives $p = \rho g\cos\alpha (h-z)$.  Also $|D\bu| = \frac{1}{2} |u_z|$.  From \eqref{slabstresses} we now have a single nontrivial equation to solve for the horizontal velocity:
     $$- \left(\frac{B_n}{2^{\gamma+1}} |u_z|^\gamma u_z\right)_z = \rho g\sin\alpha$$
-The flow of a viscous, non-sliding fluid on a uniform slab will be such that $u_z>0$.  Also returning to the direct use of the Glen exponent $n$, and with some rearrangement, the last equation is
+The flow of a viscous, non-sliding fluid on a uniform slab will be such that $u_z>0$.  With rearrangement, the equation is now
     $$\left((u_z)^{1/n} \right)_z = - \frac{2^{1/n} \rho g\sin\alpha}{B_n}$$
-Again this can be integrated from the surface $z=h$, using the no-stress (no traction) condition which becomes $u_z=0$ here, to give
+Again this can be integrated from the surface $z=h$, using the no-stress (no traction) condition, which becomes $u_z=0$, to give
     $$u_z = 2 \left(\frac{\rho g\sin\alpha}{B_n}\right)^n (h-z)^n.$$
 Integrating vertically one more time, from the base $z=b$ where $u=0$, gives
     $$u = \frac{2}{n+1} \left(\frac{\rho g\sin\alpha}{B_n}\right)^n \left((h-b)^{n+1} - (h-z)^{n+1}\right)$$
 
 Based on ice sheet modeling traditions, and glaciological experiments starting with Glen, as noted above we have the value $A_3 = 3.1689 \times 10^{-24} \,\text{Pa}^{-3}\,\text{s}^{-1}$, so that $B_3 = (A_3)^{-1/3}$ is determined.  To give comparable solutions with glaciologically reasonable ice velocities, e.g.~on the order of tens to thousands of meters per year, we compute $B_n$ for any $n\ge 1$ so as to match the surface value in the $n=3$ case.  Thus we determine $B_n$ from the equation
     $$\frac{2}{n+1} \left(\frac{\rho g\sin\alpha}{B_n}\right)^n (h-b)^{n+1} = \frac{1}{2} \left(\frac{\rho g\sin\alpha}{B_3}\right)^3 (h-b)^4$$
-FIXME
+
+FIXME finish above
+
+FIXME compute normal stress on outflow face
 
 
 \section{Weak form}
@@ -218,7 +229,12 @@ FIXME
 
 \section{Firedrake code}
 
-FIXME: show code here
+FIXME: show block figure with blocks = (genstepmesh.py,gmsh,flowstep.py,paraview) and file formats as arrows (.geo,.msh,.pvd)
+
+FIXME: show codes here
+
+%\VerbatimInput[frame=lines,numbers=left,stepnumber=5,fontsize=\footnotesize]{../genstepmesh.py}
+
 %\VerbatimInput[frame=lines,numbers=left,stepnumber=5,fontsize=\footnotesize]{../flowstep.py}
 
 \footnotesize
