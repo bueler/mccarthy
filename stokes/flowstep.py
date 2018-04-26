@@ -4,7 +4,6 @@
 # Solve glacier bedrock-step Glen-Stokes problem.  See
 # mccarthy/stokes/README.md for usage.
 
-
 import argparse
 
 # process options
@@ -77,7 +76,7 @@ noslip = Constant((0.0, 0.0))
 
 # right side outflow: apply hydrostatic normal force; nonhomogeneous Neumann
 x,z = SpatialCoordinate(mesh)
-outflow_sigma = as_vector([- rho * g * cos(alpha) * (H - z), 0.0])  # FIXME should this have a z component?
+outflow_sigma = as_vector([- rho * g * cos(alpha) * (H - z), rho * g * sin(alpha) * (H - z)])
 
 # put solution here
 up = Function(Z)       # *not* TrialFunctions(Z)
