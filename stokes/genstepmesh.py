@@ -13,7 +13,7 @@
 #   In [1]: from firedrake import *
 #   In [2]: Mesh('glacier.msh')
 # Main purpose is to solve the Stokes equations on this domain.  See
-# flowstep.py.
+# README.md and flowstep.py.
 
 import numpy
 import argparse
@@ -30,8 +30,10 @@ parser.add_argument('filename',
                     help='output file name (ends in .geo)')
 parser.add_argument('-bs', type=float, default=120.0, metavar='X',
                     help='height of bed step (m)')
+parser.add_argument('-hmesh', type=float, default=100.0, metavar='X',
+                    help='default target mesh spacing')
 parser.add_argument('-refine', type=float, default=1.0, metavar='X',
-                    help='refine default resolution by this factor')
+                    help='refine resolution by this factor')
 parser.add_argument('-refine_corner', type=float, default=4.0, metavar='X',
                     help='locally refine at interior corner by this factor')
 args = parser.parse_args()
@@ -50,7 +52,7 @@ Ls = 1300.0      # location of bedrock step (x)
 Ks = 150.0       # distance over which transition in surface happens (x)
 
 # set "characteristic lengths" which are used by gmsh to generate triangles
-lc = 300.0 / args.refine
+lc = args.hmesh / args.refine
 print('setting target mesh size of %g m' % lc)
 geo.write('lc = %f;\n' % lc)
 if abs(bs) >= 1.0:
@@ -70,7 +72,7 @@ geo.write('Point(5) = {%f,%f,0,lc};\n' % (0.0,H+bs))
 geo.write('Point(6) = {%f,%f,0,lc};\n' % (0.0,bs))
 if abs(bs) >= 1.0:
     geo.write('Point(7) = {%f,%f,0,lc_corner};\n' % (Ls,bs))
-    geo.write('Point(8) = {%f,%f,0,lc_corner};\n' % (Ls,0.0))
+    geo.write('Point(8) = {%f,%f,0,lc};\n' % (Ls,0.0))
 
 # lines along boundary
 geo.write('Line(11) = {1,2};\n')
