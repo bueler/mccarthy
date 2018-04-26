@@ -15,7 +15,7 @@ Installation
 Default usage
 -------------
 
-        $ ./genstepmesh.py glacier.geo             # create domain geometry
+        $ ./genstepmesh.py -o glacier.geo          # create domain geometry
         $ gmsh -2 glacier.geo                      # mesh domain
         $ source ~/firedrake/bin/activate          # start Firedrake
         (firedrake) $ ./flowstep.py glacier.msh    # solve Stokes problem
@@ -28,7 +28,7 @@ Slab-on-slope usage
 
 Set the height of the bedrock step to zero when creating the domain geometry:
 
-        (firedrake) $ ./genstepmesh.py -bs 0.0 slab.geo
+        (firedrake) $ ./genstepmesh.py -bs 0.0 -o slab.geo
         (firedrake) $ gmsh -2 slab.geo
         (firedrake) $ ./flowstep.py -bs 0.0 slab.msh
 
@@ -41,7 +41,7 @@ Script `genstepmesh.py` allows uniform refinement factor (`-refine X`) and addit
 
 For example the following creates a mesh with target mesh size varying from 25 m to about 3 m near the interior corner.  The resulting grid has about 15 times as many nodes as the default above:
 
-        (firedrake) $ ./genstepmesh.py -refine 4 -refine_corner 8 finer.geo
+        (firedrake) $ ./genstepmesh.py -refine 4 -refine_corner 8 -o finer.geo
         (firedrake) $ gmsh -2 finer.geo
         (firedrake) $ ./flowstep.py finer.msh
 

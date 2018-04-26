@@ -26,22 +26,22 @@ now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 # process options
 parser = argparse.ArgumentParser(description='Generate .geo geometry-description file, suitable for meshing by Gmsh, for the outline of a glacier flowing over a step.  Also generates slab-on-slope geometry (use -bs 0.0).')
-parser.add_argument('filename',
-                    help='output file name (ends in .geo)')
+parser.add_argument('-o', metavar='FILE.geo', default='glacier.geo',
+                    help='output file name (ends in .geo; default=glacier.geo)')
 parser.add_argument('-bs', type=float, default=120.0, metavar='X',
-                    help='height of bed step (m)')
+                    help='height of bed step (default=100 m)')
 parser.add_argument('-hmesh', type=float, default=100.0, metavar='X',
-                    help='default target mesh spacing')
+                    help='default target mesh spacing (default=100 m)')
 parser.add_argument('-refine', type=float, default=1.0, metavar='X',
-                    help='refine resolution by this factor')
+                    help='refine resolution by this factor (default=1)')
 parser.add_argument('-refine_corner', type=float, default=4.0, metavar='X',
-                    help='locally refine at interior corner by this factor')
+                    help='further local refinement at interior corner by this factor (default=4)')
 args = parser.parse_args()
 bs = args.bs
 
 # open .geo file and put in header which records creation info
-geo = open(args.filename, 'w')
-print('writing bedrock-step geometry to file %s ...' % args.filename)
+geo = open(args.o, 'w')
+print('writing bedrock-step geometry to file %s ...' % args.o)
 geo.write('// geometry-description file created %s by %s using command\n//   %s\n\n'
           % (now,platform.node(),commandline) )
 
