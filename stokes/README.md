@@ -21,8 +21,6 @@ Default usage
         (firedrake) $ ./flowstep.py glacier.msh    # solve Stokes problem
         (firedrake) $ paraview glacier.pvd         # visualize
 
-Note that script `genstepmesh.py` allows uniform refinement (`-refine X`) and additional refinement at the interior corner created by the bedrock step (`-refine_corner X`).
-
 Visualization in Paraview is made easier by loading the state file `flowstep.pvsm`.
 
 Slab-on-slope usage
@@ -30,10 +28,22 @@ Slab-on-slope usage
 
 Set the height of the bedrock step to zero when creating the domain geometry:
 
-        $ ./genstepmesh.py -bs 0.0 slab.geo
-        $ gmsh -2 slab.geo
-        $ source ~/firedrake/bin/activate
-        (firedrake) $ ./flowstep.py -bs 0.0 -f slab
+        (firedrake) $ ./genstepmesh.py -bs 0.0 slab.geo
+        (firedrake) $ gmsh -2 slab.geo
+        (firedrake) $ ./flowstep.py -bs 0.0 slab.msh
+
+Mesh refinement
+---------------
+
+The default mesh above has a typical mesh size of 100 m with additional refinement by a factor of 4 to give 25 m resolution near the interior corner created by the bedrock step.
+
+Script `genstepmesh.py` allows uniform refinement factor (`-refine X`) and additional refinement at the interior corner by an additional factor Y: `-refine_corner Y`.  The default case corresponds to `-hmesh 100 -refine 1 -refine_corner 4`.
+
+For example the following creates a mesh with target mesh size varying from 25 m to about 3 m near the interior corner.  The resulting grid has about 15 times as many nodes as the default above:
+
+        (firedrake) $ ./genstepmesh.py -refine 4 -refine_corner 8 finer.geo
+        (firedrake) $ gmsh -2 finer.geo
+        (firedrake) $ ./flowstep.py finer.msh
 
 Firedrake info
 --------------
