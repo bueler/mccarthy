@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # (C) 2018 Ed Bueler
 
+# FIXME this is broken becaues of new numbering in genstepmesh.py
+# ... consider deletion
+
 # Solve Newtonian fluid glacier bedrock step Stokes problem.
 # See mccarthy/projects/2018/flowstep/README.md.
 
