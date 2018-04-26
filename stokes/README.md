@@ -8,7 +8,9 @@ The codes and documents in this directory use (or assume the use of) [Firedrake]
 Installation
 ------------
 
-Install Gmsh and Paraview as desired, for instance by installing Debian or OSX packages.  Then follow the instructions at the [Firedrake download page](https://www.firedrakeproject.org/download.html) to install it.  In a normal installation one should use the PETSc which is installed by Firedrake, so there is no separate PETSc installation process needed.
+  * Install Gmsh and Paraview as desired, for instance by installing Debian or OSX packages.
+  * Follow the instructions at the [Firedrake download page](https://www.firedrakeproject.org/download.html) to install it.
+  * In a normal case one should use the PETSc which is installed by Firedrake, so no separate PETSc installation is needed.
 
 Default usage
 -------------
