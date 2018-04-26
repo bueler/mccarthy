@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
 # (C) 2018 Ed Bueler
 
-# FIXME  note other FIXMEs below; this version sort of works with n=1:
-# ./flowstep.py -bs 0.0 -n_glen 1.0 -f slab -s_snes_max_it 1000 -s_snes_rtol 1.0e-4
-
 # Solve glacier bedrock-step Glen-Stokes problem.
 # See mccarthy/projects/2018/flowstep/README.md.
 
 # Default usage:
-#     $ ./genstepmesh.py glacier.geo      # create domain
-#     $ gmsh -2 glacier.geo               # mesh domain
+#     $ ./genstepmesh.py glacier.geo           # create domain
+#     $ gmsh -2 glacier.geo                    # mesh domain
 #     $ source ~/firedrake/bin/activate
-#     (firedrake) $ ./flowstep.py         # solve Stokes problem
-#     (firedrake) $ paraview glacier.pvd  # visualize
+#     (firedrake) $ ./flowstep.py glacier.msh  # solve Stokes problem
+#     (firedrake) $ paraview glacier.pvd       # visualize
 
 # Note that the genstepmesh.py script allows uniform refinement
 # (-refine X) and refinement at interior corner (-refine_corner X).
@@ -35,14 +32,13 @@ parser.add_argument('-elements', metavar='X', default='P2P1',
                     choices=mixchoices,
                     help='stable mixed finite elements from: %s (default=P2P1)' \
                          % (','.join(mixchoices)) )
-parser.add_argument('-f', metavar='ROOT', default='glacier',
-                    help='input/output file name root (default=glacier)')
-parser.add_argument('-initonly', action='store_true')
+parser.add_argument('inname', metavar='INNAME',
+                    help='input file name ending with .msh')
 parser.add_argument('-n_glen', type=float, default=3.0, metavar='X',
                     help='Glen flow law exponent (default = 3.0)')
 args, unknown = parser.parse_known_args()
-inname = args.f + '.msh'
-outname = args.f + '.pvd'
+inname = args.inname
+outname = '.'.join(inname.split('.')[:-1]) + '.pvd'  # strip .msh and replace with .pvd
 bs = args.bs
 n_glen = args.n_glen
 
@@ -66,13 +62,11 @@ mesh = Mesh(inname)
 print('mesh has %d vertices and %d elements' \
       % (mesh.num_vertices(),mesh.num_cells()))
 
-# numbering of parts of boundary must match generation script genstepmesh.py
-# FIXME simplify the base: start with first point being bottom of outflow and go around counter-clockwise
-basedown_id = 30
-outflow_id = 31
-top_id = 32  # unused below
-inflow_id = 33
-basestep_id = 34
+# numbering of parts of boundary *must match generation script genstepmesh.py*
+outflow_id = 41
+top_id = 42  # unused below
+inflow_id = 43
+base_id = 44
 
 # define mixed finite element space
 mixFE = {'P2P1'  : (VectorFunctionSpace(mesh, "CG", 2), # Taylor-Hood
@@ -98,7 +92,7 @@ noslip = Constant((0.0, 0.0))
 
 # right side outflow: apply hydrostatic normal force; nonhomogeneous Neumann
 x,z = SpatialCoordinate(mesh)
-outflow_sigma = as_vector([- rho * g * cos(alpha) * (H - z), 0.0])
+outflow_sigma = as_vector([- rho * g * cos(alpha) * (H - z), 0.0])  # FIXME should this have a z component?
 
 # put solution here
 up = Function(Z)       # *not* TrialFunctions(Z)
@@ -128,8 +122,7 @@ hin = H + bs
 C = (2.0 / (n_glen + 1.0)) * (rho * g * sin(alpha) / Bn)**n_glen
 inflow_u = as_vector([C * (H**(n_glen+1.0) - (hin - z)**(n_glen+1.0)), 0.0])
 
-bcs = [ DirichletBC(Z.sub(0), noslip, basedown_id),
-        DirichletBC(Z.sub(0), noslip, basestep_id),
+bcs = [ DirichletBC(Z.sub(0), noslip, base_id),
         DirichletBC(Z.sub(0), inflow_u, (inflow_id,)) ]
 
 # solve
@@ -165,10 +158,18 @@ print('average pressure = %.2f Pa' % pav)
 velmagav = assemble(sqrt(dot(u, u)) * dx) / area
 print('average velocity magnitude = %.2f m a-1' % (secpera * velmagav))
 
-# FIXME  add numerical error relative to slab-on-slope when bs==0.0
+# compute numerical error relative to slab-on-slope when bs==0.0
+# FIXME not getting numerical convergence yet
+if abs(bs) < 1.0:
+    up_exact = Function(Z)
+    u_exact,p_exact = up_exact.split()
+    u_exact.interpolate(inflow_u)
+    p_exact.interpolate(rho * g * cos(alpha) * (H - z))
+    uerr = sqrt(assemble(dot(u_exact - u, u_exact - u) * dx))
+    perr = sqrt(assemble(dot(p_exact - p, p_exact - p) * dx))
+    print('numerical errors: |u-uex|_2 = %.2e, |p-pex|_2 = %.2e\n' % (uerr,perr))
 
 # write the solution to a file for visualisation with paraview
 print('writing (velocity,pressure) to %s ...' % outname)
-u.interpolate(inflow_u)
 File(outname).write(u,p)
 
