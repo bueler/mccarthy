@@ -1,24 +1,9 @@
 #!/usr/bin/env python3
 # (C) 2018 Ed Bueler
 
-# Solve glacier bedrock-step Glen-Stokes problem.
-# See mccarthy/projects/2018/flowstep/README.md.
+# Solve glacier bedrock-step Glen-Stokes problem.  See
+# mccarthy/stokes/README.md for usage.
 
-# Default usage:
-#     $ ./genstepmesh.py glacier.geo           # create domain
-#     $ gmsh -2 glacier.geo                    # mesh domain
-#     $ source ~/firedrake/bin/activate
-#     (firedrake) $ ./flowstep.py glacier.msh  # solve Stokes problem
-#     (firedrake) $ paraview glacier.pvd       # visualize
-
-# Note that the genstepmesh.py script allows uniform refinement
-# (-refine X) and refinement at interior corner (-refine_corner X).
-
-# Usage with zero bedstep for slab-on-slope:
-#     $ ./genstepmesh.py -bs 0.0 slab.geo
-#     $ gmsh -2 slab.geo
-#     $ source ~/firedrake/bin/activate
-#     (firedrake) $ ./flowstep.py -bs 0.0 -f slab
 
 import argparse
 
@@ -143,6 +128,10 @@ solve(F == 0, up, bcs=bcs,
                          "fieldsplit_1_ksp_rtol": 1.0e-3,
                          "fieldsplit_1_ksp_type": "gmres",
                          "fieldsplit_1_pc_type": "none"})
+# ALSO CONSIDER:
+#    "ksp_type": "minres", "pc_type": "jacobi",
+#    "mat_type": "aij", "ksp_type": "preonly", "pc_type": "svd",  # fully-direct solver
+#    "mat_type": "aij", "ksp_view_mat": ":foo.m:ascii_matlab"
 
 # report on and save solution parts
 u,p = up.split()
