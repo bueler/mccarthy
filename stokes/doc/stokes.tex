@@ -163,12 +163,18 @@ The flow of a viscous, non-sliding fluid on a uniform slab will be such that $u_
 Again this can be integrated from the surface $z=h$, using the no-stress (no traction) condition, which becomes $u_z=0$, to give
     $$u_z = 2 \left(\frac{\rho g\sin\alpha}{B_n}\right)^n (h-z)^n.$$
 Integrating vertically one more time, from the base $z=b$ where $u=0$, gives
-    $$u = \frac{2}{n+1} \left(\frac{\rho g\sin\alpha}{B_n}\right)^n \left((h-b)^{n+1} - (h-z)^{n+1}\right)$$
+\begin{equation}
+u(z) = \frac{2}{n+1} \left(\frac{\rho g\sin\alpha}{B_n}\right)^n \left((h-b)^{n+1} - (h-z)^{n+1}\right)  \label{uslab}
+\end{equation}
 
-Based on ice sheet modeling traditions, and glaciological experiments starting with Glen, as noted above we have the value $A_3 = 3.1689 \times 10^{-24} \,\text{Pa}^{-3}\,\text{s}^{-1}$, so that $B_3 = (A_3)^{-1/3}$ is determined.  To give comparable solutions with glaciologically reasonable ice velocities, e.g.~on the order of tens to thousands of meters per year, we compute $B_n$ for any $n\ge 1$ so as to match the surface value in the $n=3$ case.  Thus we determine $B_n$ from the equation
+Suppose our goal is to generate comparable solutions with glaciologically-reasonable ice velocities for any $n\ge 1$.  Ice sheet modeling tradition \cite{GreveBlatter2009}, and glaciological experiments starting with Glen, suggest we base our work on $n=3$.  From the ice softness value $A_3 = 3.1689 \times 10^{-24} \,\text{Pa}^{-3}\,\text{s}^{-1}$ we get $B_3 = (A_3)^{-1/3} = 6.8082\times 10^7\,\text{Pa}\,\text{s}^{1/3}$.  We now compute $B_n$ for any $n\ge 1$ so the slab-on-slope surface velocity $u(h)$ from \eqref{uslab} matches the value in the $n=3$ case.  Thus we determine $B_n$ from the equation
     $$\frac{2}{n+1} \left(\frac{\rho g\sin\alpha}{B_n}\right)^n (h-b)^{n+1} = \frac{1}{2} \left(\frac{\rho g\sin\alpha}{B_3}\right)^3 (h-b)^4$$
+which reduces to
+\begin{equation}
+B_n = \left(\frac{4}{n+1}\right)^{1/n} \Big(\rho g \sin\alpha (h-b)\Big)^{(n-3)/n} {B_3\,}^{3/n}  \label{Bnfromsurface}
+\end{equation}
+For example, suppose $h-b=400$ m and $\alpha=0.1$ radian (about $5.7$ degrees).  When we use $B_n$ from \eqref{Bnfromsurface} we get a surface velocity of $u(h)=906.09 \,\text{m}\,\text{a}^{-1}$ from \eqref{uslab} for any $n\ge 1$.  The result from \eqref{Bnfromsurface} itself is $B_1=4.9663\times 10^{12}\,\text{Pa}\,\text{s}$ and $B_4=1.7320\times 10^{7}\,\text{Pa}\,\text{s}^{1/4}$, to mention some glaciologically-relevant end-cases $n=1,4$ \cite{GreveBlatter2009}.  The Newtonian viscosity $\nu=B_1/2$ is about $10^{16}$ times more viscous than liquid water but about $10^7$ times less viscous than granite (both at $25^\circ \,\text{C}$).
 
-FIXME finish above
 
 FIXME compute normal stress on outflow face
 
