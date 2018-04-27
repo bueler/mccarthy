@@ -77,9 +77,9 @@ The main goal of this appendix comes next, namely to generate a numerical soluti
 These tools are driven by two short Python codes which are included at the end.
 
 \begin{figure}[h]
-\label{fig:stepflowlin}
 \includegraphics[width=0.8\textwidth,angle=-5.7296]{stepflowlin}  % 0.1 radian = 5.7296 degrees
 \caption{A glacier flowing over a bedrock step.  Arrows show velocity $\bu$.  Shading is pressure $p$.  Note the coarse mesh of triangular finite elements.}
+\label{fig:stepflowlin}
 \end{figure}
 
 
@@ -121,7 +121,7 @@ Here $B_n = (A_n)^{-1/n}$ is the $n$-dependent ice hardness.  With this expressi
 \end{align}
 The Stokes model is, from now on, equations \eqref{incompagain}, \eqref{stokes} with certain boundary conditions.  The solution is the velocity-pressure pair $(\bu,p)$.
 
-The domain $\Omega$ must have a smooth-enough boundary to apply the boundary conditions but it is otherwise general.  However, certain glacier-suitable boundary conditions are used in this document and in the code below.  To explain these, consider the numerical solution shown in Figure \ref{fig:stepflowlin}.  We assume that base, top, inflow, and outflow boundary surfaces are all well-defined.  On the base we require no slip:
+The domain $\Omega$ must have a smooth-enough boundary to apply the boundary conditions but it is otherwise general.  However, certain glacier-suitable boundary conditions are used in this document and in the code below.  To explain these, consider the numerical solution shown in Figure \ref{fig:stepflowlin}. We assume that base, top, inflow, and outflow boundary surfaces are all well-defined.  On the base we require no slip:
 \begin{align}
 \bu &= 0  &&\text{\emph{base}} \label{basebc} \\
 \intertext{On the top we set a condition of zero normal stress, $\sigma\hbn=0$ or equivalently:}
@@ -129,7 +129,7 @@ The domain $\Omega$ must have a smooth-enough boundary to apply the boundary con
 \intertext{As shown in Figure \ref{fig:stepflowlin}, the left-side inflow boundary is a surface with outward normal $\hbn=\left<-1,0,0\right>^\top$ in all cases we solve.  On this surface we set a nonzero inflow velocity:}
 \bu &= \left<f(z),0,0\right>^\top  &&\text{\emph{inflow}} \label{inflowbc} \\
 \intertext{(Velocity $f(z)$ will satisfy the slab-on-slope equations; see below.)  On the outflow boundary, where $\hbn=\left<1,0,0\right>^\top$ is the outward normal, $h$ is the surface elevation, and $g=|\bg|$, we set a nonzero hydrostatic normal stress:}
-\left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= \left<-\rho g (h-z),0,0\right>^\top  &&\text{\emph{outflow}} \label{outflowbc}
+\left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= \left<-\rho g \cos\alpha (h-z),0,\rho g\sin\alpha (h-z)\right>^\top  &&\text{\emph{outflow}} \label{outflowbc}
 \end{align}
 
 
@@ -156,27 +156,36 @@ Now suppose there is no variation in $x$, i.e.~that $\partial/\partial_x=0$, and
 \end{equation}
 The strain-rate norm simplifies to $|D\bu| = \sqrt{\frac{1}{2} \left(\frac{1}{2}u_z^2 + w_z^2\right)}$.
 
-If we further assume that there is no slip at the base then $w=0$ identically.  Then the second of equations \eqref{slabstresses} allows integration with respect to $z$.  Assuming zero pressure at the surface gives $p = \rho g\cos\alpha (h-z)$.  Also $|D\bu| = \frac{1}{2} |u_z|$.  From \eqref{slabstresses} we now have a single nontrivial equation to solve for the horizontal velocity:
+If we further assume that there is no slip at the base then $w=0$ identically.  Then the second of equations \eqref{slabstresses} allows integration with respect to $z$.  Assuming zero pressure at the surface gives the pressure profile
+\begin{equation}
+p(z) = \rho g\cos\alpha (h-z)  \label{pslab}
+\end{equation}
+Also $|D\bu| = \frac{1}{2} |u_z|$.  From \eqref{slabstresses} we now have a single nontrivial equation to solve for the horizontal velocity:
     $$- \left(\frac{B_n}{2^{\gamma+1}} |u_z|^\gamma u_z\right)_z = \rho g\sin\alpha$$
 The flow of a viscous, non-sliding fluid on a uniform slab will be such that $u_z>0$.  With rearrangement, the equation is now
     $$\left((u_z)^{1/n} \right)_z = - \frac{2^{1/n} \rho g\sin\alpha}{B_n}$$
 Again this can be integrated from the surface $z=h$, using the no-stress (no traction) condition, which becomes $u_z=0$, to give
-    $$u_z = 2 \left(\frac{\rho g\sin\alpha}{B_n}\right)^n (h-z)^n.$$
+\begin{equation}
+u_z = 2 \left(\frac{\rho g\sin\alpha}{B_n}\right)^n (h-z)^n  \label{uzslab}
+\end{equation}
 Integrating vertically one more time, from the base $z=b$ where $u=0$, gives
 \begin{equation}
 u(z) = \frac{2}{n+1} \left(\frac{\rho g\sin\alpha}{B_n}\right)^n \left((h-b)^{n+1} - (h-z)^{n+1}\right)  \label{uslab}
 \end{equation}
 
-Suppose our goal is to generate comparable solutions with glaciologically-reasonable ice velocities for any $n\ge 1$.  Ice sheet modeling tradition \cite{GreveBlatter2009}, and glaciological experiments starting with Glen, suggest we base our work on $n=3$.  From the ice softness value $A_3 = 3.1689 \times 10^{-24} \,\text{Pa}^{-3}\,\text{s}^{-1}$ we get $B_3 = (A_3)^{-1/3} = 6.8082\times 10^7\,\text{Pa}\,\text{s}^{1/3}$.  We now compute $B_n$ for any $n\ge 1$ so the slab-on-slope surface velocity $u(h)$ from \eqref{uslab} matches the value in the $n=3$ case.  Thus we determine $B_n$ from the equation
-    $$\frac{2}{n+1} \left(\frac{\rho g\sin\alpha}{B_n}\right)^n (h-b)^{n+1} = \frac{1}{2} \left(\frac{\rho g\sin\alpha}{B_3}\right)^3 (h-b)^4$$
-which reduces to
+Suppose we want comparable solutions, with glaciologically-reasonable ice velocities, for any $n\ge 1$.  Ice sheet modeling tradition \cite{GreveBlatter2009}, and glaciological experiments starting with Glen, suggest we base our work on $n=3$.  From the ice softness value $A_3 = 3.1689 \times 10^{-24} \,\text{Pa}^{-3}\,\text{s}^{-1}$ we get $B_3 = (A_3)^{-1/3} = 6.8082\times 10^7\,\text{Pa}\,\text{s}^{1/3}$.  We now compute $B_n$ for any $n\ge 1$ such the slab-on-slope surface velocity $u(h)$ from \eqref{uslab} matches the value in the $n=3$ case.  This reduces to
 \begin{equation}
 B_n = \left(\frac{4}{n+1}\right)^{1/n} \Big(\rho g \sin\alpha (h-b)\Big)^{(n-3)/n} {B_3\,}^{3/n}  \label{Bnfromsurface}
 \end{equation}
-For example, suppose $h-b=400$ m and $\alpha=0.1$ radian (about $5.7$ degrees).  When we use $B_n$ from \eqref{Bnfromsurface} we get a surface velocity of $u(h)=906.09 \,\text{m}\,\text{a}^{-1}$ from \eqref{uslab} for any $n\ge 1$.  The result from \eqref{Bnfromsurface} itself is $B_1=4.9663\times 10^{12}\,\text{Pa}\,\text{s}$ and $B_4=1.7320\times 10^{7}\,\text{Pa}\,\text{s}^{1/4}$, to mention some glaciologically-relevant end-cases $n=1,4$ \cite{GreveBlatter2009}.  The Newtonian viscosity $\nu=B_1/2$ is about $10^{16}$ times more viscous than liquid water but about $10^7$ times less viscous than granite (both at $25^\circ \,\text{C}$).
+For example, suppose $h-b=400$ m and $\alpha=0.1$ radians (about $5.7$ degrees).  Using $B_n$ from \eqref{Bnfromsurface} gives a surface velocity of $u(h)=906.09 \,\text{m}\,\text{a}^{-1}$ from \eqref{uslab} independent of $n\ge 1$.  For some glaciologically-relevant end-cases $n=1,4$ \cite{GreveBlatter2009}, the result from \eqref{Bnfromsurface} is $B_1=4.9663\times 10^{12}\,\text{Pa}\,\text{s}$ and $B_4=1.7320\times 10^{7}\,\text{Pa}\,\text{s}^{1/4}$.  The Newtonian viscosity $\nu=B_1/2$ is about $10^{16}$ times more viscous than liquid water but about $10^7$ times less viscous than granite (both at $25^\circ \,\text{C}$, and according to wikipedia).
 
-
-FIXME compute normal stress on outflow face
+Formulas \eqref{pslab} and \eqref{uslab} will be used for verifying the numerical solver.  Additionally they allow us to set boundary conditions which lead to glaciologically-reasonable solutions even when modeling a small part of a glacier.  Specifically we do this for the geometry shown in Figure \ref{fig:stepflowlin}.  The inflow side of the region has \eqref{uslab} applied as a Dirichlet condition, i.e.~equation \eqref{inflowbc}.  The outflow side has a normal stress computed from the slab-on-slope solution also.  Specifically, from \eqref{uzslab} above, and the facts that $w=0$, $u_x=0$, and $|D\bu| = \frac{1}{2} u_z$, we find that because $\hbn=\left<1,0\right>$ is the outward normal on the outflow side,
+\begin{align*}
+\sigma \hbn &= \left(B_n |D\bu|^{\frac{1}{n}-1} D\bu - pI\right)\hbn \\
+    &= \left(B_n |D\bu|^{\frac{1}{n}-1} \begin{pmatrix} u_x & \frac{1}{2}(u_z+w_x) \\ \frac{1}{2}(u_z+w_x) & w_z \end{pmatrix} - pI\right)\hbn \\
+    &= B_n \left(\frac{1}{2} u_z\right)^{\frac{1}{n}-1} \begin{pmatrix} 0 \\ \frac{1}{2} u_z \end{pmatrix} - \begin{pmatrix} p \\ 0 \end{pmatrix} = \begin{pmatrix} - p \\ \frac{B_n}{2^{1/n}} (u_z)^{1/n} \end{pmatrix} = \begin{pmatrix} - \rho g\cos\alpha (h-z) \\ \rho g\sin\alpha (h-z) \end{pmatrix}
+\end{align*}
+This justifies formula \eqref{outflowbc}.
 
 
 \section{Weak form}
