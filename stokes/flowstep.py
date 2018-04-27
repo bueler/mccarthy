@@ -5,6 +5,7 @@
 # mccarthy/stokes/README.md for usage.
 
 import argparse
+secpera = 31556926.0       # seconds per year
 
 # process options
 mixchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
@@ -12,10 +13,15 @@ parser = argparse.ArgumentParser(\
     description='Solve glacier bedrock-step Glen-Stokes problem.')
 parser.add_argument('-bs', type=float, default=120.0, metavar='X',
                     help='height of bed step (m; default = 120.0)')
+parser.add_argument('-Dtyp', type=float, default=2.0, metavar='X',
+                    help='regularize viscosity using "+(eps Dtyp)^2" (default = 2 a-1)')
+                    # e.g. (800 m a-1) / 400 m = 2 a-1
 parser.add_argument('-elements', metavar='X', default='P2P1',
                     choices=mixchoices,
                     help='stable mixed finite elements from: %s (default=P2P1)' \
                          % (','.join(mixchoices)) )
+parser.add_argument('-eps', type=float, default=0.01, metavar='X',
+                    help='regularize viscosity using "+(eps Dtyp)^2" (default = 0.01)')
 parser.add_argument('inname', metavar='INNAME',
                     help='input file name ending with .msh')
 parser.add_argument('-n_glen', type=float, default=3.0, metavar='X',
@@ -23,13 +29,12 @@ parser.add_argument('-n_glen', type=float, default=3.0, metavar='X',
 args, unknown = parser.parse_known_args()
 inname = args.inname
 outname = '.'.join(inname.split('.')[:-1]) + '.pvd'  # strip .msh and replace with .pvd
-bs = args.bs
-n_glen = args.n_glen
+n_glen = args.n_glen  # used pretty often
+Dtyp = args.Dtyp / secpera
 
 from firedrake import *
 
 # glacier physical constants
-secpera = 31556926.0       # seconds per year
 g = 9.81                   # m s-2
 rho = 910.0                # kg m-3
 A3 = 3.1689e-24            # Pa-3 s-1; EISMINT I value of ice softness
@@ -87,22 +92,20 @@ def D(w):
 
 # define the nonlinear weak form F(u,p;v,q)
 if n_glen == 1.0:
-    print('setting-up weak form in special Newtonian case (n_glen = 1.0) ...')
-    F = ( inner(Bn* D(u), D(v)) - p * div(v) - div(u) * q \
+    print('setting-up weak form in unregularized Newtonian case (n_glen = 1.0) ...')
+    F = ( inner(Bn * D(u), D(v)) - p * div(v) - div(u) * q \
           - inner(f_body, v) ) * dx \
         - inner(outflow_sigma, v) * ds(outflow_id)
 else:
-    print('setting-up weak form using n_glen = %.3f ...' % n_glen)
-    D_typical = 10.0 / secpera
-    eps2 = 0.0001 * D_typical**2.0
-    normsqrDu = 0.5 * inner(D(u), D(u)) + eps2
-    rr = 0.5 * (1.0/n_glen - 1.0)
-    F = ( inner(Bn * normsqrDu**rr * D(u), D(v)) - p * div(v) - div(u) * q \
+    print('setting-up weak form using n_glen = %.3f and regularized viscosity ...' % n_glen)
+    Du2 = 0.5 * inner(D(u), D(u)) + (args.eps * Dtyp)**2.0
+    rr = 1.0/n_glen - 1.0
+    F = ( inner(Bn * Du2**(rr/2.0) * D(u), D(v)) - p * div(v) - div(u) * q \
           - inner(f_body, v) ) * dx \
         - inner(outflow_sigma, v) * ds(outflow_id)
 
 # slab-on-slope inflow boundary condition
-hin = H + bs
+hin = H + args.bs
 C = (2.0 / (n_glen + 1.0)) * (rho * g * sin(alpha) / Bn)**n_glen
 inflow_u = as_vector([C * (H**(n_glen+1.0) - (hin - z)**(n_glen+1.0)), 0.0])
 
@@ -114,7 +117,7 @@ print('solving nonlinear variational problem ...')
 solve(F == 0, up, bcs=bcs,
       options_prefix='s',
       solver_parameters={"snes_converged_reason": True,
-                         "ksp_converged_reason": True,
+                         #"ksp_converged_reason": True,
                          #"ksp_monitor": True,
                          "ksp_type": "fgmres",  # or "gmres" or "minres"
                          "pc_type": "fieldsplit",
@@ -123,7 +126,7 @@ solve(F == 0, up, bcs=bcs,
                          "fieldsplit_0_ksp_type": "preonly",
                          "fieldsplit_0_pc_type": "lu",
                          #"fieldsplit_0_ksp_converged_reason": True,
-                         "fieldsplit_1_ksp_converged_reason": True,
+                         #"fieldsplit_1_ksp_converged_reason": True,
                          "fieldsplit_1_ksp_rtol": 1.0e-3,
                          "fieldsplit_1_ksp_type": "gmres",
                          "fieldsplit_1_pc_type": "none"})
@@ -138,24 +141,27 @@ u.rename('velocity')
 p.rename('pressure')
 # examine values directly:   print(p.vector().array())
 
+P1 = FunctionSpace(mesh, "CG", 1)
 one = Constant(1.0, domain=mesh)
 area = assemble(dot(one,one) * dx)
-print('domain area = %.2e m2' % area)
+#print('domain area = %.2e m2' % area)
 pav = assemble(sqrt(dot(p, p)) * dx) / area
 print('average pressure = %.2f Pa' % pav)
 velmagav = assemble(sqrt(dot(u, u)) * dx) / area
 print('average velocity magnitude = %.2f m a-1' % (secpera * velmagav))
+umagmax = interpolate(sqrt(dot(u,u)),P1).dat.data.max()
+print('maximum velocity magnitude = %.2f m a-1' % (secpera * umagmax))
 
-# compute numerical error relative to slab-on-slope when bs==0.0
-# FIXME not getting numerical convergence yet
-if abs(bs) < 1.0:
+# compute infinity-norm numerical errors relative to slab-on-slope when bs==0.0
+if abs(args.bs) < 1.0:
     up_exact = Function(Z)
     u_exact,p_exact = up_exact.split()
     u_exact.interpolate(inflow_u)
     p_exact.interpolate(rho * g * cos(alpha) * (H - z))
-    uerr = sqrt(assemble(dot(u_exact - u, u_exact - u) * dx))
-    perr = sqrt(assemble(dot(p_exact - p, p_exact - p) * dx))
-    print('numerical errors: |u-uex|_2 = %.2e, |p-pex|_2 = %.2e\n' % (uerr,perr))
+    uerr = interpolate(sqrt(dot(u_exact-u,u_exact-u)),P1).dat.data.max()
+    perr = interpolate(sqrt(dot(p_exact-p,p_exact-p)),W).dat.data.max()
+    print('numerical errors: |u-uex|_inf = %.2e m a-1, |p-pex|_inf = %.2e Pa' \
+          % (uerr*secpera,perr))
 
 # write the solution to a file for visualisation with paraview
 print('writing (velocity,pressure) to %s ...' % outname)
