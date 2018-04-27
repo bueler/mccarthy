@@ -26,9 +26,13 @@ parser.add_argument('inname', metavar='INNAME',
                     help='input file name ending with .msh')
 parser.add_argument('-n_glen', type=float, default=3.0, metavar='X',
                     help='Glen flow law exponent (default = 3.0)')
+parser.add_argument('-o', metavar='OUTNAME', type=str, default='',
+                    help='output file name ending with .pvd (default = INNAME-.msh+.pvd)')
 args, unknown = parser.parse_known_args()
-inname = args.inname
-outname = '.'.join(inname.split('.')[:-1]) + '.pvd'  # strip .msh and replace with .pvd
+if len(args.o) > 0:
+    outname = args.o
+else:
+    outname = '.'.join(args.inname.split('.')[:-1]) + '.pvd'  # strip .msh and replace with .pvd
 n_glen = args.n_glen  # used pretty often
 Dtyp = args.Dtyp / secpera
 
@@ -46,8 +50,8 @@ alpha = 0.1
 Bn = (4.0/(n_glen+1.0))**(1.0/n_glen) * B3**(3.0/n_glen) * (rho*g*sin(alpha)*H)**((n_glen-3.0)/n_glen)
 
 # input mesh and define geometry
-print('reading mesh from %s ...' % inname)
-mesh = Mesh(inname)
+print('reading mesh from %s ...' % args.inname)
+mesh = Mesh(args.inname)
 print('mesh has %d vertices and %d elements' \
       % (mesh.num_vertices(),mesh.num_cells()))
 
