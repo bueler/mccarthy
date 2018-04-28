@@ -1,0 +1,30 @@
+setting target mesh size of 200 m
+Info    : 43 vertices 90 elements
+../flowstep.py -eps 0.0001 slab0.msh -s_snes_max_it 200
+Nonlinear s_ solve converged due to CONVERGED_SNORM_RELATIVE iterations 39
+maximum velocity magnitude = 909.090 m a-1
+numerical errors: |u-uex|_inf = 9.856e+00 m a-1, |p-pex|_inf = 1.924e+04 Pa
+setting target mesh size of 100 m
+Info    : 134 vertices 272 elements
+../flowstep.py -eps 0.0001 slab1.msh -s_snes_max_it 200
+Nonlinear s_ solve converged due to CONVERGED_SNORM_RELATIVE iterations 35
+maximum velocity magnitude = 906.322 m a-1
+numerical errors: |u-uex|_inf = 2.092e+00 m a-1, |p-pex|_inf = 1.024e+04 Pa
+setting target mesh size of 50 m
+Info    : 463 vertices 930 elements
+../flowstep.py -eps 0.0001 slab2.msh -s_snes_max_it 200
+Nonlinear s_ solve converged due to CONVERGED_SNORM_RELATIVE iterations 50
+maximum velocity magnitude = 906.108 m a-1
+numerical errors: |u-uex|_inf = 1.983e-01 m a-1, |p-pex|_inf = 4.220e+03 Pa
+setting target mesh size of 25 m
+Info    : 1771 vertices 3546 elements
+../flowstep.py -eps 0.0001 slab4.msh -s_snes_max_it 200
+Nonlinear s_ solve converged due to CONVERGED_FNORM_RELATIVE iterations 49
+maximum velocity magnitude = 906.095 m a-1
+numerical errors: |u-uex|_inf = 3.664e-02 m a-1, |p-pex|_inf = 2.460e+03 Pa
+setting target mesh size of 12.5 m
+Info    : 6869 vertices 13742 elements
+../flowstep.py -eps 0.0001 slab8.msh -s_snes_max_it 200
+Nonlinear s_ solve converged due to CONVERGED_FNORM_RELATIVE iterations 17
+maximum velocity magnitude = 906.094 m a-1
+numerical errors: |u-uex|_inf = 7.728e-03 m a-1, |p-pex|_inf = 4.035e+03 Pa
