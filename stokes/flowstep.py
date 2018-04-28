@@ -56,6 +56,8 @@ top_id = 42  # unused below
 inflow_id = 43
 base_id = 44
 
+# FIXME following code breaks parallel; could do: for L do MPIAllReduce() with MAX;
+#    for Hin,bs,Hout do len(xarray<0.01) > 0 before ...
 # extract mesh geometry making these assumptions (tolerance=1cm):
 #   * max x-coordinate is total length L
 #   * min z-coordinate at x=0 is bs
@@ -171,11 +173,11 @@ one = Constant(1.0, domain=mesh)
 area = assemble(dot(one,one) * dx)
 #print('domain area = %.2e m2' % area)
 pav = assemble(sqrt(dot(p, p)) * dx) / area
-print('average pressure = %.2f Pa' % pav)
+print('average pressure = %.3f Pa' % pav)
 velmagav = assemble(sqrt(dot(u, u)) * dx) / area
-print('average velocity magnitude = %.2f m a-1' % (secpera * velmagav))
+print('average velocity magnitude = %.3f m a-1' % (secpera * velmagav))
 umagmax = interpolate(sqrt(dot(u,u)),P1).dat.data.max()
-print('maximum velocity magnitude = %.2f m a-1' % (secpera * umagmax))
+print('maximum velocity magnitude = %.3f m a-1' % (secpera * umagmax))
 
 # compute infinity-norm numerical errors relative to slab-on-slope when bs==0.0
 if isslab:
@@ -185,7 +187,7 @@ if isslab:
     p_exact.interpolate(rho * g * cos(args.alpha) * (Hin - z))
     uerr = interpolate(sqrt(dot(u_exact-u,u_exact-u)),P1).dat.data.max()
     perr = interpolate(sqrt(dot(p_exact-p,p_exact-p)),W).dat.data.max()
-    print('numerical errors: |u-uex|_inf = %.2e m a-1, |p-pex|_inf = %.2e Pa' \
+    print('numerical errors: |u-uex|_inf = %.3e m a-1, |p-pex|_inf = %.3e Pa' \
           % (uerr*secpera,perr))
 
 # write the solution to a file for visualisation with paraview
