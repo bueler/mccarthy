@@ -38,6 +38,10 @@ Dtyp = args.Dtyp / secpera
 
 from firedrake import *
 
+def printrank0(str):
+    if COMM_WORLD.rank == 0:
+        print(str)
+
 # glacier physical constants
 g = 9.81                   # m s-2
 rho = 910.0                # kg m-3
@@ -45,10 +49,10 @@ A3 = 3.1689e-24            # Pa-3 s-1; EISMINT I value of ice softness
 B3 = A3**(-1.0/3.0)        # Pa s(1/3);  ice hardness
 
 # input mesh and define geometry
-print('reading mesh from %s ...' % args.inname)
+printrank0('reading mesh from %s ...' % args.inname)
 mesh = Mesh(args.inname)
-print('mesh has %d vertices and %d elements' \
-      % (mesh.num_vertices(),mesh.num_cells()))
+printrank0('mesh has %d vertices and %d elements' \
+           % (mesh.num_vertices(),mesh.num_cells()))  # FIXME breaks in parallel
 
 # numbering of parts of boundary *must match generation script genstepmesh.py*
 outflow_id = 41
@@ -56,27 +60,34 @@ top_id = 42  # unused below
 inflow_id = 43
 base_id = 44
 
-# FIXME following code breaks parallel; could do: for L do MPIAllReduce() with MAX;
-#    for Hin,bs,Hout do len(xarray<0.01) > 0 before ...
 # extract mesh geometry making these assumptions (tolerance=1cm):
 #   * max x-coordinate is total length L
 #   * min z-coordinate at x=0 is bs
 #   * max z-coordinate at x=0 is hsurfin
 #   * max z-coordinate at x=L is Hout
-xarray = mesh.coordinates.dat.data[:,0]
-zarray = mesh.coordinates.dat.data[:,1]
-L = max(xarray)
-bs = min(zarray[xarray<0.01])
-hsurfin = max(zarray[xarray<0.01])
-Hin = hsurfin - bs
-Hout = max(zarray[xarray>L-0.01])
-print('mesh geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f, Hout = %.3f' \
+if False:
+    # FIXME breaks in parallel; could do: for L do MPIAllReduce() with MAX;
+    #    for Hin,bs,Hout do len(xarray<0.01) > 0 before ...
+    xarray = mesh.coordinates.dat.data[:,0]
+    zarray = mesh.coordinates.dat.data[:,1]
+    L = max(xarray)
+    bs = min(zarray[xarray<0.01])
+    hsurfin = max(zarray[xarray<0.01])
+    Hin = hsurfin - bs
+    Hout = max(zarray[xarray>L-0.01])
+else:
+    L = 2000.0
+    bs = 120.0
+    hsurfin = 520.0
+    Hin = 400.0
+    Hout = 400.0
+printrank0('mesh geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f, Hout = %.3f' \
       %(L,bs,Hin,Hout))
 isslab = False
 if abs(bs) < 0.01 and abs(Hin - Hout) < 0.01:
-    print('  ... detected slab geometry case ...')
+    printrank0('  ... detected slab geometry case ...')
     isslab = True
-print('using bed slope angle alpha = %.6f' % args.alpha)
+printrank0('using bed slope angle alpha = %.6f' % args.alpha)
 
 # determine B_n so that slab-on-slope solutions give surface velocity that is n-independent
 Bn = (4.0/(n_glen+1.0))**(1.0/n_glen) \
@@ -118,14 +129,14 @@ def D(w):
 
 # define the nonlinear weak form F(u,p;v,q)
 if n_glen == 1.0:
-    print('setting-up weak form in unregularized Newtonian case (n_glen = 1.0) ...')
+    printrank0('setting-up weak form in unregularized Newtonian case (n_glen = 1.0) ...')
     F = ( inner(Bn * D(u), D(v)) - p * div(v) - div(u) * q \
           - inner(f_body, v) ) * dx \
         - inner(outflow_sigma, v) * ds(outflow_id)
 else:
-    print('using n_glen = %.3f and viscosity regularization eps = %.6f ...' \
+    printrank0('using n_glen = %.3f and viscosity regularization eps = %.6f ...' \
           % (n_glen,args.eps))
-    print('setting-up weak form ...')
+    printrank0('setting-up weak form ...')
     Du2 = 0.5 * inner(D(u), D(u)) + (args.eps * Dtyp)**2.0
     rr = 1.0/n_glen - 1.0
     F = ( inner(Bn * Du2**(rr/2.0) * D(u), D(v)) - p * div(v) - div(u) * q \
@@ -140,7 +151,7 @@ bcs = [ DirichletBC(Z.sub(0), noslip, base_id),
         DirichletBC(Z.sub(0), inflow_u, (inflow_id,)) ]
 
 # solve
-print('solving nonlinear variational problem ...')
+printrank0('solving nonlinear variational problem ...')
 solve(F == 0, up, bcs=bcs,
       options_prefix='s',
       solver_parameters={"snes_converged_reason": True,
@@ -171,13 +182,13 @@ p.rename('pressure')
 P1 = FunctionSpace(mesh, "CG", 1)
 one = Constant(1.0, domain=mesh)
 area = assemble(dot(one,one) * dx)
-#print('domain area = %.2e m2' % area)
+#printrank0('domain area = %.2e m2' % area)
 pav = assemble(sqrt(dot(p, p)) * dx) / area
-print('average pressure = %.3f Pa' % pav)
+printrank0('average pressure = %.3f Pa' % pav)
 velmagav = assemble(sqrt(dot(u, u)) * dx) / area
-print('average velocity magnitude = %.3f m a-1' % (secpera * velmagav))
-umagmax = interpolate(sqrt(dot(u,u)),P1).dat.data.max()
-print('maximum velocity magnitude = %.3f m a-1' % (secpera * umagmax))
+printrank0('average velocity magnitude = %.3f m a-1' % (secpera * velmagav))
+umagmax = interpolate(sqrt(dot(u,u)),P1).dat.data.max()  # FIXME breaks in parallel
+printrank0('maximum velocity magnitude = %.3f m a-1' % (secpera * umagmax))
 
 # compute infinity-norm numerical errors relative to slab-on-slope when bs==0.0
 if isslab:
@@ -185,12 +196,12 @@ if isslab:
     u_exact,p_exact = up_exact.split()
     u_exact.interpolate(inflow_u)
     p_exact.interpolate(rho * g * cos(args.alpha) * (Hin - z))
-    uerr = interpolate(sqrt(dot(u_exact-u,u_exact-u)),P1).dat.data.max()
-    perr = interpolate(sqrt(dot(p_exact-p,p_exact-p)),W).dat.data.max()
-    print('numerical errors: |u-uex|_inf = %.3e m a-1, |p-pex|_inf = %.3e Pa' \
+    uerr = interpolate(sqrt(dot(u_exact-u,u_exact-u)),P1).dat.data.max()  # FIXME breaks in parallel
+    perr = interpolate(sqrt(dot(p_exact-p,p_exact-p)),W).dat.data.max()  # FIXME breaks in parallel
+    printrank0('numerical errors: |u-uex|_inf = %.3e m a-1, |p-pex|_inf = %.3e Pa' \
           % (uerr*secpera,perr))
 
 # write the solution to a file for visualisation with paraview
-print('writing (velocity,pressure) to %s ...' % outname)
+printrank0('writing (velocity,pressure) to %s ...' % outname)
 File(outname).write(u,p)
 
