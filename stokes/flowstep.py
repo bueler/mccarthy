@@ -10,9 +10,9 @@ secpera = 31556926.0       # seconds per year
 # process options
 mixchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
 parser = argparse.ArgumentParser(\
-    description='Solve glacier bedrock-step Glen-Stokes problem.')
-parser.add_argument('-bs', type=float, default=120.0, metavar='X',
-                    help='height of bed step (m; default = 120.0)')
+    description='Solve glacier Glen-Stokes problem on bedrock-step geometry.')
+parser.add_argument('-alpha', type=float, default=0.1, metavar='X',
+                    help='downward slope of bed as angle in radians (default = 0.1)')
 parser.add_argument('-Dtyp', type=float, default=2.0, metavar='X',
                     help='regularize viscosity using "+(eps Dtyp)^2" (default = 2 a-1)')
                     # e.g. (800 m a-1) / 400 m = 2 a-1
@@ -44,11 +44,6 @@ rho = 910.0                # kg m-3
 A3 = 3.1689e-24            # Pa-3 s-1; EISMINT I value of ice softness
 B3 = A3**(-1.0/3.0)        # Pa s(1/3);  ice hardness
 
-# determine B_n so that slab-on-slope solutions give surface velocity that is n-independent
-H = 400.0
-alpha = 0.1
-Bn = (4.0/(n_glen+1.0))**(1.0/n_glen) * B3**(3.0/n_glen) * (rho*g*sin(alpha)*H)**((n_glen-3.0)/n_glen)
-
 # input mesh and define geometry
 print('reading mesh from %s ...' % args.inname)
 mesh = Mesh(args.inname)
@@ -60,6 +55,30 @@ outflow_id = 41
 top_id = 42  # unused below
 inflow_id = 43
 base_id = 44
+
+# extract mesh geometry making these assumptions (tolerance=1cm):
+#   * max x-coordinate is total length L
+#   * min z-coordinate at x=0 is bs
+#   * max z-coordinate at x=0 is hsurfin
+#   * max z-coordinate at x=L is Hout
+xarray = mesh.coordinates.dat.data[:,0]
+zarray = mesh.coordinates.dat.data[:,1]
+L = max(xarray)
+bs = min(zarray[xarray<0.01])
+hsurfin = max(zarray[xarray<0.01])
+Hin = hsurfin - bs
+Hout = max(zarray[xarray>L-0.01])
+print('mesh geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f, Hout = %.3f' \
+      %(L,bs,Hin,Hout))
+isslab = False
+if abs(bs) < 0.01 and abs(Hin - Hout) < 0.01:
+    print('  ... detected slab geometry case ...')
+    isslab = True
+print('using bed slope angle alpha = %.6f' % args.alpha)
+
+# determine B_n so that slab-on-slope solutions give surface velocity that is n-independent
+Bn = (4.0/(n_glen+1.0))**(1.0/n_glen) \
+     * (rho*g*sin(args.alpha)*Hin)**((n_glen-3.0)/n_glen) * B3**(3.0/n_glen)
 
 # define mixed finite element space
 mixFE = {'P2P1'  : (VectorFunctionSpace(mesh, "CG", 2), # Taylor-Hood
@@ -78,14 +97,15 @@ Z = V * W
 v,q = TestFunctions(Z)
 
 # define body force
-f_body = Constant((g * rho * sin(alpha), - g * rho * cos(alpha)))
+f_body = Constant((g * rho * sin(args.alpha), - g * rho * cos(args.alpha)))
 
 # Dirichlet boundary condition applied on base
 noslip = Constant((0.0, 0.0))
 
 # right side outflow: apply hydrostatic normal force; nonhomogeneous Neumann
 x,z = SpatialCoordinate(mesh)
-outflow_sigma = as_vector([- rho * g * cos(alpha) * (H - z), rho * g * sin(alpha) * (H - z)])
+outflow_sigma = as_vector([- rho * g * cos(args.alpha) * (Hout - z),
+                           rho * g * sin(args.alpha) * (Hout - z)])
 
 # put solution here
 up = Function(Z)       # *not* TrialFunctions(Z)
@@ -101,7 +121,9 @@ if n_glen == 1.0:
           - inner(f_body, v) ) * dx \
         - inner(outflow_sigma, v) * ds(outflow_id)
 else:
-    print('setting-up weak form using n_glen = %.3f and regularized viscosity ...' % n_glen)
+    print('using n_glen = %.3f and viscosity regularization eps = %.6f ...' \
+          % (n_glen,args.eps))
+    print('setting-up weak form ...')
     Du2 = 0.5 * inner(D(u), D(u)) + (args.eps * Dtyp)**2.0
     rr = 1.0/n_glen - 1.0
     F = ( inner(Bn * Du2**(rr/2.0) * D(u), D(v)) - p * div(v) - div(u) * q \
@@ -109,9 +131,8 @@ else:
         - inner(outflow_sigma, v) * ds(outflow_id)
 
 # slab-on-slope inflow boundary condition
-hin = H + args.bs
-C = (2.0 / (n_glen + 1.0)) * (rho * g * sin(alpha) / Bn)**n_glen
-inflow_u = as_vector([C * (H**(n_glen+1.0) - (hin - z)**(n_glen+1.0)), 0.0])
+C = (2.0 / (n_glen + 1.0)) * (rho * g * sin(args.alpha) / Bn)**n_glen
+inflow_u = as_vector([C * (Hin**(n_glen+1.0) - (hsurfin - z)**(n_glen+1.0)), 0.0])
 
 bcs = [ DirichletBC(Z.sub(0), noslip, base_id),
         DirichletBC(Z.sub(0), inflow_u, (inflow_id,)) ]
@@ -157,11 +178,11 @@ umagmax = interpolate(sqrt(dot(u,u)),P1).dat.data.max()
 print('maximum velocity magnitude = %.2f m a-1' % (secpera * umagmax))
 
 # compute infinity-norm numerical errors relative to slab-on-slope when bs==0.0
-if abs(args.bs) < 1.0:
+if isslab:
     up_exact = Function(Z)
     u_exact,p_exact = up_exact.split()
     u_exact.interpolate(inflow_u)
-    p_exact.interpolate(rho * g * cos(alpha) * (H - z))
+    p_exact.interpolate(rho * g * cos(args.alpha) * (Hin - z))
     uerr = interpolate(sqrt(dot(u_exact-u,u_exact-u)),P1).dat.data.max()
     perr = interpolate(sqrt(dot(p_exact-p,p_exact-p)),W).dat.data.max()
     print('numerical errors: |u-uex|_inf = %.2e m a-1, |p-pex|_inf = %.2e Pa' \
