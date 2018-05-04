@@ -389,15 +389,14 @@ All of these concerns are areas of active research in mathematical glaciology; s
 
 \section{Finite difference numerics}  \label{sec:fd}
 
-The diffusion analogy suggests that numerical schemes for the heat equation are a starting point for solving the SIA equation \eqref{sia}.  Here we demonstrate only finite difference (FD) schemes, which replace derivatives by mere arithmetic.  These schemes are based on Taylor's theorem, which says that for a smooth function $f(x)$,
+The above diffusion analogy suggests that numerical schemes for the heat equation are a good starting point for solving the SIA equation \eqref{sia}.  Here we demonstrate only finite difference (FD) schemes.  These schemes replace derivatives by mere arithmetic by using Taylor's theorem which says that for a smooth function $f(x)$,
 	$$f(x+\Delta) = f(x) + f'(x) \Delta + \frac{1}{2} f''(x) \Delta^2 + \frac{1}{3!} f'''(x) \Delta^3 + \dots$$
 In Taylor's theorem one may also replace ``$\Delta$'' by its multiples, for example:
 \begin{align*}
 f(x+2\Delta) &= f(x) + 2 f'(x) \Delta + 2 f''(x) \Delta^2 + \frac{4}{3} f'''(x) \Delta^3 + \dots \\
 f(x-\Delta) &= f(x) - f'(x) \Delta + \frac{1}{2} f''(x) \Delta^2 - \frac{1}{3!} f'''(x) \Delta^3 + \dots
 \end{align*}
-
-When constructing FD schemes the idea is to combine expressions like these to give approximations of derivatives.  Thereby an equation relating grid values will approximate the differential equation.  Here we want partial derivative approximations, so we apply the Taylor's expansions one variable at a time.  For example, for $u=u(t,x)$ we have
+When constructing solution methods for differential equations the idea is to combine expressions like these to give approximations of the derivatives in the equation.  Thereby an algebraic equation relating grid values will approximate the differential equation.  Here we want partial derivative approximations, so we apply the Taylor's expansions one variable at a time.  For example, for $u=u(t,x)$ we have
 \begin{align*}
 u_t(t,x) &= \frac{u(t+\Delta t,x) - u(t,x)}{\Delta t} + O(\Delta t), \\
 u_t(t,x) &= \frac{u(t+\Delta t,x) - u(t-\Delta t,x)}{2\Delta t} + O((\Delta t)^2), \\
@@ -410,11 +409,9 @@ Note that if $\Delta$ is a small number then the remainder $O(\Delta^2)$ is smal
 \begin{equation}
 \frac{T(t+\Delta t,x) - T(t,x)}{\Delta t} \approx D\,\frac{T(t,x+\Delta x) - 2\, T(t,x) + T(t,x-\Delta x)}{\Delta x^2}.  \label{heat1Dapproximated}
 \end{equation}
-The scheme itself is a method for computing numbers on a grid.  That is, \eqref{heat1Dapproximated} approximates the PDE, while making it into an equality allows us to determine grid values.
-
-Let $(t_n,x_j)$ denote the points of the time-space grid shown in Figure \ref{fig:timespacegrid}.  Denote our approximation of the solution value $T(t_n,x_j)$ by $T_j^n$.  Then the finite difference scheme is
+While \eqref{heat1Dapproximated} approximates the PDE, making it into an equality allows us to determine grid values.  Let $(t_n,x_j)$ denote the points of the time-space grid shown in Figure \ref{fig:timespacegrid}.  Denote our approximation of the solution value $T(t_n,x_j)$ by $T_j^n$.  The finite difference scheme is
 	$$\frac{T_j^{n+1} - T_j^n}{\Delta t} = D\,\frac{T_{j+1}^n - 2\, T_j^n + T_{j-1}^n}{\Delta x^2}.$$
-To get a computable formula, let $\mu = D \Delta t / (\Delta x)^2$ and solve for $T_j^{n+1}$:
+To get a simplified formula, let $\mu = D \Delta t / (\Delta x)^2$ and solve for $T_j^{n+1}$:
 \begin{equation}
   T_j^{n+1} = \mu T_{j+1}^n + (1 - 2 \mu) T_j^n + \mu T_{j-1}^n \label{heat1Dfd}
 \end{equation}
@@ -423,13 +420,13 @@ To get a computable formula, let $\mu = D \Delta t / (\Delta x)^2$ and solve for
 
 FD scheme \eqref{heat1Dfd} is \emph{explicit} because it directly computes $T_j^{n+1}$ in terms of values at time $t_n$.  Figure \ref{fig:expstencil} (left) shows the ``stencil'' for scheme \eqref{heat1Dfd}: three values at the current time $t_n$ are combined to update the one value at the next time $t_{n+1}$.
 
-Notice that evaluating a heat equation solution at a grid point, namely the expression ``$T(t_n,x_j)$,'' is generally a different number from the value $T_j^n$ computed by a scheme like \eqref{heat1Dfd}.  We intend that the numbers $T(t_n,x_j)$ and $T_j^n$ become closer together as the grid is made finer (i.e.~$\Delta t \to 0$ and $\Delta x \to 0$), because the FD expressions become closer to the derivatives they approximate.  That is, we intend our FD scheme to \emph{converge} under \emph{grid refinement}.  For now we expect that convergence will happen, but this needs checking (``verification''; Section \ref{sec:exactsolutions}).
+The expression ``$T(t_n,x_j)$'' evaluates a heat equation solution at a grid point.  This is generally a different number from the value $T_j^n$ computed by a scheme like \eqref{heat1Dfd}.  We intend that the numbers $T(t_n,x_j)$ and $T_j^n$ become closer together as the grid is made finer (i.e.~$\Delta t \to 0$ and $\Delta x \to 0$), because the FD expressions become closer to the derivatives they approximate.  That is, we intend our FD scheme to \emph{converge} under \emph{grid refinement}.  Even if we expect that convergence will happen, this needs checking (``verification''; Section \ref{sec:exactsolutions}).
 
 \twofigsizes{expstencil}{exp2dstencil}{Left: Space-time stencil for the explicit scheme \eqref{heat1Dfd} for the 1D heat equation.  Right: Spatial-only stencil for scheme \eqref{heat2dexplicit}.}{2.0in}{2.1in}
 
-How accurate is scheme \eqref{heat1Dfd}?  The construction of the scheme tells us that the difference between the scheme \eqref{heat1Dfd} and the PDE \eqref{heat1D} is $O(\Delta t + (\Delta x)^2)$, so this difference goes to zero as we refine the grid in space and time, a property called \emph{consistency}.  With care about the smoothness of boundary conditions, and using mathematical facts about the heat equation itself, one can show that the difference between $T_j^n$ and $T(t_n,x_j)$ is also $O(\Delta t + (\Delta x)^2)$, which is thus the \emph{convergence rate}; see Notes and References.  To get convergence the PDE problem must possess adequately-smooth solutions.  Also the scheme must be \emph{stable}, which we address below.  The main theorem for numerical PDE schemes asserts that ``consistency plus stability implies convergence''; see Notes and References.
+How accurate is scheme \eqref{heat1Dfd}?  The construction of the scheme tells us that the difference between the scheme \eqref{heat1Dfd} and the PDE \eqref{heat1D} is $O(\Delta t + (\Delta x)^2)$.  This difference goes to zero as we refine the grid in space and time, a property of the scheme called \emph{consistency}.  With care about the smoothness of boundary conditions, and using mathematical facts about the heat equation itself, one can also show that the difference between $T_j^n$ and $T(t_n,x_j)$ is $O(\Delta t + (\Delta x)^2)$, which is thus the \emph{convergence rate}; see Notes and References.  To get convergence the scheme must be \emph{stable}, which we address below.  The main theorem for numerical PDE schemes asserts that ``consistency plus stability implies convergence''; see Notes and References.
 
-Instead of pursuing theory, in these notes we do something practical, namely verification.  We find problems for which we already know an exact solution $T(t,x)$, and then compute the differences $|T_j^n - T(t_n,x_j)|$.  This determines directly whether our actual implementation converges, not just whether it should in theory.  Then the verified code can be more confidently applied to real situations.
+Instead of pursuing theory, in these notes we do something practical, namely verification using exact solutions.  That is, we find problems for which we already know an exact solution $T(t,x)$, and then compute the differences $|T_j^n - T(t_n,x_j)|$.  This determines directly whether our actual implementation converges, not just whether it should in theory.  Then the verified code can be more confidently applied to real situations.
 
 \subsection*{A first implemented scheme}  Our first Matlab implementation is for the 2D heat equation \eqref{heat} with $D$ constant and $F=0$:
 \begin{equation}
