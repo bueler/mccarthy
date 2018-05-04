@@ -1,6 +1,6 @@
 \documentclass[letterpaper,final,12pt,reqno]{amsart}
 
-\usepackage[total={6.3in,9.2in},top=1.1in,left=1.1in]{geometry}
+\usepackage[total={6.3in,9.7in},top=0.9in,left=1.1in]{geometry}
 
 \usepackage{empheq}
 \usepackage[dvipsnames]{xcolor}
@@ -59,15 +59,16 @@ urlcolor=black     % only if colorlinks=true
 \emph{\today}
 \end{center}
 
+\thispagestyle{empty}
 \bigskip
 
 \renewcommand{\theequation}{A\arabic{equation}}
 
 This document is an appendix to my notes \emph{Numerical modelling of glaciers, ice sheets, and ice shelves}---here called ``the notes''---which are used for the International Summer School in Glaciology in McCarthy, Alaska.
 
-We start by stating the Stokes model with glacier-suitable boundary conditions.  Next we construct slab-on-a-slope solutions both for verification and to clarify the boundary conditions.  Then we derive the ``weak form,'' as explained below.  An overview of finite element (FE) methods \cite{Elmanetal2014}, which are based on such weak forms, follows.  Our particular FE method uses triangular elements for an arbitrary planar region and stable mixed elements; these ideas will be only briefly explained.
+We start by stating the Stokes model with glacier-suitable boundary conditions, and then we construct slab-on-a-slope solutions both for verification and to clarify the boundary conditions.  Then we derive the ``weak form,'' as explained below.  An overview of finite element (FE) methods \cite{Elmanetal2014}, which are based on such weak forms, follows.  Our particular FE method uses triangular elements for an arbitrary planar region and stable mixed elements; these ideas are only briefly explained.
 
-The main goal of this appendix comes next, namely to generate a numerical solution to a 2D glacier flow with a step in the bedrock (Figure \ref{fig:stepflowlin}).  This numerical solution uses four advanced open source tools/libraries:
+The main goal of this appendix comes next, namely a numerical velocity and pressure solution to a 2D glacier with a step in the bedrock (Figure \ref{fig:stepflowlin}).  This uses four advanced open source tools/libraries:
 \begin{itemize}
 \item Gmsh, a mesh generator \hfill \url{http://gmsh.info/}
 \item Firedrake, an FE library \hfill \url{https://www.firedrakeproject.org/}
@@ -77,7 +78,7 @@ The main goal of this appendix comes next, namely to generate a numerical soluti
 These tools are driven by two short Python codes which are included at the end.
 
 \begin{figure}[h]
-\includegraphics[width=0.8\textwidth,angle=-5.7296]{stepflowlin}  % 0.1 radian = 5.7296 degrees
+\includegraphics[width=0.7\textwidth,angle=-5.7296]{stepflowlin}  % 0.1 radian = 5.7296 degrees
 \caption{A glacier flowing over a bedrock step.  Arrows show velocity $\bu$.  Shading is pressure $p$.  Note the coarse mesh of triangular finite elements.}
 \label{fig:stepflowlin}
 \end{figure}
@@ -85,7 +86,7 @@ These tools are driven by two short Python codes which are included at the end.
 
 \section{Stokes equations}
 
-Recall the Glen-Stokes model in equations (3), (4), (5) from the notes.  (It is also stated in \cite{GreveBlatter2009,JouvetRappaz2011}.)  The model applies on a 3D or 2D domain $\Omega$ according to the context.  Allowing any Glen exponent $n\ge 1$, the equations are:
+Recall the Glen-Stokes model in equations (3), (4), (5) from the notes.  (The model is also described in \cite{GreveBlatter2009,JouvetRappaz2011}.)  The model applies on a 3D or 2D domain $\Omega$ according to the context.  Allowing any Glen exponent $n\ge 1$, the equations are:
 \begin{align}
 \nabla \cdot \bu &= 0 &&\text{\emph{incompressibility}} \label{incompressible} \\
 - \nabla \cdot \tau + \nabla p &= \rho \bg &&\text{\emph{stress balance}} \label{forcebalance} \\
@@ -100,35 +101,34 @@ Though the notation here generally follows Table 1 in the notes, some usage is m
 \begin{align*}
 |\tau|^2 = \frac{1}{2} \trace\left(\tau^2\right) = \frac{1}{2} \tau_{ij} \tau_{ij}, \qquad |D\bu|^2 = \frac{1}{2} \trace\left((D\bu)^2\right) = \frac{1}{2} (D\bu)_{ij} (D\bu)_{ij}
 \end{align*}
-In the last two expressions the Einstein summation is used over indices $i,j=1,2,3$ or $i,j=1,2$ according to dimension.
 
 Tensors $D\bu$ and $\tau$ are symmetric and have trace zero.  The full (Cauchy) stress tensor $\sigma$ is the deviatoric stress tensor $\tau$ minus the pressure,
 \begin{equation}
     \sigma = \tau - p\,I,  \label{cauchystress}
 \end{equation}
-so equation \eqref{forcebalance} is simply $-\Div \sigma = \rho \bg$.  One may derive that $p = -\frac{1}{3} \trace(\sigma)$ thus that the pressure is the negative of the average normal stress.  By definition $\Div\tau$ in \eqref{forcebalance} is a vector with components which we take to be the divergences of the rows:
+so equation \eqref{forcebalance} is simply $-\Div \sigma = \rho \bg$.  One may derive from \eqref{cauchystress} that $p = -\frac{1}{3} \trace(\sigma)$ thus that the pressure is the negative of the average normal stress.  By definition $\Div\tau$ in \eqref{forcebalance} is a vector with components which are the divergences of the rows:
     $$\left(\nabla \cdot \tau\right)_i = \left(\tau_{i1}\right)_{x_1} + \left(\tau_{i2}\right)_{x_2} + \left(\tau_{i3}\right)_{x_3}$$
 Thus $\nabla\cdot \tau$ is a column vector like $\nabla p$ and $\bg$ in \eqref{forcebalance}.
 
-Recall the viscosity form of flow law \eqref{flowlaw}, namely equation (15) in the notes:
+Recall the viscosity form of \eqref{flowlaw}, namely equation (15) in the notes:
 \begin{equation}
 \tau = 2\nu D\bu = B_n |D\bu|^{\frac{1}{n} - 1} D\bu  \label{viscflowlaw}
 \end{equation}
-Here $B_n = (A_n)^{-1/n}$ is the $n$-dependent ice hardness.  With this expression we can eliminate $\tau$ and rewrite equations \eqref{incompressible}, \eqref{forcebalance} in terms of velocity and pressure as
+Here $B_n = (A_n)^{-1/n}$ is the $n$-dependent ice hardness in units $\text{Pa}\,\text{s}^{1/n}$.  From \eqref{viscflowlaw} we can eliminate $\tau$ and rewrite equations \eqref{incompressible}, \eqref{forcebalance} in terms of velocity and pressure only:
 \begin{align}
 \Div \bu &= 0 \label{incompagain} \\
 - \nabla \cdot \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu\right) + \nabla p &= \rho \mathbf{g} \label{stokes}
 \end{align}
 The Stokes model is, from now on, equations \eqref{incompagain}, \eqref{stokes} with certain boundary conditions.  The solution is the velocity-pressure pair $(\bu,p)$.
 
-The domain $\Omega$ must have a smooth-enough boundary to apply the boundary conditions but it is otherwise general.  However, certain glacier-suitable boundary conditions are used in this document and in the code below.  To explain these, consider the numerical solution shown in Figure \ref{fig:stepflowlin}. We assume that base, top, inflow, and outflow boundary surfaces are all well-defined.  On the base we require no slip:
+The domain $\Omega$ must have a smooth-enough boundary to apply the boundary conditions but it is otherwise general.  However, certain glacier-suitable boundary conditions are used in this document and in the code below.  To explain these, consider the numerical solution shown in Figure \ref{fig:stepflowlin}.  We assume that the base, top, inflow, and outflow boundary surfaces are all well-defined.  On the base we require no slip:
 \begin{align}
 \bu &= 0  &&\text{\emph{base}} \label{basebc} \\
-\intertext{On the top we set a condition of zero normal stress, $\sigma\hbn=0$ or equivalently:}
+\intertext{On the top we set a condition of zero applied stress, $\sigma\hbn=0$ or equivalently:}
 \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= 0  &&\text{\emph{top}} \label{topbc} \\
 \intertext{As shown in Figure \ref{fig:stepflowlin}, the left-side inflow boundary is a surface with outward normal $\hbn=\left<-1,0,0\right>^\top$ in all cases we solve.  On this surface we set a nonzero inflow velocity:}
 \bu &= \left<f(z),0,0\right>^\top  &&\text{\emph{inflow}} \label{inflowbc} \\
-\intertext{(Velocity $f(z)$ will satisfy the slab-on-slope equations; see below.)  On the outflow boundary, where $\hbn=\left<1,0,0\right>^\top$ is the outward normal, $h$ is the surface elevation, and $g=|\bg|$, we set a nonzero hydrostatic normal stress:}
+\intertext{The inflow $f(z)$ will satisfy the slab-on-slope equations; see below.  On the outflow boundary, where $\hbn=\left<1,0,0\right>^\top$, $h$ is the surface elevation, and $g=|\bg|$, we set a nonzero hydrostatic normal stress and zero traction:}
 \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= \left<-\rho g \cos\alpha (h-z),0,\rho g\sin\alpha (h-z)\right>^\top  &&\text{\emph{outflow}} \label{outflowbc}
 \end{align}
 
