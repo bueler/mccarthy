@@ -1,5 +1,5 @@
 .PHONY: clean
 
 clean:
-	@rm -f *~ *.pyc *.pvd *.vtu *.geo *.msh tmp.txt
+	@rm -f *~ *.pyc *.pvd *.vtu *.pvtu *.geo *.msh tmp.txt
 

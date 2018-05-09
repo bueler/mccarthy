@@ -1,13 +1,16 @@
 #!/bin/bash
 set -e
 
+P=$1
+
 # measure convergence on sequence of refining slab geometries
 # note viscosity regularization relevant
 # after setting-up firedrake in parent directory, run as:
-#    ./convergeslab.sh &> convergeslab.txt
+#    ./convergeslab.sh P &> convergeslabP.txt
+# where P is number of processes
 
 function runcase() {
-  CMD="../flowstep.py -eps $2 $1 -s_snes_max_it 200"
+  CMD="mpiexec -n $P ../flowstep.py -eps $2 $1 -s_snes_max_it 200"
   echo $CMD
   rm -f tmp.txt
   #/usr/bin/time -f "real %e" $CMD &> tmp.txt
