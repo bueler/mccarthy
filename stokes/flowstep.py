@@ -8,7 +8,7 @@ import argparse
 secpera = 31556926.0       # seconds per year
 
 # process options
-mixchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
+mixFEchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
 parser = argparse.ArgumentParser(\
     description='Solve glacier Glen-Stokes problem on bedrock-step geometry.')
 parser.add_argument('-alpha', type=float, default=0.1, metavar='X',
@@ -17,9 +17,9 @@ parser.add_argument('-Dtyp', type=float, default=2.0, metavar='X',
                     help='regularize viscosity using "+(eps Dtyp)^2" (default = 2 a-1)')
                     # e.g. (800 m a-1) / 400 m = 2 a-1
 parser.add_argument('-elements', metavar='X', default='P2P1',
-                    choices=mixchoices,
+                    choices=mixFEchoices,
                     help='stable mixed finite elements from: %s (default=P2P1)' \
-                         % (','.join(mixchoices)) )
+                         % (','.join(mixFEchoices)) )
 parser.add_argument('-eps', type=float, default=0.01, metavar='X',
                     help='regularize viscosity using "+(eps Dtyp)^2" (default = 0.01)')
 parser.add_argument('inname', metavar='INNAME',
@@ -37,7 +37,6 @@ n_glen = args.n_glen  # used pretty often
 Dtyp = args.Dtyp / secpera
 
 from firedrake import *
-
 from firedrake.petsc import PETSc
 
 def printpar(thestr,comm=COMM_WORLD):
@@ -49,15 +48,16 @@ rho = 910.0                # kg m-3
 A3 = 3.1689e-24            # Pa-3 s-1; EISMINT I value of ice softness
 B3 = A3**(-1.0/3.0)        # Pa s(1/3);  ice hardness
 
-# input mesh (and report on parallel decomposition if appropriate)
+# read mesh and report on parallel decomposition (if appropriate)
 printpar('reading mesh from %s ...' % args.inname)
 mesh = Mesh(args.inname)
-if mesh.comm.size > 1:
-    printpar('  rank %d owns: mesh has %d vertices and %d elements' \
-             % (mesh.comm.rank,mesh.num_vertices(),mesh.num_cells()), comm=COMM_SELF)
+if mesh.comm.size == 1:
+    printpar('  mesh has %d elements (cells) and %d vertices' \
+          % (mesh.num_cells(),mesh.num_vertices()))
 else:
-    printpar('mesh has %d vertices and %d elements' \
-             % (mesh.num_vertices(),mesh.num_cells()), comm=mesh.comm)
+    PETSc.Sys.syncPrint('  rank %d owns %d elements (cells) and can access %d vertices' \
+                        % (mesh.comm.rank,mesh.num_cells(),mesh.num_vertices()), comm=mesh.comm)
+    PETSc.Sys.syncFlush(comm=mesh.comm)
 
 # numbering of parts of boundary *must match generation script genstepmesh.py*
 outflow_id = 41
@@ -65,34 +65,37 @@ top_id = 42  # unused below
 inflow_id = 43
 base_id = 44
 
-# extract mesh geometry making these assumptions (tolerance=1cm):
-#   * max x-coordinate is total length L
-#   * min z-coordinate at x=0 is bs
-#   * max z-coordinate at x=0 is hsurfin
-#   * max z-coordinate at x=L is Hout
-if True:
-    # FIXME breaks in parallel; could do: for L do MPIAllReduce() with MAX;
-    #    for Hin,bs,Hout do len(xarray<0.01) > 0 before ...
-    # FIXME see advice in house-firedrake/demos/parprint.py
-    xarray = mesh.coordinates.dat.data[:,0]
-    zarray = mesh.coordinates.dat.data[:,1]
-    L = max(xarray)
-    bs = min(zarray[xarray<0.01])
-    hsurfin = max(zarray[xarray<0.01])
-    Hin = hsurfin - bs
-    Hout = max(zarray[xarray>L-0.01])
-else:
-    L = 2000.0
-    bs = 120.0
-    hsurfin = 520.0
-    Hin = 400.0
-    Hout = 400.0
-printpar('mesh geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f, Hout = %.3f' \
-         %(L,bs,Hin,Hout))
+# extract mesh geometry making these definitions (tolerance=1cm):
+#   L       = total length of domain     = (max x-coordinate)
+#   bs      = height of bed step         = (min z-coordinate at x=0)
+#   hsurfin = height of surface at input = (max z-coordinate at x=0)
+#   Hout    = ice thickness at output    = (max z-coordinate at x=L)
+# in parallel no process owns the whole mesh so MPI_Allreduce() is needed
+
+from mpi4py import MPI
+xa = mesh.coordinates.dat.data_ro[:,0]  # .data_ro acts like VecGetArrayRead
+za = mesh.coordinates.dat.data_ro[:,1]
+loc_L = max(xa)
+loc_bs = 9.9999e99
+loc_hsurfin = 0.0
+if any(xa < 0.01):              # some processes may have no such points
+    loc_bs = min(za[xa<0.01])
+    loc_hsurfin = max(za[xa<0.01])
+L = mesh.comm.allreduce(loc_L, op=MPI.MAX)
+bs = mesh.comm.allreduce(loc_bs, op=MPI.MIN)
+hsurfin = mesh.comm.allreduce(loc_hsurfin, op=MPI.MAX)
+# note that determining Hout requires already having L
+loc_Hout = 0.0
+if any(xa > L-0.01):
+    loc_Hout = max(za[xa > L-0.01])
+Hout = mesh.comm.allreduce(loc_Hout, op=MPI.MAX)
+Hin = hsurfin - bs
 isslab = False
 if abs(bs) < 0.01 and abs(Hin - Hout) < 0.01:
     printpar('  ... detected slab geometry case ...')
     isslab = True
+printpar('mesh geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f, Hout = %.3f' \
+         %(L,bs,Hin,Hout))
 printpar('using bed slope angle alpha = %.6f' % args.alpha)
 
 # determine B_n so that slab-on-slope solutions give surface velocity that is n-independent
@@ -183,17 +186,17 @@ solve(F == 0, up, bcs=bcs,
 u,p = up.split()
 u.rename('velocity')
 p.rename('pressure')
-# examine values directly:   print(p.vector().array())
 
 P1 = FunctionSpace(mesh, "CG", 1)
 one = Constant(1.0, domain=mesh)
 area = assemble(dot(one,one) * dx)
-#printrank0('domain area = %.2e m2' % area)
 pav = assemble(sqrt(dot(p, p)) * dx) / area
 printpar('average pressure = %.3f Pa' % pav)
 velmagav = assemble(sqrt(dot(u, u)) * dx) / area
 printpar('average velocity magnitude = %.3f m a-1' % (secpera * velmagav))
-umagmax = interpolate(sqrt(dot(u,u)),P1).dat.data.max()  # FIXME breaks in parallel
+umag = interpolate(sqrt(dot(u,u)),P1)
+with umag.dat.vec_ro as vumag:
+    umagmax = vumag.max()[1]
 printpar('maximum velocity magnitude = %.3f m a-1' % (secpera * umagmax))
 
 # compute infinity-norm numerical errors relative to slab-on-slope when bs==0.0
@@ -202,10 +205,14 @@ if isslab:
     u_exact,p_exact = up_exact.split()
     u_exact.interpolate(inflow_u)
     p_exact.interpolate(rho * g * cos(args.alpha) * (Hin - z))
-    uerr = interpolate(sqrt(dot(u_exact-u,u_exact-u)),P1).dat.data.max()  # FIXME breaks in parallel
-    perr = interpolate(sqrt(dot(p_exact-p,p_exact-p)),W).dat.data.max()  # FIXME breaks in parallel
+    uerr = interpolate(sqrt(dot(u_exact-u,u_exact-u)),P1)
+    perr = interpolate(sqrt(dot(p_exact-p,p_exact-p)),W)
+    with uerr.dat.vec_ro as vuerr:
+        uerrmax = vuerr.max()[1]
+    with perr.dat.vec_ro as vperr:
+        perrmax = vperr.max()[1]
     printpar('numerical errors: |u-uex|_inf = %.3e m a-1, |p-pex|_inf = %.3e Pa' \
-          % (uerr*secpera,perr))
+          % (uerrmax*secpera,perrmax))
 
 # write the solution to a file for visualisation with paraview
 printpar('writing (velocity,pressure) to %s ...' % outname)
