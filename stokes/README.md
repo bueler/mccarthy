@@ -3,14 +3,14 @@ stokes/
 
 Copyright 2018  Ed Bueler
 
-The codes and documents in this directory use (or assume the use of) [Firedrake](https://www.firedrakeproject.org/), [Gmsh](http://gmsh.info/), [PETSc](http://www.mcs.anl.gov/petsc/), and [Paraview](https://www.paraview.org/).  This material is both more-advanced and more-experimental than codes in `mfiles/`
+The example in this directory uses [Firedrake](https://www.firedrakeproject.org/), [Gmsh](http://gmsh.info/), [PETSc](http://www.mcs.anl.gov/petsc/), and [Paraview](https://www.paraview.org/).  This example is more advanced, and more experimental, than codes in `mfiles/`
 
 Installation
 ------------
 
-  * Install Gmsh and Paraview as desired, for instance by installing Debian or OSX packages.
+  * Install [Gmsh](http://gmsh.info/) and [Paraview](https://www.paraview.org/), for instance by installing Debian or OSX packages.
   * Follow the instructions at the [Firedrake download page](https://www.firedrakeproject.org/download.html) to install it.
-  * In a normal case one should use the PETSc which is installed by Firedrake, so no separate PETSc installation is needed.
+  * Most users will only need the PETSc which is installed by Firedrake; no separate PETSc installation is needed.
 
 Default usage
 -------------
@@ -30,16 +30,16 @@ Set the height of the bedrock step to zero when creating the domain geometry:
 
         (firedrake) $ ./genstepmesh.py -bs 0.0 -o slab.geo
         (firedrake) $ gmsh -2 slab.geo
-        (firedrake) $ ./flowstep.py -bs 0.0 slab.msh
+        (firedrake) $ ./flowstep.py slab.msh
 
 Mesh refinement
 ---------------
 
-The default mesh above has a typical mesh size of 100 m with additional refinement by a factor of 4 to give 25 m resolution near the interior corner created by the bedrock step.
+The default mesh has a typical mesh size of 100 m with refinement by a factor of 4 near the interior corner created by the bedrock step.  (Giving 25 m resolution at the corner.)
 
-Script `genstepmesh.py` allows uniform refinement factor (`-refine X`) and additional refinement at the interior corner by an additional factor Y: `-refine_corner Y`.  The default case corresponds to `-hmesh 100 -refine 1 -refine_corner 4`.
+Options to script `genstepmesh.py` allow setting the mesh size and a uniform refinement factor: `-hmesh H -refine X`.  Another option controls the additional refinement at the interior corner: `-refine_corner Y`.  The default case corresponds to `-hmesh 100 -refine 1 -refine_corner 4`.
 
-For example the following creates a mesh with target mesh size varying from 25 m to about 3 m near the interior corner.  The resulting grid has about 15 times as many nodes as the default above:
+For example the following creates a mesh with target mesh size varying from 25 m to about 3 m near the interior corner.  The resulting grid has about 15 times as many elements as the default mesh:
 
         (firedrake) $ ./genstepmesh.py -refine 4 -refine_corner 8 -o finer.geo
         (firedrake) $ gmsh -2 finer.geo
