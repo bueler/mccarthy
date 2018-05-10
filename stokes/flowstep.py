@@ -4,10 +4,8 @@
 # Solve glacier bedrock-step Glen-Stokes problem.  See
 # mccarthy/stokes/README.md for usage.
 
-import argparse
-secpera = 31556926.0       # seconds per year
-
 # process options
+import argparse
 mixFEchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
 parser = argparse.ArgumentParser(\
     description='Solve glacier Glen-Stokes problem on bedrock-step geometry.')
@@ -33,23 +31,17 @@ if len(args.o) > 0:
     outname = args.o
 else:
     outname = '.'.join(args.inname.split('.')[:-1]) + '.pvd'  # strip .msh and replace with .pvd
-n_glen = args.n_glen  # used pretty often
-Dtyp = args.Dtyp / secpera
 
 from firedrake import *
 from firedrake.petsc import PETSc
+from stepmesh import bdryids,getmeshdims
+from physics import secpera,rho,g,getinflow,stokessolve
 
 def printpar(thestr,comm=COMM_WORLD):
-    PETSc.Sys.Print(thestr, comm=comm)
-
-# glacier physical constants
-g = 9.81                   # m s-2
-rho = 910.0                # kg m-3
-A3 = 3.1689e-24            # Pa-3 s-1; EISMINT I value of ice softness
-B3 = A3**(-1.0/3.0)        # Pa s(1/3);  ice hardness
+    PETSc.Sys.Print(thestr,comm=comm)
 
 # read mesh and report on parallel decomposition (if appropriate)
-printpar('reading mesh from %s ...' % args.inname)
+printpar('reading initial mesh from %s ...' % args.inname)
 mesh = Mesh(args.inname)
 if mesh.comm.size == 1:
     printpar('  mesh has %d elements (cells) and %d vertices' \
@@ -59,48 +51,12 @@ else:
                         % (mesh.comm.rank,mesh.num_cells(),mesh.num_vertices()), comm=mesh.comm)
     PETSc.Sys.syncFlush(comm=mesh.comm)
 
-# numbering of parts of boundary *must match generation script genstepmesh.py*
-outflow_id = 41
-top_id = 42  # unused below
-inflow_id = 43
-base_id = 44
-
-# extract mesh geometry making these definitions (tolerance=1cm):
-#   L       = total length of domain     = (max x-coordinate)
-#   bs      = height of bed step         = (min z-coordinate at x=0)
-#   hsurfin = height of surface at input = (max z-coordinate at x=0)
-#   Hout    = ice thickness at output    = (max z-coordinate at x=L)
-# in parallel no process owns the whole mesh so MPI_Allreduce() is needed
-
-from mpi4py import MPI
-xa = mesh.coordinates.dat.data_ro[:,0]  # .data_ro acts like VecGetArrayRead
-za = mesh.coordinates.dat.data_ro[:,1]
-loc_L = max(xa)
-loc_bs = 9.9999e99
-loc_hsurfin = 0.0
-if any(xa < 0.01):              # some processes may have no such points
-    loc_bs = min(za[xa<0.01])
-    loc_hsurfin = max(za[xa<0.01])
-L = mesh.comm.allreduce(loc_L, op=MPI.MAX)
-bs = mesh.comm.allreduce(loc_bs, op=MPI.MIN)
-hsurfin = mesh.comm.allreduce(loc_hsurfin, op=MPI.MAX)
-# note that determining Hout requires already having L
-loc_Hout = 0.0
-if any(xa > L-0.01):
-    loc_Hout = max(za[xa > L-0.01])
-Hout = mesh.comm.allreduce(loc_Hout, op=MPI.MAX)
-Hin = hsurfin - bs
-isslab = False
-if abs(bs) < 0.01 and abs(Hin - Hout) < 0.01:
-    printpar('  ... detected slab geometry case ...')
-    isslab = True
-printpar('mesh geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f, Hout = %.3f' \
-         %(L,bs,Hin,Hout))
+meshdims = getmeshdims(mesh)
+printpar('mesh geometry [m]: L = %.3f, bs = %.3f, hsurfin = %.3f, Hout = %.3f' \
+         %(meshdims['L'],meshdims['bs'],meshdims['hsurfin'],meshdims['Hout']))
 printpar('using bed slope angle alpha = %.6f' % args.alpha)
-
-# determine B_n so that slab-on-slope solutions give surface velocity that is n-independent
-Bn = (4.0/(n_glen+1.0))**(1.0/n_glen) \
-     * (rho*g*sin(args.alpha)*Hin)**((n_glen-3.0)/n_glen) * B3**(3.0/n_glen)
+if meshdims['isslab']:
+    printpar('  ... detected slab geometry case ...')
 
 # define mixed finite element space
 mixFE = {'P2P1'  : (VectorFunctionSpace(mesh, "CG", 2), # Taylor-Hood
@@ -116,71 +72,20 @@ mixFE = {'P2P1'  : (VectorFunctionSpace(mesh, "CG", 2), # Taylor-Hood
         }
 (V,W) = mixFE[args.elements]
 Z = V * W
-v,q = TestFunctions(Z)
 
-# define body force
-f_body = Constant((g * rho * sin(args.alpha), - g * rho * cos(args.alpha)))
-
-# Dirichlet boundary condition applied on base
-noslip = Constant((0.0, 0.0))
-
-# right side outflow: apply hydrostatic normal force; nonhomogeneous Neumann
-x,z = SpatialCoordinate(mesh)
-outflow_sigma = as_vector([- rho * g * cos(args.alpha) * (Hout - z),
-                           rho * g * sin(args.alpha) * (Hout - z)])
-
-# put solution here
-up = Function(Z)       # *not* TrialFunctions(Z)
-u,p = split(up)        # up.split() not equivalent here?
-
-def D(w):
-    return 0.5 * (grad(w) + grad(w).T)
-
-# define the nonlinear weak form F(u,p;v,q)
-if n_glen == 1.0:
-    printpar('setting-up weak form in unregularized Newtonian case (n_glen = 1.0) ...')
-    F = ( inner(Bn * D(u), D(v)) - p * div(v) - div(u) * q \
-          - inner(f_body, v) ) * dx \
-        - inner(outflow_sigma, v) * ds(outflow_id)
+# solve Stokes problem for u,p
+printpar('setting-up weak form ...')
+if args.n_glen == 1.0:
+    printpar('  in unregularized Newtonian case (n_glen = 1.0) ...')
 else:
-    printpar('using n_glen = %.3f and viscosity regularization eps = %.6f ...' \
-          % (n_glen,args.eps))
-    printpar('setting-up weak form ...')
-    Du2 = 0.5 * inner(D(u), D(u)) + (args.eps * Dtyp)**2.0
-    rr = 1.0/n_glen - 1.0
-    F = ( inner(Bn * Du2**(rr/2.0) * D(u), D(v)) - p * div(v) - div(u) * q \
-          - inner(f_body, v) ) * dx \
-        - inner(outflow_sigma, v) * ds(outflow_id)
-
-# slab-on-slope inflow boundary condition
-C = (2.0 / (n_glen + 1.0)) * (rho * g * sin(args.alpha) / Bn)**n_glen
-inflow_u = as_vector([C * (Hin**(n_glen+1.0) - (hsurfin - z)**(n_glen+1.0)), 0.0])
-
-bcs = [ DirichletBC(Z.sub(0), noslip, base_id),
-        DirichletBC(Z.sub(0), inflow_u, (inflow_id,)) ]
-
-# solve
-printpar('solving nonlinear variational problem ...')
-solve(F == 0, up, bcs=bcs,
-      options_prefix='s',
-      solver_parameters={"snes_converged_reason": True,
-                         #"ksp_converged_reason": True,
-                         #"ksp_monitor": True,
-                         "ksp_type": "fgmres",  # or "gmres" or "minres"
-                         "pc_type": "fieldsplit",
-                         "pc_fieldsplit_type": "schur",
-                         "pc_fieldsplit_schur_factorization_type": "full",  # or "diag"
-                         "fieldsplit_0_ksp_type": "preonly",
-                         "fieldsplit_0_pc_type": "lu",
-                         #"fieldsplit_0_ksp_converged_reason": True,
-                         #"fieldsplit_1_ksp_converged_reason": True,
-                         "fieldsplit_1_ksp_rtol": 1.0e-3,
-                         "fieldsplit_1_ksp_type": "gmres",
-                         "fieldsplit_1_pc_type": "none"})
-# ALSO CONSIDER:
-#    "ksp_type": "minres", "pc_type": "jacobi",
-#    "mat_type": "aij", "ksp_type": "preonly", "pc_type": "svd",  # fully-direct solver
-#    "mat_type": "aij", "ksp_view_mat": ":foo.m:ascii_matlab"
+    printpar('  using n_glen = %.3f and viscosity regularization eps = %.6f ...' \
+          % (args.n_glen,args.eps))
+printpar('solving for velocity and pressure ...')
+up = stokessolve(mesh,bdryids,Z,meshdims,
+                 n_glen=args.n_glen,
+                 alpha=args.alpha,
+                 eps=args.eps,
+                 Dtyp=args.Dtyp / secpera)
 
 # report on and save solution parts
 u,p = up.split()
@@ -199,11 +104,14 @@ with umag.dat.vec_ro as vumag:
     umagmax = vumag.max()[1]
 printpar('maximum velocity magnitude = %.3f m a-1' % (secpera * umagmax))
 
-# compute infinity-norm numerical errors relative to slab-on-slope when bs==0.0
-if isslab:
+# compute numerical errors relative to slab-on-slope *if* bs==0.0
+if meshdims['isslab']:
     up_exact = Function(Z)
     u_exact,p_exact = up_exact.split()
+    inflow_u = getinflow(mesh,meshdims,args.n_glen,args.alpha)
     u_exact.interpolate(inflow_u)
+    Hin = meshdims['hsurfin'] - meshdims['bs']
+    _,z = SpatialCoordinate(mesh)
     p_exact.interpolate(rho * g * cos(args.alpha) * (Hin - z))
     uerr = interpolate(sqrt(dot(u_exact-u,u_exact-u)),P1)
     perr = interpolate(sqrt(dot(p_exact-p,p_exact-p)),W)
