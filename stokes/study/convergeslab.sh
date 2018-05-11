@@ -16,8 +16,8 @@ function runcase() {
   #/usr/bin/time -f "real %e" $CMD &> tmp.txt
   $CMD &> tmp.txt
   grep 'converged due to' tmp.txt
-  grep 'maximum velocity' tmp.txt
-  grep 'numerical error' tmp.txt
+  grep 'flow speed' tmp.txt
+  grep 'numerical errors' tmp.txt
   #grep real tmp.txt
   rm -f tmp.txt
 }
