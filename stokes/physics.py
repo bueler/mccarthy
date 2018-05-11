@@ -85,3 +85,23 @@ def stokessolve(mesh,bdryids,Z,hsurfin,Hin,Hout,n_glen,alpha,eps,Dtyp):
     # in parallel:  -s_fieldsplit_0_ksp_type gmres -s_fieldsplit_0_pc_type asm -s_fieldsplit_0_sub_pc_type ilu
     return up
 
+def surfsolve(mesh,bdryids,X,u):
+    # use nonlinear weak form F(r;s) to solve Poisson problem
+    r = Function(X)
+    s = TestFunction(X)
+    F = inner(grad(r), grad(s)) * dx
+    x,z = SpatialCoordinate(mesh)
+    # FIXME add in climatic mass balance here
+    #dhsurf = 0.0 - grad(z)[0] * u.sub(0) + u.sub(1) # FIXME
+    dhsurf = dot(grad(z),u)   # FIXME looks right but is it?
+    bcs = [ DirichletBC(X, Constant(0.0), (bdryids['base'],bdryids['inflow'])),
+            DirichletBC(X, dhsurf, bdryids['top']) ]
+    solve(F == 0, r, bcs=bcs,
+          options_prefix='t',
+          solver_parameters={"snes_converged_reason": True,
+                             #"ksp_converged_reason": True,
+                             #"ksp_monitor": True,
+                             "ksp_type": "gmres",
+                             "pc_type": "ilu"})
+    return r
+
