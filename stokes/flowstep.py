@@ -18,6 +18,8 @@ parser.add_argument('-elements', metavar='X', default='P2P1',
                     choices=mixFEchoices,
                     help='stable mixed finite elements from: %s (default=P2P1)' \
                          % (','.join(mixFEchoices)) )
+parser.add_argument('-deltat', type=float, default=0.0, metavar='X',
+                    help='take a single time step of deltat days of surface evolution')
 parser.add_argument('-eps', type=float, default=0.01, metavar='X',
                     help='regularize viscosity using "+(eps Dtyp)^2" (default = 0.01)')
 parser.add_argument('inname', metavar='INNAME',
@@ -34,8 +36,8 @@ else:
 
 from firedrake import *
 from firedrake.petsc import PETSc
-from genstepmesh import Hin,L,Ls,Ks,bdryids,getmeshdims
-from physics import secpera,rho,g,getinflow,stokessolve
+from genstepmesh import Hin, L, Ls, Ks, bdryids, getmeshdims
+from physics import secpera, getinflow, stokessolve, surfsolve
 
 def printpar(thestr,comm=COMM_WORLD):
     PETSc.Sys.Print(thestr,comm=comm)
@@ -92,12 +94,12 @@ up = stokessolve(mesh,bdryids,Z,
                  eps = args.eps,
                  Dtyp = args.Dtyp / secpera)
 
-# report on and save solution parts
 u,p = up.split()
 u.rename('velocity')
 p.rename('pressure')
 
 P1 = FunctionSpace(mesh, "CG", 1)
+
 one = Constant(1.0, domain=mesh)
 area = assemble(dot(one,one) * dx)
 pav = assemble(sqrt(dot(p, p)) * dx) / area
@@ -111,6 +113,7 @@ printpar('maximum velocity magnitude = %.3f m a-1' % (secpera * umagmax))
 
 # compute numerical errors relative to slab-on-slope *if* bs==0.0
 if isslab:
+    from physics import rho, g
     up_exact = Function(Z)
     u_exact,p_exact = up_exact.split()
     inflow_u = getinflow(mesh,hsurfin,Hin,args.n_glen,args.alpha)
@@ -126,7 +129,28 @@ if isslab:
     printpar('numerical errors: |u-uex|_inf = %.3e m a-1, |p-pex|_inf = %.3e Pa' \
           % (uerrmax*secpera,perrmax))
 
-# write the solution to a file for visualisation with paraview
-printpar('writing (velocity,pressure) to %s ...' % outname)
-File(outname).write(u,p)
+# FIXME want time-stepping loop, of course
+# save solution parts for visualisation with paraview
+if args.deltat > 0.0:
+    printpar('solving for vertical mesh displacement from %.3f days motion ...' % args.deltat)
+    r = surfsolve(mesh,bdryids,P1,u)
+    r *= args.deltat * (secpera/365.0)
+    r.rename('displacement')
+    absr = interpolate(abs(r),P1)
+    with absr.dat.vec_ro as vabsr:
+        absrmax = vabsr.max()[1]
+    printpar('maximum vertical mesh displacement = %.3f m' % absrmax)
+    printpar('writing (velocity,pressure,displacement) to %s ...' % outname)
+    File(outname).write(u,p,r)
+    printpar('applying displacement to generate new mesh ...')
+    Vc = mesh.coordinates.function_space()
+    x,z = SpatialCoordinate(mesh)
+    f = Function(Vc).interpolate(as_vector([x, z + r]))
+    mesh.coordinates.assign(f)
+    outnamenew = '.'.join(outname.split('.')[:-1]) + '_new.pvd'
+    printpar('writing (velocity,pressure) to %s ...' % outnamenew)
+    File(outnamenew).write(u,p)
+else:
+    printpar('writing (velocity,pressure) to %s ...' % outname)
+    File(outname).write(u,p)
 
