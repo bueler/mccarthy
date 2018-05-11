@@ -63,10 +63,7 @@ def stokessolve(mesh,bdryids,Z,hsurfin,Hin,Hout,n_glen,alpha,eps,Dtyp):
 
     # solve
     solve(F == 0, up, bcs=bcs, options_prefix='s',
-          solver_parameters={"snes_converged_reason": True,
-                             #"ksp_converged_reason": True,
-                             #"ksp_monitor": True,
-                             "ksp_type": "fgmres",  # or "gmres" or "minres"
+          solver_parameters={"ksp_type": "fgmres",  # or "gmres" or "minres"
                              "pc_type": "fieldsplit",
                              "pc_fieldsplit_type": "schur",
                              "pc_fieldsplit_schur_factorization_type": "full",  # or "diag"
@@ -86,21 +83,21 @@ def stokessolve(mesh,bdryids,Z,hsurfin,Hin,Hout,n_glen,alpha,eps,Dtyp):
 
 # use Poisson problem to apply surface kinematical equation as vertical
 # strain rate of whole mesh
-def surfsolve(mesh,bdryids,X,u):
-    r = TrialFunction(X)
-    s = TestFunction(X)
+def surfsolve(mesh,bdryids,u):
+    P1 = FunctionSpace(mesh, "CG", 1)
+    r = TrialFunction(P1)
+    s = TestFunction(P1)
     a = inner(grad(r), grad(s)) * dx   # note natural b.c. on outflow
     L = inner(Constant(0.0), s) * dx
     x,z = SpatialCoordinate(mesh)
     # FIXME add in climatic mass balance a(x) here:
     #   h_t = a - u[0] h_x + u[1]
     dhsurf = dot(grad(z),u)   # FIXME looks right but is it?
-    bcs = [ DirichletBC(X, Constant(0.0), (bdryids['base'],bdryids['inflow'])),
-            DirichletBC(X, dhsurf, bdryids['top']) ]
-    rsoln = Function(X)
+    bcs = [ DirichletBC(P1, Constant(0.0), (bdryids['base'],bdryids['inflow'])),
+            DirichletBC(P1, dhsurf, bdryids['top']) ]
+    rsoln = Function(P1)
     solve(a == L, rsoln, bcs=bcs, options_prefix='t',
-          solver_parameters={"ksp_converged_reason" : True,
-                             "ksp_type": "gmres",
+          solver_parameters={"ksp_type": "gmres",
                              "pc_type": "ilu"})
     return rsoln
 
