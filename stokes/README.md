@@ -1,19 +1,23 @@
 stokes/
 =======
 
-Copyright 2018  Ed Bueler
+Copyright 2018 Ed Bueler
 
-The example in this directory uses [Firedrake](https://www.firedrakeproject.org/), [Gmsh](http://gmsh.info/), [PETSc](http://www.mcs.anl.gov/petsc/), and [Paraview](https://www.paraview.org/).  This example is more advanced, and more experimental, than codes in `mfiles/`
+The example in this directory uses [Firedrake](https://www.firedrakeproject.org/), [Gmsh](http://gmsh.info/), [PETSc](http://www.mcs.anl.gov/petsc/), and [Paraview](https://www.paraview.org/).  It is more advanced, and more experimental, than codes in `mfiles/`
 
 Installation
 ------------
 
-  * Install [Gmsh](http://gmsh.info/) and [Paraview](https://www.paraview.org/), for instance by installing Debian or OSX packages.
-  * Follow the instructions at the [Firedrake download page](https://www.firedrakeproject.org/download.html) to install it.
-  * Most users will only need the PETSc which is installed by Firedrake; no separate PETSc installation is needed.
+  * Install [Gmsh](http://gmsh.info/) and [Paraview](https://www.paraview.org/),
+    for instance by installing Debian or OSX packages.
+  * Follow the instructions at the
+    [Firedrake download page](https://www.firedrakeproject.org/download.html)
+    to install Firedrake.
+  * Most users will only need the PETSc which is installed by Firedrake; no
+    separate PETSc installation is needed.
 
-Default usage
--------------
+Default Stokes-only usage
+-------------------------
 
         $ ./genstepmesh.py -o glacier.geo          # create domain geometry
         $ gmsh -2 glacier.geo                      # mesh domain
@@ -31,6 +35,11 @@ Set the height of the bedrock step to zero when creating the domain geometry:
         (firedrake) $ ./genstepmesh.py -bs 0.0 -o slab.geo
         (firedrake) $ gmsh -2 slab.geo
         (firedrake) $ ./flowstep.py slab.msh
+
+Surface evolution usage
+-----------------------
+
+FIXME
 
 Mesh refinement
 ---------------
