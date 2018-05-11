@@ -104,3 +104,33 @@ def surfsolve(mesh,bdryids,X,u):
                              "pc_type": "ilu"})
     return rsoln
 
+def solutionstats(u,p,mesh):
+    P1 = FunctionSpace(mesh, "CG", 1)
+    one = Constant(1.0, domain=mesh)
+    area = assemble(dot(one,one) * dx)
+    pav = assemble(sqrt(dot(p, p)) * dx) / area
+    with p.dat.vec_ro as vp:
+        pmax = vp.max()[1]
+    umagav = assemble(sqrt(dot(u, u)) * dx) / area
+    umag = interpolate(sqrt(dot(u,u)),P1)
+    with umag.dat.vec_ro as vumag:
+        umagmax = vumag.max()[1]
+    return (umagav,umagmax,pav,pmax)
+
+def numericalerrorsslab(u,p,mesh,V,W,hsurfin,Hin,n_glen,alpha):
+    P1 = FunctionSpace(mesh, "CG", 1)
+    Z = V * W
+    up_exact = Function(Z)
+    u_exact,p_exact = up_exact.split()
+    inflow_u = getinflow(mesh,hsurfin,Hin,n_glen,alpha)
+    u_exact.interpolate(inflow_u)
+    _,z = SpatialCoordinate(mesh)
+    p_exact.interpolate(rho * g * cos(alpha) * (Hin - z))
+    uerr = interpolate(sqrt(dot(u_exact-u,u_exact-u)),P1)
+    perr = interpolate(sqrt(dot(p_exact-p,p_exact-p)),W)
+    with uerr.dat.vec_ro as vuerr:
+        uerrmax = vuerr.max()[1]
+    with perr.dat.vec_ro as vperr:
+        perrmax = vperr.max()[1]
+    return (uerrmax,perrmax)
+

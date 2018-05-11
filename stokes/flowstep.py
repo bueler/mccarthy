@@ -19,11 +19,13 @@ parser.add_argument('-elements', metavar='X', default='P2P1',
                     help='stable mixed finite elements from: %s (default=P2P1)' \
                          % (','.join(mixFEchoices)) )
 parser.add_argument('-deltat', type=float, default=0.0, metavar='X',
-                    help='take a single time step of deltat days of surface evolution')
+                    help='duration in days of time step for surface evolution')
 parser.add_argument('-eps', type=float, default=0.01, metavar='X',
                     help='regularize viscosity using "+(eps Dtyp)^2" (default = 0.01)')
 parser.add_argument('inname', metavar='INNAME',
                     help='input file name ending with .msh')
+parser.add_argument('-m', type=int, default=1, metavar='X',
+                    help='number of time steps of deltat days of surface evolution')
 parser.add_argument('-n_glen', type=float, default=3.0, metavar='X',
                     help='Glen flow law exponent (default = 3.0)')
 parser.add_argument('-o', metavar='OUTNAME', type=str, default='',
@@ -37,7 +39,7 @@ else:
 from firedrake import *
 from firedrake.petsc import PETSc
 from genstepmesh import Hin, L, Ls, Ks, bdryids, getmeshdims
-from physics import secpera, getinflow, stokessolve, surfsolve
+from physics import secpera, stokessolve, surfsolve, solutionstats, numericalerrorsslab
 
 def printpar(thestr,comm=COMM_WORLD):
     PETSc.Sys.Print(thestr,comm=comm)
@@ -58,7 +60,7 @@ bs,Hout,isslab = getmeshdims(mesh)
 hsurfin = bs + Hin
 printpar('mesh geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f, Hout = %.3f' \
          %(L,bs,Hin,Hout))
-printpar('using bed slope angle alpha = %.6f radians' % args.alpha)
+printpar('  bed slope angle alpha = %.6f radians' % args.alpha)
 if isslab:
     printpar('  slab geometry case ...')
 
@@ -77,14 +79,15 @@ mixFE = {'P2P1'  : (VectorFunctionSpace(mesh, "CG", 2), # Taylor-Hood
 (V,W) = mixFE[args.elements]
 Z = V * W
 
-# solve Stokes problem for u,p
-printpar('setting-up weak form ...')
 if args.n_glen == 1.0:
-    printpar('  in unregularized Newtonian case (n_glen = 1.0) ...')
+    printpar('unregularized Newtonian case (n_glen = 1.0)')
 else:
-    printpar('  using n_glen = %.3f and viscosity regularization eps = %.6f ...' \
+    printpar('power law case with n_glen = %.3f and visc. reg. eps = %.6f' \
           % (args.n_glen,args.eps))
 printpar('solving for velocity and pressure ...')
+
+# time-stepping loop
+# solve Stokes problem for u,p
 up = stokessolve(mesh,bdryids,Z,
                  hsurfin = hsurfin,
                  Hin = Hin,
@@ -95,43 +98,24 @@ up = stokessolve(mesh,bdryids,Z,
                  Dtyp = args.Dtyp / secpera)
 
 u,p = up.split()
-u.rename('velocity')
-p.rename('pressure')
 
-P1 = FunctionSpace(mesh, "CG", 1)
-
-one = Constant(1.0, domain=mesh)
-area = assemble(dot(one,one) * dx)
-pav = assemble(sqrt(dot(p, p)) * dx) / area
-printpar('average pressure = %.3f Pa' % pav)
-velmagav = assemble(sqrt(dot(u, u)) * dx) / area
-printpar('average velocity magnitude = %.3f m a-1' % (secpera * velmagav))
-umag = interpolate(sqrt(dot(u,u)),P1)
-with umag.dat.vec_ro as vumag:
-    umagmax = vumag.max()[1]
-printpar('maximum velocity magnitude = %.3f m a-1' % (secpera * umagmax))
+(umagav,umagmax,pav,pmax) = solutionstats(u,p,mesh)
+printpar('flow speed: av = %10.3f m a-1,  max = %10.3f m a-1' \
+         % (secpera*umagav,secpera*umagmax))
+printpar('pressure:   av = %10.3f bar,    max = %10.3f bar' \
+         % (1.0e-5*pav,1.0e-5*pmax))
 
 # compute numerical errors relative to slab-on-slope *if* bs==0.0
 if isslab:
-    from physics import rho, g
-    up_exact = Function(Z)
-    u_exact,p_exact = up_exact.split()
-    inflow_u = getinflow(mesh,hsurfin,Hin,args.n_glen,args.alpha)
-    u_exact.interpolate(inflow_u)
-    _,z = SpatialCoordinate(mesh)
-    p_exact.interpolate(rho * g * cos(args.alpha) * (Hin - z))
-    uerr = interpolate(sqrt(dot(u_exact-u,u_exact-u)),P1)
-    perr = interpolate(sqrt(dot(p_exact-p,p_exact-p)),W)
-    with uerr.dat.vec_ro as vuerr:
-        uerrmax = vuerr.max()[1]
-    with perr.dat.vec_ro as vperr:
-        perrmax = vperr.max()[1]
+    (uerrmax,perrmax) = numericalerrorsslab(u,p,mesh,V,W,hsurfin,Hin,args.n_glen,args.alpha)
     printpar('numerical errors: |u-uex|_inf = %.3e m a-1, |p-pex|_inf = %.3e Pa' \
-          % (uerrmax*secpera,perrmax))
+             % (uerrmax*secpera,perrmax))
 
 # FIXME want time-stepping loop, of course
 # save solution parts for visualisation with paraview
-if args.deltat > 0.0:
+u.rename('velocity')
+p.rename('pressure')
+if args.deltat > 0.0:   # FIXME m such steps
     printpar('solving for vertical mesh displacement from %.3f days motion ...' % args.deltat)
     r = surfsolve(mesh,bdryids,P1,u)
     r *= args.deltat * (secpera/365.0)
