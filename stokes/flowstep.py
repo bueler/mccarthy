@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # (C) 2018 Ed Bueler
 
-# Solve glacier bedrock-step Glen-Stokes problem.  See
+# Solve glacier bedrock-step Glen-Stokes problem with evolving surface.  See
 # mccarthy/stokes/README.md for usage.
 
 # process options
@@ -83,27 +83,58 @@ if args.n_glen == 1.0:
     printpar('unregularized Newtonian case (n_glen = 1.0)')
 else:
     printpar('power law case with n_glen = %.3f and visc. reg. eps = %.6f' \
-          % (args.n_glen,args.eps))
-printpar('solving for velocity and pressure ...')
+             % (args.n_glen,args.eps))
 
 # time-stepping loop
-# solve Stokes problem for u,p
-up = stokessolve(mesh,bdryids,Z,
-                 hsurfin = hsurfin,
-                 Hin = Hin,
-                 Hout = Hout,
-                 n_glen = args.n_glen,
-                 alpha = args.alpha,
-                 eps = args.eps,
-                 Dtyp = args.Dtyp / secpera)
+t_days = 0.0
+if args.deltat > 0.0:
+    printpar('writing (velocity,pressure,displacement) at each time step to %s ...' % outname)
+    outfile = File(outname)
+for j in range(args.m):
+    if args.deltat > 0.0:
+        printpar('step %d: t = %.3f days' % (j,t_days))
+    printpar('  solving for velocity and pressure ...')
 
-u,p = up.split()
+    # solve Stokes problem for u,p
+    up = stokessolve(mesh,bdryids,Z,
+                     hsurfin = hsurfin,
+                     Hin = Hin,
+                     Hout = Hout,
+                     n_glen = args.n_glen,
+                     alpha = args.alpha,
+                     eps = args.eps,
+                     Dtyp = args.Dtyp / secpera)
+    # report
+    u,p = up.split()
+    u.rename('velocity')
+    p.rename('pressure')
+    (umagav,umagmax,pav,pmax) = solutionstats(u,p,mesh)
+    printpar('    flow speed: av = %10.3f m a-1,  max = %10.3f m a-1' \
+             % (secpera*umagav,secpera*umagmax))
+    printpar('    pressure:   av = %10.3f bar,    max = %10.3f bar' \
+             % (1.0e-5*pav,1.0e-5*pmax))
 
-(umagav,umagmax,pav,pmax) = solutionstats(u,p,mesh)
-printpar('flow speed: av = %10.3f m a-1,  max = %10.3f m a-1' \
-         % (secpera*umagav,secpera*umagmax))
-printpar('pressure:   av = %10.3f bar,    max = %10.3f bar' \
-         % (1.0e-5*pav,1.0e-5*pmax))
+    # time-stepping;  deltat=0 case is diagnostic only
+    if args.deltat > 0.0:
+        printpar('  solving for vertical mesh displacement from %.3f days motion ...' % args.deltat)
+        r = surfsolve(mesh,bdryids,u)
+        r *= args.deltat * (secpera/365.0)
+        with r.dat.vec_ro as vr:
+            absrmax = vr.norm(norm_type=PETSc.NormType.NORM_INFINITY)
+        r.rename('displacement')
+        printpar('    maximum vertical mesh displacement = %.3f m' % absrmax)
+        printpar('  writing t = %.3f days values ...' % t_days)
+        outfile.write(u,p,r, time=t_days)
+        printpar('  applying displacement to mesh ...')
+        Vc = mesh.coordinates.function_space()
+        x,z = SpatialCoordinate(mesh)
+        f = Function(Vc).interpolate(as_vector([x, z + r]))
+        mesh.coordinates.assign(f)
+        bs,Hout,isslab = getmeshdims(mesh)   # re-extract mesh geometry
+        hsurfin = bs + Hin
+        printpar('    mesh geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f, Hout = %.3f' \
+                 %(L,bs,Hin,Hout))
+        t_days += args.deltat
 
 # compute numerical errors relative to slab-on-slope *if* bs==0.0
 if isslab:
@@ -111,30 +142,13 @@ if isslab:
     printpar('numerical errors: |u-uex|_inf = %.3e m a-1, |p-pex|_inf = %.3e Pa' \
              % (uerrmax*secpera,perrmax))
 
-# FIXME want time-stepping loop, of course
-# save solution parts for visualisation with paraview
-u.rename('velocity')
-p.rename('pressure')
-if args.deltat > 0.0:   # FIXME m such steps
-    printpar('solving for vertical mesh displacement from %.3f days motion ...' % args.deltat)
-    r = surfsolve(mesh,bdryids,P1,u)
-    r *= args.deltat * (secpera/365.0)
-    r.rename('displacement')
-    absr = interpolate(abs(r),P1)
-    with absr.dat.vec_ro as vabsr:
-        absrmax = vabsr.max()[1]
-    printpar('maximum vertical mesh displacement = %.3f m' % absrmax)
-    printpar('writing (velocity,pressure,displacement) to %s ...' % outname)
-    File(outname).write(u,p,r)
-    printpar('applying displacement to generate new mesh ...')
-    Vc = mesh.coordinates.function_space()
-    x,z = SpatialCoordinate(mesh)
-    f = Function(Vc).interpolate(as_vector([x, z + r]))
-    mesh.coordinates.assign(f)
-    outnamenew = '.'.join(outname.split('.')[:-1]) + '_new.pvd'
-    printpar('writing (velocity,pressure) to %s ...' % outnamenew)
-    File(outnamenew).write(u,p)
+if args.deltat > 0.0:
+    # save final mesh
+    printpar('step END: t = %.3f days' % t_days)
+    printpar('  writing END values ...')
+    outfile.write(u,p,r, time=t_days)
 else:
+    # save solution if diagnostic
     printpar('writing (velocity,pressure) to %s ...' % outname)
     File(outname).write(u,p)
 
