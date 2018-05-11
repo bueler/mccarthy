@@ -34,7 +34,7 @@ else:
 
 from firedrake import *
 from firedrake.petsc import PETSc
-from stepmesh import bdryids,getmeshdims
+from genstepmesh import Hin,L,Ls,Ks,bdryids,getmeshdims
 from physics import secpera,rho,g,getinflow,stokessolve
 
 def printpar(thestr,comm=COMM_WORLD):
@@ -51,12 +51,14 @@ else:
                         % (mesh.comm.rank,mesh.num_cells(),mesh.num_vertices()), comm=mesh.comm)
     PETSc.Sys.syncFlush(comm=mesh.comm)
 
-meshdims = getmeshdims(mesh)
-printpar('mesh geometry [m]: L = %.3f, bs = %.3f, hsurfin = %.3f, Hout = %.3f' \
-         %(meshdims['L'],meshdims['bs'],meshdims['hsurfin'],meshdims['Hout']))
-printpar('using bed slope angle alpha = %.6f' % args.alpha)
-if meshdims['isslab']:
-    printpar('  ... detected slab geometry case ...')
+# extract mesh geometry needed in solver
+bs,Hout,isslab = getmeshdims(mesh)
+hsurfin = bs + Hin
+printpar('mesh geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f, Hout = %.3f' \
+         %(L,bs,Hin,Hout))
+printpar('using bed slope angle alpha = %.6f radians' % args.alpha)
+if isslab:
+    printpar('  slab geometry case ...')
 
 # define mixed finite element space
 mixFE = {'P2P1'  : (VectorFunctionSpace(mesh, "CG", 2), # Taylor-Hood
@@ -81,11 +83,14 @@ else:
     printpar('  using n_glen = %.3f and viscosity regularization eps = %.6f ...' \
           % (args.n_glen,args.eps))
 printpar('solving for velocity and pressure ...')
-up = stokessolve(mesh,bdryids,Z,meshdims,
-                 n_glen=args.n_glen,
-                 alpha=args.alpha,
-                 eps=args.eps,
-                 Dtyp=args.Dtyp / secpera)
+up = stokessolve(mesh,bdryids,Z,
+                 hsurfin = hsurfin,
+                 Hin = Hin,
+                 Hout = Hout,
+                 n_glen = args.n_glen,
+                 alpha = args.alpha,
+                 eps = args.eps,
+                 Dtyp = args.Dtyp / secpera)
 
 # report on and save solution parts
 u,p = up.split()
@@ -105,12 +110,11 @@ with umag.dat.vec_ro as vumag:
 printpar('maximum velocity magnitude = %.3f m a-1' % (secpera * umagmax))
 
 # compute numerical errors relative to slab-on-slope *if* bs==0.0
-if meshdims['isslab']:
+if isslab:
     up_exact = Function(Z)
     u_exact,p_exact = up_exact.split()
-    inflow_u = getinflow(mesh,meshdims,args.n_glen,args.alpha)
+    inflow_u = getinflow(mesh,hsurfin,Hin,args.n_glen,args.alpha)
     u_exact.interpolate(inflow_u)
-    Hin = meshdims['hsurfin'] - meshdims['bs']
     _,z = SpatialCoordinate(mesh)
     p_exact.interpolate(rho * g * cos(args.alpha) * (Hin - z))
     uerr = interpolate(sqrt(dot(u_exact-u,u_exact-u)),P1)
