@@ -10,7 +10,7 @@ P=$1
 # where P is number of processes
 
 function runcase() {
-  CMD="mpiexec -n $P ../flowstep.py -eps $2 $1 -s_snes_max_it 200"
+  CMD="mpiexec -n $P ../flowstep.py -eps $2 $1 -s_snes_converged_reason -s_snes_max_it 200"
   echo $CMD
   rm -f tmp.txt
   #/usr/bin/time -f "real %e" $CMD &> tmp.txt
@@ -23,10 +23,10 @@ function runcase() {
 }
 
 EPS=0.0001
-for REFINE in 0 1 2 4 8; do
+for REFINE in 0 1 2 4; do
     MESH=slab$REFINE
     if [ "$REFINE" -eq "0" ]; then
-        ../genstepmesh.py -hmesh 200.0 -bs 0.0 -o $MESH.geo | grep setting
+        ../genstepmesh.py -hmesh 160.0 -bs 0.0 -o $MESH.geo | grep setting
     else
         ../genstepmesh.py -refine $REFINE -bs 0.0 -o $MESH.geo | grep setting
     fi
