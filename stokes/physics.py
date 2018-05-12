@@ -21,14 +21,14 @@ def D(U):
     return 0.5 * (grad(U) + grad(U).T)
 
 # compute slab-on-slope inflow velocity
-def getinflow(mesh,hsurfin,Hin,n_glen,alpha):
+def getinflow(mesh,Hin,n_glen,alpha):
     _,z = SpatialCoordinate(mesh)
     Bn = getBn(n_glen,alpha,Hin)
     C = (2.0 / (n_glen + 1.0)) * (rho * g * sin(alpha) / Bn)**n_glen
-    u = as_vector([C * (Hin**(n_glen+1.0) - (hsurfin - z)**(n_glen+1.0)), 0.0])
+    u = as_vector([C * (Hin**(n_glen+1.0) - (Hin - z)**(n_glen+1.0)), 0.0])
     return u
 
-def stokessolve(mesh,bdryids,Z,hsurfin,Hin,Hout,n_glen,alpha,eps,Dtyp):
+def stokessolve(up,mesh,bdryids,Z,Hin,Hout,n_glen,alpha,eps,Dtyp):
     # define body force
     f_body = Constant((g * rho * sin(alpha), - g * rho * cos(alpha)))
 
@@ -42,7 +42,6 @@ def stokessolve(mesh,bdryids,Z,hsurfin,Hin,Hout,n_glen,alpha,eps,Dtyp):
                                rho * g * sin(alpha) * (Hout - z)])
 
     # define the nonlinear weak form F(u,p;v,q)
-    up = Function(Z)       # *not* TrialFunctions(Z)
     u,p = split(up)        # up.split() not equivalent here?
     v,q = TestFunctions(Z)
     if n_glen == 1.0:
@@ -57,7 +56,7 @@ def stokessolve(mesh,bdryids,Z,hsurfin,Hin,Hout,n_glen,alpha,eps,Dtyp):
 
     # Dirichlet boundary conditions
     noslip = Constant((0.0, 0.0))
-    inflow_u = getinflow(mesh,hsurfin,Hin,n_glen,alpha)
+    inflow_u = getinflow(mesh,Hin,n_glen,alpha)
     bcs = [ DirichletBC(Z.sub(0), noslip, bdryids['base']),
             DirichletBC(Z.sub(0), inflow_u, bdryids['inflow']) ]
 
@@ -114,12 +113,12 @@ def solutionstats(u,p,mesh):
         umagmax = vumag.max()[1]
     return (umagav,umagmax,pav,pmax)
 
-def numericalerrorsslab(u,p,mesh,V,W,hsurfin,Hin,n_glen,alpha):
+def numericalerrorsslab(u,p,mesh,V,W,Hin,n_glen,alpha):
     P1 = FunctionSpace(mesh, "CG", 1)
     Z = V * W
     up_exact = Function(Z)
     u_exact,p_exact = up_exact.split()
-    inflow_u = getinflow(mesh,hsurfin,Hin,n_glen,alpha)
+    inflow_u = getinflow(mesh,Hin,n_glen,alpha)
     u_exact.interpolate(inflow_u)
     _,z = SpatialCoordinate(mesh)
     p_exact.interpolate(rho * g * cos(alpha) * (Hin - z))
