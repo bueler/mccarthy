@@ -25,7 +25,7 @@ Default Stokes-only usage
         (firedrake) $ ./flowstep.py glacier.msh    # solve Stokes problem
         (firedrake) $ paraview glacier.pvd         # visualize
 
-Visualization in Paraview is made easier by loading the state file `flowstep.pvsm`.
+Visualization in Paraview might be made easier by loading the state file `flowstep.pvsm`.
 
 Slab-on-slope usage
 -------------------
@@ -39,7 +39,10 @@ Set the height of the bedrock step to zero when creating the domain geometry:
 Surface evolution usage
 -----------------------
 
-FIXME
+By setting `-deltat` to a positive value, and choosing the number of time steps by `-m`, the surface will evolve.  For example,
+
+        (firedrake) $ ./flowstep.py -deltat 10.0 -m 60 glacier.msh
+        (firedrake) $ paraview glacier.pvd   # can now animate the 60 frames
 
 Mesh refinement
 ---------------
@@ -54,8 +57,17 @@ For example the following creates a mesh with target mesh size varying from 25 m
         (firedrake) $ gmsh -2 finer.geo
         (firedrake) $ ./flowstep.py finer.msh
 
-Firedrake info
---------------
+Solver performance information
+------------------------------
+
+There are two PETSc solvers at each time step in surface evolution mode.  One, with prefix `s_`, solves the Stokes equations from the current geometry.  It is nonlinear and computes the velocity and pressure.  The other solver, with prefix `t_`, computes the vertical displacement of the mesh so as to solve the surface kinematical equation.  The minimal information on solver performance comes from asking for the number of iterations in each solver, for example
+
+        (firedrake) $ ./flowstep.py -deltat 10.0 -m 60 glacier.msh -s_snes_converged_reason -t_ksp_converged_reason
+
+Note that the `t_` solver is not used in the default diagnostic-only mode (i.e. when there is no positive value supplied as `-deltat`).
+
+Info on using Firedrake
+-----------------------
 
   * `unset PETSC_DIR` and `unset PETSC_ARCH` may be needed before running `activate` when starting Firedrake
   * do `python3 firedrake-status` in the `firedrake/bin/` directory to see the current configuration of your firedrake installation
