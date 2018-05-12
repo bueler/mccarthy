@@ -116,20 +116,20 @@ for j in range(args.m):
 
     # time-stepping;  deltat=0 case is diagnostic only
     if args.deltat > 0.0:
-        printpar('  solving for vertical mesh displacement from %.3f days motion ...' % args.deltat)
+        printpar('  solving for vertical mesh displacement rate ...')
         r = surfsolve(mesh,bdryids,u)
         r *= args.deltat * (secpera/365.0)
         with r.dat.vec_ro as vr:
             absrmax = vr.norm(norm_type=PETSc.NormType.NORM_INFINITY)
         r.rename('displacement')
-        printpar('    maximum vertical mesh displacement = %.3f m' % absrmax)
-        printpar('  writing t = %.3f days values ...' % t_days)
         outfile.write(u,p,r, time=t_days)
-        printpar('  applying displacement to mesh ...')
         Vc = mesh.coordinates.function_space()
         x,z = SpatialCoordinate(mesh)
         f = Function(Vc).interpolate(as_vector([x, z + r]))
         mesh.coordinates.assign(f)
+        bs,Hout = getmeshdims(mesh)
+        printpar('    from %.3f days vert. displacement to mesh: max. disp. = %.3f m, Hout = %.3f m' \
+                 % (args.deltat,absrmax,Hout))
         t_days += args.deltat
 
 # compute numerical errors relative to slab-on-slope *if* bs==0.0
