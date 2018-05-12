@@ -86,10 +86,21 @@ def surfsolve(mesh,bdryids,u):
     s = TestFunction(P1)
     a = inner(grad(r), grad(s)) * dx   # note natural b.c. on outflow
     L = inner(Constant(0.0), s) * dx
-    x,z = SpatialCoordinate(mesh)
-    # FIXME add in climatic mass balance a(x) here:
-    #   h_t = a - u[0] h_x + u[1]
-    dhsurf = dot(grad(z),u)   # FIXME looks right but is it?
+
+    # FIXME add in climatic mass balance a(x) here
+
+    # FIXME want h_t = a - u[0] h_x + u[1]
+    #n = FacetNormal(mesh)
+    #P1vec = VectorFunctionSpace(mesh, "CG", 1)
+    #uP1 = Function(P1vec).interpolate(u)
+    #n = Function(VectorFunctionSpace(mesh,"CG",2)).interpolate(FacetNormal(mesh))
+    #dhsurf = inner(u,n)
+
+    #x,z = SpatialCoordinate(mesh)
+    #dhsurf = dot(grad(z),u)   # FIXME: only   h_t = u[1]
+
+    dhsurf = Function(P1).interpolate(dot(as_vector([0.0,1.0]),u))   # equivalent to  dot(grad(z),u)  form
+
     bcs = [ DirichletBC(P1, Constant(0.0), (bdryids['base'],bdryids['inflow'])),
             DirichletBC(P1, dhsurf, bdryids['top']) ]
     rsoln = Function(P1)
