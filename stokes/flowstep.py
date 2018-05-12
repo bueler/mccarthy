@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # (C) 2018 Ed Bueler
 
-# Solve glacier bedrock-step Glen-Stokes problem with evolving surface.  See
+# Solve glacier bedrock-steps Glen-Stokes problem with evolving surface.  See
 # mccarthy/stokes/README.md for usage.
 
 # process options
@@ -38,7 +38,7 @@ else:
 
 from firedrake import *
 from firedrake.petsc import PETSc
-from genstepmesh import Hin, L, Ls, Ks, bdryids, getmeshdims
+from genstepmesh import Hin, L, bdryids, getmeshdims
 from physics import secpera, stokessolve, surfsolve, solutionstats, numericalerrorsslab
 
 def printpar(thestr,comm=COMM_WORLD):
@@ -56,11 +56,11 @@ else:
     PETSc.Sys.syncFlush(comm=mesh.comm)
 
 # extract mesh geometry needed in solver
-bs,Hout,isslab = getmeshdims(mesh)
-hsurfin = bs + Hin
+bs,Hout = getmeshdims(mesh)
 printpar('mesh geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f, Hout = %.3f' \
          %(L,bs,Hin,Hout))
 printpar('  bed slope angle alpha = %.6f radians' % args.alpha)
+isslab = bs < 1.0
 if isslab:
     printpar('  slab geometry case ...')
 
@@ -90,14 +90,14 @@ t_days = 0.0
 if args.deltat > 0.0:
     printpar('writing (velocity,pressure,displacement) at each time step to %s ...' % outname)
     outfile = File(outname)
+up = Function(Z)
 for j in range(args.m):
     if args.deltat > 0.0:
         printpar('step %d: t = %.3f days' % (j,t_days))
     printpar('  solving for velocity and pressure ...')
 
     # solve Stokes problem for u,p
-    up = stokessolve(mesh,bdryids,Z,
-                     hsurfin = hsurfin,
+    up = stokessolve(up,mesh,bdryids,Z,
                      Hin = Hin,
                      Hout = Hout,
                      n_glen = args.n_glen,
@@ -130,22 +130,18 @@ for j in range(args.m):
         x,z = SpatialCoordinate(mesh)
         f = Function(Vc).interpolate(as_vector([x, z + r]))
         mesh.coordinates.assign(f)
-        bs,Hout,isslab = getmeshdims(mesh)   # re-extract mesh geometry
-        hsurfin = bs + Hin
-        printpar('    mesh geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f, Hout = %.3f' \
-                 %(L,bs,Hin,Hout))
         t_days += args.deltat
 
 # compute numerical errors relative to slab-on-slope *if* bs==0.0
 if isslab:
-    (uerrmax,perrmax) = numericalerrorsslab(u,p,mesh,V,W,hsurfin,Hin,args.n_glen,args.alpha)
+    (uerrmax,perrmax) = numericalerrorsslab(u,p,mesh,V,W,Hin,args.n_glen,args.alpha)
     printpar('numerical errors: |u-uex|_inf = %.3e m a-1, |p-pex|_inf = %.3e Pa' \
              % (uerrmax*secpera,perrmax))
 
 if args.deltat > 0.0:
     # save final mesh
     printpar('step END: t = %.3f days' % t_days)
-    printpar('  writing END values ...')
+    printpar('  writing END values to finish %s ...' % outname)
     outfile.write(u,p,r, time=t_days)
 else:
     # save solution if diagnostic
