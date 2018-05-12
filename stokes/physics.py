@@ -68,8 +68,6 @@ def stokessolve(up,mesh,bdryids,Z,Hin,Hout,n_glen,alpha,eps,Dtyp):
                              "pc_fieldsplit_schur_factorization_type": "full",  # or "diag"
                              "fieldsplit_0_ksp_type": "preonly",
                              "fieldsplit_0_pc_type": "lu",  # uses mumps in parallel
-                             #"fieldsplit_0_ksp_converged_reason": True,
-                             #"fieldsplit_1_ksp_converged_reason": True,
                              "fieldsplit_1_ksp_rtol": 1.0e-3,
                              "fieldsplit_1_ksp_type": "gmres",
                              "fieldsplit_1_pc_type": "none"})
