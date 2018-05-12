@@ -146,5 +146,10 @@ if args.deltat > 0.0:
 else:
     # save solution if diagnostic
     printpar('writing (velocity,pressure) to %s ...' % outname)
-    File(outname).write(u,p)
+    #File(outname).write(u,p)
+    # FIXME temporarily put method for indicator function here
+    I_top = Function( FunctionSpace(mesh, "CG", 1) )
+    par_loop( 'for ( int i=0; i < f.dofs; i++ ) f[i][0] = 1.0;', ds(bdryids['top']), {'f': (I_top, WRITE)} )
+    I_top.rename('indicator_top')
+    File(outname).write(u,p,I_top)
 
