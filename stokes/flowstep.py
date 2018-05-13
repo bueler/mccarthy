@@ -39,7 +39,7 @@ else:
 from firedrake import *
 from firedrake.petsc import PETSc
 from genstepmesh import Hin, L, bdryids, getmeshdims
-from physics import secpera, stokessolve, surfsolve, solutionstats, numericalerrorsslab
+from physics import secpera, stokessolve, initialphi, solvekinematical, solutionstats, numericalerrorsslab
 
 def printpar(thestr,comm=COMM_WORLD):
     PETSc.Sys.Print(thestr,comm=comm)
@@ -88,9 +88,10 @@ else:
 # time-stepping loop
 t_days = 0.0
 if args.deltat > 0.0:
-    printpar('writing (velocity,pressure,displacement) at each time step to %s ...' % outname)
+    printpar('writing (velocity,pressure,vdisplacement,kinelevel) at each time step to %s ...' % outname)
     outfile = File(outname)
 up = Function(Z)
+phi = initialphi(mesh,Hin)
 for j in range(args.m):
     if args.deltat > 0.0:
         printpar('step %d: t = %.3f days' % (j,t_days))
@@ -117,16 +118,18 @@ for j in range(args.m):
     # time-stepping;  deltat=0 case is diagnostic only
     if args.deltat > 0.0:
         printpar('  solving for vertical mesh displacement rate ...')
-        r = surfsolve(mesh,bdryids,u)
-        r *= args.deltat * (secpera/365.0)
+        dt = args.deltat * (secpera/365.0)
+        r = solvekinematical(mesh,bdryids,u,phi,dt)
         with r.dat.vec_ro as vr:
             absrmax = vr.norm(norm_type=PETSc.NormType.NORM_INFINITY)
-        r.rename('displacement')
-        outfile.write(u,p,r, time=t_days)
+        r.rename('vdisplacement')
+        phi.rename('kinelevel')
+        outfile.write(u,p,r,phi, time=t_days)
         Vc = mesh.coordinates.function_space()
         x,z = SpatialCoordinate(mesh)
         f = Function(Vc).interpolate(as_vector([x, z + r]))
         mesh.coordinates.assign(f)
+        phi -= r
         bs,Hout = getmeshdims(mesh)
         printpar('    from %.3f days vert. displacement to mesh: max. disp. = %.3f m, Hout = %.3f m' \
                  % (args.deltat,absrmax,Hout))
@@ -142,7 +145,7 @@ if args.deltat > 0.0:
     # save final mesh
     printpar('step END: t = %.3f days' % t_days)
     printpar('  writing END values to finish %s ...' % outname)
-    outfile.write(u,p,r, time=t_days)
+    outfile.write(u,p,r,phi, time=t_days)
 else:
     # save solution if diagnostic
     printpar('writing (velocity,pressure) to %s ...' % outname)

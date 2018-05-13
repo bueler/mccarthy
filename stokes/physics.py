@@ -78,31 +78,27 @@ def stokessolve(up,mesh,bdryids,Z,Hin,Hout,n_glen,alpha,eps,Dtyp):
     # in parallel:  -s_fieldsplit_0_ksp_type gmres -s_fieldsplit_0_pc_type asm -s_fieldsplit_0_sub_pc_type ilu
     return up
 
-# use Poisson problem to apply surface kinematical equation as vertical
-# strain rate of whole mesh
-def surfsolve(mesh,bdryids,u):
+def initialphi(mesh,Hin):
+    P1 = FunctionSpace(mesh, "CG", 1)
+    phi = Function(P1)
+    _,z = SpatialCoordinate(mesh)
+    phi.interpolate(Hin-z)
+    return phi
+
+# use kinematic level set function, and Poisson problem for the mesh vertical
+# displacement, to apply surface kinematical equation as vertical strain rate
+# of whole mesh
+def solvekinematical(mesh,bdryids,u,phi,deltat):
     P1 = FunctionSpace(mesh, "CG", 1)
     r = TrialFunction(P1)
     s = TestFunction(P1)
     a = inner(grad(r), grad(s)) * dx   # note natural b.c. on outflow
     L = inner(Constant(0.0), s) * dx
-
-    # FIXME add in climatic mass balance a(x) here
-
-    # FIXME want h_t = a - u[0] h_x + u[1]
-    #n = FacetNormal(mesh)
-    #P1vec = VectorFunctionSpace(mesh, "CG", 1)
-    #uP1 = Function(P1vec).interpolate(u)
-    #n = Function(VectorFunctionSpace(mesh,"CG",2)).interpolate(FacetNormal(mesh))
-    #dhsurf = inner(u,n)
-
-    #x,z = SpatialCoordinate(mesh)
-    #dhsurf = dot(grad(z),u)   # FIXME: only   h_t = u[1]
-
-    dhsurf = Function(P1).interpolate(dot(as_vector([0.0,1.0]),u))   # equivalent to  dot(grad(z),u)  form
-
+    # FIXME add in climatic mass balance a(x) here; want h_t = a - u[0] h_x + u[1]
+    # but here used a = Constant(0.0):
+    deltah = deltat * Function(P1).interpolate(Constant(0.0) - dot(grad(phi),u))
     bcs = [ DirichletBC(P1, Constant(0.0), (bdryids['base'],bdryids['inflow'])),
-            DirichletBC(P1, dhsurf, bdryids['top']) ]
+            DirichletBC(P1, deltah, bdryids['top']) ]
     rsoln = Function(P1)
     solve(a == L, rsoln, bcs=bcs, options_prefix='t',
           solver_parameters={"ksp_type": "gmres",
