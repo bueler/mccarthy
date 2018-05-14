@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 # (C) 2018 Ed Bueler
 
-# Solve glacier bedrock-steps Glen-Stokes problem with evolving surface.  See
-# mccarthy/stokes/README.md for usage.
+# Solve glacier Glen-Stokes problem with evolving surface.  See README.md for usage.
 
 # process options
 import argparse
 mixFEchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
 parser = argparse.ArgumentParser(\
-    description='Solve glacier Glen-Stokes problem on bedrock-step geometry.')
+    description='Solve 2D glacier Glen-Stokes problem with evolving surface.')
 parser.add_argument('-alpha', type=float, default=0.1, metavar='X',
                     help='downward slope of bed as angle in radians (default = 0.1)')
 parser.add_argument('-Dtyp', type=float, default=2.0, metavar='X',
@@ -38,7 +37,7 @@ else:
 
 from firedrake import *
 from firedrake.petsc import PETSc
-from genstepmesh import Hin, L, bdryids, getmeshdims
+from gendomain import Hin, L, bdryids, getdomaindims
 from physics import secpera, stokessolve, initialphi, solvekinematical, solutionstats, numericalerrorsslab
 
 def printpar(thestr,comm=COMM_WORLD):
@@ -56,8 +55,8 @@ else:
     PETSc.Sys.syncFlush(comm=mesh.comm)
 
 # extract mesh geometry needed in solver
-bs,Hout = getmeshdims(mesh)
-printpar('mesh geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f, Hout = %.3f' \
+bs,Hout = getdomaindims(mesh)
+printpar('geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f, Hout = %.3f' \
          %(L,bs,Hin,Hout))
 printpar('  bed slope angle alpha = %.6f radians' % args.alpha)
 isslab = bs < 1.0
@@ -130,7 +129,7 @@ for j in range(args.m):
         f = Function(Vc).interpolate(as_vector([x, z + r]))
         mesh.coordinates.assign(f)
         phi -= r
-        bs,Hout = getmeshdims(mesh)
+        bs,Hout = getdomaindims(mesh)
         printpar('    from %.3f days vert. displacement to mesh: max. disp. = %.3f m, Hout = %.3f m' \
                  % (args.deltat,absrmax,Hout))
         t_days += args.deltat

@@ -2,7 +2,7 @@
 # (C) 2018 Ed Bueler
 
 # Usage:
-#   $ ./genstepmesh.py glacier.geo
+#   $ ./gendomain.py glacier.geo
 #   $ gmsh -2 glacier.geo
 #   ...
 # which generates glacier.msh.  (Use "gmsh glacier.geo" for GUI version.)
@@ -13,7 +13,7 @@
 #   In [1]: from firedrake import *
 #   In [2]: Mesh('glacier.msh')
 # Main purpose is to solve the Stokes equations on this domain.  See
-# README.md and flowstep.py.
+# README.md and flow.py.
 
 # immutable domain distances in meters
 Hin = 400.0      # input (and initial output) thickness (z)
@@ -21,7 +21,7 @@ L = 3000.0       # total along-flow length (x)
 Lup = 1500.0     # location of bedrock step up (x)
 Ldown = 2000.0   # location of bedrock step down (x);  Ldown > Lup
 
-# numbering of parts of boundary *must match generation script genstepmesh.py*
+# numbering of parts of boundary
 bdryids = {'outflow' : 41,
            'top'     : 42,
            'inflow'  : 43,
@@ -73,11 +73,11 @@ def writegeometry(geo,bs):
     # ensure all interior elements written ... NEEDED!
     geo.write('Physical Surface(51) = {31};\n')
 
-# dynamically extract mesh geometry making these definitions (tolerance=1cm):
+# dynamically extract geometry making these definitions (tolerance=1cm):
 #   bs      = height of bedrock step     = (min z-coordinate over Lup < x < Ldown)
 #   Hout    = ice thickness at output    = (max z-coordinate at x=L)
 # in parallel no process owns the whole mesh so MPI_Allreduce() is needed
-def getmeshdims(mesh,tol=0.01):
+def getdomaindims(mesh,tol=0.01):
     from mpi4py import MPI
     # mesh needs to be a Mesh from Firedrake
     xa = mesh.coordinates.dat.data_ro[:,0]  # .data_ro acts like VecGetArrayRead
@@ -97,7 +97,7 @@ def processopts():
     import argparse
     parser = argparse.ArgumentParser(description=
     '''Generate .geo geometry-description file, suitable for meshing by Gmsh, for
-    the outline of a glacier flowing over bedrock steps.  Also generates
+    the outline of a glacier flow domain with bedrock steps.  Also generates
     slab-on-slope geometry with -bs 0.0.
     ''')
     parser.add_argument('-o', metavar='FILE.geo', default='glacier.geo',
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     commandline = " ".join(sys.argv[:])  # for save in comment in generated .geo
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    print('writing bedrock-step geometry to file %s ...' % args.o)
+    print('writing domain geometry to file %s ...' % args.o)
     geo = open(args.o, 'w')
     # header which records creation info
     geo.write('// geometry-description file created %s by %s using command\n//   %s\n\n'

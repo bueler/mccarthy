@@ -1,24 +1,24 @@
 setting target mesh size of 160 m
 Info    : 94 vertices 190 elements
-mpiexec -n 1 ../flowstep.py -eps 0.0001 slab0.msh -s_snes_converged_reason -s_snes_max_it 200
+mpiexec -n 1 ../flow.py -eps 0.0001 slab0.msh -s_snes_converged_reason -s_snes_max_it 200
 Nonlinear s_ solve converged due to CONVERGED_SNORM_RELATIVE iterations 43
     flow speed: av =    723.558 m a-1,  max =    907.137 m a-1
 numerical errors: |u-uex|_inf = 5.994e+00 m a-1, |p-pex|_inf = 1.246e+04 Pa
 setting target mesh size of 80 m
 Info    : 301 vertices 604 elements
-mpiexec -n 1 ../flowstep.py -eps 0.0001 slab1.msh -s_snes_converged_reason -s_snes_max_it 200
+mpiexec -n 1 ../flow.py -eps 0.0001 slab1.msh -s_snes_converged_reason -s_snes_max_it 200
 Nonlinear s_ solve converged due to CONVERGED_SNORM_RELATIVE iterations 57
     flow speed: av =    724.789 m a-1,  max =    906.189 m a-1
 numerical errors: |u-uex|_inf = 8.590e-01 m a-1, |p-pex|_inf = 6.533e+03 Pa
 setting target mesh size of 40 m
 Info    : 1049 vertices 2100 elements
-mpiexec -n 1 ../flowstep.py -eps 0.0001 slab2.msh -s_snes_converged_reason -s_snes_max_it 200
+mpiexec -n 1 ../flow.py -eps 0.0001 slab2.msh -s_snes_converged_reason -s_snes_max_it 200
 Nonlinear s_ solve converged due to CONVERGED_SNORM_RELATIVE iterations 48
     flow speed: av =    724.867 m a-1,  max =    906.102 m a-1
 numerical errors: |u-uex|_inf = 1.239e-01 m a-1, |p-pex|_inf = 3.874e+03 Pa
 setting target mesh size of 20 m
 Info    : 4097 vertices 8196 elements
-mpiexec -n 1 ../flowstep.py -eps 0.0001 slab4.msh -s_snes_converged_reason -s_snes_max_it 200
+mpiexec -n 1 ../flow.py -eps 0.0001 slab4.msh -s_snes_converged_reason -s_snes_max_it 200
 Nonlinear s_ solve converged due to CONVERGED_FNORM_RELATIVE iterations 51
     flow speed: av =    724.871 m a-1,  max =    906.094 m a-1
 numerical errors: |u-uex|_inf = 2.551e-02 m a-1, |p-pex|_inf = 3.715e+03 Pa

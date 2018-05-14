@@ -19,29 +19,27 @@ Installation
 Default Stokes-only usage
 -------------------------
 
-        $ ./genstepmesh.py -o glacier.geo          # create domain geometry
-        $ gmsh -2 glacier.geo                      # mesh domain
+        $ ./gendomain.py -o glacier.geo            # create domain geometry
+        $ gmsh -2 glacier.geo                      # mesh domain; generates glacier.msh
         $ source ~/firedrake/bin/activate          # start Firedrake
-        (firedrake) $ ./flowstep.py glacier.msh    # solve Stokes problem
+        (firedrake) $ ./flow.py glacier.msh        # solve Stokes problem
         (firedrake) $ paraview glacier.pvd         # visualize
-
-Visualization in Paraview might be made easier by loading the state file `flowstep.pvsm`.
 
 Slab-on-slope usage
 -------------------
 
 Set the height of the bedrock step to zero when creating the domain geometry:
 
-        (firedrake) $ ./genstepmesh.py -bs 0.0 -o slab.geo
+        (firedrake) $ ./gendomain.py -bs 0.0 -o slab.geo
         (firedrake) $ gmsh -2 slab.geo
-        (firedrake) $ ./flowstep.py slab.msh
+        (firedrake) $ ./flow.py slab.msh
 
 Surface evolution usage
 -----------------------
 
 By setting `-deltat` to a positive value, and choosing the number of time steps by `-m`, the surface will evolve.  For example,
 
-        (firedrake) $ ./flowstep.py -deltat 10.0 -m 60 glacier.msh
+        (firedrake) $ ./flow.py -deltat 10.0 -m 60 glacier.msh
         (firedrake) $ paraview glacier.pvd   # can now animate the 60 frames
 
 Mesh refinement
@@ -49,20 +47,20 @@ Mesh refinement
 
 The default mesh has a typical mesh size of 100 m with refinement by a factor of 4 near the interior corner created by the bedrock step.  (Giving 25 m resolution at the corner.)
 
-Options to script `genstepmesh.py` allow setting the mesh size and a uniform refinement factor: `-hmesh H -refine X`.  Another option controls the additional refinement at the interior corner: `-refine_corner Y`.  The default case corresponds to `-hmesh 100 -refine 1 -refine_corner 4`.
+Options to script `gendomain.py` allow setting the target mesh size and setting a uniform refinement factor: `-hmesh H -refine X`.  Another option controls the additional refinement at the interior corner: `-refine_corner Y`.  The default case corresponds to `-hmesh 100 -refine 1 -refine_corner 4`.
 
 For example the following creates a mesh with target mesh size varying from 25 m to about 3 m near the interior corner.  The resulting grid has about 15 times as many elements as the default mesh:
 
-        (firedrake) $ ./genstepmesh.py -refine 4 -refine_corner 8 -o finer.geo
+        (firedrake) $ ./gendomain.py -refine 4 -refine_corner 8 -o finer.geo
         (firedrake) $ gmsh -2 finer.geo
-        (firedrake) $ ./flowstep.py finer.msh
+        (firedrake) $ ./flow.py finer.msh
 
 Solver performance information
 ------------------------------
 
 There are two PETSc solvers at each time step in surface evolution mode.  One, with prefix `s_`, solves the Stokes equations from the current geometry.  It is nonlinear and computes the velocity and pressure.  The other solver, with prefix `t_`, computes the vertical displacement of the mesh so as to solve the surface kinematical equation.  The minimal information on solver performance comes from asking for the number of iterations in each solver, for example
 
-        (firedrake) $ ./flowstep.py -deltat 10.0 -m 60 glacier.msh -s_snes_converged_reason -t_ksp_converged_reason
+        (firedrake) $ ./flow.py -deltat 10.0 -m 60 glacier.msh -s_snes_converged_reason -t_ksp_converged_reason
 
 Note that the `t_` solver is not used in the default diagnostic-only mode (i.e. when there is no positive value supplied as `-deltat`).
 
