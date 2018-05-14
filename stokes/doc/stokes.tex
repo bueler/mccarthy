@@ -241,9 +241,17 @@ This weak formulation is proven in \cite{JouvetRappaz2011} to be well-posed unde
 
 FIXME
 
+\section{Surface kinematical equation, and moving the mesh}
+
+A real glacier changes shape as it flows.  We want our model to do that too.  Form now on we regard the domain on which the Stokes equations apply as the time-dependent set
+\begin{equation}
+\Omega_t = \left\{(x,z)\,\big|\, b(x) \le z \le h(x,t)\right\}  \label{Omegat}
+\end{equation}
+where $z=b(x)$ is the bedrock elevation and $z=h(x,t)$ is the time-dependent ice surface elevation.  At any time $t$ the Stokes equations, as already covered, apply on $\Omega_t$.
+
 \section{Firedrake code}
 
-FIXME: show block figure with blocks = (genstepmesh.py,gmsh,flowstep.py,paraview) and file formats as arrows (.geo,.msh,.pvd)
+FIXME: show block figure with blocks = (gendomain.py,gmsh,flow.py,paraview) and file formats as arrows (.geo,.msh,.pvd)
 
 FIXME: show codes here
 
