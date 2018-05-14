@@ -37,6 +37,7 @@ urlcolor=black     % only if colorlinks=true
 \newcommand{\hbn}{\hat{\mathbf{n}}}
 
 \newcommand{\bg}{\mathbf{g}}
+\newcommand{\bn}{\mathbf{n}}
 \newcommand{\bu}{\mathbf{u}}
 \newcommand{\bv}{\mathbf{v}}
 
@@ -179,7 +180,7 @@ Suppose we want comparable solutions, with glaciologically-reasonable ice veloci
 \begin{equation}
 B_n = \left(\frac{4}{n+1}\right)^{1/n} \Big(\rho g \sin\alpha (h-b)\Big)^{(n-3)/n} {B_3\,}^{3/n}  \label{Bnfromsurface}
 \end{equation}
-For example, suppose $h-b=400$ m and $\alpha=0.1$ radians (about $5.7$ degrees).  Using $B_n$ from \eqref{Bnfromsurface} gives a surface velocity of $u(h)=906.092 \,\text{m}\,\text{a}^{-1}$ from \eqref{uslab} independent of $n\ge 1$.  For some glaciologically-relevant end-cases $n=1,4$ \cite{GreveBlatter2009}, the result from \eqref{Bnfromsurface} is $B_1=4.9663\times 10^{12}\,\text{Pa}\,\text{s}$ and $B_4=1.7320\times 10^{7}\,\text{Pa}\,\text{s}^{1/4}$.  The Newtonian viscosity $\nu=B_1/2$ is about $10^{16}$ times more viscous than liquid water but about $10^7$ times less viscous than granite (both at $25^\circ \,\text{C}$, and according to wikipedia).
+For example, suppose $h-b=400$ m and $\alpha=0.1$ radians (about $5.7$ degrees).  Using $B_n$ from \eqref{Bnfromsurface} gives a surface velocity of $u(h)=906.092 \,\text{m}\,\text{a}^{-1}$ from \eqref{uslab} independent of $n\ge 1$.  For some glaciologically-relevant end-cases $n=1,4$ \cite{GoldsbyKohlstedt2001}, the result from \eqref{Bnfromsurface} is $B_1=4.9663\times 10^{12}\,\text{Pa}\,\text{s}$ and $B_4=1.7320\times 10^{7}\,\text{Pa}\,\text{s}^{1/4}$.  The Newtonian viscosity $\nu=B_1/2$ is about $10^{16}$ times more viscous than liquid water but about $10^7$ times less viscous than granite (both at $25^\circ \,\text{C}$, and according to wikipedia).
 
 Formulas \eqref{pslab} and \eqref{uslab} will be used for verifying the numerical solver.  Additionally they allow us to set boundary conditions which lead to glaciologically-reasonable solutions even when modeling a small part of a glacier.  Specifically we do this for the geometry shown in Figure \ref{fig:stepflowlin}.  The inflow side of the region has \eqref{uslab} applied as a Dirichlet condition, i.e.~equation \eqref{inflowbc}.  Also, the outflow side has a normal stress computed from the slab-on-slope solution.  From \eqref{uzslab} above, and the facts that $w=0$, $u_x=0$, and $|D\bu| = \frac{1}{2} u_z$, we find that because $\hbn=\left<1,0\right>$ is the outward normal on the outflow side,
 \begin{align*}
@@ -213,7 +214,7 @@ where $\circ$ denotes an index which is iterated-over and $\tau_{j\circ}$ denote
     \end{bmatrix}$$
 so
     $$\trace(\tau \grad \bv) = \sum_{j=1}^3 \tau_{j\circ} \cdot \grad v_j = \sum_{i,j=1}^3 \tau_{ji} (v_j)_{x_i}$$
-Also, because $\trace(AB)=0$ if $A$ is symmetric and $B$ is antisymmetric, in fact $\trace(\tau \grad \bv) = \trace(\tau D\bv)$.  (To show this take $A=\tau$ and $B=\grad\bv-D\bv$.  Note that many sources write $A:B$ for $\trace(AB)$.)
+Also, because $\trace(AB)=0$ if $A$ is symmetric and $B$ is antisymmetric, in fact $\trace(\tau \grad \bv) = \trace(\tau D\bv)$.  (To show this take $A=\tau$ and $B=\grad\bv-D\bv$.  Note that some sources \cite{JouvetRappaz2011} write $A:B$ for $\trace(AB)$.)
 
 In addition we do a straightforward integration-by-parts on the pressure portion of $F$:
     $$\int_\Omega \nabla p \cdot \bv = \int_\Omega \nabla\cdot (p\,\bv) - p (\nabla \cdot \bv) = \int_{\partial \Omega} p\hbn \cdot \bv - \int_\Omega p (\nabla \cdot \bv)$$
@@ -247,7 +248,22 @@ A real glacier changes shape as it flows.  We want our model to do that too.  Fo
 \begin{equation}
 \Omega_t = \left\{(x,z)\,\big|\, b(x) \le z \le h(x,t)\right\}  \label{Omegat}
 \end{equation}
-where $z=b(x)$ is the bedrock elevation and $z=h(x,t)$ is the time-dependent ice surface elevation.  At any time $t$ the Stokes equations, as already covered, apply on $\Omega_t$.
+where $z=b(x)$ is the base elevation and $z=h(x,t)$ is the time-dependent ice surface elevation.  At any time $t$ the Stokes equations, as already covered, apply on $\Omega_t$.
+
+The bed in our model here is simple.  The bedrock does not move and so the base elevation function $b(x)$ is time-independent.  The ice does not slide (equation \eqref{basebc}) or melt at the base.  Thus the base kinematical equation (42) in the notes reduces to ``$0=0$'' and no effort is needed to solve it.
+
+The ice surface $z=h(x,t)$, however, evolves via the surface kinematical equation (equation (41) in the notes).  In the context of our 2D model, where the ice velocity is $\bu=\left<u(x,z,t),w(x,z,t)\right>$, the equation says
+\begin{equation}
+h_t = a(x,t) - u(x,h,t) h_x + w(x,h,t) \label{surfacekinematical}
+\end{equation}
+Here $a(x,t)$ is the climatic mass balance in units $\text{m}\,\text{s}^{-1}$ units.  (In our examples below $a=0$ because we are happy to study ice fluid dynamics in isolation, but most scientific questions about glaciers are addressed via nontrivial models for $a$.)  Equation \eqref{surfacekinematical} applies only on the time-dependent 1D domain (curve)
+    $$\Gamma_t = \left\{(x,z) \,\big|\, z = h(x,t)\right\} \subset \partial \Omega_t$$
+which is the ice surface.  To describe \eqref{surfacekinematical} somewhat informally, it determines the change in surface elevation $\Delta h \approx h_t\,\Delta t$ as the sum of the added/removed ice $a\,\Delta t$ and the component of the motion of the ice at the surface in the normal direction $\bn = \left<-h_x,1\right>$, thus $\Delta h \approx a \,\Delta t + \bn\cdot \bu\big|_{z=h} \Delta t$.
+
+However, as pointed-out for example by \cite[pp.~65--66]{GreveBlatter2009}, FIXME
+
+
+
 
 \section{Firedrake code}
 
@@ -264,7 +280,7 @@ FIXME: show codes here
 \bigskip
 %from: \bibliographystyle{siam}
 
-\begin{thebibliography}{3}
+\begin{thebibliography}{4}
 
 %\bibitem{BaliseRaymond1985}
 %{\sc M.~Balise and C.~Raymond}, {\em Transfer of basal sliding variations to
@@ -280,6 +296,10 @@ FIXME: show codes here
 {\sc H.~C. Elman and D.~J. Silvester and A.~J. Wathen}, {\em Finite Elements
   and Fast Iterative Solvers: with Applications in Incompressible Fluid Dynamics},
   Oxford University Press, 2nd~ed., 2014.
+
+\bibitem{GoldsbyKohlstedt2001}
+{\sc D.~L.~Goldsby and D. L. Kohlstedt}, {\em Superplastic deformation of ice:
+  experimental observations}, J. Geophys. Res., 106 (M4):11017--11030, (2001).
 
 \bibitem{GreveBlatter2009}
 {\sc R.~Greve and H.~Blatter}, {\em Dynamics of {I}ce {S}heets and {G}laciers},
