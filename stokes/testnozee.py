@@ -1,3 +1,10 @@
+import argparse
+parser = argparse.ArgumentParser(\
+    description='test idea about removing z-dependence of a scalar function')
+parser.add_argument('inname', metavar='INNAME',
+                    help='input file name ending with .msh')
+args, unknown = parser.parse_known_args()
+
 from firedrake import *
 
 def nozee(mesh,X,top_id,bottom_id,Gtop):
@@ -12,14 +19,16 @@ def nozee(mesh,X,top_id,bottom_id,Gtop):
     solve(a == L, Gsoln, bcs=bc, options_prefix='nz',
           solver_parameters={"ksp_type": "preonly",
                              "pc_type": "svd"})
+          # also -nz_pc_type lu -nz_pc_factor_nonzeros_along_diagonal
     return Gsoln
 
 from gendomain import L,bdryids
-mesh = Mesh('glacier.msh')
-print('mesh in "glacier.msh" has %d elements (cells) and %d vertices' \
-      % (mesh.num_cells(),mesh.num_vertices()))
 
-X = FunctionSpace(mesh, "CG", 1)
+mesh = Mesh(args.inname)
+print('mesh in %s has %d elements (cells) and %d vertices' \
+      % (args.inname,mesh.num_cells(),mesh.num_vertices()))
+
+X = FunctionSpace(mesh, "CG", 2)
 x,z = SpatialCoordinate(mesh)
 
 Gtop = sin(6*pi*x/L)
