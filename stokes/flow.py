@@ -3,6 +3,17 @@
 
 # Solve glacier Glen-Stokes problem with evolving surface.  See README.md for usage.
 
+# FIXME  run that shows clear build-up of surface kinematical scheme drift error:
+# ./gendomain -bs 0.0 slab.geo
+# gmsh -2 slab.geo
+# ./flow.py -deltat 20.0 -m 194 slab.msh
+
+# FIXME  instead, classic instability?; *not* a sawtooth but wave at wavelength comparable to thickness?:
+# cp slab.msh slabfast.msh
+# ./flow.py -deltat 100.0 -m 40 slabfast.msh    # only drift error visible at end
+# ./flow.py -deltat 200.0 -m 20 slabfast.msh    # classic-ish wave instability
+# ./flow.py -deltat 250.0 -m 12 slabfast.msh    # happens sooner
+
 # process options
 import argparse
 mixFEchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
@@ -38,7 +49,7 @@ else:
 from firedrake import *
 from firedrake.petsc import PETSc
 from gendomain import Hin, L, bdryids, getdomaindims
-from physics import secpera, stokessolve, initialphi, solvekinematical, solutionstats, numericalerrorsslab
+from physics import secpera, stokessolve, initialphi, solvevdisplacement, solutionstats, numericalerrorsslab
 
 def printpar(thestr,comm=COMM_WORLD):
     PETSc.Sys.Print(thestr,comm=comm)
@@ -91,6 +102,7 @@ if args.deltat > 0.0:
     outfile = File(outname)
 up = Function(Z)
 phi = initialphi(mesh,Hin)
+P1 = FunctionSpace(mesh,'CG',1)  # used for mesh displacement
 for j in range(args.m):
     if args.deltat > 0.0:
         printpar('step %d: t = %.3f days' % (j,t_days))
@@ -116,16 +128,21 @@ for j in range(args.m):
 
     # time-stepping;  deltat=0 case is diagnostic only
     if args.deltat > 0.0:
-        printpar('  solving for vertical mesh displacement rate ...')
+        printpar('  solving kinematical equation for vertical mesh displacement rate ...')
         dt = args.deltat * (secpera/365.0)
-        r = solvekinematical(mesh,bdryids,u,phi,dt)
+        # FIXME add in climatic mass balance a(x) here; want h_t = a - u[0] h_x + u[1]
+        # but here used a = Constant(0.0):
+        deltah = dt * Function(P1).interpolate(Constant(0.0) - dot(grad(phi),u))
+        r = solvevdisplacement(mesh,bdryids,deltah)
         with r.dat.vec_ro as vr:
             absrmax = vr.norm(norm_type=PETSc.NormType.NORM_INFINITY)
         r.rename('vdisplacement')
         phi.rename('kinelevel')
-        outfile.write(u,p,r,phi, time=t_days)
         Vc = mesh.coordinates.function_space()
         x,z = SpatialCoordinate(mesh)
+        phiplusz = Function(P1).interpolate(phi + z)  # FIXME temporary diagnostic; should = h(x,t)
+        phiplusz.rename('phiplusz')
+        outfile.write(u,p,r,phi,phiplusz, time=t_days)
         f = Function(Vc).interpolate(as_vector([x, z + r]))
         mesh.coordinates.assign(f)
         phi -= r
@@ -144,7 +161,7 @@ if args.deltat > 0.0:
     # save final mesh
     printpar('step END: t = %.3f days' % t_days)
     printpar('  writing END values to finish %s ...' % outname)
-    outfile.write(u,p,r,phi, time=t_days)
+    outfile.write(u,p,r,phi,phiplusz, time=t_days)
 else:
     # save solution if diagnostic
     printpar('writing (velocity,pressure) to %s ...' % outname)

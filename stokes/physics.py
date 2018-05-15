@@ -85,18 +85,18 @@ def initialphi(mesh,Hin):
     phi.interpolate(Hin-z)
     return phi
 
-# use kinematic level set function, and Poisson problem for the mesh vertical
-# displacement, to apply surface kinematical equation as vertical strain rate
-# of whole mesh
-def solvekinematical(mesh,bdryids,u,phi,deltat):
+# use kinematic level set function to apply surface kinematical equation as vertical strain rate
+# of whole mesh  ??
+# FIXME  def solvekine()
+
+# compute vertical mesh displacement, given the surface value of it, by setting
+# up and solving a Poisson problem
+def solvevdisplacement(mesh,bdryids,deltah):
     P1 = FunctionSpace(mesh, "CG", 1)
     r = TrialFunction(P1)
     s = TestFunction(P1)
     a = inner(grad(r), grad(s)) * dx   # note natural b.c. on outflow
     L = inner(Constant(0.0), s) * dx
-    # FIXME add in climatic mass balance a(x) here; want h_t = a - u[0] h_x + u[1]
-    # but here used a = Constant(0.0):
-    deltah = deltat * Function(P1).interpolate(Constant(0.0) - dot(grad(phi),u))
     bcs = [ DirichletBC(P1, Constant(0.0), (bdryids['base'],bdryids['inflow'])),
             DirichletBC(P1, deltah, bdryids['top']) ]
     rsoln = Function(P1)
