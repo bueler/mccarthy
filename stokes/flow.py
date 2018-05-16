@@ -3,17 +3,6 @@
 
 # Solve glacier Glen-Stokes problem with evolving surface.  See README.md for usage.
 
-# FIXME  run that shows clear build-up of surface kinematical scheme drift error:
-# ./gendomain -bs 0.0 slab.geo
-# gmsh -2 slab.geo
-# ./flow.py -deltat 20.0 -m 194 slab.msh
-
-# FIXME  instead, classic instability?; *not* a sawtooth but wave at wavelength comparable to thickness?:
-# cp slab.msh slabfast.msh
-# ./flow.py -deltat 100.0 -m 40 slabfast.msh    # only drift error visible at end
-# ./flow.py -deltat 200.0 -m 20 slabfast.msh    # classic-ish wave instability
-# ./flow.py -deltat 250.0 -m 12 slabfast.msh    # happens sooner
-
 # process options
 import argparse
 mixFEchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
@@ -136,8 +125,8 @@ for j in range(args.m):
         phi.dat.data[:] = h(xval.dat.data_ro) - zval.dat.data_ro
         dt = args.deltat * (secpera/365.0)
         # FIXME add in climatic mass balance a(x) here; want h_t = a - u[0] h_x + u[1]
-        # but here used a = Constant(0.0)
-        deltah = dt * Function(P1).interpolate(Constant(0.0) - dot(grad(phi),u))
+        #       currently uses:  a = Constant(0.0)
+        deltah = Function(P1).interpolate( dt * (Constant(0.0) - dot(grad(phi),u)) )
         r = solvevdisplacement(mesh,bdryids,deltah)
         with r.dat.vec_ro as vr:
             absrmax = vr.norm(norm_type=PETSc.NormType.NORM_INFINITY)

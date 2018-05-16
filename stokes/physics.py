@@ -99,8 +99,9 @@ def solvevdisplacement(mesh,bdryids,deltah):
     s = TestFunction(P1)
     a = inner(grad(r), grad(s)) * dx   # note natural b.c. on outflow
     L = inner(Constant(0.0), s) * dx
-    bcs = [ DirichletBC(P1, Constant(0.0), (bdryids['base'],bdryids['inflow'])),
-            DirichletBC(P1, deltah, bdryids['top']) ]
+    # WARNING: top must go *first* so closed top gets zero; is this documented behavior?
+    bcs = [ DirichletBC(P1, deltah, bdryids['top']),
+            DirichletBC(P1, Constant(0.0), (bdryids['base'],bdryids['inflow'])) ]
     rsoln = Function(P1)
     solve(a == L, rsoln, bcs=bcs, options_prefix='t',
           solver_parameters={"ksp_type": "gmres",
