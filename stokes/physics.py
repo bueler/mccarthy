@@ -78,16 +78,18 @@ def stokessolve(up,mesh,bdryids,Z,Hin,Hout,n_glen,alpha,eps,Dtyp):
     # in parallel:  -s_fieldsplit_0_ksp_type gmres -s_fieldsplit_0_pc_type asm -s_fieldsplit_0_sub_pc_type ilu
     return up
 
-def initialphi(mesh,Hin):
+# return surface profile function  h(x)
+# FIXME  will not work in parallel
+def getsurfaceprofile(mesh,top_id):
+    from scipy import interpolate
     P1 = FunctionSpace(mesh, "CG", 1)
-    phi = Function(P1)
-    _,z = SpatialCoordinate(mesh)
-    phi.interpolate(Hin-z)
-    return phi
-
-# use kinematic level set function to apply surface kinematical equation as vertical strain rate
-# of whole mesh  ??
-# FIXME  def solvekine()
+    bc = DirichletBC(P1, 1.0, top_id)
+    # notes:  1)  bc.nodes  gives indices to mesh; 1D numpy array with dtype=int32
+    #         2)  f = Function(P1); bc.apply(f)  gives indicator function
+    x,z = SpatialCoordinate(mesh)
+    xh = Function(P1).interpolate(x).dat.data[bc.nodes]  # 1D numpy array
+    zh = Function(P1).interpolate(z).dat.data[bc.nodes]
+    return interpolate.interp1d(xh,zh,copy=False)   # default is 'linear', which is what we want
 
 # compute vertical mesh displacement, given the surface value of it, by setting
 # up and solving a Poisson problem

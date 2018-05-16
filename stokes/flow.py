@@ -49,7 +49,7 @@ else:
 from firedrake import *
 from firedrake.petsc import PETSc
 from gendomain import Hin, L, bdryids, getdomaindims
-from physics import secpera, stokessolve, initialphi, solvevdisplacement, solutionstats, numericalerrorsslab
+from physics import secpera, stokessolve, solvevdisplacement, solutionstats, numericalerrorsslab, getsurfaceprofile
 
 def printpar(thestr,comm=COMM_WORLD):
     PETSc.Sys.Print(thestr,comm=comm)
@@ -101,7 +101,6 @@ if args.deltat > 0.0:
     printpar('writing (velocity,pressure,vdisplacement,kinelevel) at each time step to %s ...' % outname)
     outfile = File(outname)
 up = Function(Z)
-phi = initialphi(mesh,Hin)
 P1 = FunctionSpace(mesh,'CG',1)  # used for mesh displacement
 for j in range(args.m):
     if args.deltat > 0.0:
@@ -129,9 +128,15 @@ for j in range(args.m):
     # time-stepping;  deltat=0 case is diagnostic only
     if args.deltat > 0.0:
         printpar('  solving kinematical equation for vertical mesh displacement rate ...')
+        h = getsurfaceprofile(mesh,bdryids['top'])
+        x,z = SpatialCoordinate(mesh)
+        xval = Function(P1).interpolate(x)
+        zval = Function(P1).interpolate(z)
+        phi = Function(P1)
+        phi.dat.data[:] = h(xval.dat.data_ro) - zval.dat.data_ro
         dt = args.deltat * (secpera/365.0)
         # FIXME add in climatic mass balance a(x) here; want h_t = a - u[0] h_x + u[1]
-        # but here used a = Constant(0.0):
+        # but here used a = Constant(0.0)
         deltah = dt * Function(P1).interpolate(Constant(0.0) - dot(grad(phi),u))
         r = solvevdisplacement(mesh,bdryids,deltah)
         with r.dat.vec_ro as vr:
@@ -139,13 +144,9 @@ for j in range(args.m):
         r.rename('vdisplacement')
         phi.rename('kinelevel')
         Vc = mesh.coordinates.function_space()
-        x,z = SpatialCoordinate(mesh)
-        phiplusz = Function(P1).interpolate(phi + z)  # FIXME temporary diagnostic; should = h(x,t)
-        phiplusz.rename('phiplusz')
-        outfile.write(u,p,r,phi,phiplusz, time=t_days)
+        outfile.write(u,p,r,phi, time=t_days)
         f = Function(Vc).interpolate(as_vector([x, z + r]))
         mesh.coordinates.assign(f)
-        phi -= r
         bs,Hout = getdomaindims(mesh)
         printpar('    from %.3f days vert. displacement to mesh: max. disp. = %.3f m, Hout = %.3f m' \
                  % (args.deltat,absrmax,Hout))
@@ -161,7 +162,7 @@ if args.deltat > 0.0:
     # save final mesh
     printpar('step END: t = %.3f days' % t_days)
     printpar('  writing END values to finish %s ...' % outname)
-    outfile.write(u,p,r,phi,phiplusz, time=t_days)
+    outfile.write(u,p,r,phi, time=t_days)
 else:
     # save solution if diagnostic
     printpar('writing (velocity,pressure) to %s ...' % outname)
