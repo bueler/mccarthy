@@ -3,6 +3,21 @@
 
 # Solve glacier Glen-Stokes problem with evolving surface.  See README.md for usage.
 
+# FIXME:  make downstream boundary condition into fixed *total* backpressure, applied in hydrostatic profile
+
+# classic stability:
+#   ./gendomain.py -bs 0.0 -o slab.geo
+#   gmsh -2 slab.geo
+#   ./flow.py -deltat 20.0 -m 50 slab.msh  # have run to -m 500 w evident stability
+# classic surface instability; sawtooth emerges at center of top of mesh:
+#   ./flow.py -deltat 40.0 -m 25 slab.msh
+# apparent time step limit: about dt=35 days
+#   (but instability flows off end; dt=37 causes full-thickness blowup)
+
+# for grids refined by factor of 2 it matters *A LOT* how that refinement happens
+#   use of "./gendomain.py -bs 0.0 -refine 2 -o slab2.geo"  gives dt=1 or worse
+#   use of gmsh to split cells in above slab.msh gives dt=15 or better
+
 # process options
 import argparse
 mixFEchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
@@ -55,7 +70,7 @@ else:
     PETSc.Sys.syncFlush(comm=mesh.comm)
 
 # extract mesh geometry needed in solver
-bs,Hout = getdomaindims(mesh)
+bs,bmin_initial,Hout = getdomaindims(mesh)
 printpar('geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f, Hout = %.3f' \
          %(L,bs,Hin,Hout))
 printpar('  bed slope angle alpha = %.6f radians' % args.alpha)
@@ -117,29 +132,36 @@ for j in range(args.m):
     # time-stepping;  deltat=0 case is diagnostic only
     if args.deltat > 0.0:
         printpar('  solving kinematical equation for vertical mesh displacement rate ...')
+        # use surface kinematical equation to get boundary condition for mesh displacement problem
         h = getsurfaceprofile(mesh,bdryids['top'])
         x,z = SpatialCoordinate(mesh)
         xval = Function(P1).interpolate(x)
         zval = Function(P1).interpolate(z)
         phi = Function(P1)
         phi.dat.data[:] = h(xval.dat.data_ro) - zval.dat.data_ro
+        phi.rename('kinelevel')
         dt = args.deltat * (secpera/365.0)
         # FIXME add in climatic mass balance a(x) here; want h_t = a - u[0] h_x + u[1]
         #       currently uses:  a = Constant(0.0)
         deltah = Function(P1).interpolate( dt * (Constant(0.0) - dot(grad(phi),u)) )
+        # solve mesh displacement problem
         r = solvevdisplacement(mesh,bdryids,deltah)
         with r.dat.vec_ro as vr:
             absrmax = vr.norm(norm_type=PETSc.NormType.NORM_INFINITY)
         r.rename('vdisplacement')
-        phi.rename('kinelevel')
-        Vc = mesh.coordinates.function_space()
+        # save complete current state
         outfile.write(u,p,r,phi, time=t_days)
+        # actually move mesh
+        Vc = mesh.coordinates.function_space()
         f = Function(Vc).interpolate(as_vector([x, z + r]))
         mesh.coordinates.assign(f)
-        bs,Hout = getdomaindims(mesh)
-        printpar('    from %.3f days vert. displacement to mesh: max. disp. = %.3f m, Hout = %.3f m' \
-                 % (args.deltat,absrmax,Hout))
+        # report on amount of movement
         t_days += args.deltat
+        bs,_,Hout = getdomaindims(mesh)
+        printpar('    max. vert. mesh disp. = %.3f m,  Hout = %.3f m' % (absrmax,Hout))
+        if any(f.dat.data_ro[:,1] < bmin_initial - 1.0):  # mesh z values below bed is extreme instability
+            printpar('\n\nSURFACE EVEVATION INSTABILITY DETECTED ... stopping\n\n')
+            break
 
 # compute numerical errors relative to slab-on-slope *if* bs==0.0
 if isslab:
