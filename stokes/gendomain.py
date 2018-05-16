@@ -75,6 +75,7 @@ def writegeometry(geo,bs):
 
 # dynamically extract geometry making these definitions (tolerance=1cm):
 #   bs      = height of bedrock step     = (min z-coordinate over Lup < x < Ldown)
+#   bmin    = minimum base elevation     = (min z-coordinates)
 #   Hout    = ice thickness at output    = (max z-coordinate at x=L)
 # in parallel no process owns the whole mesh so MPI_Allreduce() is needed
 def getdomaindims(mesh,tol=0.01):
@@ -87,11 +88,13 @@ def getdomaindims(mesh,tol=0.01):
     if any(xinmid):
         loc_bs = min(za[xinmid])
     bs = mesh.comm.allreduce(loc_bs, op=MPI.MIN)
+    loc_bmin = min(za)
+    bmin = mesh.comm.allreduce(loc_bmin, op=MPI.MIN)
     loc_Hout = 0.0
     if any(xa > L-tol):
         loc_Hout = max(za[xa > L-tol])
     Hout = mesh.comm.allreduce(loc_Hout, op=MPI.MAX)
-    return (bs,Hout)
+    return (bs,bmin,Hout)
 
 def processopts():
     import argparse
