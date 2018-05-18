@@ -19,12 +19,14 @@
 #   use of gmsh to split cells in above slab.msh gives dt=15 or better
 
 # process options
-import argparse
+import sys,argparse
 mixFEchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
 parser = argparse.ArgumentParser(\
     description='Solve 2D glacier Glen-Stokes problem with evolving surface.')
 parser.add_argument('-alpha', type=float, default=0.1, metavar='X',
                     help='downward slope of bed as angle in radians (default = 0.1)')
+parser.add_argument('-deltat', type=float, default=0.0, metavar='X',
+                    help='duration in days of time step for surface evolution')
 parser.add_argument('-Dtyp', type=float, default=2.0, metavar='X',
                     help='regularize viscosity using "+(eps Dtyp)^2" (default = 2 a-1)')
                     # e.g. (800 m a-1) / 400 m = 2 a-1
@@ -32,19 +34,23 @@ parser.add_argument('-elements', metavar='X', default='P2P1',
                     choices=mixFEchoices,
                     help='stable mixed finite elements from: %s (default=P2P1)' \
                          % (','.join(mixFEchoices)) )
-parser.add_argument('-deltat', type=float, default=0.0, metavar='X',
-                    help='duration in days of time step for surface evolution')
 parser.add_argument('-eps', type=float, default=0.01, metavar='X',
                     help='regularize viscosity using "+(eps Dtyp)^2" (default = 0.01)')
-parser.add_argument('inname', metavar='INNAME',
-                    help='input file name ending with .msh')
 parser.add_argument('-m', type=int, default=1, metavar='X',
                     help='number of time steps of deltat days of surface evolution')
 parser.add_argument('-n_glen', type=float, default=3.0, metavar='X',
                     help='Glen flow law exponent (default = 3.0)')
 parser.add_argument('-o', metavar='OUTNAME', type=str, default='',
                     help='output file name ending with .pvd (default = INNAME-.msh+.pvd)')
+parser.add_argument('-save_rank', action='store_true',
+                    help='add fields (element_rank,vertex_rank) to output file', default=False)
+parser.add_argument('inname', metavar='INNAME',
+                    help='input file name ending with .msh')
 args, unknown = parser.parse_known_args()
+if args.save_rank and args.deltat > 0.0:
+    print("ERROR: -save_rank currently only works in time-independent runs")
+    sys.exit(1)
+
 if len(args.o) > 0:
     outname = args.o
 else:
@@ -61,6 +67,9 @@ def printpar(thestr,comm=COMM_WORLD):
 # read mesh and report on parallel decomposition (if appropriate)
 printpar('reading initial mesh from %s ...' % args.inname)
 mesh = Mesh(args.inname)
+if mesh.comm.size > 1 and args.deltat > 0.0:
+    print("ERROR: time-dependent runs only currently run in serial, not parallel")
+    sys.exit(2)
 if mesh.comm.size == 1:
     printpar('  mesh has %d elements (cells) and %d vertices' \
           % (mesh.num_cells(),mesh.num_vertices()))
@@ -177,5 +186,15 @@ if args.deltat > 0.0:
 else:
     # save solution if diagnostic
     printpar('writing (velocity,pressure) to %s ...' % outname)
-    File(outname).write(u,p)
+    if args.save_rank:
+        printpar('  also writing (element_rank,vertex_rank) ...')
+        element_rank = Function(FunctionSpace(mesh,'DG',0))
+        element_rank.dat.data[:] = mesh.comm.rank
+        element_rank.rename('element_rank')
+        vertex_rank = Function(P1)
+        vertex_rank.dat.data[:] = mesh.comm.rank
+        vertex_rank.rename('vertex_rank')
+        File(outname).write(u,p,element_rank,vertex_rank)
+    else:
+        File(outname).write(u,p)
 
