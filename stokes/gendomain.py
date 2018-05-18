@@ -113,12 +113,13 @@ def processopts():
                         help='refine resolution by this factor (default=1)')
     parser.add_argument('-refine_corner', type=float, default=4.0, metavar='X',
                         help='further local refinement at interior corner by this factor (default=4)')
+    parser.add_argument('-testspew', action='store_true',
+                        help='write .geo contents, w/o header, to stdout', default=False)  # just for testing
     return parser.parse_args()
 
 if __name__ == "__main__":
-    import sys
     from datetime import datetime
-    import platform
+    import sys, platform, subprocess
 
     args = processopts()
     commandline = " ".join(sys.argv[:])  # for save in comment in generated .geo
@@ -127,8 +128,9 @@ if __name__ == "__main__":
     print('writing domain geometry to file %s ...' % args.o)
     geo = open(args.o, 'w')
     # header which records creation info
-    geo.write('// geometry-description file created %s by %s using command\n//   %s\n\n'
-              % (now,platform.node(),commandline) )
+    if not args.testspew:
+        geo.write('// geometry-description file created %s by %s using command\n//   %s\n\n'
+                  % (now,platform.node(),commandline) )
     # set "characteristic lengths" which are used by gmsh to generate triangles
     lc = args.hmesh / args.refine
     print('setting target mesh size of %g m' % lc)
@@ -142,4 +144,7 @@ if __name__ == "__main__":
     # the rest
     writegeometry(geo,args.bs)
     geo.close()
+    if args.testspew:
+        result = subprocess.run(['cat', args.o], stdout=subprocess.PIPE)
+        print(result.stdout)
 
