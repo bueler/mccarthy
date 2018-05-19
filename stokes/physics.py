@@ -78,14 +78,14 @@ def stokessolve(up,mesh,bdryids,Z,Hin,Hout,n_glen,alpha,eps,Dtyp):
     # in parallel:  -s_fieldsplit_0_ksp_type gmres -s_fieldsplit_0_pc_type asm -s_fieldsplit_0_sub_pc_type ilu
     return up
 
-# return surface profile function  h(x)
+# return linear-interpolated surface profile function  h(x)
 # FIXME  will not work in parallel
 def getsurfaceprofile(mesh,top_id):
     from scipy import interpolate
     P1 = FunctionSpace(mesh, "CG", 1)
     bc = DirichletBC(P1, 1.0, top_id)
-    # notes:  1)  bc.nodes  gives indices to mesh; 1D numpy array with dtype=int32
-    #         2)  f = Function(P1); bc.apply(f)  gives indicator function
+    # notes:  1)  bc.nodes  gives indices to mesh; is a 1D dtype=int32 numpy array
+    #         2)  f = Function(P1);  bc.apply(f)  gives indicator function
     x,z = SpatialCoordinate(mesh)
     xh = Function(P1).interpolate(x).dat.data[bc.nodes]  # 1D numpy array
     zh = Function(P1).interpolate(z).dat.data[bc.nodes]
