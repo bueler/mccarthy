@@ -79,10 +79,10 @@ def stokessolve(up,mesh,bdryids,Z,Hin,Hout,n_glen,alpha,eps,Dtyp):
     # in parallel:  -s_fieldsplit_0_ksp_type gmres -s_fieldsplit_0_pc_type asm -s_fieldsplit_0_sub_pc_type ilu
     return up
 
-# return linear-interpolated surface profile function  h(x)
+# return linear-interpolated surface elevation function  z = h(x)
 # FIXME  will not work in parallel
-def getsurfaceprofile(mesh,top_id):
-    from scipy import interpolate
+def getsurfaceelevation(mesh,top_id):
+    from scipy.interpolate import interp1d
     P1 = FunctionSpace(mesh, "CG", 1)
     bc = DirichletBC(P1, 1.0, top_id)
     # notes:  1)  bc.nodes  gives indices to mesh; is a 1D dtype=int32 numpy array
@@ -90,7 +90,21 @@ def getsurfaceprofile(mesh,top_id):
     x,z = SpatialCoordinate(mesh)
     xh = Function(P1).interpolate(x).dat.data[bc.nodes]  # 1D numpy array
     zh = Function(P1).interpolate(z).dat.data[bc.nodes]
-    return interpolate.interp1d(xh,zh,copy=False)   # default is 'linear', which is what we want
+    return interp1d(xh,zh,copy=False)   # default is 'linear', which is what we want
+
+# return linear-interpolated surface velocity functions  u(x), w(x)
+# FIXME  will not work in parallel
+def getsurfacevelocity(mesh,top_id,Z,u):
+    from scipy.interpolate import interp1d
+    P1 = FunctionSpace(mesh, "CG", 1)
+    P1V = VectorFunctionSpace(mesh, "CG", 1)
+    bc = DirichletBC(P1, 1.0, top_id)
+    x,_ = SpatialCoordinate(mesh)
+    xh = Function(P1).interpolate(x).dat.data[bc.nodes]
+    uP1 = Function(P1V).interpolate(u)
+    ufcn = interp1d(xh,uP1.dat.data_ro[bc.nodes,0],copy=False)
+    wfcn = interp1d(xh,uP1.dat.data_ro[bc.nodes,1],copy=False)
+    return (ufcn,wfcn)
 
 # compute vertical mesh displacement, given the surface value of it, by setting
 # up and solving a Poisson problem
