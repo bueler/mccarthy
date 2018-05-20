@@ -18,10 +18,10 @@ runflow_2: slabtest.msh
 	-@./testit.sh flow.py "slabtest.msh" 1 2 "slab bed u,p solve"
 
 runflow_3: lowtest.msh
-	-@./testit.sh flow.py "-deltat 20.0 -m 2 lowtest.msh" 1 3 "evolving surface u,p,h solve"
+	-@./testit.sh flow.py "-deltat 20.0 -m 2 -o test3.pvd lowtest.msh" 1 3 "evolving surface u,p,h solve"
 
 runflow_4: lowtest.msh
-	-@./testit.sh flow.py "lowtest.msh -s_snes_converged_reason" 2 4 "parallel u,p solve"
+	-@./testit.sh flow.py "-o test4.pvd lowtest.msh -s_snes_converged_reason" 2 4 "parallel u,p solve"
 
 test: rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4
 

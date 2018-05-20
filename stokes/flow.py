@@ -113,7 +113,7 @@ else:
 # time-stepping loop
 t_days = 0.0
 if args.deltat > 0.0:
-    printpar('writing (velocity,pressure,vdisplacement,kinelevel) at each time step to %s ...' % outname)
+    printpar('writing (velocity,pressure,vertical_displacement) at each time step to %s ...' % outname)
     outfile = File(outname)
 up = Function(Z)
 P1 = FunctionSpace(mesh,'CG',1)  # used for mesh displacement
