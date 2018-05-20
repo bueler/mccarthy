@@ -19,11 +19,23 @@ Installation
 Default Stokes-only usage
 -------------------------
 
-        $ ./gendomain.py -o glacier.geo            # create domain geometry
-        $ gmsh -2 glacier.geo                      # mesh domain; generates glacier.msh
-        $ source ~/firedrake/bin/activate          # start Firedrake
-        (firedrake) $ ./flow.py glacier.msh        # solve Stokes problem
-        (firedrake) $ paraview glacier.pvd         # visualize
+Generate the domain geometry and the mesh:
+
+        $ ./gendomain.py -o glacier.geo            # creates domain outline
+        $ gmsh -2 glacier.geo                      # generates glacier.msh
+
+Start Firedrake and run the solver:
+
+        $ source ~/firedrake/bin/activate
+        (firedrake) $ ./flow.py glacier.msh        # solve Stokes problem for velocity and pressure
+
+This writes variables (velocity,pressure) into `glacier.pvd`.  Now visualize:
+
+        (firedrake) $ paraview glacier.pvd
+
+Alternative visualization is to plot surface values of (h,u,w) into an image file:
+
+        (firedrake) $ ./flow.py -osurface foo.png glacier.msh
 
 Slab-on-slope usage
 -------------------
@@ -40,7 +52,10 @@ Surface evolution usage
 By setting `-deltat` to a positive value, and choosing the number of time steps by `-m`, the surface will evolve.  For example,
 
         (firedrake) $ ./flow.py -deltat 10.0 -m 60 glacier.msh
-        (firedrake) $ paraview glacier.pvd   # can now animate the 60 frames
+
+This writes variables (velocity,pressure,vertical\_displacement) into `glacier.pvd` at each time step.  Paraview can show an animation.  The alternate visualization will plot surface values of (h,u,w,h_t) into the image file:
+
+        (firedrake) $ ./flow.py -osurface foo.png glacier.msh
 
 Mesh refinement
 ---------------
@@ -58,11 +73,11 @@ For example the following creates a mesh with target mesh size varying from 25 m
 Solver performance information
 ------------------------------
 
-There are two PETSc solvers at each time step in surface evolution mode.  One, with prefix `s_`, solves the Stokes equations from the current geometry.  It is nonlinear and computes the velocity and pressure.  The other solver, with prefix `t_`, computes the vertical displacement of the mesh so as to solve the surface kinematical equation.  The minimal information on solver performance comes from asking for the number of iterations in each solver, for example
+There are two PETSc solvers at each time step in surface evolution mode.  One, with prefix `s_`, solves the Stokes equations from the current geometry.  It is nonlinear and computes the velocity and pressure.  The other solver, with prefix `t_`, computes the vertical displacement of the mesh to solve the surface kinematical equation.  Basic information on solver performance comes from asking for the number of iterations in each solver, for example
 
         (firedrake) $ ./flow.py -deltat 10.0 -m 60 glacier.msh -s_snes_converged_reason -t_ksp_converged_reason
 
-Note that the `t_` solver is not used in the default diagnostic-only mode (i.e. when there is no positive value supplied as `-deltat`).
+Note that all PETSc options must come _after_ the options to the script `flow.py`.  Also, the `t_` solver is not used in the default diagnostic-only mode (i.e. when there is no positive value supplied as `-deltat`).
 
 Info on using Firedrake
 -----------------------
