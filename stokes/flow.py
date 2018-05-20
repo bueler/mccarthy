@@ -61,7 +61,7 @@ from firedrake.petsc import PETSc
 from gendomain import Hin, L, bdryids, getdomaindims
 from physics import secpera, stokessolve, solvevdisplacement, \
                     solutionstats, numericalerrorsslab, \
-                    getsurfaceelevation, getsurfacevelocity
+                    getsurfaceelevation, getsurfaceverticaldisplacement, getsurfacevelocity
 
 def printpar(thestr,comm=COMM_WORLD):
     PETSc.Sys.Print(thestr,comm=comm)
@@ -148,20 +148,19 @@ for j in range(args.m):
         x,z = SpatialCoordinate(mesh)
         xval = Function(P1).interpolate(x)
         zval = Function(P1).interpolate(z)
-        phi = Function(P1)
-        phi.dat.data[:] = h(xval.dat.data_ro) - zval.dat.data_ro
-        phi.rename('kinelevel')
+        Fs = Function(P1)
+        Fs.dat.data[:] = zval.dat.data_ro - h(xval.dat.data_ro)
         dt = args.deltat * (secpera/365.0)
         # FIXME add in climatic mass balance a(x) here; want h_t = a - u[0] h_x + u[1]
         #       currently uses:  a = Constant(0.0)
-        deltah = Function(P1).interpolate( dt * (Constant(0.0) - dot(grad(phi),u)) )
+        deltah = Function(P1).interpolate( dt * (Constant(0.0) + dot(grad(Fs),u)) )
         # solve mesh displacement problem
         r = solvevdisplacement(mesh,bdryids,deltah)
         with r.dat.vec_ro as vr:
             absrmax = vr.norm(norm_type=PETSc.NormType.NORM_INFINITY)
-        r.rename('vdisplacement')
+        r.rename('vertical_displacement')
         # save complete current state
-        outfile.write(u,p,r,phi, time=t_days)
+        outfile.write(u,p,r, time=t_days)
         # actually move mesh
         Vc = mesh.coordinates.function_space()
         f = Function(Vc).interpolate(as_vector([x, z + r]))
@@ -185,7 +184,7 @@ if args.deltat > 0.0:
     # save final mesh
     printpar('step END: t = %.3f days' % t_days)
     printpar('  writing values to finish file %s ...' % outname)
-    outfile.write(u,p,r,phi, time=t_days)
+    outfile.write(u,p,r, time=t_days)
 else:
     # save solution if diagnostic
     printpar('writing (velocity,pressure) to %s ...' % outname)
@@ -205,22 +204,34 @@ else:
 if len(args.osurface) > 0:
     import numpy as np
     import matplotlib.pyplot as plt
-    printpar('plotting surface values of (h,u,w) into file %s ...' % args.osurface)
     x = np.linspace(0.0,L,401)
     hfcn = getsurfaceelevation(mesh,bdryids['top'])
     ufcn,wfcn = getsurfacevelocity(mesh,bdryids['top'],Z,u)
-    plt.subplot(3,1,1)
-    plt.plot(x,hfcn(x),label='h(x) = surface elevation')
+    plt.figure(figsize=(6.0,8.0))
+    if args.deltat > 0.0:
+        rows = 4
+        printpar('plotting surface values of (h,u,w,h_t) in file %s ...' % args.osurface)
+    else:
+        rows = 3
+        printpar('plotting surface values of (h,u,w) in file %s ...' % args.osurface)
+    plt.subplot(rows,1,1)
+    plt.plot(x,hfcn(x),'r',label='h(x) = surface elevation')
     plt.ylabel('h(x)  [m]')
     plt.legend()
-    plt.subplot(3,1,2)
-    plt.plot(x,secpera*ufcn(x),label='u(x) = horizontal velocity')
+    plt.subplot(rows,1,2)
+    plt.plot(x,secpera*ufcn(x),label='horizontal velocity')
     plt.ylabel('u(x)  [m/a]')
     plt.legend()
-    plt.subplot(3,1,3)
-    plt.plot(x,secpera*wfcn(x),label='w(x) = vertical velocity')
+    plt.subplot(rows,1,3)
+    plt.plot(x,secpera*wfcn(x),label='vertical velocity')
     plt.ylabel('w(x)  [m/a]')
-    plt.xlabel('x  [m]')
     plt.legend()
+    if args.deltat > 0.0:
+        rfcn = getsurfaceverticaldisplacement(mesh,bdryids['top'],r)
+        plt.subplot(rows,1,4)
+        plt.plot(x,rfcn(x)/args.deltat,'r',label='surface elevation rate (last time step)')
+        plt.ylabel('h_t  [m/day]')
+        plt.legend()
+    plt.xlabel('x  [m]')
     plt.savefig(args.osurface,bbox_inches='tight')
 

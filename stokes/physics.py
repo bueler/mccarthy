@@ -92,6 +92,17 @@ def getsurfaceelevation(mesh,top_id):
     zh = Function(P1).interpolate(z).dat.data[bc.nodes]
     return interp1d(xh,zh,copy=False)   # default is 'linear', which is what we want
 
+# return linear-interpolated surface vertical displacement function  r = (delta h)(x)
+# FIXME  will not work in parallel
+def getsurfaceverticaldisplacement(mesh,top_id,r):
+    from scipy.interpolate import interp1d
+    P1 = FunctionSpace(mesh, "CG", 1)
+    bc = DirichletBC(P1, 1.0, top_id)
+    x,_ = SpatialCoordinate(mesh)
+    xh = Function(P1).interpolate(x).dat.data[bc.nodes]
+    rh = r.dat.data_ro[bc.nodes]
+    return interp1d(xh,rh,copy=False)
+
 # return linear-interpolated surface velocity functions  u(x), w(x)
 # FIXME  will not work in parallel
 def getsurfacevelocity(mesh,top_id,Z,u):
