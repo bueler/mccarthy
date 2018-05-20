@@ -1,5 +1,6 @@
 /*.m
 /__pycache__/
+/tmptest/
 *.geo
 *.msh
 *.vtu

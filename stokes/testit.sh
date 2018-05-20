@@ -2,32 +2,30 @@
 
 # ./testit.sh PROGRAM OPTS PROCESSES TESTNUM
 
-rm -f maketmp tmp difftmp
+mkdir -p tmptest/
 
-make $1 > maketmp 2>&1;
+make $1 > tmptest/maketmp 2>&1;
 
 CMD="mpiexec -n $3 ./$1 $2"
 
 if [[ ! -f output/$1.test$4 ]]; then
-    echo "FAIL: Test #$4 of $CURRDIR/$1"
+    echo "FAIL: Test #$4 of $1"
     echo "       command = '$CMD'"
     echo "       OUTPUT MISSING"
 
 else
 
-    $CMD > tmp
+    $CMD > tmptest/tmp
 
-    diff output/$1.test$4 tmp > difftmp
+    diff output/$1.test$4 tmptest/tmp > tmptest/difftmp
 
-    CURRDIR=${PWD##*/}
-    if [[ -s difftmp ]] ; then
-       echo "FAIL: Test #$4 of $CURRDIR/$1  ($5)"
+    if [[ -s tmptest/difftmp ]] ; then
+       echo "FAIL: Test #$4 of $1  ($5)"
        echo "       command = '$CMD'"
        echo "       diffs follow:"
-       cat difftmp
+       cat tmptest/difftmp
     else
-       echo "PASS: Test #$4 of $CURRDIR/$1  ($5)"
-       rm -f maketmp tmp difftmp
+       echo "PASS: Test #$4 of $1  ($5)"
     fi
 
 fi
