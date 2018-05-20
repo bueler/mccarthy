@@ -38,8 +38,9 @@ def stokessolve(up,mesh,bdryids,Z,Hin,Hout,n_glen,alpha,eps,Dtyp):
     # right side outflow nonhomogeneous Neumann is part of weak form:
     #    apply hydrostatic normal force; 
     x,z = SpatialCoordinate(mesh)
-    outflow_sigma = as_vector([- rho * g * cos(alpha) * (Hout - z),
-                               rho * g * sin(alpha) * (Hout - z)])
+    Cout = (Hin/Hout)**2
+    outflow_sigma = as_vector([- Cout * rho * g * cos(alpha) * (Hout - z),
+                               Cout * rho * g * sin(alpha) * (Hout - z)])
 
     # define the nonlinear weak form F(u,p;v,q)
     u,p = split(up)        # up.split() not equivalent here?
