@@ -3,8 +3,6 @@
 
 # Solve glacier Glen-Stokes problem with evolving surface.  See README.md for usage.
 
-# FIXME:  make downstream boundary condition into fixed *total* backpressure, applied in hydrostatic profile
-
 # classic stability:
 #   ./gendomain.py -bs 0.0 -o slab.geo
 #   gmsh -2 slab.geo
@@ -16,7 +14,7 @@
 
 # for grids refined by factor of 2 it matters *A LOT* how that refinement happens
 #   use of "./gendomain.py -bs 0.0 -refine 2 -o slab2.geo"  gives dt=1 or worse
-#   use of gmsh to split cells in above slab.msh gives dt=15 or better
+#   use of gmsh to split cells ONCE gives dt=15 or better
 
 # process options
 import sys,argparse
@@ -40,10 +38,12 @@ parser.add_argument('-m', type=int, default=1, metavar='X',
                     help='number of time steps of deltat days of surface evolution')
 parser.add_argument('-n_glen', type=float, default=3.0, metavar='X',
                     help='Glen flow law exponent (default = 3.0)')
-parser.add_argument('-o', metavar='OUTNAME', type=str, default='',
+parser.add_argument('-o', metavar='NAME', type=str, default='',
                     help='output file name ending with .pvd (default = INNAME-.msh+.pvd)')
 parser.add_argument('-save_rank', action='store_true',
                     help='add fields (element_rank,vertex_rank) to output file', default=False)
+parser.add_argument('-osurface', metavar='NAME', type=str, default='',
+                    help='save a plot of surface values of (h,u,w) in this image file (.png,.pdf,...)')
 parser.add_argument('inname', metavar='INNAME',
                     help='input file name ending with .msh')
 args, unknown = parser.parse_known_args()
@@ -59,7 +59,9 @@ else:
 from firedrake import *
 from firedrake.petsc import PETSc
 from gendomain import Hin, L, bdryids, getdomaindims
-from physics import secpera, stokessolve, solvevdisplacement, solutionstats, numericalerrorsslab, getsurfaceprofile
+from physics import secpera, stokessolve, solvevdisplacement, \
+                    solutionstats, numericalerrorsslab, \
+                    getsurfaceelevation, getsurfacevelocity
 
 def printpar(thestr,comm=COMM_WORLD):
     PETSc.Sys.Print(thestr,comm=comm)
@@ -142,7 +144,7 @@ for j in range(args.m):
     if args.deltat > 0.0:
         printpar('  solving kinematical equation for vertical mesh displacement rate ...')
         # use surface kinematical equation to get boundary condition for mesh displacement problem
-        h = getsurfaceprofile(mesh,bdryids['top'])
+        h = getsurfaceelevation(mesh,bdryids['top'])
         x,z = SpatialCoordinate(mesh)
         xval = Function(P1).interpolate(x)
         zval = Function(P1).interpolate(z)
@@ -178,10 +180,11 @@ if isslab:
     printpar('numerical errors: |u-uex|_inf = %.3e m a-1, |p-pex|_inf = %.3e Pa' \
              % (uerrmax*secpera,perrmax))
 
+# save results in .pvd
 if args.deltat > 0.0:
     # save final mesh
     printpar('step END: t = %.3f days' % t_days)
-    printpar('  writing END values to finish %s ...' % outname)
+    printpar('  writing values to finish file %s ...' % outname)
     outfile.write(u,p,r,phi, time=t_days)
 else:
     # save solution if diagnostic
@@ -197,4 +200,27 @@ else:
         File(outname).write(u,p,element_rank,vertex_rank)
     else:
         File(outname).write(u,p)
+
+# generate plot of surface values if desired
+if len(args.osurface) > 0:
+    import numpy as np
+    import matplotlib.pyplot as plt
+    printpar('plotting surface values of (h,u,w) into file %s ...' % args.osurface)
+    x = np.linspace(0.0,L,401)
+    hfcn = getsurfaceelevation(mesh,bdryids['top'])
+    ufcn,wfcn = getsurfacevelocity(mesh,bdryids['top'],Z,u)
+    plt.subplot(3,1,1)
+    plt.plot(x,hfcn(x),label='h(x) = surface elevation')
+    plt.ylabel('h(x)  [m]')
+    plt.legend()
+    plt.subplot(3,1,2)
+    plt.plot(x,secpera*ufcn(x),label='u(x) = horizontal velocity')
+    plt.ylabel('u(x)  [m/a]')
+    plt.legend()
+    plt.subplot(3,1,3)
+    plt.plot(x,secpera*wfcn(x),label='w(x) = vertical velocity')
+    plt.ylabel('w(x)  [m/a]')
+    plt.xlabel('x  [m]')
+    plt.legend()
+    plt.savefig(args.osurface,bbox_inches='tight')
 
