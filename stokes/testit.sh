@@ -21,12 +21,12 @@ else
 
     CURRDIR=${PWD##*/}
     if [[ -s difftmp ]] ; then
-       echo "FAIL: Test #$4 of $CURRDIR/$1"
+       echo "FAIL: Test #$4 of $CURRDIR/$1  ($5)"
        echo "       command = '$CMD'"
        echo "       diffs follow:"
        cat difftmp
     else
-       echo "PASS: Test #$4 of $CURRDIR/$1"
+       echo "PASS: Test #$4 of $CURRDIR/$1  ($5)"
        rm -f maketmp tmp difftmp
     fi
 
