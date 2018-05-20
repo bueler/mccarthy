@@ -65,11 +65,11 @@ urlcolor=black     % only if colorlinks=true
 
 \renewcommand{\theequation}{A\arabic{equation}}
 
-This document is an appendix to my notes \emph{Numerical modelling of glaciers, ice sheets, and ice shelves}---here called ``the notes''---which are used for the International Summer School in Glaciology in McCarthy, Alaska.
+This is an appendix to my notes \emph{Numerical modelling of glaciers, ice sheets, and ice shelves}---here called ``the notes''---for the International Summer School in Glaciology in McCarthy, Alaska.
 
-We start by stating the Stokes model with glacier-suitable boundary conditions.  A specific slab-on-a-slope case is used both for verification and to clarify the boundary conditions.  Then we derive the ``weak form,'' as explained below.  An overview of finite element (FE) methods \cite{Elmanetal2014}, which are based on such weak forms, follows.  Our particular FE method uses triangular elements for an arbitrary planar region and stable mixed elements; these ideas are only briefly explained.
+We start by stating the Stokes model with glacier-suitable boundary conditions.  Next, the specific slab-on-a-slope case is solved exactly, both for verification and to construct boundary conditions for more general cases.  We derive the ``weak form'' of the Stokes problem and then give an overview of finite element (FE) methods \cite{Elmanetal2014}, which are based on weak forms.  Our particular FE method uses an unstructured mesh of triangular elements for an arbitrary planar region and stable mixed elements; these ideas are only briefly explained.  In addition to the FE method which solves the Stokes problem for velocity and pressure, we use a moving-mesh scheme to solve the surface kinematical equation.
 
-The main goal of this appendix is a numerical velocity, pressure, and surface evolution solution to a 2D glacier with a step in the bedrock (Figure \ref{fig:stepflowlin}).  This model is in the short Python codes which are included at the end.  They use four advanced open source tools/libraries:
+The main goal is a numerical velocity and pressure solution, with surface evolution, for a 2D glacier with steps in the bedrock (Figure \ref{fig:stepflowlin}).  This numerical model is in three Python codes, included at the end, which exploit four advanced open source tools/libraries:
 \begin{itemize}
 \item Gmsh, a mesh generator \hfill \url{http://gmsh.info/}
 \item Firedrake, an FE library \hfill \url{https://www.firedrakeproject.org/}
@@ -79,21 +79,20 @@ The main goal of this appendix is a numerical velocity, pressure, and surface ev
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth,angle=-5.7296]{stepflowlin}  % 0.1 radian = 5.7296 degrees
-\caption{A 400 m thick glacier flowing over 100 m bedrock steps, with bed at angle $5.73^\circ$.  Arrows show velocity $\bu$ and shading is pressure $p$.}
-% FIXME want steady surface too
+\caption{A steady-state 2D glacier flowing over bedrock steps.  Arrows show velocity $\bu$.  Shading is by pressure $p$.}
 \label{fig:stepflowlin}
 \end{figure}
 
 
-\section{Stokes equations}
+\section{Stokes problem}
 
-Recall the Glen-Stokes model in equations (3), (4), (5) from the notes; the model is also described in \cite{GreveBlatter2009,JouvetRappaz2011}.  It applies on a 3D or 2D domain $\Omega$, according to the context, which must have a smooth-enough boundary to apply the boundary conditions but is otherwise general.  Allowing any Glen exponent $n\ge 1$, the equations are:
+Recall the Glen-Stokes model in equations (3), (4), (5) from the notes; the model is also described in \cite{GreveBlatter2009,JouvetRappaz2011}.  It applies on a 3D or 2D domain $\Omega$ which must have a smooth-enough boundary to apply the boundary conditions but is otherwise general.  Allowing any Glen exponent $n\ge 1$, the equations are:
 \begin{align}
 \nabla \cdot \bu &= 0 &&\text{\emph{incompressibility}} \label{incompressible} \\
 - \nabla \cdot \tau + \nabla p &= \rho \bg &&\text{\emph{stress balance}} \label{forcebalance} \\
 D\bu &= A_n |\tau|^{n-1} \tau &&\text{\emph{Glen flow law}} \label{flowlaw}
 \end{align}
-The velocity $\bu$, pressure $p$, ice density $\rho$, acceleration of gravity $\bg$, deviatoric stress tensor $\tau$ and strain rate tensor $D\bu$ all appear.  Recall $D\bu$ involves derivatives of velocity:
+The velocity $\bu$, pressure $p$, ice density $\rho$, acceleration of gravity $\bg$, deviatoric stress tensor $\tau$ and strain rate tensor $D\bu$ all appear; recall $D\bu$ involves derivatives of velocity:
 \begin{equation}
 (D\bu)_{ij} = \frac{1}{2} \left((u_i)_{x_j} + (u_j)_{x_i}\right) \label{strainrate}
 \end{equation}
@@ -124,21 +123,22 @@ Here $B_n = (A_n)^{-1/n}$ is the $n$-dependent ice hardness in units $\text{Pa}\
 \end{align}
 The Stokes model is, from now on, equations \eqref{incompagain}, \eqref{stokes} with certain boundary conditions.  The solution is the velocity-pressure pair $(\bu,p)$.
 
-Certain glacier-suitable boundary conditions are used in this document and in the code below.  To explain these, consider the numerical solution shown in Figure \ref{fig:stepflowlin}.  We assume that the base, top, inflow, and outflow boundary surfaces are all well-defined.  On the base we require no slip:
+Certain glacier-suitable velocity and stress boundary conditions are used in our example.  To explain these, consider the numerical solution shown in Figure \ref{fig:stepflowlin}.  We assume that the base, top, inflow, and outflow boundary surfaces can all be identified.  On the base we require no slip:
 \begin{align}
 \bu &= 0  &&\text{\emph{base}} \label{basebc} \\
 \intertext{On the top we set a condition of zero applied stress, $\sigma\hbn=0$ or equivalently:}
 \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= 0  &&\text{\emph{top}} \label{topbc} \\
-\intertext{As shown in Figure \ref{fig:stepflowlin}, the left-side inflow boundary is a surface with outward normal $\hbn=\left<-1,0,0\right>^\top$ in all cases we solve.  On this surface we set a nonzero inflow velocity:}
+\intertext{The left-side inflow boundary has outward normal $\hbn=\left<-1,0,0\right>^\top$ in all cases we solve.  On this surface we set a nonzero inflow velocity:}
 \bu &= \left<f(z),0,0\right>^\top  &&\text{\emph{inflow}} \label{inflowbc} \\
-\intertext{The inflow $f(z)$ will satisfy the slab-on-slope equations; see below.  On the outflow boundary, where $\hbn=\left<1,0,0\right>^\top$, $h$ is the surface elevation, and $g=|\bg|$, we set a nonzero hydrostatic normal stress and zero traction:}
-\left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= \left<-\rho g \cos\alpha (h-z),0,\rho g\sin\alpha (h-z)\right>^\top  &&\text{\emph{outflow}} \label{outflowbc}
+\intertext{The inflow $f(z)$ will satisfy the slab-on-slope equations for a specific thickness $H_{\text{in}}$ at the inflow; see below.  On the outflow boundary, where $\hbn=\left<1,0,0\right>^\top$, $h$ is the surface elevation, and $g=|\bg|$, we set a nonzero hydrostatic normal stress and zero traction:}
+\left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= C_{\text{out}} \left<- \rho g \cos\alpha (h-z),0, \rho g\sin\alpha (h-z)\right>^\top  &&\text{\emph{outflow}} \label{outflowbc}
 \end{align}
+The constant $C_{\text{out}} $ is adjusted so that the total applied stress is equal to its value for ice thicknesses $H_{\text{in}}$: $C_{\text{out}} = (H_{\text{in}}/H_{\text{out}})^2$ where $H_{\text{out}}$ is the varying outflow ice thickness.
 
 
 \section{Slab-on-slope solutions}
 
-Testing a numerical model requires verification tools, namely exact solutions.  Thus we recapitulate the construction of slab-on-slope solutions, as given in the notes, this time allowing any Glen exponent $n$.  We also determine the $n$-dependent ice hardness $B_n$ so that these solutions have the same surface velocity for any $n$, and we construct the outflow boundary condition used in more general situations.
+Testing a numerical model requires verification tools, namely exact solutions.  Thus we recapitulate the construction of slab-on-slope solutions, as given in the notes, this time allowing any Glen exponent $n$.  We also determine the $n$-dependent ice hardness $B_n$ so that these solutions have the same surface velocity for any $n$, and construct the inflow and outflow boundary conditions based on based on the slab-on-slope case.
 
 Suppose the domain $\Omega$ is 2D, namely points $(x,y,z)$ where $y=0$.  Denote the components of velocity as $\bu=\left<u,v,w\right>$.  Suppose there is no variation in the cross-flow direction ($\partial/\partial y=0$) and no cross-flow velocity ($v=0$).  Also assume the force of gravity is downward but at angle $\alpha$ with the $z$-direction so $\bg = \left<g\sin\alpha,0,-g\cos\alpha\right>$ where $g=|\bg|$.  Equations \eqref{incompagain}, \eqref{stokes} now become the system
 \begin{align}
