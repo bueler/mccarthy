@@ -200,6 +200,14 @@ else:
     else:
         File(outname).write(u,p)
 
+def removexticks():
+    plt.tick_params(
+        axis='x',          # changes apply to the x-axis
+        which='both',      # both major and minor ticks are affected
+        bottom=False,      # ticks along the bottom edge are off
+        top=False,         # ticks along the top edge are off
+        labelbottom=False) # labels along the bottom edge are off
+
 # generate plot of surface values if desired
 if len(args.osurface) > 0:
     import numpy as np
@@ -215,22 +223,25 @@ if len(args.osurface) > 0:
         rows = 3
         printpar('plotting surface values of (h,u,w) in file %s ...' % args.osurface)
     plt.subplot(rows,1,1)
-    plt.plot(x,hfcn(x),'r',label='h(x) = surface elevation')
-    plt.ylabel('h(x)  [m]')
+    plt.plot(x,hfcn(x),'g',label='surface elevation')
+    plt.ylabel('h  [m]')
     plt.legend()
+    removexticks()
     plt.subplot(rows,1,2)
     plt.plot(x,secpera*ufcn(x),label='horizontal velocity')
-    plt.ylabel('u(x)  [m/a]')
+    plt.ylabel('u  [m/a]')
     plt.legend()
+    removexticks()
     plt.subplot(rows,1,3)
     plt.plot(x,secpera*wfcn(x),label='vertical velocity')
-    plt.ylabel('w(x)  [m/a]')
+    plt.ylabel('w  [m/a]')
     plt.legend()
     if args.deltat > 0.0:
+        removexticks()
         rfcn = getsurfaceverticaldisplacement(mesh,bdryids['top'],r)
         plt.subplot(rows,1,4)
-        plt.plot(x,rfcn(x)/args.deltat,'r',label='surface elevation rate (last time step)')
-        plt.ylabel('h_t  [m/day]')
+        plt.plot(x,rfcn(x)/(args.deltat/365.2422),'r',label='surface elevation rate (last time step)')
+        plt.ylabel('h_t  [m/a]')
         plt.legend()
     plt.xlabel('x  [m]')
     plt.savefig(args.osurface,bbox_inches='tight')
