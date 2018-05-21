@@ -309,14 +309,14 @@ Our earlier slab-on-a-slope example can be converted into a rough derivation of 
 \begin{equation}
 \bar U H = \int_0^H \frac{1}{2} A (\rho g \sin\alpha)^3  \left(H^4 - (H-z)^4\right)\,dz = \frac{2}{5} A (\rho g \sin\alpha)^3 H^5. \label{siaubar}
 \end{equation}
-Note $\sin \alpha \approx \tan\alpha = - h_x$ when $\alpha$ is a small angle.  Combining these statements with mass continuity \eqref{masscont1D} gives
+Regarding the surface slope, note $\sin \alpha \approx \tan\alpha = - h_x$ when $\alpha$ is a small angle.  Combining these statements with mass continuity \eqref{masscont1D} gives
 \begin{equation}
   H_t = M + \left(\frac{2}{5} (\rho g)^3 A H^5 |h_x|^2 h_x\right)_x. \label{sia1D}
 \end{equation}
 
-Equation \eqref{sia1D} is the SIA equation for nonsliding plane flow.  It models the evolution of an ice sheet's thickness $H$ in terms of surface mass balance $M$, ice softness $A$, and bed elevation $b$.  (Note $h=H+b$.)  The model should, however, be solved subject to the constraint that the thickness is positive ($H\ge 0$) \cite{Bueler2016,JouvetBueler2012}.
+Equation \eqref{sia1D} is the primary SIA equation for nonsliding plane flow.  Noting $h=H+b$, it models the evolution of an ice sheet's thickness $H$.  The model should, however, be solved subject to the constraint that the thickness is positive ($H\ge 0$) \cite{Bueler2016,JouvetBueler2012}.
 
-Additional arguments are needed to derive the SIA in the general case.  (Such arguments reduce the Stokes equations under the assumption of small surface and bed slopes, and small depth-to-width ratio; see Notes and References.)  Here we state the model in two horizontal dimensions (2D) in preparation for numerical solutions in section \ref{sec:numericalsia}.  Let $\mathbf{U} = (u,v)$ be the vector horizontal velocity.  The shear stress approximation is $(\tau_{13},\tau_{23}) \approx - \rho g (h-z) \nabla h$.  Equation \eqref{flowlaw} then gives the SIA formula for shear strain rates
+Additional arguments are needed to derive the SIA in the general case.  Such arguments reduce the Stokes equations under the assumption of small surface and bed slopes, and small depth-to-width ratio; see Notes and References.  Here we state the model in preparation for numerical solutions in section \ref{sec:numericalsia}.  Let $\mathbf{U} = (u,v)$ be the vector horizontal velocity; this is a 2D vector-valued funciton of 3D coordinates $(x,y,z)$.  The shear stress approximation is $(\tau_{13},\tau_{23}) \approx - \rho g (h-z) \nabla h$.  Equation \eqref{flowlaw} then gives the SIA formula for shear strain rates
 \begin{equation*}
 \mathbf{U}_z = 2 A |(\tau_{13},\tau_{23})|^{n-1} (\tau_{13},\tau_{23}) = - 2 A (\rho g)^n (h-z)^n |\nabla h|^{n-1} \nabla h.
 \end{equation*}
@@ -328,19 +328,15 @@ Mass continuity in 2D, which generalizes the 1D version \eqref{masscont1D}, appl
 \begin{equation}
     H_t = M - \Div\left(\bar{\mathbf{U}} H\right)  \label{masscont}
 \end{equation}
-Equation \eqref{masscont} may also be written $H_t = M - \Div \bq$ in terms of the map-plane flux $\bq = \int_{b}^{h} \mathbf{U}\,dz = \bar{\mathbf{U}}\,H$.
+Equation \eqref{masscont} may also be written $H_t = M - \Div \bq$ in terms of the map-plane flux $\bq = \int_{b}^{h} \mathbf{U}\,dz = \bar{\mathbf{U}}\,H$.  Note $\bar{\mathbf{U}}$ and $\bq$ are functions of 2D coordinates $(x,y)$ only.
 
 Combining Equations \eqref{siavelocity} and \eqref{masscont}, we get an equation for the rate of thickness change in terms of mass balance $M$, thickness $H$, and surface gradient $\grad h$:
 \begin{equation}
 H_t = M + \Div \left(\Gamma H^{n+2} |\grad h|^{n-1} \grad h \right). \label{sia}
 \end{equation}
-We have defined the positive constant $\Gamma = 2 A (\rho g)^n / (n+2)$ only to improve appearance.  Equation \eqref{sia} is the SIA in 2D.  Recalling our earlier promise, if we can solve \eqref{sia} numerically then we have, following Mahaffy \cite{Mahaffy}, a usable model for the Barnes ice cap in Canada, a particularly-simple ice sheet on a rather flat bed.
+We have defined the positive constant $\Gamma = 2 A (\rho g)^n / (n+2)$ only to improve appearance.  Equation \eqref{sia} is the SIA in 2D.  Recalling our earlier promise, if we can solve \eqref{sia} numerically then we have a usable model for certain ice sheets.  For example, Mahaffy \cite{Mahaffy} used it in a 1976 numerical model of the Barnes ice cap in Canada, a particularly-simple ice sheet on a rather flat bed.
 
-\subsection*{Analogy with diffusion equations}  Numerical methods for solving \eqref{sia} are modifications of methods for the better-known heat equation, which we first state in the simplest 1D case:
-\begin{equation}
-T_t = D T_{xx} \label{heat1D}
-\end{equation}
-This equation, which might model the temperature $T(t,x)$ of a conducting rod, applies when material properties are constant and there are no heat sources.  The positive constant $D$ is the ``diffusivity,'' with SI units which can be read from comparing sides of the equation: $D\sim \text{m}^2 \text{s}^{-1}$.  Not that equation \eqref{heat1D} has a smoothing effect on the solution $T$ as it evolves in time, because any local maximum or minimum in the temperature is flattened.  In fact, $T_{xx}<0$ implies $T_t<0$, so $T$ decreases near a maximum, while $T_{xx}>0$ implies $T_t>0$ so $T$ increases near a minimum.
+\subsection*{Analogy with diffusion equations}  Numerical methods for solving \eqref{sia} are modifications of methods for the better-known heat equation, which, in its simplest 1D form, is the equation $T_t = D T_{xx}$.  This model of the temperature $T(t,x)$ in a conducting rod, for example, applies when material properties are constant and there are no heat sources.  The positive constant $D$ is the ``diffusivity,'' with SI units which can be read from comparing sides of the equation: $D\sim \text{m}^2 \text{s}^{-1}$.  The heat equation has a smoothing effect on the solution $T$ as it evolves in time, because any local maximum or minimum in the temperature is flattened.  In fact, $T_{xx}<0$ implies $T_t<0$, so $T$ decreases near a maximum, while $T_{xx}>0$ implies $T_t>0$ so $T$ increases near a minimum.
 
 The 2D heat equation, which describes the temperature $T(t,x,y)$ of a planar object, is a better analogy to \eqref{sia}.  Recall that Fourier's law for conduction is the formula $\mathbf{Q} = - \kappa \grad T$ for heat flux $\mathbf{Q}$, where $\kappa$ is conductivity.  We will assume, so as to help the analogy to the SIA, that $\kappa(x,y)$ may vary in space, and we suppose there is a variable heat source $f(t,x,y)$.  Then conservation of internal energy says
 \begin{equation}
@@ -350,7 +346,7 @@ Here $\rho$ is density and $c$ is specific heat capacity.  Assuming $\rho c$ is 
 \begin{equation}
 T_t = F + \Div (D\, \grad T), \label{heat}
 \end{equation}
-which is similar to \eqref{heat1D} but with variable diffusivity and an additional heat source.
+which is similar to the above 1D equation, but with variable diffusivity and an additional heat source.
 
 Figure \ref{fig:initialheat} shows a solution of \eqref{heat} in which the initial condition is a localized ``hot spot''.  Solutions of the heat equation always involve the spreading, in all directions, of any local maxima or minima, that is, diffusion.
 
@@ -360,7 +356,7 @@ The SIA equation \eqref{sia} and the heat equation \eqref{heat} are each diffusi
 \begin{center}
 \begin{tabular}{cc}
 \vspace{1mm}
-SIA:\, $H$ is ice thickness & \phantom{foo bar} heat (diffusion): $T$ is temperature\phantom{foo bar}  \\
+SIA:\, $H$ is ice thickness & \phantom{foo bar} heat: $T$ is temperature\phantom{foo bar}  \\
 \vspace{1mm}
 	$H_t = M + \Div \left({\color{red}\Gamma H^{n+2} |\grad h|^{n-1}}\, \grad h \right)$  &  $T_t = F + \Div (D\, \grad T)$
 \end{tabular}
@@ -372,21 +368,21 @@ The analogy suggests that we identify the \emph{SIA diffusivity} as:
 \begin{equation}
 	D = {\color{red}\Gamma H^{n+2} |\grad h|^{n-1}}.  \label{siadiffusivity}
 \end{equation}
-When $D$ is large then the diffusion acts most quickly.  As a product of powers of $H$ and $|\grad h|$, $D$ is large if the ice is both thick and steep, because then ice flows downhill most strongly.  This analogy explains generally why the surfaces of ice sheets are smooth, at least if we overlook non-flow processes like crevassing and wind-driven (snow) dunes.
+When $D$ is large then the diffusion acts most quickly.  As a product of powers of $H$ and $|\grad h|$, $D$ is large if the ice is both thick and steep, because then ice flows downhill most strongly.  Our analogy explains why the surfaces of ice sheets are smooth, at least overlooking non-flow processes like crevassing.
 
 There are, however, conceptual and practical concerns about the analogy:
 \begin{itemize}
 \item The letters ``$H$'' and ``$h$'' denote different quantities in \eqref{sia}.  Are we allowed to regard \eqref{sia} as a diffusion anyway, when the bed is not flat?
-\item The diffusivity $D$ in \eqref{siadiffusivity} depends on the solution---both on thickness $H$ and surface slope $|\grad h|$---so equation \eqref{sia} is a nonlinear PDE.  Numerical solution processes for nonlinear equations are more difficult to implement and analyze.
-\item The diffusivity $D$ in \eqref{siadiffusivity} goes to zero at margins, where $H\to 0$, and at divides and domes, where $|\grad h|\to 0$.  This ultimately means that the solution $h$ is not smooth, even though the thickness is continuous everywhere (and zero outside the ice sheet) and even if the bed $b$ and surface mass balance $M$ \emph{are} smooth.  A non-smooth solution inevitably generates larger numerical errors.
+\item The diffusivity $D$ in \eqref{siadiffusivity} depends on the solution---both on thickness $H$ and surface slope $|\grad h|$---so equation \eqref{sia} is a nonlinear PDE.  Numerical solutions for nonlinear equations are both more difficult to implement and to analyze.
+\item The diffusivity $D$ in \eqref{siadiffusivity} goes to zero at margins, where $H\to 0$, and at divides and domes, where $|\grad h|\to 0$.  This ultimately means that the solution $h$ is not smooth, even though the thickness is continuous everywhere.  The solution $h$ is not smooth even if the bed $b$ and surface mass balance $M$ \emph{are} smooth.  A non-smooth solution inevitably generates larger numerical errors.
 \end{itemize}
 Just as important is a deficiency of the SIA model, namely
 \begin{itemize}
-\item Ice flow is not evidently diffusive when significant longitudinal (membrane) stresses are present, as when ice is floating or sliding or when the flow is confined by terrain.
+\item Ice flow is not very diffusive when significant longitudinal (membrane) stresses are present, as when ice is floating or sliding or when the flow is confined by terrain.
 \end{itemize}
-(This last item is a deficiency of the model, not just the analogy.)
+This last item is a deficiency of the SIA model, not just of our analogy to explain it.
 
-All of these concerns are areas of active research in mathematical glaciology; see the Notes and References.  For now we continue toward a verified numerical scheme for \eqref{sia}.  The next Section first introduces numerical PDE methods.
+All of these concerns are areas of active research in mathematical glaciology; see the Notes and References.  For now we continue toward a verified numerical scheme for \eqref{sia}.  The next Section introduces numerical PDE methods.
 
 
 \section{Finite difference numerics}  \label{sec:fd}
@@ -407,7 +403,7 @@ u_{xx}(t,x) &= \frac{u(t,x+\Delta x) - 2\, u(t,x) + u(t,x-\Delta x)}{\Delta x^2}
 \end{align*}
 Note that if $\Delta$ is a small number then the remainder $O(\Delta^2)$ is smaller than $O(\Delta)$, so the approximation is closer.
 
-\subsection*{Explicit scheme for the heat equation}  We first build the simplest ``explicit'' scheme which approximates the 1D heat equation \eqref{heat1D}.  It is based on the fact that because $T_t$ and $D T_{xx}$ are equal, these two FD expressions are nearly equal:
+\subsection*{Explicit scheme for the heat equation}  We first build the simplest ``explicit'' scheme which approximates the 1D heat equation $T_t=D T_{xx}$.  It is based on the fact that because $T_t$ and $D T_{xx}$ are equal, these two FD expressions are nearly equal:
 \begin{equation}
 \frac{T(t+\Delta t,x) - T(t,x)}{\Delta t} \approx D\,\frac{T(t,x+\Delta x) - 2\, T(t,x) + T(t,x-\Delta x)}{\Delta x^2}.  \label{heat1Dapproximated}
 \end{equation}
@@ -418,7 +414,7 @@ To get a simplified formula, let $\mu = D \Delta t / (\Delta x)^2$ and solve for
   T_j^{n+1} = \mu T_{j+1}^n + (1 - 2 \mu) T_j^n + \mu T_{j-1}^n \label{heat1Dfd}
 \end{equation}
 
-\onefigsize{timespacegrid}{A grid for a finite difference solution to \eqref{heat1D}.}{2.0in}
+\onefigsize{timespacegrid}{A grid for a finite difference solution to the 1D heat equation.}{2.0in}
 
 FD scheme \eqref{heat1Dfd} is \emph{explicit} because it directly computes $T_j^{n+1}$ in terms of values at time $t_n$.  Figure \ref{fig:expstencil} (left) shows the ``stencil'' for scheme \eqref{heat1Dfd}: three values at the current time $t_n$ are combined to update the one value at the next time $t_{n+1}$.
 
@@ -426,7 +422,7 @@ The expression ``$T(t_n,x_j)$'' evaluates a heat equation solution at a grid poi
 
 \twofigsizes{expstencil}{exp2dstencil}{Left: Space-time stencil for the explicit scheme \eqref{heat1Dfd} for the 1D heat equation.  Right: Spatial-only stencil for scheme \eqref{heat2dexplicit}.}{2.0in}{2.1in}
 
-How accurate is scheme \eqref{heat1Dfd}?  The construction of the scheme tells us that the difference between the scheme \eqref{heat1Dfd} and the PDE \eqref{heat1D} is $O(\Delta t + (\Delta x)^2)$.  This difference goes to zero as we refine the grid in space and time, a property of the scheme called \emph{consistency}.  With care about the smoothness of boundary conditions, and using mathematical facts about the heat equation itself, one can also show that the difference between $T_j^n$ and $T(t_n,x_j)$ is $O(\Delta t + (\Delta x)^2)$, which is thus the \emph{convergence rate}; see Notes and References.  To get convergence the scheme must be \emph{stable}, which we address below.  The main theorem for numerical PDE schemes asserts that ``consistency plus stability implies convergence''; see Notes and References.
+How accurate is scheme \eqref{heat1Dfd}?  The construction of the scheme tells us that the difference between the scheme \eqref{heat1Dfd} and the PDE it solves is $O(\Delta t + (\Delta x)^2)$.  This difference goes to zero as we refine the grid in space and time, a property of the scheme called \emph{consistency}.  With care about the smoothness of boundary conditions, and using mathematical facts about the heat equation itself, one can also show that the difference between $T_j^n$ and $T(t_n,x_j)$ is $O(\Delta t + (\Delta x)^2)$, which is thus the \emph{convergence rate}; see Notes and References.  To get convergence the scheme must be \emph{stable}, which we address below.  The main theorem for numerical PDE schemes asserts that ``consistency plus stability implies convergence''; see Notes and References.
 
 Instead of pursuing theory, in these notes we do something practical, namely verification using exact solutions.  That is, we find problems for which we already know an exact solution $T(t,x)$, and then compute the differences $|T_j^n - T(t_n,x_j)|$.  This determines directly whether our actual implementation converges, not just whether it should in theory.  Then the verified code can be more confidently applied to real situations.
 
@@ -440,13 +436,13 @@ Writing $T_{jk}^n \approx T(t_n,x_j,y_k)$, the 2D explicit scheme is
 \begin{equation}
 	\frac{T_{jk}^{n+1} - T_{jk}^n}{\Delta t} = D\,\left(\frac{T_{j+1,k}^n - 2\, T_{jk}^n + T_{j-1,k}^n}{\Delta x^2} + \frac{T_{j,k+1}^n - 2\, T_{jk}^n + T_{j,k-1}^n}{\Delta y^2}\right). \label{heat2dexplicit}
 \end{equation}
-The stencil for the right side of \eqref{heat2dexplicit} is in Figure \ref{fig:expstencil} (right).
+The stencil for the right side of \eqref{heat2dexplicit} is in Figure \ref{fig:expstencil}..
 
-The implementation of \eqref{heat2dexplicit} is \texttt{heat.m} below.  It uses Matlab ``colon'' notation to remove loops over spatial variables.  This example run
+The implementation of \eqref{heat2dexplicit} is \texttt{heat.m} below.  It uses Matlab ``colon'' notation to remove loops over spatial variables.  The following example run
 \begin{Verbatim}
 >>  heat(1.0,30,30,0.001,20);
 \end{Verbatim}
-sets $D=1.0$, uses a $30\times 30$ spatial grid, and takes $N=20$ time steps of $\Delta t = 0.001$.  The result is shown in Figure \ref{fig:initialheat}, right.  This is the look of success.
+sets $D=1.0$, uses a $30\times 30$ spatial grid, and takes $N=20$ time steps of $\Delta t = 0.001$.  The result is shown in Figure \ref{fig:initialheat} (right), the look of success.
 
 \minput{heat}
 
@@ -455,54 +451,48 @@ However, very similar runs seem to succeed or fail according to some as-yet uncl
 >> heat(1.0,40,40,0.0005,100);    % Figure 8, left
 >> heat(1.0,40,40,0.001,50);      % Figure 8, right
 \end{Verbatim}
-Both runs compute temperature $T$ on the same spatial grid, for the same final time $t_f = N \Delta t = 0.05$, but with different time steps.  Noting the vertical axes, the second run clearly shows ``instability,'' an extreme form of inaccuracy characterized in practice by numbers of a totally different magnitude than expected.
+Both runs compute temperature $T$ on the same spatial grid, for the same final time $t_f = N \Delta t = 0.05$, but with different time steps.  Noting the vertical axes, the second run clearly shows ``instability,'' an extreme form of inaccuracy characterized in practice by exponentially-growing solution magnitude in cases where the exact solution is bounded.
 
-\twofig{stability}{instability}{Numerically-computed temperature on $40\times 40$ grids.  The two runs are the same except that the left has $\Delta t=0.0005$ so $D\Delta t/(\Delta x)^2= 0.2$, while the right has $\Delta t=0.001$ so $D\Delta t/(\Delta x)^2= 0.4$.  Compare \eqref{stabcrit}.}
+\twofig{stability}{instability}{Numerically-computed temperature on $40\times 40$ grids.  The two runs are the same except that the left has $\Delta t=0.0005$ and $D\Delta t/(\Delta x)^2= 0.2$, while the right has $\Delta t=0.001$ and $D\Delta t/(\Delta x)^2= 0.4$.  Compare \eqref{stabcrit}.}
 
-\subsection*{Stability criteria and adaptive time stepping}  To avoid the instability shown at right in Figure \ref{fig:stability}, we need to understand the scheme better.  It turns out we have not made an implementation error.  Instead, care is required when choosing space and time steps.
+\subsection*{Stability criteria and adaptive time stepping}  To avoid the instability shown above, we need to understand the scheme better.  We have not made an implementation error, but we must be more careful when choosing space and time steps.
 
-Recall the 1D explicit scheme in form \eqref{heat1Dfd}: $T_j^{n+1} = \mu T_{j+1}^n + (1 - 2 \mu) T_j^n + \mu T_{j-1}^n$.  The new value $T_j^{n+1}$ is an average of the old values, in the sense that the coefficients add to one.  Averaging is stable because averaged wiggles are smaller than the wiggles themselves.  Actually, however, the scheme is only an average \emph{if} the middle coefficient is positive, as a linear combination with coefficients which add to one is not an average if any coefficients are negative.  (For example, one would not accept 15 as an ``average'' of 5 and 7, but: $15 = -4 \times 5 + 5 \times 7$, and $-4+5=1$.)
+Recall the 1D explicit scheme in form \eqref{heat1Dfd}: $T_j^{n+1} = \mu T_{j+1}^n + (1 - 2 \mu) T_j^n + \mu T_{j-1}^n$.  The new value $T_j^{n+1}$ is an average of the old values, in the sense that the coefficients add to one.  Averaging is stable because averaged wiggles are smaller than the wiggles themselves.  However, the scheme is only an average \emph{if} the middle coefficient is positive.  (A linear combination with coefficients which add to one is not an average if any coefficients are negative.  For example, one would not accept 15 as an ``average'' of 5 and 7, but: $15 = -4 \times 5 + 5 \times 7$, and $-4+5=1$.)
 
-So, what follows from requiring the middle coefficient in \eqref{heat1Dfd} to be positive so it computes such an average?  A \emph{stability criterion} follows, with these equivalent forms:
+So, what follows from requiring the middle coefficient in \eqref{heat1Dfd} to be positive so it computes such an average?  A \emph{stability criterion}, with these equivalent forms:
 \begin{equation}
    1 - 2 \mu \ge 0 \quad \iff \quad \frac{D\Delta t}{\Delta x^2} \le \frac{1}{2} \quad \iff \quad \Delta t \le \frac{\Delta x^2}{2 D}.  \label{stabcrit}
 \end{equation}
-The third form states the condition as a limitation on the size of $\Delta t$.  It is a \emph{sufficient} stability criterion; it is enough to guarantee stability, though something weaker might do.  In summary, for given $\Delta x$, shortening the time steps $\Delta t$ so that \eqref{stabcrit} holds will make FD scheme \eqref{heat1Dfd} into an averaging process.
+The third form states the condition as a limitation on the size of $\Delta t$.  It is a \emph{sufficient} stability criterion; it is enough to guarantee stability, though something weaker might do.  In summary, for given $\Delta x$, shortening the time steps $\Delta t$ so that \eqref{stabcrit} holds will make FD scheme \eqref{heat1Dfd} into a stable averaging process.
 
 Applying this same idea to the 2D heat equation \eqref{heat2D} leads to the stability condition that $1-2\mu^x-2\mu^y \ge 0$ where $\mu^x = D \Delta t / (\Delta x^2)$ and $\mu^y = D \Delta t / (\Delta y^2)$.  In the cases shown in Figure \ref{fig:stability}, wherein $\Delta x=\Delta y$, this condition requires $D \Delta t /(\Delta x^2) \le 0.25$.  This inequality precisely distinguishes between the two parts of Figure \ref{fig:stability}.
 
-In summary, runs of \texttt{heat.m} are unstable if the time step $\Delta t$ is too big relative to the spacing $\Delta x$.  The stability criterion is, however, satisfied by making each time step shorter.  Enforcing the criterion inside the code itself is an \emph{adaptive} implementation.  Such an implementation can be stable even if the diffusivity $D$ is changing in time.  To show how easy this is to implement, \texttt{heatadapt.m} (not shown) is the same as \texttt{heat.m} except that the time step comes from the stability criterion.
-
-However, if the diffusivity $D$ is large or the grid spacings $\Delta x$, $\Delta y$ are small, then adaptive explicit implementations must take many short time steps to assure stability.  Adaptive explicit schemes can be slow.
+In summary, runs of \texttt{heat.m} are unstable if the time step $\Delta t$ is too big relative to the spacing $\Delta x$.  The stability criterion can always be satisfied by making each time step shorter, and enforcing it inside the code is an \emph{adaptive} implementation.  We illustrate this idea with small changes to \texttt{heat.m} which yield \texttt{heatadapt.m} (not shown).  Adaptive codes can be stable even if the diffusivity $D$ is changing in time.  However, if the diffusivity $D$ is large or the grid spacings $\Delta x$, $\Delta y$ are small, then adaptive explicit implementations must take many short time steps to assure stability; adaptive explicit schemes can be slow.
 
 \subsection*{Implicit schemes}  There is an alternative stability fix instead of adaptivity, namely ``implicitness.''  For example, the finite difference scheme
 \begin{equation}
   \frac{T_j^{n+1} - T_j^n}{\Delta t} = D\,\frac{T_{j+1}^{n+1} - 2\, T_j^{n+1} + T_{j-1}^{n+1}}{\Delta x^2} \label{implicit1D}
 \end{equation}
-is an $O(\Delta t + (\Delta x)^2)$ implicit scheme for Equation \eqref{heat1D}.  This implicit scheme for the heat equation is stable for \emph{any} positive time step $\Delta t>0$ (``unconditionally stable''); see Notes and References.  Another well-known implicit scheme is \emph{Crank-Nicolson}, which is unconditionally stable for the heat equation, but with smaller error $O((\Delta t)^2 +(\Delta x)^2)$.
+is an $O(\Delta t + (\Delta x)^2)$ implicit scheme for the 1D heat equation $T_t = D T_{xx}$.  This implicit scheme is stable for \emph{any} positive time step $\Delta t>0$ (``unconditionally stable''); see Notes and References.  Another well-known implicit scheme is \emph{Crank-Nicolson}, which is unconditionally stable for the heat equation, but with smaller error $O((\Delta t)^2 +(\Delta x)^2)$.
 
-Implicit schemes are harder to implement because the unknown solution values at time step $t_{n+1}$ are treated as a vector in a large system of equations which must be formed and solved at each time step.  If the PDE is nonlinear then the system of equations may be hard to solve.  Though the SIA is a highly nonlinear diffusion equation, implicit schemes are becoming useful \cite{Bueler2016}.  Because of the tradeoff between the easy implementability of adaptive explicit schemes and the better stability of implicit schemes, for these notes we stay with adaptive explicit (FD) schemes.
+Implicit schemes are harder to implement because the unknown solution at time step $t_{n+1}$ must be treated as a vector and a large linear or nonlinear system of equations must be formed and solved at each time step.  Though the SIA is a highly-nonlinear diffusion equation, implicit schemes are indeed implementable and effective when the right tools are used \cite{Bueler2016}.  In the tradeoff between the easy implementability of adaptive explicit schemes and the better stability of implicit schemes, for these notes we choose the former.
 
-\subsection*{Numerical solution of diffusion equations}  We are trying to numerically model ice flows, not heat conduction.  We have an analogy, however, which says that the SIA is diffusive like the heat equation.  In this section, because we wish to solve the SIA on real bedrock, we construct a numerical scheme for a more general diffusion equation which has an extra ``shift'' inside the gradient, namely
+\subsection*{Numerical solution of generalized diffusion equations}  While we have an analogy which says that the SIA is diffusive, we are trying to numerically model flowing ice not heat conduction.  In this section, as a step toward an SIA code which works on nonflat beds, we construct a numerical scheme for a generalized diffusion equation which has an extra ``tilt'' inside the gradient, namely
 \begin{equation}
   T_t = F + \Div \left(D \grad (T + b)\right). \label{gendiffusion}
 \end{equation}
-In equation \eqref{gendiffusion}, the source term $F(x,y)$, the diffusivity $D(x,y)$, and the ``shift'' $b(x,y)$ may all vary in space.
-
-The following code solves \eqref{gendiffusion}.  It is called by the SIA-specific schemes we build next.
+In \eqref{gendiffusion} the source term $F(x,y)$, diffusivity $D(x,y)$, and tilt $b(x,y)$ may all vary in space.  The following code is called by the SIA-specific schemes we build next, with $b(x,y)$ equal to the bedrock elevation.
 
 \minput{diffusion}
 
-This adaptive explicit method for the diffusion equation is conditionally stable, with the same essential time step restriction as for the constant diffusivity case, as long as we evaluate $D(x,y)$ at \emph{staggered} grid points.  That is, we use this expression for the second derivative:
+The adaptive explicit method in \texttt{diffusion.m} is conditionally stable, with the same essential time step restriction as for the constant diffusivity case, as long as we evaluate $D(x,y)$ at \emph{staggered} grid points and we the following approximation:
 \begin{align*}
 \Div \left(D \grad X\right) &\approx \frac{D_{j+1/2,k}(X_{j+1,k} - X_{j,k}) - D_{j-1/2,k}(X_{j,k} - X_{j-1,k})}{\Delta x^2} \\
-	&\qquad + \frac{D_{j,k+1/2}(X_{j,k+1} - X_{j,k}) - D_{j,k-1/2}(X_{j,k} - X_{j,k-1})}{\Delta y^2},
+	&\qquad + \frac{D_{j,k+1/2}(X_{j,k+1} - X_{j,k}) - D_{j,k-1/2}(X_{j,k} - X_{j,k-1})}{\Delta y^2}.
 \end{align*}
-where $X=T+b$.  The left part of Figure \ref{fig:diffstencil} shows the stencil.
+Here $X=T+b$.  The left part of Figure \ref{fig:diffstencil} shows the stencil.  The user supplies the diffusivity $D(x,y)$ on the staggered grid.  The initial values $T(0,x,y)$, source term $F(x,y)$, and tilt $b(x,y)$ are supplied on the regular grid.  When using this code for standard diffusions, such as for the flat-bed case of the SIA, we take $b=0$.
 
-\twofigsizes{diffstencil}{mahaffystencil}{Left:  Spatial stencil for staggered grid evaluation of diffusivity (at triangles) in the diffusion equation \eqref{gendiffusion}.  Right: Stencil showing how the staggered-grid diffusivity (triangle) can be evaluated in the SIA, from surface elevation (diamonds) and thicknesses (squares).}{2.2in}{2.2in}
-
-The user supplies the diffusivity $D(x,y)$ to \texttt{diffusion.m} on the staggered grid.  The initial temperature $T(0,x,y)$, source term $F(x,y)$, and ``shift'' $b(x,y)$ are also supplied on the regular grid.  When using this code for standard diffusions, or for the flat-bed case of the SIA, we would take $b=0$.
+\twofigsizes{diffstencil}{mahaffystencil}{Left:  Spatial stencil for staggered-grid (triangles) evaluation of diffusivity $D$ in \eqref{gendiffusion}.  Right: Stencil showing how $D$ is evaluated in the SIA, from surface elevation (diamonds) and thicknesses (squares).}{2.2in}{2.2in}
 
 
 \section{Numerically solving the SIA} \label{sec:numericalsia}
