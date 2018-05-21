@@ -125,7 +125,7 @@ The reader may be surprised that continuum models, and not computer codes, seem 
   \begin{quote}\emph{shallow approximations of ice flow.}\end{quote}
 They adopt a constructive approach:
   \begin{quote}\emph{we provide numerical codes that actually work.}\end{quote}
-Within our scope are the shallow ice approximation (SIA) in two horizontal dimensions (2D), the shallow shelf approximation (SSA) in 1D, and the mass continuity and surface kinematical equations; these terms will be defined in due course!  We recall the Stokes model, but we do not address its numerical solution.
+Within our scope are the shallow ice approximation (SIA) in two horizontal dimensions (2D), the shallow shelf approximation (SSA) in 1D, and the mass continuity and surface kinematical equations; these technical terms will be defined in due course!  We also recall the Stokes model, but we do not address its numerical solution except in a separate Appendix A.
 
 Numerical concepts within our scope include finite difference schemes, solving algebraic systems from stress balances, and the verification of codes using exact solutions.
 
@@ -177,7 +177,7 @@ Our initial goal is an equation for which one may say:
 \begin{center}
 \emph{by numerically solving this equation, we have a usable model for an ice sheet.}
 \end{center}
-\noindent This initial model will not be complete by any modern standard.  However, a ``usable'' model tends to be \emph{understood} as much as it is \emph{correct}.
+\noindent This initial model will not be complete by any modern standard.  However, a ``usable'' model tends to be \emph{understood} as much as it is \emph{correct} in a physical sense.
 
 First we (briefly!) recall the continuum mechanical equations of ice flow.  Ice in glaciers is a moving fluid so we describe its motion by a velocity field $\mathbf{u}(t,x,y,z)$.  If the ice fluid were faster-moving than it actually is, and if it were linearly-viscous like liquid water, then it would be a ``typical'' incompressible fluid and we would use the Navier-Stokes equations as the model:
 \begin{align}
@@ -195,45 +195,45 @@ The numerical solution of the Navier-Stokes equations is \emph{computational flu
 Du_{ij} &= A \tau^2 \tau_{ij} &&\text{\emph{$n$=3 Glen flow law}} \label{flowlaw}
 \end{align}
 
-In \eqref{flowlaw} the deviatoric stress tensor $\tau_{ij}$ and the strain rate tensor $Du_{ij}$ now appear.  Other McCarthy lectures cover these but recall that by definition
+In \eqref{flowlaw} the deviatoric stress tensor $\tau_{ij}$ and the strain rate tensor $Du_{ij}$ now appear.  Other McCarthy lectures cover these ideas, but recall that by definition
     $$Du_{ij} = \frac{1}{2} \left((u_i)_{x_j}+(u_j)_{x_i}\right).$$
-Both tensors in \eqref{flowlaw} are symmetric and have trace zero.  Note that $\tau^2 = (1/2) \tau_{ij} \tau_{ij}$, using the summation convention, defines the \emph{effective stress} $\tau$.
+Both tensors in \eqref{flowlaw} are symmetric and have trace zero.  Note that $\tau^2 = (1/2) \tau_{ij} \tau_{ij}$, using the summation convention, which defines the \emph{effective stress} $\tau$.
 
-Because the Stokes equations do not contain a time derivative, the combined effect of boundary stresses, gravity $\rho \mathbf{g} = \left<0,0,-\rho g\right>$, and ice softness $A>0$ will determine the velocity and stress fields ($\bu$, $p$, $\tau_{ij}$), i.e.~the solution to \eqref{incompressibleagain}--\eqref{flowlaw}, instantaneously.  Thus ice flow simulation codes have no memory of prior momentum or velocity.  Said another way, velocity is a ``diagnostic'' output of ice flow models.  Unlike in a Navier-Stokes-based simulation, velocity is not needed for (re)starting a simulation.
+Because the Stokes equations do not contain a time derivative, the combined effect of boundary stresses, gravity $\rho \mathbf{g} = \left<0,0,-\rho g\right>$, and a value for ice softness $A>0$ will determine the velocity and stress fields ($\bu$, $p$, $\tau_{ij}$), i.e.~the solution to \eqref{incompressibleagain}--\eqref{flowlaw}, instantaneously.  Thus ice flow simulation codes have no memory of prior momentum or velocity.  Said another way, velocity is a ``diagnostic'' output of ice flow models.  Unlike in a Navier-Stokes-based simulation, velocity is not needed for (re)starting a simulation.
 
-Consider now the $x,z$-plane case of equations \eqref{incompressibleagain}--\eqref{flowlaw}.  Such a planar flow has velocity component $v$ of zero and all derivatives with respect to $y$ are zero:
+Consider now the $x,z$-plane case of equations \eqref{incompressibleagain}--\eqref{flowlaw}.  Such a planar flow has velocity component $v=0$.  All derivatives with respect to $y$ are also zero so the equations are:
 \begin{align}
 u_x + w_z &= 0 &&\text{\emph{incompressibility}} \label{incompressiblexz} \\
 - \tau_{11,x} - \tau_{13,z} + p_x &= 0 &&\text{\emph{stress balance} ($x$)} \label{stokespx} \\
 - \tau_{13,x} + \tau_{11,z} + p_z &= - \rho g &&\text{\emph{stress balance} ($z$)} \label{stokespz} \\
-u_x &= A \tau^2 \tau_{11} &&\text{\emph{flow law} (diagonal)}  \label{forceflowx} \\
-u_z + w _x &= 2 A \tau^2 \tau_{13} &&\text{\emph{flow law} (off-diagonal)} \label{forceflowz}
+u_x &= A \tau^2 \tau_{11} &&\text{\emph{flow law (diagonal)}}  \label{forceflowx} \\
+u_z + w _x &= 2 A \tau^2 \tau_{13} &&\text{\emph{flow law (off-diagonal)}} \label{forceflowz}
 \end{align}
 Note that $\tau_{13}$ is a shear stress while $\tau_{11}$ and $\tau_{33}=-\tau_{11}$ are deviatoric longitudinal stresses.  Also $\tau^2 = \tau_{11}^2+\tau_{13}^2$ in this case.  Equations \eqref{incompressiblexz}--\eqref{forceflowz} form a system of five nonlinear equations in five scalar unknowns ($u,w,p,\tau_{11},\tau_{13}$).
 
-\subsection*{Slab-on-a-slope}  Equations \eqref{incompressiblexz}--\eqref{forceflowz} are complicated enough to make us pause before jumping in to numerical solution methods.  However, we can start with a simplified situation, namely a uniform slab of ice.  In this case we can both solve the Stokes equations exactly and motivate the shallow model in the next subsection.
+\subsection*{Slab-on-a-slope}  Equations \eqref{incompressiblexz}--\eqref{forceflowz} are complicated enough to make us pause before jumping in to numerical solution methods.  We start with a simplified situation, namely a uniform slab of ice, in which we can both solve the Stokes equations exactly and motivate the shallow model in the next subsection.
 
 \onefig{slab}{Rotated axes for a slab-on-a-slope flow calculation.}
 
-We rotate our coordinates only for this example (and not elsewhere in these notes).  The two-dimensional axes ($x$,$z$) shown in Figure \ref{fig:slab} are rotated clockwise at angle $\alpha>0$ so that the gravity vector has components $\mathbf{g} = (g \sin\alpha,- g \cos \alpha)$ relative to the new axes.  Equations \eqref{stokespx} and \eqref{stokespz} in these rotated coordinates are
+We rotate our coordinates only for this example (and not elsewhere in these notes, except in the separate Appendix A).  The two-dimensional axes ($x$,$z$) shown in Figure \ref{fig:slab} are rotated clockwise at angle $\alpha>0$ so that the gravity vector has components $\mathbf{g} = (g \sin\alpha,- g \cos \alpha)$ in the new axes.  Equations \eqref{stokespx} and \eqref{stokespz} are now
 \begin{align}
 - \tau_{11,x} - \tau_{13,z} + p_x &= \rho g \sin\alpha, \label{stokespxrot} \\
 - \tau_{13,x} + \tau_{11,z} + p_z &= - \rho g \cos\alpha. \label{stokespzrot}
 \end{align}
 
-Assume that there is no variation with $x$. Then the whole set of Stokes equations \eqref{incompressiblexz}, \eqref{forceflowx}, \eqref{forceflowz}, \eqref{stokespxrot}, \eqref{stokespzrot} simplifies greatly:
+Assume further that there is no variation with $x$. Then the whole set of Stokes equations \eqref{incompressiblexz}, \eqref{forceflowx}, \eqref{forceflowz}, \eqref{stokespxrot}, \eqref{stokespzrot} simplifies greatly:
 \begin{align}
 w_z &= 0 &   \tau_{11} &= 0 \label{stokesslab} \\
 \tau_{13,z} &= - \rho g \sin\alpha &   u_z &= 2 A \tau^2 \tau_{13} \notag \\
 p_z &= - \rho g \cos\alpha \notag
 \end{align}
-Each unknown is now a function of $z$.  Some boundary conditions come from assuming that the ice is not crossing the bed, that the surface of the ice is moving parallel to the $x$-axis, and that it is stress free: $w(0)=0$, $p(H)=0$, $\tau_{13}(H)=0$.  Then, by integrating equations \eqref{stokesslab} with respect to $z$, we get $w=0$, $p = \rho g \cos\alpha (H-z)$, and $\tau_{13} = \rho g \sin\alpha (H-z)$.  Note that $H-z$ is the depth below the ice surface; both pressure and shear stress are proportional to depth.  Integrating the remaining equation in \eqref{stokesslab} yields horizontal velocity:
+Each unknown is now a function of $z$ only.  Boundary conditions come from assuming that the ice is not crossing the bed, that the surface of the ice is moving parallel to the $x$-axis, and that it is stress free: $w(0)=0$, $p(H)=0$, $\tau_{13}(H)=0$.  Then, by integrating some of equations \eqref{stokesslab} with respect to $z$, we get $w=0$, $p = \rho g \cos\alpha (H-z)$, and $\tau_{13} = \rho g \sin\alpha (H-z)$.  Note that $H-z$ is the depth below the ice surface; both pressure and shear stress are proportional to depth.  Integrating the remaining equation in \eqref{stokesslab} yields horizontal velocity:
 \begin{align}
 u &= u_0 + \frac{1}{2} A (\rho g \sin\alpha)^3  \left(H^4 - (H-z)^4\right)  \label{uslab}
 \end{align}
 The basal velocity $u_0=u(0)$ remains undetermined for now.
 
-Do we believe formula \eqref{uslab}?  Figure \ref{fig:slabvel} compares it to observations of a mountain glacier.  This model for velocity does a credible job of capturing deformation flow in this case.  However, until section 9 about the SSA, we will not have a reasonable dynamical model for the sliding velocity $u_0$.  We assume until then that the ice is frozen firmly to the bed.
+Do we believe formula \eqref{uslab}, which makes a specific prediction about the profile of flow in a glacier?  Figure \ref{fig:slabvel} compares \eqref{uslab} to observations of a mountain glacier.  Our model for velocity indeed does a credible job of capturing deformation flow in this case.  However, until section 9, we will not have a reasonable dynamical model for the sliding velocity $u_0$.  We assume until then that the ice is frozen to the bed and there is no sliding.
 
 \twofigsizes{slabvel}{athabasca-deform}{Left:  Velocity from formula \eqref{uslab}.  Right:  Measured velocity in a glacier (Athabasca Glacier \cite{SavagePaterson}).}{2.0in}{1.8in}
 
@@ -243,48 +243,48 @@ Do we believe formula \eqref{uslab}?  Figure \ref{fig:slabvel} compares it to ob
 \end{equation}
 where
     $$2\nu = A^{-1/3} |Du|^{-2/3}$$
-defines the nonlinear viscosity $\nu$.  Often $B = A^{-1/3}$ is called the ice ``hardness''.  Flow law \eqref{viscosityflowlaw} allows us to eliminate stresses $\tau_{ij}$ from the Stokes equations, resulting in formulas depending only on the strain rates.
+defines the nonlinear \emph{viscosity} $\nu$.  Often $B = A^{-1/3}$ is called the \emph{ice hardness}.  Flow law \eqref{viscosityflowlaw} allows us to eliminate stresses $\tau_{ij}$ from the Stokes equations, resulting in formulas depending only on the strain rates $Du_{ij}$.
 
 \subsection*{The Blatter-Pattyn approximation}  One may approximate the plane-flow Stokes equations \eqref{incompressiblexz}--\eqref{forceflowz} by assuming that horizontal variation in the vertical shear stress is small compared to the other terms.  This removes the single term  $\tau_{13,x}$ from the $z$-component of the stress balance \eqref{stokespz}:
 \begin{equation}
 p_z = - \tau_{11,z} - \rho g. \label{hydrostaticpz}
 \end{equation}
-Because $\sigma_{ij} = \tau_{ij} - p \delta_{ij}$, thus $p + \tau_{11} = p - \tau_{33} = - \sigma_{33}$, equation \eqref{hydrostaticpz} says that the vertical normal stress $\sigma_{33}$ is linear in depth.  (This is similar, but not identical, to the statement that the pressure $p$ is itself hydrostatic.)  Taking $\sigma_{33}$ to have surface value zero we get
+Because $\sigma_{ij} = \tau_{ij} - p \delta_{ij}$, thus $p + \tau_{11} = p - \tau_{33} = - \sigma_{33}$, equation \eqref{hydrostaticpz} says that the vertical normal stress $\sigma_{33}$ is linear in depth.  (This is similar, but not identical, to the statement that the pressure $p$ is hydrostatic.)  Taking $\sigma_{33}$ to have surface value zero we get
 \begin{equation}
 p + \tau_{11} = \rho g (h-z). \label{hydrostaticitself}
 \end{equation}
 
-Equation \eqref{hydrostaticitself} allows one to eliminate the pressure $p$ from the model equations.  Furthermore, taking the $x$-derivative of \eqref{hydrostaticitself}, then substituting into \eqref{stokespx}, and then using the viscosity form \eqref{viscosityflowlaw} leads to this equation \cite{GreveBlatter2009}:
+Equation \eqref{hydrostaticitself} allows elimination of the pressure $p$ from the model equations.  Furthermore, taking the $x$-derivative of \eqref{hydrostaticitself}, then substituting into \eqref{stokespx} to eliminate $p_x$, and then using the viscosity form \eqref{viscosityflowlaw} leads to this equation \cite{GreveBlatter2009}:
 \begin{equation}
 \left(4 \nu u_x\right)_x + \left(\nu (u_z+w_x)\right)_z = \rho g h_x \qquad\text{\emph{hydrostatic stress balance}} \label{stresshydrostatic}
 \end{equation}
-Though $p$ is gone, equation \eqref{stresshydrostatic} is nontrivially-coupled to incompressibility \eqref{incompressiblexz} because the vertical velocity $w$ appears in both places.  Equations \eqref{incompressiblexz}, \eqref{viscosityflowlaw}, \eqref{stresshydrostatic}, plus appropriate boundary conditions, determine $u$ and $w$ and then all remaining unknowns.
+Though $p$ is gone, equation \eqref{stresshydrostatic} is nontrivially-coupled to incompressibility \eqref{incompressiblexz} because the vertical velocity $w$ appears in both places.  Now equations \eqref{incompressiblexz}, \eqref{viscosityflowlaw}, \eqref{stresshydrostatic}, plus appropriate boundary conditions, determine $u$ and $w$ and then all remaining unknowns.
 
-If we drop $w_x$ from equation \eqref{stresshydrostatic} then we get the Blatter-Pattyn model:
+If we additionally drop $w_x$ from equation \eqref{stresshydrostatic} then we get the Blatter-Pattyn model:
 \begin{equation}
 \left(4 \nu u_x\right)_x + \left(\nu u_z\right)_z = \rho g h_x \qquad\text{\emph{Blatter-Pattyn stress balance}} \label{stressblatter}
 \end{equation}
-Using this equation one can solve first for the horizontal velocity $u$ and then afterward recover $w$ from \eqref{incompressiblexz}; stress balance and incompressibility are coupled only in one direction.  Also, because it is similar to the well-understood Poisson equation $u_{xx} + u_{zz} = f$ \cite{MortonMayers}, solving equation \eqref{stressblatter} is more familiar to numerical analysts than are solutions to the model using \eqref{stresshydrostatic}.
+Using this equation one can solve first for the horizontal velocity $u$ and then afterward recover $w$ from \eqref{incompressiblexz}.  In other words the stress balance and incompressibility are coupled only in one direction.  Also, because it is similar to the well-understood Poisson equation $u_{xx} + u_{zz} = f$ \cite{MortonMayers}, solving equation \eqref{stressblatter} is more familiar to numerical analysts than are solutions to \eqref{stresshydrostatic}.
 
 \subsection*{Plane-flow mass-continuity equation}  The equations so far do not address the change in shape of the glacier or ice sheet.  For this we need the \emph{mass continuity equation}.  We derive it first in an informal way, but we also return to the topic in section 8.
 
 Consider any $x,z$-plane flow with variable thickness and velocity, not just slab-on-a-slope.  Define the vertical average of the horizontal velocity:
 	$$\bar U = \frac{1}{H}\int_0^{H} u\,dz.$$
-The flux $q=\bar U\, H = \int_0^{H} u\,dz$ is the rate of flow input into the side of the area in Figure \ref{fig:slabmasscontfig}.  Ice can be added by surface mass balance $M$ or by a difference in the flux $q=\bar u H$ between the left and right sides.
+The flux $q=\bar U\, H = \int_0^{H} u\,dz$ is the rate of flow input into the side of the area in Figure \ref{fig:slabmasscontfig}.  Ice can be added by climatic (surface) mass balance $M$ or by a difference in the flux $q=\bar u H$ between the left and right sides.
 
-\onefigsize{slabmasscontfig}{Mass continuity equation \eqref{masscont1D} follows from considering this domain, which has time-dependent area $A$.}{2.5in}
+\onefigsize{slabmasscontfig}{Mass continuity equation \eqref{masscont1D} follows from considering this domain of ice, which has time-dependent area $A$.}{2.5in}
 
-Thus $A$ changes according to the sum of all the boundary contributions:
+The area $A$ changes according to the sum of all the boundary contributions:
 \begin{equation}
-\frac{dA}{dt} = \int_{x_1}^{x_2} M(x)\,dx + \bar U_1 H_1 - \bar U_2 H_2. \label{masscontintegrated}
+\frac{dA}{dt} = \int_{x_1}^{x_2} M(x,t)\,dx + \bar U_1 H_1 - \bar U_2 H_2. \label{masscontintegrated}
 \end{equation}
-Here $M(x)$ is the climatic mass balance at the ice surface.  In three-dimensions, equation \eqref{masscontintegrated} becomes an equation for $dV/dt$, the ice volume rate of change.
+In three-dimensions, \eqref{masscontintegrated} becomes an equation for $dV/dt$, the ice volume rate of change.
 
 If the width $\Delta x=x_2-x_1$ is small then $A\approx \Delta x\, H$.  So we divide by $\Delta x$ and take $\Delta x \to 0$ in \eqref{masscontintegrated} to get
 \begin{equation}
 H_t = M - \left(\bar U H\right)_x \label{masscont1D}
 \end{equation}
-This differential equation for mass continuity describes change in the ice thickness in terms of surface mass balance and ice velocity.  Notice that ice flow simulations must compute the velocity in order to use this equation for the changing glacier geometry.
+This differential equation for mass continuity describes change in the ice thickness in terms of surface mass balance and ice velocity.  Ice flow simulations must compute the velocity $u$ in order to use this equation for the changing glacier geometry.
 
 
 \section{Shallow ice sheets}   \label{sec:sia}
@@ -295,17 +295,19 @@ Ice sheet flow has four outstanding properties as a fluids problem.  Ice sheets 
 \item slow,
 \item shallow,
 \item non-Newtonian (shear-thinning), and
-\item capable of widespread contact slip (basal sliding).
+\item subject to widespread contact slip (basal sliding).
 \end{enumerate}
-The first numerical ice flow model in these notes, which accounts for the first three properties only, is the non-sliding, isothermal \emph{shallow ice approximation} (SIA).
+The first numerical ice flow model in these notes accounts for the first three properties only.  It is the non-sliding, isothermal \emph{shallow ice approximation} (SIA).
 
 Regarding shallowness (\emph{ii}), Figure \ref{fig:green-transect} shows both a no-vertical-exaggeration cross-section of Greenland at $71^\circ$ and the standard vertically-exaggerated version which is more familiar in the glaciological literature.  Without vertical exaggeration we see the ice sheet as a thin blanket, barely three-dimensional.  In other words, ice sheets \emph{are} shallow.  (Note, however, that the portion of an ice sheet which you want to model may not be.)
 
-\onefigsize{green-transect}{A vertically-exaggerated cross-section of the Greenland ice sheet ($71^\circ$ N) is shown by the upper two curves.  Without exaggeration it appears as merely a thickened horizontal line (bottom).}{3.5in}
+\medskip
 
-Our slab-on-a-slope example can be converted into a rough derivation of the plane-flow SIA.  We vertically integrate velocity formula \eqref{uslab} in the $u_0=0$ case to get
+\onefigsize{green-transect}{A cross-section of the Greenland ice sheet ($71^\circ$ N), with width about 760 km and maximum thickness 3200 m, is shown by the upper two curves.  The thickened horizontal line (bottom) shows the same cross-section without exaggeration.}{4.0in}
+
+Our earlier slab-on-a-slope example can be converted into a rough derivation of the plane-flow SIA.  We vertically integrate velocity formula \eqref{uslab} in the $u_0=0$ case to get
 \begin{equation}
-\bar u H = \int_0^H \frac{1}{2} A (\rho g \sin\alpha)^3  \left(H^4 - (H-z)^4\right)\,dz = \frac{2}{5} A (\rho g \sin\alpha)^3 H^5. \label{siaubar}
+\bar U H = \int_0^H \frac{1}{2} A (\rho g \sin\alpha)^3  \left(H^4 - (H-z)^4\right)\,dz = \frac{2}{5} A (\rho g \sin\alpha)^3 H^5. \label{siaubar}
 \end{equation}
 Note $\sin \alpha \approx \tan\alpha = - h_x$ when $\alpha$ is a small angle.  Combining these statements with mass continuity \eqref{masscont1D} gives
 \begin{equation}
