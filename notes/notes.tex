@@ -233,7 +233,7 @@ u &= u_0 + \frac{1}{2} A (\rho g \sin\alpha)^3  \left(H^4 - (H-z)^4\right)  \lab
 \end{align}
 The basal velocity $u_0=u(0)$ remains undetermined for now.
 
-Do we believe formula \eqref{uslab}, which makes a specific prediction about the profile of flow in a glacier?  Figure \ref{fig:slabvel} compares \eqref{uslab} to observations of a mountain glacier.  Our model for velocity indeed does a credible job of capturing deformation flow in this case.  However, until section 9, we will not have a reasonable dynamical model for the sliding velocity $u_0$.  We assume until then that the ice is frozen to the bed and there is no sliding.
+Do we believe formula \eqref{uslab}, which makes a specific prediction about the profile of flow in a glacier?  Figure \ref{fig:slabvel} compares \eqref{uslab} to observations of a mountain glacier.  Our model for velocity indeed does a credible job of capturing deformation flow in this case.  However, until section \ref{sec:shelvesandstreams}, we will not have a reasonable dynamical model for the sliding velocity $u_0$.  We assume until then that the ice is frozen to the bed and there is no sliding.
 
 \twofigsizes{slabvel}{athabasca-deform}{Left:  Velocity from formula \eqref{uslab}.  Right:  Measured velocity in a glacier (Athabasca Glacier \cite{SavagePaterson}).}{2.0in}{1.8in}
 
@@ -266,7 +266,7 @@ If we additionally drop $w_x$ from equation \eqref{stresshydrostatic} then we ge
 \end{equation}
 Using this equation one can solve first for the horizontal velocity $u$ and then afterward recover $w$ from \eqref{incompressiblexz}.  In other words the stress balance and incompressibility are coupled only in one direction.  Also, because it is similar to the well-understood Poisson equation $u_{xx} + u_{zz} = f$ \cite{MortonMayers}, solving equation \eqref{stressblatter} is more familiar to numerical analysts than are solutions to \eqref{stresshydrostatic}.
 
-\subsection*{Plane-flow mass-continuity equation}  The equations so far do not address the change in shape of the glacier or ice sheet.  For this we need the \emph{mass continuity equation}.  We derive it first in an informal way, but we also return to the topic in section 8.
+\subsection*{Plane-flow mass-continuity equation}  The equations so far do not address the change in shape of the glacier or ice sheet.  For this we need the \emph{mass continuity equation}.  We derive it first in an informal way, but we also return to the topic in section \ref{sec:masscont}.
 
 Consider any $x,z$-plane flow with variable thickness and velocity, not just slab-on-a-slope.  Define the vertical average of the horizontal velocity:
 	$$\bar U = \frac{1}{H}\int_0^{H} u\,dz.$$
@@ -497,54 +497,47 @@ Here $X=T+b$.  The left part of Figure \ref{fig:diffstencil} shows the stencil. 
 
 \section{Numerically solving the SIA} \label{sec:numericalsia}
 
-In SIA equation \eqref{sia} we have diffusivity $D = \Gamma H^{n+2} |\grad h|^{n-1}$.  As already noted, an interesting aspect of this formula is that $D$ goes to zero, i.e.~the diffusion ``degenerates,'' when either $H\to 0$ or $\grad h \to 0$.  Degenerate diffusion equations are automatically free boundary problems, and this aspect of the thickness evolution problem should be no surprise to a glaciologist.  Determining the location and movement of the margin is an obvious goal of modelling a glacier or ice sheet.  To address this free boundary issue in our explicit time-stepping code it suffices to numerically compute new thicknesses and then set them to zero if they come out negative.
+In SIA equation \eqref{sia} we have diffusivity $D = \Gamma H^{n+2} |\grad h|^{n-1}$.  As already noted, $D$ goes to zero, i.e.~the diffusion ``degenerates,'' when either $H\to 0$ or $\grad h \to 0$.  Degenerate diffusion equations are automatically free boundary problems, but this aspect of the thickness evolution problem should be no surprise to a glaciologist because the determination of the location of the ice margin is a standard goal when modelling a glacier.  To address this free boundary problem in an explicit time-stepping scheme it suffices to numerically compute new thicknesses and then set them to zero if they come out negative.
 
-For numerical stability and mass conservation we should compute $D$ on a ``staggered'' grid.  Various finite difference schemes have been proposed for evaluating diffusivity, but all of these schemes involve averaging $H$ and differencing $h$ in a ``balanced'' way onto the staggered grid.  In the code \texttt{siaflat.m} below we use the Mahaffy \cite{Mahaffy} method, with the stencil for computing $D$ shown in Figure \ref{fig:diffstencil} (right).  This code only works for the flat bed, zero surface mass balance case, but we will correct these deficiencies soon.
+For numerical stability and mass conservation we compute $D$ on a ``staggered'' grid.  Various finite difference schemes have been proposed, but all involve averaging $H$ and differencing $h$ in a ``balanced'' way onto the staggered grid.  In the code \texttt{siaflat.m} below we use the Mahaffy \cite{Mahaffy} method, with the stencil for computing $D$ shown in Figure \ref{fig:diffstencil} (right).  This code only works for a flat bed and zero surface mass balance, deficiences which will be corrected shortly in an extended code \texttt{siageneral.m}.
 
 \minput{siaflat}
 
 
 \section{Exact solutions and verification} \label{sec:exactsolutions}
 
-In \texttt{siaflat.m}, which calls \texttt{diffusion.m}, we already have a fairly complicated code.  How do we make sure that such an implemented numerical scheme is correct?  Here are three proposed techniques:
+In \texttt{siaflat.m}, which calls \texttt{diffusion.m}, we already have a complicated code.  How do we make sure that such an implemented numerical scheme is correct?  Here are three proposed techniques:
 \begin{enumerate}
   \item don't make any mistakes, or
   \item compare your numerical results with results from other researchers, and assume the outliers are in error, or
   \item compare your numerical results to an exact solution.   \end{enumerate}
-The first two of these, which one might call ``infallibility'' and ``intercomparison,'' respectively, should be less common approaches than they are.  The last one of these, preferred by the CFD community generally \cite{Wesseling}, is called ``verification.''  It is a simple idea:  When we build a new computer code we should test it in cases where we know the right answer.  To do so we return to the PDE itself seeking useful exact solutions.
+The first two approaches, which one might call ``infallibility'' and ``intercomparison,'' respectively, should be less common than they are.  The last one, preferred by the CFD community generally \cite{Roache,Wesseling}, is called ``verification.''  It is a simple idea:  A computer code should be tested in cases where we know the right answer.  To do this we must return to the PDE itself seeking useful exact solutions.
 
-\subsection*{Exact solution of heat equation}  First we return to the simpler case of the 1D heat equation with constant $D$, namely $T_t = D T_{xx}$.  Many exact solutions $T(t,x)$ to this heat equation are known, but let's consider the time-dependent ``Green's function,'' also known as the ``heat kernel'' and dating from 1830 or so.  It starts at time $t=0$ with a delta function $T(0,x)=\delta(x)$ of heat at the origin $x=0$.  Then it spreads out over time.  It is a solution of the heat equation on the whole line $-\infty<x<\infty$ and for all $t>0$.
-
-We will calculate this exact solution by a method which generalizes to the SIA.  In both cases the Green's function is ``self-similar'' over time, in the sense that it changes shape \emph{only} by shrinking the output (vertical) axis and lengthening the input (horizontal) axis (Figure \ref{fig:heatscaling}).  These scalings are related to each other by conservation of energy.
-
-\onefigsize{heatscaling}{The heat equation Green's function in 1D has the same shape at each time, but with time-dependent input- and output-scalings.}{2.4in}
-
-The Green's function of the 1D heat equation is
-  $$T(t,x) = (4 \pi D t)^{-1/2}\, e^{-x^2/(4Dt)}.$$
-``Similarity'' variables for this solution, the above-mentioned scalings, involving multiplying the input and output of an invariant shape function $\phi(s) = (4 \pi D)^{-1/2}\, e^{-s^2/(4D)}$ by the same power of $t$:
+\subsection*{Exact solution of heat equation}  First we return to the simpler 1D heat equation $T_t = D T_{xx}$ with constant $D$.  Many exact solutions are known, but consider the time-dependent ``Green's function,'' circa 1830, also known as the ``heat kernel.''  It starts at time $t=0$ with a delta function $T(0,x)=\delta(x)$ of heat at the origin and then it spreads out over time, solving the equation on $-\infty<x<\infty$ and for $t>0$.  We calculate it by a method which generalizes to the SIA.  The Green's function is ``self-similar'' over time, in the sense that it changes shape \emph{only} by shrinking the output (vertical) axis and lengthening the input (horizontal) axis (Figure \ref{fig:heatscaling}).  These scalings are related to each other by conservation of energy.  Similarity variables for this solution involve multiplying the input and output of an invariant shape function $\phi(s)$ by the same power of $t$:
 \begin{equation}
 s \stackrel{\text{\emph{input scaling}}}{\phantom{\Big|}=\phantom{\Big|}} t^{-1/2} x, \qquad\qquad T(t,x) \stackrel{\text{\emph{output scaling}}}{\phantom{\Big|}=\phantom{\Big|}} t^{-1/2} \phi(s).  \label{heatscalings}
 \end{equation}
+One may then show that $\phi(s) = (4 \pi D)^{-1/2}\, e^{-s^2/(4D)}$ so the Green's function is
+  $$T(t,x) = (4 \pi D t)^{-1/2}\, e^{-x^2/(4Dt)}.$$
+A numerical solver for the 1D heat equation which starts with initial values $T(t_0,x)$, from this exact solution at $t_0>0$ should, at a later time $t>t_0$, produce numbers which are close to the exact solution $T(t,x)$; see the Exercises.
 
-A numerical solver for the 1D heat equation which starts with initial values $T(t_0,x)$ from this exact solution at $t_0>0$ should, at a later time $t>t_0$, produce numbers which are close to the exact solution $T(t,x)$; see the Exercises.
+\onefigsize{heatscaling}{The heat equation Green's function in 1D has the same shape at each time, but with time-dependent input- and output-scalings.}{2.4in}
 
-\subsection*{Halfar's similarity solution to the SIA}  Now we jump to the year 1981.  P.~Halfar published the similarity solution of the SIA in the case of flat bed and zero surface mass balance.  For the 2D SIA model \eqref{sia} using a Glen exponent $n=3$ this solution has scalings similar to \eqref{heatscalings} above:
+\subsection*{Halfar's similarity solution to the SIA}  Now we jump to the year 1981.  P.~Halfar \cite{Halfar81} published the similarity solution of the SIA in the case of flat bed and zero surface mass balance.  For the 2D SIA model \eqref{sia} using a Glen exponent $n=3$ this solution \cite{Halfar83} has scalings similar to \eqref{heatscalings} above:
 \begin{equation}
 s = t^{-1/18} r, \qquad \qquad H(t,r)=t^{-1/9} \phi(s), \label{halfarscalings}
 \end{equation}
-where $r=(x^2+y^2)^{1/2}$ is the distance from the origin.  These scalings are related to each other by conservation of mass, because no mass is gained or lost through the surface. Scalings \eqref{halfarscalings} imply that, quite differently from heat, the diffusion of ice slows down severely as the shape flattens out.  The powers $t^{-1/9}$ and $t^{-1/18}$ change very slowly for large times $t$.
+where $r=(x^2+y^2)^{1/2}$ is the distance from the origin.  These scalings are related to each other by the constancy of total mass/volume, because no mass is gained or lost through the surface (see the Exercises). Scalings \eqref{halfarscalings} imply that, differently from heat, the diffusion of ice slows down dramatically as the shape flattens out because the powers $t^{-1/9}$ and $t^{-1/18}$ change very slowly for large times $t$.
 
-\onefigsize{siascaling}{Radial sections of Halfar's solution \eqref{halfar} of the SIA equation \eqref{sia} on a flat bed with zero mass balance.  The solution is shown on $H$ (m) versus $r$ (km) axes for times $t=1,10,100,1000,10000$ years.}{5.5in}
+\onefigsize{siascaling}{Radial sections of Halfar's solution \eqref{halfar} of \eqref{sia}, shown on $H$ (m) versus $r$ (km) axes at $t=1,10,100,1000,10000$ years.}{5.5in}
 
-The formula for the Halfar solution to the SIA is remarkably simple given all that it accomplishes:
+The formula for the Halfar solution is remarkably simple given all it accomplishes:
 \begin{equation}
 H(t,r) = H_0 \left(\frac{t_0}{t}\right)^{1/9} \left[1 - \left(\left(\frac{t_0}{t}\right)^{1/18} \frac{r}{R_0}\right)^{4/3}\right]^{3/7}. \label{halfar}
 \end{equation}
-Here the ``characteristic time'' $t_0 = (18 \Gamma)^{-1} (7/4)^3 R_0^4 H_0^{-7}$ is a parameter which can be determined by choosing a center height $H_0$ and a radius $R_0$.
+Here the characteristic time satisfies $t_0 = (18 \Gamma)^{-1} (7/4)^3 R_0^4 H_0^{-7}$ for center height $H_0$ and radius $R_0$.  In Figure \ref{fig:siascaling} we see that for times significantly greater than $t_0$ ($t/t_0 \gg 1$) the solution changes very slowly.  For example, the change between years $1$ and $100$ is larger than that between years $1000$ and $10000$.
 
-Formula \eqref{halfar} is plotted in Figure \ref{fig:siascaling}.  We see that for times significantly greater than $t_0$ (i.e.~$t/t_0 \gg 1$) the solution changes very slowly.  For example, the change between years $1$ and $100$ is larger than that between years $1000$ and $10000$.  Note that the \emph{volume} of ice is constant with $t$ (see the Exercises).
-
-\subsection*{Using Halfar's solution}  Formula \eqref{halfar} is simple enough to use for verifying time-dependent SIA models.  The code \texttt{verifysia.m} (not shown) takes as input the number of grid points in each ($x,y$) direction.  It uses the Halfar solution at 200 a as the initial condition, does a numerical run of \texttt{siaflat.m} above to a final time 20000 a, and then compares to the Halfar formula for that time.  By ``compares'' we mean it computes the thickness \emph{numerical error}, the absolute values of the differences between the numerical and exact thickness solutions at the final time:
+\subsection*{Using Halfar's solution}  Formula \eqref{halfar} is simple to use for verifying time-dependent SIA models.  The code \texttt{verifysia.m} (not shown) takes as input the number of grid points in each ($x,y$) direction.  It uses the Halfar solution at 200 a as the initial condition, does a numerical run of \texttt{siaflat.m} to a final time 20000 a, and then compares to the Halfar formula at that time.  By ``compares'' we mean it computes the thickness \emph{numerical error}, the absolute differences between the numerical and exact thicknesses at the final time:
 \small
 \begin{verbatim}
 >> verifysia(20)
@@ -557,27 +550,21 @@ average thickness error     = 2.800
 average thickness error     = 1.059
 \end{verbatim}
 \normalsize
-We see that the average thickness error decreases with increasing grid resolution.  This is as expected for a correctly-implemented code.
+We see that the average thickness error decreases with increasing grid resolution, as expected for a correctly-implemented code.  What is less obvious is that almost any numerical implementation mistake will break such convergence.  That is, the reported errors will not shrink if there is any meaningful bug (see the Exercises).  The essential benefit of verification against an exact solution is thus that it is \emph{fragile}!  One must implement the model correctly, not just generate good-looking results, to get convergence as above.
 
-What is less obvious, perhaps, is that almost any numerical implementation mistake will break the convergence we have just demonstrated.  That is, the reported errors will not shrink if there is any meaningful bug (see the Exercises).  The essential benefit of verification against an exact solution is thus that it is a \emph{fragile} process.  One must actually implement the model correctly, and not just generate good-looking results, to demonstrate convergence as above.
-
-Perhaps surprisingly, the Halfar solution has been used for modelling real ice masses.  J.~Nye and others \cite{NyeIcarus2000} compared the long-time consequences of different flow laws for the south polar cap on Mars.  In particular, they evaluated $\text{CO}_2$ and $\text{H}_2\text{O}$ ice softness parameters by comparing the long-time behavior of the corresponding Halfar solutions to the observed polar cap properties.  Their conclusions:
+The Halfar solution has also been used for modelling real ice masses.  J.~Nye and others \cite{NyeIcarus2000} used it to compare the long-time consequences of different flow laws for the south polar cap on Mars.  In particular, they evaluated $\text{CO}_2$ and $\text{H}_2\text{O}$ ice softness parameters by comparing the long-time behavior of the corresponding Halfar solutions to the observed polar cap properties.  Their conclusions:
   \begin{quote}
   \dots none of the three possible [$\text{CO}_2$] flow laws will allow a 3000-m cap, the thickness suggested by stereogrammetry, to survive for $10^7$ years, indicating that the south polar ice cap is probably not composed of pure $\text{CO}_2$ ice [but rather] water ice, with an unknown admixture of dust.
   \end{quote}
-This theoretical result has since been confirmed by the observation and sampling of the polar geology of Mars.
+This theoretical result has since been confirmed by sampling the surface of Mars.
 
-Are exact solutions like Halfar's always available when needed?  The answer is ``no.''  However, many ice flow models do have exact solutions which are relevant to verification; see the Notes and References.  For example, we will use an exact solution for ice shelves in a later section.  On the other hand, an apparent absence of exact solutions may in fact show that not enough thought has gone into the continuum model itself.
+Are exact solutions like Halfar's always available when needed?  The answer is ``no.''  However, many ice flow models have exact solutions which are relevant to verification; see the Notes and References.  For example, we will use an exact solution for ice shelves in a later section.  An apparent absence of exact solutions to a given model may actually show that not enough thought has gone into the continuum model itself.
 
-\subsection*{A test of robustness}  Verification is an ideal way to start testing a code.  Another worthwhile test is for ``robustness'' over unusual or difficult input cases.  One asks: Does the model break?  In a robustness test one may not have a precise expectation of what the code \emph{should} do, but one tries to identify obviously-unreasonable outputs.
+\subsection*{A test of robustness}  Verification is an ideal way to test a code, but another worthwhile test is for ``robustness'' in unusual or difficult input cases.  One asks: Does the model break?  Here one may not have a precise expectation of what the code \emph{should} do, but it should not produce obviously-unreasonable outputs.
 
-The robustness test in the program \texttt{roughice.m} (not shown) demonstrates that \texttt{siaflat.m} can handle an ice sheet with extraordinarily large ``driving stresses.''  Recall that glaciological driving stress is $\tau_d = - \rho g H \grad h$, which appears in the SIA model as the modeled value of the shear stress $(\tau_{13},\tau_{23})$ at the base of the ice.  The driving stress is large when the ice is both thick and has steep surface slope $|\nabla h|$.
+The robustness test run by the code \texttt{roughice.m} (not shown) demonstrates that \texttt{siaflat.m} can handle an ice sheet with extraordinarily large driving stresses.  Recall that the driving stress $\tau_d = - \rho g H \grad h$ appears in the SIA model as the modeled value of the shear stress $(\tau_{13},\tau_{23})$ at the base of the ice.  The driving stress is large when the ice is thick and has steep surface slope $|\nabla h|$.  In our test we give \texttt{siaflat.m} a randomly-generated initial ice sheet which has extraordinarily large driving stresses.  It is thick (average of 3000 m), and it has huge surface slopes because of the random surface elevation values, so the product $H|\grad h|$ is large everywhere.  An initial shape is shown in the left side of Figure \ref{fig:roughinitial}.  During a run of just 50 model years on a 17 km grid, with time step determined adaptively from \eqref{stabcrit}, the maximum diffusivity $D$ decreases as the surface lowers and becomes smooth through flow.  The time-step consequently increases, in this case by three orders of magnitude from about 0.0002 years to 0.2 years.  The maximum value of the driving stress decreases from $57$ bar ($= 5.7\times 10^6$ Pa) to $3.6$ bar.  At the end of the run the ice cap has the shape shown at right in Figure \ref{fig:roughinitial}.  This shape is rather close to a Halfar solution \eqref{halfar}, and it illustrates what Halfar proved \cite{Halfar81,Halfar83}, namely that \emph{all} solutions of the zero-mass-balance SIA on a flat bed will asymptotically approach \eqref{halfar}.  The Halfar solution is generic, attracting, and worth knowing.
 
-\twofigsizes{roughinitial}{roughfinal}{The SIA model evolves the huge-driving-stress initial ice sheet at left to the ice cap at right in only 50 model years.}{2.9in}{2.9in}
-
-In \texttt{roughice.m} we give \texttt{siaflat.m} a randomly-generated initial ice sheet which has extraordinarily large driving stresses.  It is thick (average of 3000 m), and it has huge surface slopes because of the random surface elevation values, so the product $H|\grad h|$ is large everywhere.  The initial shape is shown in the left side of Figure \ref{fig:roughinitial}.  During the run of 50 model years on a 17 km grid, the time step is determined adaptively from \eqref{stabcrit}.  The maximum diffusivity $D$ decreases over the course of the run as the surface lowers and becomes smooth through flow.  As this happens, the time-step increases by three orders of magnitude from about 0.0002 years to 0.2 years.  The maximum value of the driving stress decreases from $57$ bar ($= 5.7\times 10^6$ Pa) to $3.6$ bar.
-
-At the end of the run the ice cap has the shape shown at right in Figure \ref{fig:roughinitial}.  This shape is rather close to a Halfar solution \eqref{halfar}, and it illustrates what Halfar proved, namely that \emph{all} solutions of the zero-mass-balance SIA on a flat bed asymptotically approach \eqref{halfar}.  The Halfar solution is generic and attracting.
+\twofigsizes{roughinitial}{roughfinal}{Our numerical model evolves the huge-driving-stress initial ice sheet at left to the ice cap at right in only 50 model years.}{2.9in}{2.9in}
 
 
 \section{Application to the Antarctic ice sheet}   \label{sec:antapp}
@@ -802,16 +789,13 @@ Which are the best numerical models for moving grounding lines?  Even when the m
 
 Where to find exact solutions for ice flow models?  Textbooks by van der Veen \cite{vanderVeen} and Greve and Blatter \cite{GreveBlatter2009} have a few.  Halfar's similarity solution to the SIA \cite{Halfar81,Halfar83} has been generalized to non-zero mass balance \cite{BLKCB}.  There are flow-line \cite{Bodvardsson,vanderVeen83} and cross-flow \cite{SchoofStream} solutions to the SSA model, and one can even construct an exact, steady marine ice sheet in the flow-line case \cite{Bueler2014exactmarine}.  For the Stokes equations themselves there are plane flow solutions for constant viscosity \cite{BaliseRaymond1985}.  For numerical verification purposes, as shown in the main text, one can ``manufacture'' exact solutions by starting with a specified solution and then deriving a source term so that the specified function is actually a solution \cite{Roache}.  The literature contains such manufactured solutions to the thermomechanically-coupled SIA \cite{BBL}, plane flow Blatter-Pattyn model \cite{GlowinskiRappaz}, and Glen-law Stokes equations \cite{JouvetRappaz2011,Lengetal2012,SargentFastook2010}.
 
-%\clearpage\newpage
 \footnotesize
 
 \bigskip
 \bigskip
-%\bibliography{ice-bib}
 %\bibliographystyle{siam}
 \input{notes.bbl}
 
-%\clearpage\newpage
 \bigskip
 \bigskip
 \small
