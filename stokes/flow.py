@@ -47,9 +47,6 @@ parser.add_argument('-osurface', metavar='NAME', type=str, default='',
 parser.add_argument('inname', metavar='INNAME',
                     help='input file name ending with .msh')
 args, unknown = parser.parse_known_args()
-if args.save_rank and args.deltat > 0.0:
-    print("ERROR: -save_rank currently only works in time-independent runs")
-    sys.exit(1)
 
 if len(args.o) > 0:
     outname = args.o
@@ -61,7 +58,7 @@ from firedrake.petsc import PETSc
 from gendomain import Hin, L, bdryids, getdomaindims
 from physics import secpera, stokessolve, solvevdisplacement, \
                     solutionstats, numericalerrorsslab, \
-                    getsurfaceelevation, getsurfaceverticaldisplacement, getsurfacevelocity
+                    getsurfaceelevation, getsurfaceverticaldisplacement, getsurfacevelocity, getranks
 
 def printpar(thestr,comm=COMM_WORLD):
     PETSc.Sys.Print(thestr,comm=comm)
@@ -69,9 +66,9 @@ def printpar(thestr,comm=COMM_WORLD):
 # read mesh and report on parallel decomposition (if appropriate)
 printpar('reading initial mesh from %s ...' % args.inname)
 mesh = Mesh(args.inname)
-if mesh.comm.size > 1 and args.deltat > 0.0:
-    print("ERROR: time-dependent runs only currently run in serial, not parallel")
-    sys.exit(2)
+if mesh.comm.size > 1 and len(args.osurface) > 0:
+    print("ERROR: -osurface output only available in serial, not parallel")
+    sys.exit(1)
 if mesh.comm.size == 1:
     printpar('  mesh has %d elements (cells) and %d vertices' \
           % (mesh.num_cells(),mesh.num_vertices()))
@@ -117,6 +114,8 @@ if args.deltat > 0.0:
     outfile = File(outname)
 up = Function(Z)
 P1 = FunctionSpace(mesh,'CG',1)  # used for mesh displacement
+if args.save_rank:
+    (element_rank,vertex_rank) = getranks(mesh)
 for j in range(args.m):
     if args.deltat > 0.0:
         printpar('step %d: t = %.3f days' % (j,t_days))
@@ -160,7 +159,10 @@ for j in range(args.m):
             absrmax = vr.norm(norm_type=PETSc.NormType.NORM_INFINITY)
         r.rename('vertical_displacement')
         # save complete current state
-        outfile.write(u,p,r, time=t_days)
+        if args.save_rank:
+            outfile.write(u,p,r,element_rank,vertex_rank, time=t_days)
+        else:
+            outfile.write(u,p,r, time=t_days)
         # actually move mesh
         Vc = mesh.coordinates.function_space()
         f = Function(Vc).interpolate(as_vector([x, z + r]))
@@ -184,18 +186,14 @@ if args.deltat > 0.0:
     # save final mesh
     printpar('step END: t = %.3f days' % t_days)
     printpar('  writing values to finish file %s ...' % outname)
-    outfile.write(u,p,r, time=t_days)
+    if args.save_rank:
+        outfile.write(u,p,r,element_rank,vertex_rank, time=t_days)
+    else:
+        outfile.write(u,p,r, time=t_days)
 else:
     # save solution if diagnostic
     printpar('writing (velocity,pressure) to %s ...' % outname)
     if args.save_rank:
-        printpar('  also writing (element_rank,vertex_rank) ...')
-        element_rank = Function(FunctionSpace(mesh,'DG',0))
-        element_rank.dat.data[:] = mesh.comm.rank
-        element_rank.rename('element_rank')
-        vertex_rank = Function(P1)
-        vertex_rank.dat.data[:] = mesh.comm.rank
-        vertex_rank.rename('vertex_rank')
         File(outname).write(u,p,element_rank,vertex_rank)
     else:
         File(outname).write(u,p)

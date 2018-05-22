@@ -17,7 +17,7 @@ runflow_1: tmptest/lowtest.msh
 	-@./testit.sh flow.py "tmptest/lowtest.msh" 1 1 "basic u,p solve with bed step"
 
 runflow_2: tmptest/slabtest.msh
-	-@./testit.sh flow.py "tmptest/slabtest.msh" 1 2 "slab bed u,p solve"
+	-@./testit.sh flow.py "tmptest/slabtest.msh" 1 2 "slab u,p solve"
 
 runflow_3: tmptest/lowtest.msh
 	-@./testit.sh flow.py "-deltat 20.0 -m 2 -o tmptest/test3.pvd tmptest/lowtest.msh" 1 3 "evolving surface u,p,h solve"
@@ -25,9 +25,12 @@ runflow_3: tmptest/lowtest.msh
 runflow_4: tmptest/lowtest.msh
 	-@./testit.sh flow.py "-o tmptest/test4.pvd tmptest/lowtest.msh -s_snes_converged_reason" 2 4 "parallel u,p solve"
 
-test: rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4
+runflow_5: tmptest/lowtest.msh
+	-@./testit.sh flow.py "-deltat 10.0 -m 1 -o tmptest/test5.pvd tmptest/lowtest.msh" 2 5 "parallel u,p,h solve"
 
-.PHONY: clean rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 test
+test: rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5
+
+.PHONY: clean rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 test
 
 clean:
 	rm -f *~ *.pyc *.pvd *.vtu *.pvtu *.geo *.msh
