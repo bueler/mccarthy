@@ -76,7 +76,7 @@ scope: I will cover these
   \item $\rho=$ density of ice
   \item $\rho_w=$ density of ocean water
   \item $g=$ acceleration of gravity
-  \item $n=3$ Glen flow law exponent $=3$
+  \item $n$ Glen flow law exponent (usually $=3$)
   \item $A=A(T)=$ ice softness in Glen law ($\mathbf{D}_{ij} = A(T) \tau^{n-1} \tau_{ij}$)
   \item \alert{please ask about notation!}
   \end{itemize}
@@ -198,11 +198,11 @@ scope: I will cover these
   \end{itemize}
 
 \bigskip
-\item the standard model is Glen-law ($n=3$) Stokes:
+\item the standard model is Glen-law Stokes:
 \begin{align*}
 \nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \\
 0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \mathbf{g} &&\text{\emph{stress balance}} \\
-\mathbf{D}_{ij} &= A \tau^2 \tau_{ij} &&\text{\emph{flow law}}
+\mathbf{D}_{ij} &= A \tau^{n-1} \tau_{ij} &&\text{\emph{flow law}}
 \end{align*}
 
 \end{itemize}
@@ -217,7 +217,7 @@ scope: I will cover these
 \begin{align*}
 \nabla \cdot \mathbf{u} &= 0 \\
 0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \mathbf{g} \\
-\mathbf{D}_{ij} &= A \tau^2 \tau_{ij}
+\mathbf{D}_{ij} &= A \tau^{n-1} \tau_{ij}
 \end{align*}
 \normalsize
 \item thus a time-stepping ice sheet code
@@ -238,7 +238,7 @@ scope: I will cover these
 
 \begin{itemize}
 \item suppose we work in a $x,z$ plane, such as the centerline of a glacier, \emph{or} in a cross-flow plane
-\item now the Stokes equations say
+\item now the $n=3$ Stokes equations say
 \begin{empheq}[]{align}
 u_x + w_z &= 0 &&\text{\emph{incompressibility}}\notag \\
 p_x &= \tau_{11,x} + \tau_{13,z} &&\text{\emph{stress balance} ($x$)} \notag \\

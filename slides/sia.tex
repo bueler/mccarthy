@@ -18,29 +18,32 @@
 \begin{frame}{regarding ``shallow''}
 
 \begin{itemize}
-\item below in \alert{red} is a no-vertical-exaggeration cross section of Greenland at $71^\circ$
+\item in \alert{red} is a no-vertical-exaggeration Greenland cross section
+  \begin{itemize}
+  \item[$\circ$] width = 760 km, thickness = 3200 m; at $71^\circ$ N
+  \end{itemize}
 \item green and blue: standard vertically-exaggerated cross section
 \end{itemize}
 
 \begin{center}
-  \includegraphics[width=0.6\textwidth]{green-transect}
+  \includegraphics[width=0.85\textwidth]{green-transect}
 \end{center}
 \end{frame}
 
 
 \subsection{shallow ice approx (SIA)}
 
-\begin{frame}{flow model I: non-sliding, isothermal shallow ice approximation = (SIA)}
+\begin{frame}{flow model I: shallow ice approximation (SIA)}
 
 a model which applies to
 \begin{itemize}
 \item small depth-to-width ratio (``shallow'') grounded ice sheets
-\item on not-too-rough bed topography,
-\item whose flow is \emph{not} dominated by sliding and/or liquid water at the base or margin
+\item for \emph{not}\, too rough/steep bed topography
+\item when flow is \emph{not}\, dominated by sliding at the base
 \end{itemize}
 
 \begin{center}
-  \includegraphics[width=0.65\textwidth]{polaris}
+  \includegraphics[width=0.7\textwidth]{polaris}
 
 \tiny ``Polaris Glacier,'' northwest Greenland, photo 122, Post \& LaChapelle (2000)
 \end{center}
@@ -51,22 +54,25 @@ a model which applies to
 \begin{frame}{SIA model equations}
 
 \begin{itemize}
-\item \small though the best explanation of the SIA is to use shallowness to simplify the Stokes equations, here we take the simple slogan:\normalsize
+\item \small we take the simple slogan:\normalsize
 
 \begin{center}
 \emph{the SIA uses the formulas from slab-on-a-slope}
 \end{center}
+  \begin{itemize}
+  \item[$\circ$] better explanation: expand the Stokes equations in aspect ratio
+  \end{itemize}
+
 \item shear stress approximation:
 	$$(\tau_{13},\tau_{23}) = - \rho g (h-z) \nabla h$$
-\item let $\mathbf{u} = (u,v)$ be the horizontal velocity
-\item use this approximation:
+\item then horizontal velocity $\mathbf{u} = (u,v)$ satisfies this approximation:
 \begin{align*}
 \mathbf{u}_z &= 2 A |(\tau_{13},\tau_{23})|^{n-1} (\tau_{13},\tau_{23}) \\
      &= - 2 A (\rho g)^n (h-z)^n |\nabla h|^{n-1} \nabla h
 \end{align*}
-\item by integrating vertically, in the non-sliding case,
+\item by integrating vertically (non-sliding case):
     $$\mathbf{u} = - \frac{2 A (\rho g)^n}{n+1} \left[H^{n+1} - (h-z)^{n+1}\right] |\nabla h|^{n-1} \nabla h$$
-\item but mass continuity remains, $H_t = M - \left(\overline{\mathbf{u}} H\right)_x$
+\item add mass continuity: \quad $H_t = M - \left(\overline{\mathbf{u}} H\right)_x$
 \end{itemize}
 \end{frame}
 
@@ -74,14 +80,14 @@ a model which applies to
 \begin{frame}{SIA thickness equation}
 
 \begin{itemize}
-\item from last slide, we get the non-sliding, isothermal shallow ice approximation for how thickness changes:
+\item thus the non-sliding, isothermal SIA for thickness evolution:
 \begin{empheq}[box=\fbox]{equation}
 H_t = M + \Div \left(\Gamma H^{n+2} |\grad h|^{n-1} \grad h \right) \label{sia}
 \end{empheq}
 
 \vspace{-2mm}
   \begin{itemize}
-  \item[$\circ$] where $H$ is ice thickness, $h$ is ice surface elevation, $b$ is bed elevation ($h=H+b$)
+  \item[$\circ$] $H$ is ice thickness, $h$ is ice surface elevation, $b$ is bed elevation ($h=H+b$)
   \item[$\circ$] $M$ combines surface and basal mass (im)balance:
 
      accumulation if $M>0$, ablation if $M<0$
@@ -97,8 +103,7 @@ H_t = M + \Div \left(\Gamma H^{n+2} |\grad h|^{n-1} \grad h \right) \label{sia}
 \small
 \noindent good questions:
 \begin{enumerate}
-\item where does equation (1) come from?
-\item how to solve it numerically?
+\item how to solve (1) numerically?
 \item how to \emph{think} about it?
 \end{enumerate}  
 \end{column}
