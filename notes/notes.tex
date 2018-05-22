@@ -651,33 +651,33 @@ The inequality ``$\,\rho H < - \rho_w b\,$'' is called the \emph{flotation crite
 \end{equation}
 
 
-\subsection*{Steady ice shelf exact solution}  Note that both the left- and right-hand expressions in equation \eqref{ssafloat} are derivatives.  For a steady 1D ice shelf, in which $H_t=0$, van der Veen \cite{vanderVeen83} built an exact solution from this property of \eqref{ssafloat}.  That is, because the mass continuity equation \eqref{masscont} reduces to $M=(uH)_x$ in the steady case, both a velocity and a thickness can be computed \cite{vanderVeen83} which solve \eqref{ssafloat} and \eqref{masscont} simultaneously as long as $M$ is constant ($M=M_0>0$).  This exact solution depends on the ice thickness $H_g$ and velocity $u_g$ at the grounding line.  These choices determine a unique solution, the derivation of which is left to the exercises.
+\subsection*{Steady ice shelf exact solution}  For a steady 1D ice shelf, in which $H_t=0$, van der Veen \cite{vanderVeen83} built an exact solution by noting that both sides in equation \eqref{ssafloat} are derivatives.  In fact, because the mass continuity equation \eqref{masscont} also reduces to $M=(uH)_x$ in the steady case, velocity and thickness simultaneously solving \eqref{masscont} and \eqref{ssafloat} can be found when $M$ is constant ($M=M_0$).  This exact solution depends on the ice thickness $H_g$ and velocity $u_g$ at the grounding line (i.e.~at the inflow).
 
-Supposing $H_g=500$ m, $u_g = 50 \,\text{m}\,\text{a}^{-1}$, and $M_0=30 \,\text{cm}\,\text{a}^{-1}$ we get the results in Figure \ref{fig:steadyshelfprofile} from plotting program \texttt{exactshelf.m} (not shown).  We will use this exact solution to verify a numerical SSA code.  Note that driving stresses are much higher near the grounding line than away from it, and thus the highest longitudinal stresses, strain rates, and thinning rates occur near the grounding line.
+Supposing $H_g=500$ m, $u_g = 50 \,\text{m}\,\text{a}^{-1}$, and $M_0=30 \,\text{cm}\,\text{a}^{-1}$ we get the exact results shown in Figure \ref{fig:steadyshelfprofile}.  We will use this exact solution to verify a numerical SSA code.  Because driving stresses are highest near the grounding line, the highest longitudinal strain rates and thinning rates also occur there.
 
-\twofig{steadyshelfprofile}{steadyshelfvelocity}{The upper and lower surface elevation (m; left) of the exact ice shelf solution and its velocity (m/a; right); $x=0$ is the grounding line.}
+\twofig{steadyshelfprofile}{steadyshelfvelocity}{The upper and lower surface elevation (m; left) and velocity (m/a; right) of the exact ice shelf solution; $x=0$ is the grounding line.}
 
-\subsection*{Numerical solution of the SSA}  Suppose the ice thickness is a fixed function $H(x)$.  To find the velocity we must solve the nonlinear PDE \eqref{ssa} or \eqref{ssafloat} for $u(x)$.  When we do this numerically an iteration is needed because of the nonlinearity.  The simplest iterative approach is to use an initial guess at the velocity, then compute an effective viscosity, then get a new velocity solution from a linear PDE problem, and repeat until the change is as small as desired.  This is often called a ``Picard'' iteration.  Newton iteration should converge faster but it is more complicated to implement and it may require a better initial guess to converge at all.
+\subsection*{Numerical solution of the SSA}  Suppose the ice thickness is a fixed function $H(x)$.  To find the velocity we must solve the nonlinear PDE \eqref{ssa} or \eqref{ssafloat} for $u(x)$.  When we do this numerically an iteration is needed because of the nonlinearity.  The simplest iterative approach is to use an initial guess at the velocity, then compute an effective viscosity, then get a new velocity solution from a linear PDE problem, and repeat until the change is as small as desired.  This is often called a ``Picard'' iteration.  Newton iteration, which would converge faster, is more complicated to implement and may require a better initial guess to converge at all.
 
 Denote the previous velocity iterate as $u^{(k-1)}$ and the current iterate as $u^{(k)}$.  Compute $\bar \nu^{(k-1)} = B |u^{(k-1)}_x|^{1/n-1}$ and define $W^{(k-1)} = 2 \bar \nu^{(k-1)} H$.  Solving the following linear elliptic PDE for the unknown $u^{(k)}$ is a Picard iteration for \eqref{ssa}:
 \begin{equation}
    \left(W^{(k-1)} u^{(k)}_x\right)_x - C |u^{(k-1)}|^{m-1} u^{(k)} = \rho g H h_x. \label{picardssa}
 \end{equation}
-If the difference between $u^{(k-1)}$ and $u^{(k)}$ were zero then we would have a solution of \eqref{ssa}, while in practice we stop the iteration when the difference is smaller than some tolerance.
+If the difference between $u^{(k-1)}$ and $u^{(k)}$ were zero then we would have a solution of \eqref{ssa}.  In practice we stop the iteration when the difference is smaller than some tolerance.
 
-Equation \eqref{picardssa} is a linear boundary value problem.  We can write it abstractly
+Equation \eqref{picardssa} is a linear boundary value problem, written abstractly as
 \begin{equation}
   \left(W(x)\, u_x\right)_x - \alpha(x)\, u = \beta(x)  \label{innerlinear}
 \end{equation}
-where the functions $W(x)$, $\alpha(x)$, $\beta(x)$ are known.  Equation \eqref{innerlinear} applies for $x$ in an interval $[x_g,x_c]$ where $x_g$, the ``grounding line'', is a location where the velocity is known, and $x_c$ is the calving front.  Thus $u(x_g)=u_g$ and, in the ice shelf case, we also have the calving front condition (see Notes and References)
+where the functions $W(x)$, $\alpha(x)$, $\beta(x)$ are known.  Equation \eqref{innerlinear} applies for $x$ in an interval $[x_g,x_c]$ where $x_g$, the ``grounding line'', is a location where the velocity is known, and $x_c$ is the calving front.  At $x_g$ we have $u(x_g)=u_g$.  In the ice shelf case we also have the calving front condition (see Notes and References)
 \begin{equation}
   2 B H |u_x|^{1/n - 1} u_x = \frac{1}{2}\rho (1-\rho/\rho_w) g H^2  \label{calvingstress}
 \end{equation}
 at $x=x_c$.  Notice that \eqref{calvingstress} can be solved for $u_x(x_c)=\gamma$ in terms of the thickness $H(x_c)$ at the calving front.
 
-Where to get an initial guess $u^{(0)}$?  Generally this may require effort, but the choice is straightforward in our 1D case.  For grounded ice, we may assume ice is held by basal resistance only: $u^{(0)}(x) = \left(-C^{-1} \rho g H h_x\right)^{1/m}$.  For floating ice, an initial velocity iterate comes from assuming a uniform strain rate provided by the calving front condition: $u^{(0)}(x) = \gamma (x-x_g) + u_g$
+Where do we get an initial guess $u^{(0)}$?  Generally this may require effort, but the choice is straightforward in our 1D case.  For grounded ice, we may assume ice is held by basal resistance only: $u^{(0)}(x) = \left(-C^{-1} \rho g H h_x\right)^{1/m}$.  For floating ice, an initial velocity iterate comes from assuming a uniform strain rate provided by the boundary conditions: $u^{(0)}(x) = u_g + \gamma (x-x_g)$.
 
-\subsection*{Numerics of the linear boundary value problem}  Suppose equation \eqref{innerlinear} applies on $[x_g,x_c]=[0,L]$.  We choose a grid with equal spacing $\Delta x$.  For $j=1,2,\dots,J+1$ we let $x_j=(j-1)\Delta x$ so that $x_1 = 0$ and $x_{J+1} = L$ are the boundary points.
+Suppose equation \eqref{innerlinear} applies on $[x_g,x_c]=[0,L]$ and choose a grid with equal spacing $\Delta x$.  For $j=1,2,\dots,J+1$ we let $x_j=(j-1)\Delta x$ so that $x_1 = 0$ and $x_{J+1} = L$ are the boundary points.
 
 The coefficient $W(x)$ is needed on a staggered grid, for stability and accuracy reasons similar to those for the SIA diffusivity: $W_{j+1/2}$ at $x_{j+1/2} = x_j + \Delta x/2$.  Our finite difference approximation of \eqref{innerlinear} is, therefore,
 \begin{equation}
@@ -686,11 +686,7 @@ The coefficient $W(x)$ is needed on a staggered grid, for stability and accuracy
 
 For the left end boundary condition we have $u_1 = u_g$ given, which is easy to include in the linear system (below).  For the right end boundary condition we have $u_x(L)=\gamma$, which requires more thought.  First introduce a notional point $x_{J+2}$.  Now require $(u_{J+2} - u_J)/(2 \Delta x) = \gamma$, which is a centered approximation to ``$u_x(x_c)=\gamma$.''  Then, using equation \eqref{discreteinnerlinear} in the $j=J+1$ case, eliminate the $u_{J+2}$ variable.  This procedure generates the last equation in our linear system.
 
-Thus each iteration to solve the SSA stress balance requires solving a finite, $J+1$ equation, linear system of the form
-\begin{equation}
-   A \mathbf{v} = \mathbf{b}. \label{Aveqb}
-\end{equation}
-Indeed, at each location $x_1,\dots,x_{J+1}$ we can write an equation, namely a row of the matrix $A$ in \eqref{Aveqb}, involving the unknown velocities:
+Thus each iteration solves a linear system of $J+1$ equations of the form $A \mathbf{v} = \mathbf{b}$ or
 \begin{equation}
 \begin{bmatrix}
 1 &  &  &  &  \\
@@ -714,7 +710,7 @@ There are special cases for the coefficients in the last equation:
   $$A_{J+1,J} = 2 W_{J+1/2}, \quad A_{J+1,J+1} = -(2 W_{J+1/2}+\alpha_{J+1}\Delta x^2).$$
 For the right side of the last equation, $b_{J+1} = -2 \gamma \Delta x W_{J+3/2} + \beta_{J+1} \Delta x^2$.
 
-System \eqref{discretematrixform} is a \emph{tridiagonal} linear system, but there is no need to look up how to solve such a linear system, except for general knowledge.  It is fully-appropriate to hand-off the system \eqref{discretematrixform} to Matlab's linear solver, the ``backslash'' operator ($\mathbf{v} = A\, \backslash\, \mathbf{b}$), especially at this initial implementation stage.  Matlab can identify a tridiagonal system and solve it efficiently.  (In \emph{these} notes we will not worry further about solving finite linear systems.)  Thus we now have a code to solve the abstracted Picard-step problem \eqref{innerlinear} by finite differences and linear algebra, namely \texttt{flowline.m} below.
+System \eqref{discretematrixform} is a \emph{tridiagonal} linear system.  There is no need to look up how to solve such a linear system because it is fully-appropriate to hand it off to Matlab's linear solver, the ``backslash'' operator ($\mathbf{v} = A\, \backslash\, \mathbf{b}$), especially at this initial implementation stage.  Matlab can identify a tridiagonal system and solve it efficiently so these notes we will not worry further about solving finite linear systems.  Collecting these ideas yields the following code to solve the abstracted problem \eqref{innerlinear} using only finite differences and linear algebra:
 
 \minput{flowline}
 
