@@ -12,6 +12,7 @@ function [avthkerr,maxthkerr] = verifysia(J,dtyears)
 %     adaptive time stepping
 % Example:
 %   >> verifysia;
+% Calls: SIAFLAT
 
 if nargin<1, J=40; end;
 if nargin<2, dtyears=10.0; end;
@@ -51,10 +52,10 @@ shading('flat'),   axis square,   view(2),   colorbar
 title('thickness error (m)')
 
 % side-by-side comparison of numerical and exact result:
-figure(2),   subplot(121),   surf(x/1000,y/1000,H2exact),   shading('flat')
-xlabel('x (km)'),   ylabel('y (km)'),   zlabel('exact thickness (m)')
-subplot(122),   surf(x/1000,y/1000,H2approx),   shading('flat')
-xlabel('x (km)'),   ylabel('y (km)'),   zlabel('numerical thickness (m)')
+%figure(2),   subplot(121),   surf(x/1000,y/1000,H2exact),   shading('flat')
+%xlabel('x (km)'),   ylabel('y (km)'),   zlabel('exact thickness (m)')
+%subplot(122),   surf(x/1000,y/1000,H2approx),   shading('flat')
+%xlabel('x (km)'),   ylabel('y (km)'),   zlabel('numerical thickness (m)')
 
 % to make figure showing adaptive time-stepping:
 % figure(3), plot(dtlist / secpera,'o')

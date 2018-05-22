@@ -1,4 +1,5 @@
-function [T,dtav] = diffusion(Lx,Ly,J,K,Dup,Ddown,Dright,Dleft,T0,tf,F,b)
+function [T,dtav] = diffusion(Lx,Ly,J,K,Dup,Ddown,Dright,Dleft,...
+                              T0,tf,F,b)
 % DIFFUSION  Adaptive explicit method for diffusion equation
 %   T_t = F + div (D grad (T + b))
 % on rectangle (-Lx,Lx) x (-Ly,Ly) with initial condition T0 and
@@ -44,7 +45,8 @@ if nargin < 12, b = zeros(size(T0)); end  % allows use for nonflat-bed SIA case
 t = 0.0;    count = 0;
 while t < tf
    % stability condition gives time-step restriction
-   maxD = [max(max(Dup)) max(max(Ddown)) max(max(Dleft)) max(max(Dright))];
+   maxD = [max(max(Dup))   max(max(Ddown)) ...
+           max(max(Dleft)) max(max(Dright))];
    maxD = max(maxD);  % scalar maximum of D
    if maxD <= 0.0  % e.g. happens with zero thickness ice sheets
      dt = tf - t;
