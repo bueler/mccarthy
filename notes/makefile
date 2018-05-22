@@ -22,6 +22,6 @@ tmp/%.slim.m: ../mfiles/%.m
 .PHONY: clean
 
 clean:
-	@rm -f *~ *.out *.aux *.log *.blg *.snm *.toc *.nav *.vrb *.synctex.gz
+	@rm -f *~ *.out *.aux *.log *.blg *.snm *.toc *.nav *.vrb *.synctex.gz *.dvi
 	@rm -rf tmp/
 
