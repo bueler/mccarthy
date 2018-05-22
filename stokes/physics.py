@@ -80,7 +80,6 @@ def stokessolve(up,mesh,bdryids,Z,Hin,Hout,n_glen,alpha,eps,Dtyp):
     return up
 
 # return linear-interpolated surface elevation function  z = h(x)
-# FIXME  will not work in parallel
 def getsurfaceelevation(mesh,top_id):
     from scipy.interpolate import interp1d
     P1 = FunctionSpace(mesh, "CG", 1)
@@ -88,33 +87,32 @@ def getsurfaceelevation(mesh,top_id):
     # notes:  1)  bc.nodes  gives indices to mesh; is a 1D dtype=int32 numpy array
     #         2)  f = Function(P1);  bc.apply(f)  gives indicator function
     x,z = SpatialCoordinate(mesh)
-    xh = Function(P1).interpolate(x).dat.data[bc.nodes]  # 1D numpy array
-    zh = Function(P1).interpolate(z).dat.data[bc.nodes]
-    return interp1d(xh,zh,copy=False)   # default is 'linear', which is what we want
+    xh = Function(P1).interpolate(x).dat.data_with_halos[bc.nodes]  # 1D numpy array
+    zh = Function(P1).interpolate(z).dat.data_with_halos[bc.nodes]
+    # default for interp1d() is 'linear', which is what we want
+    return interp1d(xh,zh,copy=False,bounds_error=False,fill_value='extrapolate')
 
 # return linear-interpolated surface vertical displacement function  r = (delta h)(x)
-# FIXME  will not work in parallel
 def getsurfaceverticaldisplacement(mesh,top_id,r):
     from scipy.interpolate import interp1d
     P1 = FunctionSpace(mesh, "CG", 1)
     bc = DirichletBC(P1, 1.0, top_id)
     x,_ = SpatialCoordinate(mesh)
-    xh = Function(P1).interpolate(x).dat.data[bc.nodes]
-    rh = r.dat.data_ro[bc.nodes]
+    xh = Function(P1).interpolate(x).dat.data_with_halos[bc.nodes]
+    rh = r.dat.data_with_halos[bc.nodes]
     return interp1d(xh,rh,copy=False)
 
 # return linear-interpolated surface velocity functions  u(x), w(x)
-# FIXME  will not work in parallel
 def getsurfacevelocity(mesh,top_id,Z,u):
     from scipy.interpolate import interp1d
     P1 = FunctionSpace(mesh, "CG", 1)
     P1V = VectorFunctionSpace(mesh, "CG", 1)
     bc = DirichletBC(P1, 1.0, top_id)
     x,_ = SpatialCoordinate(mesh)
-    xh = Function(P1).interpolate(x).dat.data[bc.nodes]
+    xh = Function(P1).interpolate(x).dat.data_with_halos[bc.nodes]
     uP1 = Function(P1V).interpolate(u)
-    ufcn = interp1d(xh,uP1.dat.data_ro[bc.nodes,0],copy=False)
-    wfcn = interp1d(xh,uP1.dat.data_ro[bc.nodes,1],copy=False)
+    ufcn = interp1d(xh,uP1.dat.data_with_halos[bc.nodes,0],copy=False)
+    wfcn = interp1d(xh,uP1.dat.data_with_halos[bc.nodes,1],copy=False)
     return (ufcn,wfcn)
 
 # compute vertical mesh displacement, given the surface value of it, by setting
@@ -129,9 +127,7 @@ def solvevdisplacement(mesh,bdryids,deltah):
     bcs = [ DirichletBC(P1, deltah, bdryids['top']),
             DirichletBC(P1, Constant(0.0), (bdryids['base'],bdryids['inflow'])) ]
     rsoln = Function(P1)
-    solve(a == L, rsoln, bcs=bcs, options_prefix='t',
-          solver_parameters={"ksp_type": "gmres",
-                             "pc_type": "ilu"})
+    solve(a == L, rsoln, bcs=bcs, options_prefix='t', solver_parameters={})
     return rsoln
 
 def solutionstats(u,p,mesh):
@@ -163,4 +159,13 @@ def numericalerrorsslab(u,p,mesh,V,W,Hin,n_glen,alpha):
     with perr.dat.vec_ro as vperr:
         perrmax = vperr.max()[1]
     return (uerrmax,perrmax)
+
+def getranks(mesh):
+    element_rank = Function(FunctionSpace(mesh,'DG',0))
+    element_rank.dat.data[:] = mesh.comm.rank
+    element_rank.rename('element_rank')
+    vertex_rank = Function(FunctionSpace(mesh,'CG',1))
+    vertex_rank.dat.data[:] = mesh.comm.rank
+    vertex_rank.rename('vertex_rank')
+    return (element_rank,vertex_rank)
 
