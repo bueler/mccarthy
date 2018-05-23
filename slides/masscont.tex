@@ -1,7 +1,35 @@
 
 \section{mass continuity}
 
-\begin{frame}{the most basic shallow assumption}
+
+\begin{frame}{three equations for geometry change}
+
+\begin{itemize}
+\item let $a$ be the climatic (surface) mass balance function
+    \begin{itemize}
+    \item[$\circ$] $a>0$ is accumulation and $a<0$ is ablation
+    \end{itemize}
+\item let $s$ be the basal melt rate (mass balance) function
+    \begin{itemize}
+    \item[$\circ$] $s>0$ is basal melting and $s<0$ is freeze-on
+    \end{itemize}
+\item let $M=a-s$
+    \begin{itemize}
+    \item[$\circ$] ``climatic-basal mass balance function'' in glossary
+    \end{itemize}
+\item define the map-plane flux of ice,
+	$$\bq = \int_{b}^{h} (u,v)\,dz = \overline{\mathbf{U}}\,H$$
+\item the three equations for glacier geometry change:
+\begin{align*}
+&\text{surface kinematical} && h_t = a - u\big|_h h_x - v\big|_h h_y + w\big|_h  \\
+&\text{base kinematical} && b_t = s - u\big|_b b_x - v\big|_b b_y + w\big|_b  \\
+&\text{mass continuity} && H_t = M - \Div \bq \\
+\end{align*}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{the most-basic shallow assumption}
 
 \begin{columns}
 
@@ -13,8 +41,10 @@
 \begin{center}
 \alert{the surface and base of the ice are given by functions $z=h(t,x,y)$ and $z=b(t,x,y)$}
 \end{center}
+    \begin{itemize}
+    \item[$\circ$] most Stokes models make this assumption too!
+    \end{itemize}
 \item surface overhang is not allowed
-\item (and most Stokes models make this assumption too)
 \end{itemize}
 \end{column}
 
@@ -30,36 +60,18 @@
 \includegraphics[width=1.0\textwidth]{serac}
 
 \begin{center}
-\emph{not shallow!}
+\emph{not shallow! or even fluid!}
 \end{center}
 \end{column}
 \end{columns}
 \end{frame}
 
 
-\begin{frame}{three equations for geometry change}
-
-\begin{itemize}
-\item let $a$ be the climatic (surface) mass balance function;  $a>0$ corresponds to accumulation
-\item $s$ be the basal melt rate function (basal mass balance);  $s>0$ is basal melting
-\item let $M=a-s$: ``climatic-basal mass balance function'' in glossary
-\item define the map-plane flux of ice,
-	$$\bq = \int_{b}^{h} (u,v)\,dz = \overline{\mathbf{U}}\,H$$
-\item the three equations for glacier geometry change:
-\begin{align*}
-&\text{surface kinematical} && h_t = a - u\big|_h h_x - v\big|_h h_y + w\big|_h  \\
-&\text{base kinematical} && b_t = s - u\big|_b b_x - v\big|_b b_y + w\big|_b  \\
-&\text{mass continuity} && H_t = M - \Div \bq \\
-\end{align*}
-\end{itemize}
-\end{frame}
-
-
 \begin{frame}{kinematic and mass continuity equations}
 
 \begin{itemize}
-\item what does the ``most basic shallow assumption'' get you?
-\item \emph{answer}: of these three equations,
+\item what does the ``most-basic shallow assumption'' get you?
+\item \emph{answer}: for these three equations,
   \begin{itemize}
   \item[$\circ$]  surface kinematical
   \item[$\circ$]  base kinematical
@@ -68,7 +80,7 @@
 \emph{any two imply the third}
 
 \bigskip
-\item to show the above, recall:
+\item to show equivalences recall:
   \begin{itemize}
   \item[$\circ$]  the incompressibility of ice
     $$u_x + v_y + w_z = 0$$
@@ -76,31 +88,7 @@
   \scriptsize
     $$\frac{d}{dx}\left(\int_{g(x)}^{f(x)} h(x,y)\,dy\right) = f'(x) h(x,f(x)) - g'(x) h(x,g(x)) + \int_{g(x)}^{f(x)} h_x(x,y)\,dy$$
   \end{itemize}
-\end{itemize}
-\end{frame}
-
-
-\begin{frame}{kinematic and mass continuity equations 2}
-
-\begin{itemize}
-\item literature is full of incomplete calculations of these equivalences
-\item \dots usually mixed in with small-parameter arguments about shallowness
-\item most ice sheet models use the mass continuity equation
-\item \dots but they could instead use the surface kinematical equation
-\end{itemize}
-\end{frame}
-
-
-\begin{frame}{standard recipe for ice sheet models}
-
-\begin{itemize}
-\item the ingredients of a typical ice sheet model:
-  \begin{enumerate}
-  \item numerical implementation of a stress balance: compute velocity $(u,v,w)$
-  \item from the horizontal velocity $(u,v)$ and the surface balance, do time-step of mass continuity equation to get $H_t$
-  \item update surface elevation
-  \item decide on time-step from size of diffusivity $D$, and repeat at 1.
-  \end{enumerate}
+\item it's an exercise
 \end{itemize}
 \end{frame}
 
@@ -108,15 +96,45 @@
 \begin{frame}{the mass continuity equation: a summary}
 
 \begin{itemize}
-\item the \emph{mass continuity equation} is
-  $$H_t = M - \nabla \cdot (\mathbf{u} H)$$
-\item the numerical nature of this equation depends on the stress balance:
+\item literature is full of (incomplete) calculations of above equivalences, often mixed-in with shallowness arguments
+\item most ice sheet models use the mass continuity equation and the base kinematical equation
+
+\bigskip
+\item the numerical character of the \emph{mass continuity equation}
+  $$H_t = M - \nabla \cdot (\mathbf{u} H),$$
+a summary:
   \begin{itemize}
-  \item[$\circ$] the equation is a diffusion for frozen bed, large scale flows (i.e.~SIA)
-  \item[$\circ$] it is \emph{not} very diffusive for membrane stresses and no basal resistance (e.g.~SSA for ice shelves)
+  \item[$\circ$] it depends on the stress balance
+  \item[$\circ$] it is a diffusion for frozen bed, large scale flows (SIA)
+      \begin{itemize}
+      \item if your fancy Stokes model is not diffusive in this case \dots \emph{it's wrong}
+      \end{itemize}
+  \item[$\circ$] it is not very diffusive for membrane stresses and no basal resistance (e.g.~SSA for ice shelves)
   \item[$\circ$] it is diffusive for ice streams (but how much?)
-  \item[$\circ$] there is \emph{not} much helpful theory on this transport problem
-  \item[$\circ$] \dots maybe you will help find this theory!
   \end{itemize}
+
+\bigskip
+\item there is \emph{not} much helpful theory on this transport problem \dots maybe you will help find this theory!
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{standard recipe for ice sheet models}
+
+\begin{enumerate}
+  \item use stress balance to compute velocity $(u,v,w)$
+      \begin{itemize}
+      \item[$\circ$] often: $w$ from incompressibility after $(u,v)$
+      \end{itemize}
+  \item somewhere in here do other processes: thermodynamics, basal melt, calving, \dots
+  \item decide on time-step $\Delta t$ from diffusivity $D$ \dots or fixed $\Delta t$
+  \item from velocity, surface balance, and base balance do time-step of mass continuity equation to get $H_t$
+  \item update surface elevation: $h \gets h+H_t \Delta t$
+  \item repeat at 1.
+\end{enumerate}
+
+\bigskip
+\begin{itemize}
+\item this paradigm \emph{is} explicit time stepping of the whole model
 \end{itemize}
 \end{frame}

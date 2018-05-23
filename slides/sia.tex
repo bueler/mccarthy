@@ -54,11 +54,7 @@ a model which applies to
 \begin{frame}{SIA model equations}
 
 \begin{itemize}
-\item \small we take the simple slogan:\normalsize
-
-\begin{center}
-\emph{the SIA uses the formulas from slab-on-a-slope}
-\end{center}
+\item simple slogan: \emph{the SIA uses the formulas from slab-on-a-slope}
   \begin{itemize}
   \item[$\circ$] better explanation: expand the Stokes equations in aspect ratio
   \end{itemize}
@@ -87,14 +83,15 @@ H_t = M + \Div \left(\Gamma H^{n+2} |\grad h|^{n-1} \grad h \right) \label{sia}
 
 \vspace{-2mm}
   \begin{itemize}
-  \item[$\circ$] $H$ is ice thickness, $h$ is ice surface elevation, $b$ is bed elevation ($h=H+b$)
+  \item[$\circ$] $H$ is ice thickness, $h$ is ice surface elevation
+  \item[$\circ$] (also $b$ is bed elevation and $h=H+b$)
   \item[$\circ$] $M$ combines surface and basal mass (im)balance:
 
      accumulation if $M>0$, ablation if $M<0$
   \item[$\circ$] $n$ is the exponent in the Glen flow law
   \item[$\circ$] $\Gamma = 2 A (\rho g)^n / (n+2)$ is a positive constant
   \end{itemize}
-\item numerically solve (1) and you've got a usable model for \dots \emph{the Barnes ice cap} (Mahaffy, 1976)
+\item numerically solve (1) and you've got a usable model for \dots \emph{the Barnes ice cap}, a boring ice sheet (Mahaffy, 1976)
 \end{itemize}
 \medskip
 
@@ -121,35 +118,35 @@ H_t = M + \Div \left(\Gamma H^{n+2} |\grad h|^{n-1} \grad h \right) \label{sia}
 
 \small
 \begin{columns}
-\begin{column}{0.6\textwidth}
+\begin{column}{0.7\textwidth}
 \begin{itemize}
 \item to understand SIA, see heat equation
 \item recall Newton's law of cooling
 	$$\frac{dT}{dt} = -K (T-T_{\text{ambient}})$$
-where $T$ is object temperature and $K$ relates to material and geometry of object (e.g.~cup of coffee)
-\item Newton's law for segments of a rod:
+where $T$ is object temperature and $K$ relates to material and geometry of object
+\item Newton's law for segments of a rod has $T_{\text{ambient}}$ as neighbor average:
 \begin{align*}
 \frac{dT_j}{dt} &= -K \left(T_j - \frac{1}{2} (T_{j-1} + T_{j+1}) \right) \\
 	&= \frac{K}{2} \left(T_{j-1} - 2 T_j + T_{j+1}\right) 
 \end{align*}
-\item this has limit as segments shrink:
+\item the limit as segments shrink is the \emph{heat equation}:
 	$$T_t = D T_{xx}$$
 \end{itemize}
 \end{column}
 
-\begin{column}{0.4\textwidth}
-\hfill
-\includegraphics[width=0.5\textwidth]{coffee}
-\vspace{1.0in}
-\includegraphics[width=1.0\textwidth]{heatconduction}
+\begin{column}{0.3\textwidth}
+\hfill \includegraphics[width=0.75\textwidth]{coffee}
+
+\vspace{0.4in}
+\includegraphics[width=1.1\textwidth]{heatconduction}
 \end{column}
 \end{columns}
 \end{frame}
 
-\begin{frame}{analogy: SIA versus 2D heat equation}
+\begin{frame}{major analogy: SIA versus 2D heat equation}
 
 \begin{itemize}
-\item general heat eqn: $T_t = F + \Div (D\, \grad T)$
+\item general 2D heat eqn: \quad $T_t = F + \Div (D\, \grad T)$
 \item side-by-side comparison:
 
 \medskip
@@ -161,8 +158,8 @@ where $T$ is object temperature and $K$ relates to material and geometry of obje
 \medskip
 \item identify the diffusivity in the SIA:
 	$$D = {\color{red}\Gamma H^{n+2} |\grad h|^{n-1}}$$
-\item non-sliding shallow ice flow \emph{diffuses} the ice sheet
-\item ``issues'' with this analogy:
+\item non-sliding shallow ice flow \emph{diffuses} the ice sheet geometry
+\item concerns about this analogy:
   \begin{itemize}
   \item[$\circ$]  $D$ depends on solution $H(t,x,y)$
   \item[$\circ$]  $D\to 0$ at margin, where $H\to 0$
@@ -174,11 +171,14 @@ where $T$ is object temperature and $K$ relates to material and geometry of obje
 
 \subsection{finite difference numerics}
 
-\begin{frame}{numerics for heat equation: basic ideas of finite differences}
+\begin{frame}{numerics for heat equation: basic finite differences}
 
 \begin{itemize}
 \item numerical schemes for heat equation are good start for SIA
-\item for differentiable $f(x)$ and any $h$, \emph{Taylor's theorem} says
+\item only \emph{finite differences} (FD) schemes in these slides
+
+\bigskip
+\item first, for differentiable $f(x)$ \emph{Taylor's theorem} says
 	$$f(x+h) = f(x) + f'(x) h + \frac{1}{2} f''(x) h^2 + \frac{1}{3!} f'''(x) h^3 + \dots$$
 \normalsize
 \item you can replace ``$h$'' by multiples of $\Delta x$, e.g.:
@@ -188,15 +188,16 @@ f(x-\Delta x) &= f(x) - f'(x) \Delta x + \frac{1}{2} f''(x) \Delta x^2 - \frac{1
 f(x+2\Delta x) &= f(x) + 2 f'(x) \Delta x + 2 f''(x) \Delta x^2 + \frac{4}{3} f'''(x) \Delta x^3 + \dots
 \end{align*}
 \normalsize
-\item \emph{main idea}:  combine expressions like these to give approximations of derivatives, from values on a grid
+\item \emph{main idea for FD schemes}:  combine expressions like these to approximate derivatives from the values of functions on a grid
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{finite differences for partial derivatives}
+\begin{frame}{partial derivatives}
 
 \begin{itemize}
-\item we want partial derivative expressions, for example with any function $u=u(t,x)$:
+\item we want FD approximations of partial derivatives
+\item for example, with any function $u=u(t,x)$:
 \small
 \begin{align*}
 u_t(t,x) &= \frac{u(t+\Delta t,x) - u(t,x)}{\Delta t} + O(\Delta t), \\
@@ -205,12 +206,11 @@ u_x(t,x) &= \frac{u(t,x+\Delta x) - u(t,x-\Delta x)}{2\Delta x} + O(\Delta x^2),
 u_{xx}(t,x) &= \frac{u(t,x+\Delta x) - 2 u(t,x) + u(t,x-\Delta x)}{\Delta x^2} + O(\Delta x^2)
 \end{align*}
 \normalsize
-and so on
 \item sometimes we want a derivative in-between grid points:
 \small
-	$$u_x(t,x+(\Delta x/2)) = \frac{u(t,x+\Delta x) - u(t,x)}{\Delta x} + O(\Delta x^2)$$
+	$$u_x(t,x+\tfrac{\Delta x}{2}) = \frac{u(t,x+\Delta x) - u(t,x)}{\Delta x} + O(\Delta x^2)$$
 \normalsize
-\item ``$+O(h^2)$'' is better than ``$+O(h)$'' if $h$ is a small number
+\item \emph{note}: ``$+O(h^2)$'' is better than ``$+O(h)$'' if $h$ is a small number
 \end{itemize}
 \end{frame}
 
@@ -220,28 +220,25 @@ and so on
 
 \begin{itemize}
 \item consider 1D heat equation $T_t = D T_{xx}$
-\item approximately true:
+\item thus this is approximately true:
 \small
 	$$\frac{T(t+\Delta t,x) - T(t,x)}{\Delta t} \approx D\,\frac{T(t,x+\Delta x) - 2 T(t,x) + T(t,x-\Delta x)}{\Delta x^2}$$
 \normalsize
-\item the difference between the equation $T_t = D T_{xx}$ and the scheme is $O(\Delta t,\Delta x^2)$ (Morton and Mayers, 2005)
-\item notation: $(t_n,x_j)$ is a point in the time-space grid
-\item notation: $T_j^n \approx T(t_n,x_j)$  \only<2>{\hfill \alert{$\longleftarrow$ can you distinguish these?}}
-\item let $\nu = D \Delta t / (\Delta x)^2$, so ``explicit'' scheme is
+\item the difference between $T_t = D T_{xx}$ and the scheme is $O(\Delta t,\Delta x^2)$
+\item notation:
+    \begin{itemize}
+    \item[$\circ$] $(t_n,x_j)$ is a point in the time-space grid
+    \item[$\circ$] $T_j^n \approx T(t_n,x_j)$  \only<2>{\hfill \alert{$\longleftarrow$ can you distinguish these?}}
+    \end{itemize} 
+\item let $\mu = D \Delta t / (\Delta x)^2$, so ``explicit'' scheme is
 \small
-	$$T_j^{n+1} = \nu T_{j+1}^n + (1 - 2 \nu) T_j^n + \nu T_{j-1}^n$$
+	$$T_j^{n+1} = \mu T_{j+1}^n + (1 - 2 \mu) T_j^n + \mu T_{j-1}^n \phantom{sdfkj sdkfj asdlfj asldkfj asdflkj}$$
 \normalsize
-\end{itemize}
-\begin{columns}
-\begin{column}{0.55\textwidth}
-\begin{itemize}
 \item ``stencil'' at right \large $\to$ \normalsize
 \end{itemize}
-\end{column}
-\begin{column}{0.45\textwidth}
-\includegraphics[width=0.7\textwidth]{expstencil}
-\end{column}
-\end{columns}
+
+\vspace{-12mm}
+\hfill \includegraphics[width=0.28\textwidth]{expstencil}
 \end{frame}
 
 
@@ -254,11 +251,16 @@ and so on
 \item the 2D explicit scheme is
 \small
 	$$\frac{T_{jk}^{n+1} - T_{jk}^n}{\Delta t} = D\,\left(\frac{T_{j+1,k}^n - 2 T_{jk}^n + T_{j-1,k}^n}{\Delta x^2} + \frac{T_{j,k+1}^n - 2 T_{jk}^n + T_{j,k-1}^n}{\Delta y^2}\right)$$
+\normalsize
+\item which becomes a computable iteration:
+\small
+	$$T_{jk}^{n+1} = T_{jk}^n + \mu_x (T_{j+1,k}^n - 2 T_{jk}^n + T_{j-1,k}^n) + \mu_y (T_{j,k+1}^n - 2 T_{jk}^n + T_{j,k-1}^n)$$
+\normalsize
+where $\mu_x=D\Delta t/\Delta x^2$ and $\mu_y = D\Delta t/\Delta y^2$
 \end{itemize}
 
-\bigskip
 \begin{center}
-\includegraphics[width=0.35\textwidth]{exp2dstencil}
+\includegraphics[width=0.25\textwidth]{exp2dstencil}
 \end{center}
 \end{frame}
 
@@ -273,9 +275,6 @@ and so on
 \item solves $T_t = D(T_{xx} + T_{yy})$ on square $-1 < x < 1$, $-1 < y < 1$
 \item example uses initial condition $T_0(x,y) = e^{-30 r^2}$
 \item code uses ``colon notation'' to remove loops (over space)
-\item \texttt{>>  heat(1.0,30,30,0.001,20)}
-
-approximates $T$ on $30\times 30$ spatial grid, with $D=1$ and $N=20$ steps of $\Delta t = 0.001$
 \end{itemize}
 \end{frame}
 
@@ -283,10 +282,13 @@ approximates $T$ on $30\times 30$ spatial grid, with $D=1$ and $N=20$ steps of $
 \begin{frame}{the look of success}
 
 \begin{itemize}
-\item solving $T_t = D(T_{xx} + T_{yy})$ on $30\times 30$ grid
+\item \texttt{>>  heat(1.0,30,30,0.001,20)}
+
+\medskip
+solves $T_t = D(T_{xx} + T_{yy})$ for $T(t,x,y)$ with $D=1$, $30\times 30$ grid, $\Delta t = 0.001$, and $N=20$ time steps
 \end{itemize}
 
-\bigskip\bigskip
+\bigskip
 \begin{columns}
 \begin{column}{0.5\textwidth}
 initial condition $T(0,x,y)$
@@ -297,7 +299,7 @@ initial condition $T(0,x,y)$
 \end{center}
 \end{column}
 \begin{column}{0.5\textwidth}
-approximate solution $T(t,x,y)$ at $t=0.02$ with $\Delta t=0.001$ 
+\mbox{approximate solution $T(0.02,x,y)$}
 
 \bigskip
 \begin{center}
@@ -310,11 +312,9 @@ approximate solution $T(t,x,y)$ at $t=0.02$ with $\Delta t=0.001$
 
 \begin{frame}{the look of instability}
 
-\begin{itemize}
-\item both figures are from solving $T_t = D(T_{xx} + T_{yy})$ on the same space grid, but with slightly different time steps
-\end{itemize}
+results from solving $T_t = D(T_{xx} + T_{yy})$ on the \emph{same} space grid and at the \emph{same} time, but with slightly-different time steps:
 
-\bigskip\bigskip
+\bigskip
 \begin{columns}
 \begin{column}{0.5\textwidth}
 \begin{center}
@@ -339,16 +339,14 @@ approximate solution $T(t,x,y)$ at $t=0.02$ with $\Delta t=0.001$
 
 \begin{itemize}
 \item recall 1D explicit scheme had the form 
-	$$T_j^{n+1} = \nu T_{j+1}^n + (1 - 2 \nu) T_j^n + \nu T_{j-1}^n$$
+	$$T_j^{n+1} = \mu T_{j+1}^n + (1 - 2 \mu) T_j^n + \mu T_{j-1}^n$$
 \item thus the new value $u_j^{n+1}$ is an \emph{average} of the old values, \emph{if the middle coefficient is positive}:
-	$$1 - 2 \nu \ge 0 \quad \iff \quad  \frac{D\Delta t}{\Delta x^2} \le \frac{1}{2} \quad \iff \quad \Delta t \le \frac{\Delta x^2}{2 D}$$
-\item averaging is always stable because averaged wiggles are always smaller than the original wiggles
-\item this condition is a sufficient \emph{stability criterion}
-\item so:
-
-\begin{center}
-\emph{the result was unstable because the time step was too big}
-\end{center}
+	$$1 - 2 \mu \ge 0 \quad \iff \quad  \frac{D\Delta t}{\Delta x^2} \le \frac{1}{2} \quad \iff \quad \Delta t \le \frac{\Delta x^2}{2 D}$$
+    \begin{itemize}
+    \item[$\circ$] this condition is a sufficient \emph{stability criterion}
+    \end{itemize}
+\item averaging is stable because averaged wiggles are smaller than wiggles
+\item instability is because \emph{the time step is too big}
 \end{itemize}
 \end{frame}
 
@@ -358,7 +356,7 @@ approximate solution $T(t,x,y)$ at $t=0.02$ with $\Delta t=0.001$
 \minput{heatadapt}
 
 \begin{itemize}
-\item same as \texttt{heat.m} except
+\item same as \texttt{heat.m} except:
 
 \begin{center}
 \emph{choose time step from stability criterion}
@@ -370,64 +368,54 @@ approximate solution $T(t,x,y)$ at $t=0.02$ with $\Delta t=0.001$
 
 \begin{itemize}
 \item \alert{implicit} methods can be designed to be stable for \emph{any} positive time step $\Delta t$
-\end{itemize}
-
-\begin{columns}
-\begin{column}{0.7\textwidth}
-\small
-\begin{itemize}
 \item example is \emph{Crank-Nicolson} scheme $\longrightarrow$
+
+\vspace{-10mm}
+\hfill \includegraphics[width=0.35\textwidth]{cnstencil}
+
+\vspace{-7mm}
 \item has smaller error too: $O(\Delta t^2,\Delta x^2)$
-\end{itemize}
-\normalsize
-\end{column}
-\begin{column}{0.3\textwidth}
-\includegraphics[width=1.2\textwidth]{cnstencil}
-\end{column}
-\end{columns}
+\item \emph{but} you must solve linear (or nonlinear) systems of equations to take each time step
 
 \bigskip
-\begin{itemize}
-\item \emph{but} you must solve linear (or nonlinear) systems of equations to take each time step
-\medskip
 
-\item \scriptsize Donald Knuth has advice for ice sheet modelers: \begin{quote}
-\emph{We should forget about small efficiencies \dots: premature optimization is the root of all evil}.
-\end{quote}
+\small
+\item Donald Knuth has advice for ice sheet modelers:
+
+\begin{center}
+\emph{We should forget about small efficiencies \dots}
+
+\emph{premature optimization is the root of all evil}
+\end{center}
+
+\item I've followed this advice: Bueler et al.~(2005) and PISM use adaptive explicit, Bueler (2016) used implicit
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{variable diffusivity and time steps}
+\begin{frame}{variable diffusivity and staggered grids}
 
 \begin{itemize}
   \item recall the analogy: \qquad (SIA) $\leftrightarrow$ (heat eqn)
-  \item the SIA has a diffusivity which varies in space, so consider a more general heat equation:
-  		$$T_t = F + \Div \left(D(x,y) \grad T\right)$$
-  \item the explicit method is conditionally stable with the same time step restriction if we evaluate diffusivity $D(x,y)$ at \alert{staggered} grid points:
-  \scriptsize
+  \item the SIA has a diffusivity which varies in space, so consider the generalized diffusion/heat equation:
+     $$T_t = F + \Div \big(D(x,y) \grad (T+b)\big)$$
+  \item the explicit method is conditionally stable, with same condition, if we evaluate diffusivity $D(x,y)$ at \alert{staggered} grid points:
+  \small
 \begin{align*}
-\Div \left(D(x,y) \grad u\right) &\approx \frac{D_{j+1/2,k}(T_{j+1,k} - T_{j,k}) - D_{j-1/2,k}(T_{j,k} - T_{j-1,k})}{\Delta x^2} \\
-	&\qquad + \frac{D_{j,k+1/2}(T_{j,k+1} - T_{j,k}) - D_{j,k-1/2}(T_{j,k} - T_{j,k-1})}{\Delta y^2}
+\Div \left(D(x,y) \grad X\right) &\approx \frac{D_{j+1/2,k}(X_{j+1,k} - X_{j,k}) - D_{j-1/2,k}(X_{j,k} - X_{j-1,k})}{\Delta x^2} \\
+	&\qquad + \frac{D_{j,k+1/2}(X_{j,k+1} - X_{j,k}) - D_{j,k-1/2}(X_{j,k} - X_{j,k-1})}{\Delta y^2}
 \end{align*}
-\end{itemize}
+\normalsize
+where $X=T+b$
+\item in stencil at right $\longrightarrow$
+    \begin{itemize}
+    \item[] diamonds: $T,b$
+    \item[] triangles: $D$
+    \end{itemize}
 
-\vspace{-0.15in}
-\small
-\begin{columns}
-\begin{column}{0.55\textwidth}
-in stencil at right:
-\begin{itemize}
-\item[] diamonds: $T$
-\item[] triangles: $D$
+\vspace{-15mm}
+\hfill \includegraphics[width=0.3\textwidth]{diffstencil}
 \end{itemize}
-\end{column}
-\begin{column}{0.45\textwidth}
-\begin{center}
-\includegraphics[width=0.8\textwidth]{diffstencil}
-\end{center}
-\end{column}
-\end{columns}
 \end{frame}
 
 
@@ -438,7 +426,7 @@ in stencil at right:
 
 \small
 \begin{itemize}
-\item solves abstract diffusion equation $T_t = \Div \left(D(x,y)\, \grad T\right)$
+\item solves abstract diffusion equation $T_t = \Div \left(D(x,y)\, \grad (T+b)\right)$
 \item user supplies diffusivity on staggered grid
 \end{itemize}
 \end{frame}
@@ -450,16 +438,15 @@ in stencil at right:
 \begin{itemize}
 \item how do you make sure your \emph{implemented} numerical ice flow code is correct?
   \begin{itemize}
-  \item[$\circ$] \emph{technique} 1: don't make any mistakes
-  \item[$\circ$] \emph{technique} 2: compare your model with others, and hope that the outliers are the ones with errors
-  \item[$\circ$] \emph{technique} 3: build-in a comparison to an exact solution, and actually measure the numerical error $=$ \alert{verification}
+  \item[$\circ$] \emph{technique} 1 = \alert{infallibility}: don't make any mistakes
+  \item[$\circ$] \emph{technique} 2 = \alert{intercomparison}: compare your model with others, and hope that the outliers are the ones with errors
+  \item[$\circ$] \emph{technique} 3 = \alert{verification}: build-in a comparison to an exact solution, and actually measure the numerical error
   \end{itemize}
 
 \medskip
 \item where to get exact solutions for ice flow models?
   \begin{itemize}
   \item[$\circ$] textbooks: Greve and Blatter (2009), van der Veen (2013)
-  \item[$\circ$] similarity solns to SIA (Halfar 1983; Bueler et al 2005)
   \item[$\circ$] manufactured solns to thermo-coupled SIA (Bueler et al 2007)
   \item[$\circ$] flowline and cross-flow SSA solns (Bodvardsson, 1955; van der Veen, 1985; Schoof, 2006; Bueler 2014)
   \item[$\circ$] flowline Blatter solns (Glowinski and Rappaz 2003)
@@ -470,23 +457,32 @@ in stencil at right:
 \end{frame}
 
 
-\begin{frame}{an exact solution of heat equation}
+\begin{frame}{the Green's function of the heat equation}
 
 \begin{itemize}
-\item the simple heat equation in 1D with constant diffusivity $D>0$ is:
+\item recall heat equation in 1D with constant diffusivity $D>0$ is:
 	$$T_t = D T_{xx}$$
-\item many \emph{exact} solutions to the heat equation are known
-\item I'll show the Green's function solution (a.k.a.~``fundamental solution'' or ``heat kernel'')
-\item it starts at time $t=0$ with a ``delta function'' of heat at the origin $x=0$ and then it spreads out over time
-\item we find it by a method which generalizes to the SIA
+\item many exact solutions are known!
+\item Green's function solution shown below
+  \begin{itemize}
+  \item[$\circ$] a.k.a.~``fundamental solution'' or ``heat kernel''
+  \end{itemize}
+\item starts at time $t=0$ with a ``delta function'' $T(0,x)=\delta_0(x)$
+\item then it spreads out over time
 \end{itemize}
+
+\begin{center}
+\includegraphics[width=0.5\textwidth]{heatscaling}
+
+\emph{increasing time} \Large $\to$
+\end{center}
 \end{frame}
 
 
-\begin{frame}{Green's function of heat equation}
+\begin{frame}{the Green's function of the heat equation \quad 2}
 
 \begin{itemize}
-\item the solution is ``self-similar'' over time
+\item the Green's function can be found by a method which generalizes to the SIA: the solution is ``self-similar'' over time
 \item as time goes it changes shape by
   \begin{itemize}
   \item[$\circ$] shrinking the output (vertical) axis and
@@ -507,24 +503,20 @@ in stencil at right:
 \begin{frame}{similarity solutions}
 
 \begin{itemize}
-\item Green's function of heat equation in 1D is
-	$$T(t,x) = C\, t^{-1/2} e^{-x^2/(4Dt)}$$
-\item ``similarity'' variables for 1D heat equation are
+\item ``similarity'' variables for the 1D heat equation are
 	$$s \stackrel{\text{\emph{input scaling}}}{\phantom{\Big|}=\phantom{\Big|}} t^{-1/2} x, \qquad T(t,x) \stackrel{\text{\emph{output scaling}}}{\phantom{\Big|}=\phantom{\Big|}} t^{-1/2} \phi(s)$$
-\end{itemize}
-\begin{columns}
-\begin{column}{0.6\textwidth}
-\begin{itemize}
-\item \emph{1905}: Einstein discovers that the average distance traveled by particles in thermal motion scales like $\sqrt{t}$, so $s = t^{-1/2}x$ is an invariant
-\end{itemize}
-\end{column}
-\begin{column}{0.4\textwidth}
-\begin{center}
-\includegraphics[width=0.8\textwidth]{brownian}
-\end{center}
-\end{column}
-\end{columns}
+\item derive from ODE: \, $\phi(s) = C\, e^{-s^2/(4D)}$
+\item thus the Green's function of heat equation in 1D is
+	$$T(t,x) = C\, t^{-1/2} e^{-x^2/(4Dt)}$$
 
+\bigskip
+\item \begin{minipage}[t]{0.55\textwidth}
+\noindent \emph{a tangent?}: Einstein (1905) discovered that the average distance traveled by particles in thermal motion scales like $\sqrt{t}$, so $s = t^{-1/2}x$ is an invariant
+\end{minipage}
+\end{itemize}
+
+\vspace{-20mm}
+\hfill \includegraphics[width=0.3\textwidth]{brownian}
 \end{frame}
 
 
@@ -534,14 +526,20 @@ in stencil at right:
 
 \begin{itemize}
 \item \emph{1981}:  P.~Halfar discovers the similarity solution of the SIA in the case of flat bed and no surface mass balance
-\item Halfar's 2D solution (1983) for Glen flow law with $n=3$ has scalings
+  \begin{itemize}
+  \item[$\circ$] for almost 20 years no one cares, and P.~Halfar leaves the scene
+  \end{itemize}
+\item Halfar's 2D solution for Glen flow law with $n=3$ has scalings
    $$H(t,r)=t^{-1/9} \phi(s), \qquad s = t^{-1/18} r$$
-\item \dots so the diffusion of ice really slows down as the shape flattens out!
+and a simple invariant shape function $\phi(s)$
+
+\medskip
+\item immediate conclusion (\alert{movie follows}): the diffusion of ice really slows down as the shape flattens out!
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{Halfar solution to the SIA: the movie}
+\begin{frame}{Halfar solution: the movie}
 \label{slide:plothalfar}
 
 \medskip
@@ -549,7 +547,7 @@ in stencil at right:
 frames from $t=0.3$ to $t = 10^6$ years
 
 \medskip
-nearly equally-spaced in \emph{exponential} time
+nearly equally-spaced in \emph{logarithmic} time
 
 \begin{center}
 \multiinclude[format=png,graphics={width=10cm}]{anim/halfar}
@@ -557,7 +555,7 @@ nearly equally-spaced in \emph{exponential} time
 \end{frame}
 
 
-\begin{frame}{Halfar solution to the SIA: the formula}
+\begin{frame}{Halfar solution: the formula}
 
 \begin{itemize}
 \item for $n=3$ the solution formula is:
@@ -566,50 +564,48 @@ if $H_0$, $R_0$ are central height and ice cap radius
 \item \dots at the ``characteristic time''
   $$t_0 = \frac{1}{18 \Gamma} \left(\frac{7}{4}\right)^3 \frac{R_0^4}{H_0^{7}}$$
 \item it is a simple formula to use for verification!
+    \begin{itemize}
+    \item[$\circ$] it finally appears in a textbook: van der Veen (2013)
+    \end{itemize}
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{is the Halfar solution \emph{good for any modeling}?}
+\begin{frame}{is the Halfar solution useful for modelling?}
 
 \begin{itemize}
 \item John Nye and others (2000) compared different flow laws for the South Polar Cap on Mars
 \item they evaluated $\text{CO}_2$ ice and $\text{H}_2\text{O}$ ice softness parameters by comparing the long-time behavior of the corresponding Halfar solutions
 \item conclusions:
   \begin{quote}
-  \dots none of the three possible [$\text{CO}_2$] flow laws will allow a 3000-m cap, the thickness suggested by stereogrammetry, to survive for $10^7$ years, indicating that the south polar ice cap is probably not composed of pure $\text{CO}_2$ ice \dots the south polar cap probably consists of water ice, with an unknown admixture of dust.
+  \dots none of the three possible [$\text{CO}_2$] flow laws will allow a 3000-m cap, the thickness suggested by stereogrammetry, to survive for $10^7$ years, indicating that the south polar ice cap is probably not composed of pure $\text{CO}_2$ ice \dots the south polar cap probably consists of water ice, with an unknown admixture of dust
   \end{quote}
+\item direct sampling says: yup!
 \end{itemize}
 
 \end{frame}
 
 
-\begin{frame}
-  \frametitle{computing diffusivity in SIA}
+\begin{frame}{computing diffusivity in SIA}
 
 \begin{itemize}
-\item back to numerics \dots we need diffusivity $D = \Gamma H^{n+2} |\grad h|^{n-1}$ on the staggered grid
-\item various schemes proposed \small (Mahaffy, 1976; van der Veen 1999; Hindmarsh and Payne 1996)
-\item all schemes involve
+\item back to numerics \dots
+\item we need diffusivity $D = \Gamma H^{n+2} |\grad h|^{n-1}$ on the staggered grid
+\item various schemes proposed
+  \begin{itemize}
+  \item[$\circ$] Mahaffy, 1976; Hindmarsh and Payne 1996
+  \end{itemize}
+\item all schemes seek accurate diffusivity by:
   \begin{itemize}
   \item[$\circ$] averaging thickness $H$
   \item[$\circ$] differencing surface elevation $h$
-  \item[$\circ$] in a ``balanced'' way, for better accuracy,
+  \item[$\circ$] in a ``balanced'' way
   \end{itemize}
-to get the diffusivity on staggered grid (triangle below)
+\item Mahaffy stencil is compact $\longrightarrow$
 \end{itemize}
 
-\begin{columns}
-\begin{column}{0.65\textwidth}
-\begin{itemize}
-\item Mahaffy stencil \large $\to$ \normalsize
-\end{itemize}
-\end{column}
-
-\begin{column}{0.35\textwidth}
-  \includegraphics[width=1.0\textwidth]{mahaffystencil}
-\end{column}
-\end{columns}
+\vspace{-10mm}
+\hfill  \includegraphics[width=0.3\textwidth]{mahaffystencil}
 \end{frame}
 
 
@@ -626,7 +622,7 @@ to get the diffusivity on staggered grid (triangle below)
 \label{slide:verifysia}
 
 \begin{columns}
-\begin{column}{0.6\textwidth}
+\begin{column}{0.55\textwidth}
 \scriptsize
 \begin{verbatim}
 >> verifysia(20)
@@ -643,14 +639,15 @@ average abs error            = 1.059
 maximum abs error            = 109.466
 \end{verbatim}
 \normalsize
-
-\includegraphics[width=0.8\textwidth]{siaerror}
 \end{column}
+\begin{column}{0.45\textwidth}
 
-\begin{column}{0.4\textwidth}
-\vspace{4cm}
+\medskip
+\includegraphics[width=1.0\textwidth]{siaerror}
 
-\includegraphics[width=1.0\textwidth]{eismintone}
+\bigskip\medskip
+
+\includegraphics[width=0.85\textwidth]{eismintone}
 
 \scriptsize \emph{figure 2 in Huybrechts et al.~(1996)}
 \end{column}
@@ -660,18 +657,22 @@ maximum abs error            = 109.466
 
 \begin{frame}{demonstrate robustness}
 
-\texttt{roughice.m} sets-up the nasty initial state at left and then calls \texttt{siaflat.m} to evolve it for 50 years \dots it becomes nice dome at right
-\medskip
+\begin{itemize}
+\item \texttt{roughice.m} sets-up the nasty initial state at left
+\item calls \texttt{siaflat.m} to evolve it for 50 years \dots adaptive time steps!
+\item get nice dome at right
+\end{itemize}
 
 \begin{columns}
 \begin{column}{0.5\textwidth}
-\includegraphics[width=1.0\textwidth]{roughinitial}
+\includegraphics[width=0.85\textwidth]{roughinitial}
 \end{column}
 \begin{column}{0.5\textwidth}
-\includegraphics[width=1.0\textwidth]{roughfinal}
+\hfill \includegraphics[width=0.85\textwidth]{roughfinal}
 \end{column}
 \end{columns}
 
+\vspace{-2mm}
 \begin{center}
 \includegraphics[width=0.4\textwidth]{roughtimesteps}
 \end{center}
@@ -688,7 +689,7 @@ maximum abs error            = 109.466
   \item[$\circ$] allow non-flat bed (so $H\ne h$),
   \item[$\circ$] calve any ice that is floating
   \end{itemize}
-\item this makes a good exercise \dots only 10 additional lines \dots
+\item makes a good exercise \dots only add 10 new lines of code
 \item results from this \emph{toy} Antarctic flow model, a 2000 model year run on a $\Delta x=50$ km grid; runtime a few seconds
 \end{itemize}
 

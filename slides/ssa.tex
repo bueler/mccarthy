@@ -4,7 +4,7 @@
 
 \subsection{shallow shelf aprx (SSA)}
 
-\begin{frame}{flow model II: shallow shelf approximation (SSA) stress balance}
+\begin{frame}{flow model II: shallow shelf approximation (SSA)}
   
 SSA model applies very well to \alert{ice shelves}
 \begin{itemize}
@@ -12,27 +12,27 @@ SSA model applies very well to \alert{ice shelves}
 \item \dots and away from calving fronts
 \end{itemize}
 
-\bigskip\bigskip
+\bigskip
 
 \begin{center}
-  \includegraphics[width=0.6\textwidth]{iceshelfedge}
+  \includegraphics[width=0.7\textwidth]{iceshelfedge}
 
-\tiny Ekstr\"om ice shelf(Hans Grobe)
+\tiny Ekstr\"om ice shelf (Hans Grobe)
 \end{center}
 \end{frame}
 
 
-\begin{frame}{shallow shelf approximation stress balance 2}
+\begin{frame}{application of SSA to ice streams}
 
 SSA also applies reasonably well to \alert{ice streams}
 \begin{itemize}
 \item \dots with modest bed topography
-\item \dots and weak bed strength\footnote{energy conservation (esp.~ice temperature and basal melt) and subglacial hydrology (esp.~subglacial water pressure) are major aspects of ice stream flow \dots but not addressed here}
+\item \dots and weak bed strength\footnote{energy conservation (esp.~ice temperature and basal melt) and subglacial hydrology (esp.~subglacial water pressure) are major aspects of ice stream flow \dots but not addressed here!}
 \item imperfect near shear margins and grounding lines
 \end{itemize}
 
 \begin{center}
-  \includegraphics[width=0.6\textwidth]{siple}
+  \includegraphics[width=0.5\textwidth]{siple}
 
 \tiny surface velocity for Siple Coast ice streams, Antarctica 
 \end{center}
@@ -86,9 +86,14 @@ Jakobshavns Isbrae (\textbf{a}) and Whillans Ice Stream (\textbf{b}); plotted wi
 \item the {\color{blue} blue term} is basal resistance
 \item the {\color{green} green term} is  driving stress
 \item derived originally by Morland (1987), MacAyeal (1989)
-\item \emph{how to think about this equation}?
-\item \emph{how do you solve it numerically}?
 \end{itemize}
+
+\bigskip
+\noindent once again, good questions:
+\begin{enumerate}
+\item how to solve (2) numerically?
+\item how to \emph{think} about it?
+\end{enumerate}
 \end{frame}
 
 
@@ -376,30 +381,44 @@ lines below are a convergence analysis of \texttt{testshelf.m}, which calls \tex
 \end{itemize}
 
 \begin{center}
-  \includegraphics[width=0.5\textwidth]{rossquiver} \quad  \includegraphics[width=0.45\textwidth]{rossscatter}
+\includegraphics[width=0.45\textwidth]{rossquiver}  \hfill  \includegraphics[width=0.45\textwidth]{rossscatter}
 \end{center}
 \end{frame}
-
 
 \begin{frame}{numerical solution of stress balances: a summary}
 
 \begin{itemize}
 \item stress balance equations (e.g.~SSA or Stokes) determine velocity from geometry and boundary conditions
+\item for ice the equations are nonlinear so iteration is necessary
   \begin{itemize}
-  \item[$\circ$] nonlinear so iteration is necessary
-  \item[$\circ$] at each iteration a sparse matrix ``inner'' problem is solved \dots give it to a matrix solver software package
+  \item[$\circ$] at each iteration a sparse matrix ``inner'' problem is solved
+  \item[$\circ$] \alert{give it to a linear algebra package}
+  \item[$\circ$] don't write it yourself
   \end{itemize}
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{conclusion: general principles}
+\section{conclusions}
+
+\begin{frame}{conclusion: best practices for numerical modeling}
 
 \begin{itemize}
-\item \alert{learn a version-control system} (\texttt{git})
-\item \alert{modularize your codes}
-\item \alert{test the parts, and make testing repeatable} (\texttt{make test})
-\item \alert{if you are stuck, write documentation for what you have}
+\item learn a version-control system \hfill \alert{\texttt{git}}
+\item put your project on a public host from the beginning
+  \begin{itemize}
+  \item[$\circ$] to hell with your paranoid advisor \hfill \alert{\texttt{github.com}}
+  \end{itemize}
+\item modularize your codes
+\item test the parts
+  \begin{itemize}
+  \item[$\circ$] make testing easily repeatable \hfill \alert{\texttt{make test}}
+  \end{itemize}
+\item if you are stuck:
+  \begin{itemize}
+  \item[$\circ$] write documentation for what you have
+  \item[$\circ$] go find exact solutions and literature about submodels
+  \end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -407,16 +426,18 @@ lines below are a convergence analysis of \texttt{testshelf.m}, which calls \tex
 \begin{frame}{conclusion: a last take-away}
 \begin{itemize}
 \item this thing
+
+\vspace{-10mm}
 \begin{center}
-\includegraphics[width=0.3\textwidth]{computer}
+\includegraphics[width=0.5\textwidth]{computer}
 \end{center}
-\alert{does not know what you \emph{intend}}, i.e.~your physical modelling goal
+\alert{does not know what you \emph{intend}}, your physical modelling goal
    \begin{itemize}
    \item[$\circ$] it does ``know'' your discrete equations, the program you wrote
    \end{itemize}
 
 \bigskip
-\item you \emph{can} aspire for your computer to ``know'' your continuum model, the one that you write as equations with derivatives
+\item you \emph{can} aspire for your computer to ``know'' your continuum model, the one that you write as PDEs
    \begin{itemize}
    \item[$\circ$] achieve this through verification with exact solutions
    \end{itemize}
