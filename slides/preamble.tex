@@ -178,26 +178,19 @@ scope: I will cover these
 \begin{frame}{ice is a slow, shear-thinning fluid}
 
 \begin{itemize}
-\item ice fluid is
-
-\smallskip
-  \begin{tabular}{lc}
-  \emph{slow}\,: & $\rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) \approx 0$ \\
-  \emph{non-Newtonian}\,: & viscosity $\nu$ is not constant
-  \end{tabular}
-
-\bigskip
-\item ``slow'':
-  $$\rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) \approx 0 \qquad \iff \qquad \begin{pmatrix} \text{forces of inertia} \\ \text{are neglected} \end{pmatrix}$$
-
-\medskip
-\item ice is non-Newtonian in a ``shear-thinning'' way
-  \begin{itemize}
-  \item[$\circ$] higher strain rates means lower viscosity
-  \end{itemize}
+\item ice fluid is \emph{slow} and \emph{non-Newtonian}
+    \begin{itemize}
+    \item[$\circ$] ``slow'' is a technical term:
+      $$\rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) \approx 0 \qquad \iff \qquad \begin{pmatrix} \text{forces of inertia} \\ \text{are neglected} \end{pmatrix}$$
+    \item[$\circ$] ice is non-Newtonian in a ``shear-thinning'' way
+        \begin{itemize}
+        \item higher strain rates means lower viscosity
+        \item viscosity $\nu$ is not constant
+        \end{itemize}
+    \end{itemize}
 
 \bigskip
-\item the standard model is Glen-law Stokes:
+\item thus the standard model is Glen-law Stokes:
 \begin{align*}
 \nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \\
 0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \mathbf{g} &&\text{\emph{stress balance}} \\
@@ -212,21 +205,18 @@ scope: I will cover these
 
 \begin{itemize}
 \item note \emph{no time derivatives} in Stokes model:
-\scriptsize
+\small
 \begin{align*}
 \nabla \cdot \mathbf{u} &= 0 \\
 0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \mathbf{g} \\
 \mathbf{D}_{ij} &= A \tau^{n-1} \tau_{ij}
 \end{align*}
 \normalsize
-\item thus a time-stepping ice sheet code
+\item thus a time-stepping ice sheet code recomputes the full velocity field at every time step
   \begin{itemize}
-  \item[$\circ$] recomputes the full velocity field at every time step, and
-  \item[$\circ$] does not require velocity from the previous time step\footnote{to contradict Bob Dylan: to be a glacier forecaster you don't need to know which way the wind blows \dots}
+  \item[$\circ$] it does not require velocity from the previous time step\footnote{you don't need \dots to know which way the wind blows}
   \end{itemize}
-
-\medskip
-\item because there is no memory of previous velocity, velocity is a ``diagnostic'' output, not needed for (e.g.) restarting the model
+\item because there is no memory of it, velocity is a ``diagnostic'' output not needed for starting or restarting the model
 \end{itemize}
 \end{frame}
 
@@ -234,7 +224,7 @@ scope: I will cover these
 \begin{frame}{plane flow Stokes}
 
 \begin{itemize}
-\item suppose we work in a $x,z$ plane, such as the centerline of a glacier, \emph{or} in a cross-flow plane
+\item suppose we work in a $x,z$ plane, such as the centerline of a glacier, or a cross-flow plane
 \item now the $n=3$ Stokes equations say
 \begin{empheq}[]{align}
 u_x + w_z &= 0 &&\text{\emph{incompressibility}}\notag \\
@@ -339,40 +329,26 @@ Velocity profile of the Athabasca Glacier, Canada, derived from inclinometry (Sa
 
 \begin{frame}{mass conservation}
 
-\begin{itemize}
-\item \emph{Q}: having computed the velocity $u=u(t,x,z)$ \dots so what?
-\item \emph{A}: velocity moves the ice around to determine new ice shape
-
-\bigskip
-\item we need to add \alert{mass conservation}
-\item suppose, instead of slab-on-a-slope, that our ice flow has variable thickness $H(t,x)$
-\item compute the vertical average of velocity:
-	$$\bar u(t,x) = \frac{1}{H}\int_0^{H} u(t,x,z)\,dz$$
-\end{itemize}
-\end{frame}
-
-
-\begin{frame}{mass conservation \quad 2}
-
-\begin{columns}
-\begin{column}{0.6\textwidth}
 \small
 \begin{itemize}
-\item $M(x)$ is climatic mass balance
-\item consider change of area in the figure:
-	$$\frac{dA}{dt} = \int_{x_1}^{x_2} M(x)\,dx + \bar u_1 H_1 - \bar u_2 H_2$$
-\item assume width $dx=x_2-x_1$ is small so $A\approx dx\, H$
-\item divide equation for $dA/dt$ by $dx$ and get
-   $$H_t = M - \left(\bar u H\right)_x$$
-\item this is a \emph{mass continuity equation}
-\item $A$ in 2D becomes $V$ (volume) in 3D
-\end{itemize}
-\end{column}
-\begin{column}{0.4\textwidth}
-\includegraphics[width=1.0\textwidth]{slabmasscontfig}
-\end{column}
-\end{columns}
+\item[Q:] having computed the velocity $u=u(t,x,z)$ \dots so what?
+\item[A:] velocity partly determines the new ice shape through \alert{mass conservation}
+\item suppose our ice has variable thickness $H(t,x)$
+\item define the vertical average of velocity:
+	$$\bar U(t,x) = \frac{1}{H}\int_0^{H} u(t,x,z)\,dz \phantom{sdlj asdlbj asldbfj asdlfj}$$
 
+\vspace{-20mm}
+\hfill \includegraphics[width=0.3\textwidth]{slabmasscontfig}
+\item with climatic mass balance $M(x)$, consider change of area in the figure:
+	$$\frac{dA}{dt} = \int_{x_1}^{x_2} M(x)\,dx + \bar U_1 H_1 - \bar U_2 H_2$$
+
+    \vspace{-2mm}
+    \begin{itemize}
+    \item[$\circ$] area $A$ in 2D becomes volume $V$ in 3D
+    \end{itemize}
+\item assume width $dx=x_2-x_1$ is small, so $A\approx dx\, H$, and divide by $dx$ to get the  \emph{mass continuity (conservation) equation}
+   $$H_t = M - \left(\bar U H\right)_x$$
+\end{itemize}
 \end{frame}
 
 
@@ -381,15 +357,17 @@ Velocity profile of the Athabasca Glacier, Canada, derived from inclinometry (Sa
 \begin{itemize}
 \item from slab-on-slope velocity formula in $u_0=0$ case,
 \begin{align*}
-\bar u H &= \int_0^H \frac{1}{2} A (\rho g \sin\alpha)^3  \left(H^4 - (H-z)^4\right)\,dz \\
+\bar U H &= \int_0^H \frac{1}{2} A (\rho g \sin\alpha)^3  \left(H^4 - (H-z)^4\right)\,dz \\
 	&= \frac{2}{5} A (\rho g \sin\alpha)^3 H^5
 \end{align*}
 \item note $\sin \alpha \approx \tan\alpha = - h_x$
-\item combine with mass continuity $H_t = M - \left(\bar u H\right)_x$ to get:
+\item combine with mass continuity $H_t = M - \left(\bar U H\right)_x$ to get:
   $$H_t = M + \left(\frac{2}{5} (\rho g)^5 A H^5 |h_x|^2 h_x\right)_x$$
 
 \medskip
-\item this is the ``shallow ice approximation'' (SIA) \dots on next slides
-\item this is a very rough explanation of the SIA!
+\item this is the ``shallow ice approximation'' (SIA)
+    \begin{itemize}
+    \item[$\circ$] it's a very rough explanation of it
+    \end{itemize}
 \end{itemize}
 \end{frame}

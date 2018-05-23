@@ -18,9 +18,9 @@
 \begin{frame}{regarding ``shallow''}
 
 \begin{itemize}
-\item in \alert{red} is a no-vertical-exaggeration Greenland cross section
+\item in \alert{red} is a Greenland cross section
   \begin{itemize}
-  \item[$\circ$] width = 760 km, thickness = 3200 m; at $71^\circ$ N
+  \item[$\circ$] at $71^\circ$ N: \qquad width = 760 km, thickness = 3200 m
   \end{itemize}
 \item green and blue: standard vertically-exaggerated cross section
 \end{itemize}
@@ -82,30 +82,24 @@ H_t = M + \Div \left(\Gamma H^{n+2} |\grad h|^{n-1} \grad h \right) \label{sia}
 \vspace{-2mm}
   \begin{itemize}
   \item[$\circ$] $H$ is ice thickness, $h$ is ice surface elevation
-  \item[$\circ$] (also $b$ is bed elevation and $h=H+b$)
-  \item[$\circ$] $M$ combines surface and basal mass (im)balance:
-
-     accumulation if $M>0$, ablation if $M<0$
-  \item[$\circ$] $n$ is the exponent in the Glen flow law
-  \item[$\circ$] $\Gamma = 2 A (\rho g)^n / (n+2)$ is a positive constant
+  \item[$\circ$] \dots also $b$ is bed elevation and $h=H+b$
+  \item[$\circ$] $M$ combines surface and basal mass (im)balance
+  \item[$\circ$] $\Gamma = 2 A (\rho g)^n / (n+2)$ is a constant
   \end{itemize}
-\item numerically solve (1) and you've got a usable model for \dots \emph{the Barnes ice cap}, a boring ice sheet (Mahaffy, 1976)
+\item \begin{minipage}[t]{0.53\textwidth}
+numerically solve (1) and you have a usable model for \dots \emph{the Barnes ice cap}, a boring ice sheet (Mahaffy, 1976) \hfill $\longrightarrow$
+\end{minipage}
 \end{itemize}
-\medskip
+\bigskip \bigskip
 
-\begin{columns}
-\begin{column}{0.7\textwidth}
-\small
 \noindent good questions:
-\begin{enumerate}
-\item how to solve (1) numerically?
-\item how to \emph{think} about it?
-\end{enumerate}  
-\end{column}
-\begin{column}{0.3\textwidth}
-\includegraphics[width=0.8\textwidth]{mahaffy-profiles}
-\end{column}
-\end{columns}
+\begin{itemize}
+\item[] how to solve (1) numerically?
+\item[] how to \emph{think} about it?
+\end{itemize}
+
+\vspace{-43mm}
+\hfill \includegraphics[width=0.34\textwidth]{mahaffy-profiles}
 \end{frame}
 
 
@@ -169,7 +163,7 @@ where $T$ is object temperature and $K$ relates to material and geometry of obje
 
 \begin{itemize}
 \item numerical schemes for heat equation are good start for SIA
-\item only \emph{finite differences} (FD) schemes in these slides
+\item only \emph{finite difference} (FD) schemes in these slides
 
 \bigskip
 \item first, for differentiable $f(x)$ \emph{Taylor's theorem} says
@@ -364,10 +358,10 @@ results from solving $T_t = D(T_{xx} + T_{yy})$ on the \emph{same} space grid an
 \item \alert{implicit} methods can be designed to be stable for \emph{any} positive time step $\Delta t$
 \item example is \emph{Crank-Nicolson} scheme $\longrightarrow$
 
-\vspace{-10mm}
+\vspace{-7mm}
 \hfill \includegraphics[width=0.35\textwidth]{cnstencil}
 
-\vspace{-7mm}
+\vspace{-5mm}
 \item has smaller error too: $O(\Delta t^2,\Delta x^2)$
 \item \emph{but} you must solve linear (or nonlinear) systems of equations to take each time step
 
@@ -377,12 +371,14 @@ results from solving $T_t = D(T_{xx} + T_{yy})$ on the \emph{same} space grid an
 \item Donald Knuth has advice for ice sheet modelers:
 
 \begin{center}
-\emph{We should forget about small efficiencies \dots}
+\emph{\dots forget about small efficiencies \dots}
 
 \emph{premature optimization is the root of all evil}
 \end{center}
 
-\item I've followed this advice: Bueler et al.~(2005) and PISM use adaptive explicit, Bueler (2016) used implicit
+    \begin{itemize}
+    \item[$\circ$] I've followed this advice: Bueler et al.~(2005) and PISM use adaptive explicit, Bueler (2016) used implicit    
+    \end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -390,10 +386,10 @@ results from solving $T_t = D(T_{xx} + T_{yy})$ on the \emph{same} space grid an
 \begin{frame}{variable diffusivity and staggered grids}
 
 \begin{itemize}
-  \item recall the analogy: \qquad (SIA) $\leftrightarrow$ (heat eqn)
-  \item the SIA has a diffusivity which varies in space, so consider the generalized diffusion/heat equation:
+  \item since SIA has diffusivity which varies in space \dots
+  \item consider the generalized diffusion/heat equation:
      $$T_t = F + \Div \big(D(x,y) \grad (T+b)\big)$$
-  \item the explicit method is conditionally stable, with same condition, if we evaluate diffusivity $D(x,y)$ at \alert{staggered} grid points:
+  \item an explicit method is conditionally stable, with same condition, if we evaluate diffusivity $D(x,y)$ at \alert{staggered} grid points:
   \small
 \begin{align*}
 \Div \left(D(x,y) \grad X\right) &\approx \frac{D_{j+1/2,k}(X_{j+1,k} - X_{j,k}) - D_{j-1/2,k}(X_{j,k} - X_{j-1,k})}{\Delta x^2} \\
@@ -613,6 +609,8 @@ if $H_0$, $R_0$ are central height and ice cap radius
 
 \begin{columns}
 \begin{column}{0.55\textwidth}
+\begin{itemize}
+\item run \texttt{siaflat.m} using Halfar solution for verification:
 \scriptsize
 \begin{verbatim}
 >> verifysia(20)
@@ -629,6 +627,10 @@ average abs error            = 1.059
 maximum abs error            = 109.466
 \end{verbatim}
 \normalsize
+
+\medskip
+\item caution \dots how much more effort is halving the grid spacing?
+\end{itemize}
 \end{column}
 \begin{column}{0.45\textwidth}
 

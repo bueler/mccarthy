@@ -23,7 +23,7 @@
 \begin{align*}
 &\text{surface kinematical} && h_t = a - u\big|_h h_x - v\big|_h h_y + w\big|_h  \\
 &\text{base kinematical} && b_t = s - u\big|_b b_x - v\big|_b b_y + w\big|_b  \\
-&\text{mass continuity} && H_t = M - \Div \bq \\
+&\text{mass continuity} && H_t = M - \Div \bq
 \end{align*}
 \end{itemize}
 \end{frame}
@@ -39,12 +39,13 @@
 \item \emph{all} make one assumption not required in Stokes:
 
 \begin{center}
-\alert{the surface and base of the ice are given by functions $z=h(t,x,y)$ and $z=b(t,x,y)$}
+\alert{the surface and base of the ice are given by functions}
 \end{center}
     \begin{itemize}
-    \item[$\circ$] most Stokes models make this assumption too!
+    \item[$\circ$] namely $z=h(t,x,y)$ and $z=b(t,x,y)$
+    \item[$\circ$] surface overhang is not allowed
+    \item[$\circ$] most Stokes models make this assumption too
     \end{itemize}
-\item surface overhang is not allowed
 \end{itemize}
 \end{column}
 
@@ -70,17 +71,18 @@
 \begin{frame}{kinematic and mass continuity equations}
 
 \begin{itemize}
-\item what does the ``most-basic shallow assumption'' get you?
-\item \emph{answer}: for these three equations,
-  \begin{itemize}
-  \item[$\circ$]  surface kinematical
-  \item[$\circ$]  base kinematical
-  \item[$\circ$]  mass continuity
-  \end{itemize}
-\emph{any two imply the third}
+\item[Q:] what does the ``most-basic shallow assumption'' get you?
+\item[A:] any two of these three equations imply the third:
+\small
+\begin{align*}
+&\text{surface kinematical} && h_t = a - u\big|_h h_x - v\big|_h h_y + w\big|_h  \\
+&\text{base kinematical} && b_t = s - u\big|_b b_x - v\big|_b b_y + w\big|_b  \\
+&\text{mass continuity} && H_t = M - \Div \bq
+\end{align*}
+\normalsize
 
 \bigskip
-\item to show equivalences recall:
+\item to show the equivalences recall:
   \begin{itemize}
   \item[$\circ$]  the incompressibility of ice
     $$u_x + v_y + w_z = 0$$
@@ -96,25 +98,25 @@
 \begin{frame}{the mass continuity equation: a summary}
 
 \begin{itemize}
-\item literature is full of (incomplete) calculations of above equivalences, often mixed-in with shallowness arguments
 \item most ice sheet models use the mass continuity equation and the base kinematical equation
 
 \bigskip
-\item the numerical character of the \emph{mass continuity equation}
+\item regarding how to think about the \emph{mass continuity equation}
   $$H_t = M - \nabla \cdot (\mathbf{u} H),$$
 a summary:
   \begin{itemize}
-  \item[$\circ$] it depends on the stress balance
-  \item[$\circ$] it is a diffusion for frozen bed, large scale flows (SIA)
+  \item[$\circ$] its character depends on the stress balance
+  \item[$\circ$] it \emph{is} a transport equation
+  \item[$\circ$] \dots but it is a diffusion for frozen bed, large scale flows (SIA)
       \begin{itemize}
       \item if your fancy Stokes model is not diffusive in this case \dots \emph{it's wrong}
       \end{itemize}
-  \item[$\circ$] it is not very diffusive for membrane stresses and no basal resistance (e.g.~SSA for ice shelves)
-  \item[$\circ$] it is diffusive for ice streams (but how much?)
+  \item[$\circ$] it is not very diffusive for membrane stresses and low basal resistance (e.g.~SSA for ice shelves)
+  \item[$\circ$] additional mass continuity equations are needed for liquid water on surface and base \dots with much shorter time scales \dots which gets complicated
   \end{itemize}
 
-\bigskip
-\item there is \emph{not} much helpful theory on this transport problem \dots maybe you will help find this theory!
+\medskip
+\item there is \emph{not} much helpful theory on the transport problems in glaciology \dots maybe you will help find this theory!
 \end{itemize}
 \end{frame}
 
