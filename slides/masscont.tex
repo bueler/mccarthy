@@ -124,12 +124,12 @@ a summary:
 \begin{frame}{standard recipe for ice sheet models}
 
 \begin{enumerate}
-  \item use stress balance to compute velocity $(u,v,w)$
+  \item use stress balance to compute velocity
       \begin{itemize}
-      \item[$\circ$] often: $w$ from incompressibility after $(u,v)$
+      \item[$\circ$] often: first get $(u,v)$, then $w$ from incompressibility
       \end{itemize}
   \item somewhere in here do other processes: thermodynamics, basal melt, calving, \dots
-  \item decide on time-step $\Delta t$ from diffusivity $D$ \dots or fixed $\Delta t$
+  \item decide on time-step $\Delta t$ from diffusivity $D$ \hfill (\emph{or: fixed} $\Delta t$)
   \item from velocity, surface balance, and base balance do time-step of mass continuity equation to get $H_t$
   \item update surface elevation: $h \gets h+H_t \Delta t$
   \item repeat at 1.

@@ -24,7 +24,7 @@ SSA model applies very well to \alert{ice shelves}
 SSA also applies reasonably well to \alert{ice streams}
 \begin{itemize}
 \item \dots with modest bed topography
-\item \dots and weak bed strength\footnote{energy conservation (esp.~ice temperature and basal melt) and subglacial hydrology (esp.~subglacial water pressure) are major aspects of ice stream flow \dots but not addressed here!}
+\item \dots and weak bed strength\footnote{energy conservation (esp.~ice temperature and basal melt rate) and subglacial hydrology (esp.~subglacial water pressure) are major aspects of ice stream flow \dots but not addressed here!}
 \item imperfect near shear margins and grounding lines
 \end{itemize}
 
@@ -36,36 +36,38 @@ SSA also applies reasonably well to \alert{ice streams}
 \end{frame}
 
 
-\begin{frame}{what is, \emph{and is not}, an ice stream?}
+\begin{frame}{but what is, \emph{and is not}, an ice stream?}
 
 \begin{columns}
-\begin{column}{0.6\textwidth}
-\begin{itemize}
-\item ice streams 
-  \small
-  \begin{itemize}
-  \item[$\circ$] fast surface speed (up to $1 \,\text{m}\,\text{a}^{-1}$)
-  \item[$\circ$] have concentrated vertical shear in thin layer near base (``sliding'')
-  \end{itemize}
-  \normalsize
-\item outlet glaciers
-  \begin{itemize}
-  \item[$\circ$] fast surface speed (up to $10 \,\text{km}\,\text{a}^{-1}$)
-  \item[$\circ$] uncertain how much is sliding
-  \item[$\circ$] substantial vertical shear ``up'' in the ice column,
-  \item[$\circ$] not-at-all flat bed topography
-  \item[$\circ$] soft, temperate ice may play a big role
-  \end{itemize} 
-\item \alert{few simplifying assumptions are appropriate for outlet glaciers}
-\end{itemize}
-\end{column}
-
 \begin{column}{0.4\textwidth}
 \includegraphics[width=1.0\textwidth]{streamisbrae}
 
 \bigskip
 \scriptsize 
 Jakobshavns Isbrae (\textbf{a}) and Whillans Ice Stream (\textbf{b}); plotted without vertical exaggeration (\tiny Truffer and Echelmeyer 2003)\scriptsize)
+\end{column}
+\begin{column}{0.6\textwidth}
+\begin{itemize}
+\item[a.] outlet glaciers:
+  \begin{itemize}
+  \item fast surface speed (up to $10 \,\text{km}\,\text{a}^{-1}$)
+  \item uncertain how much is sliding
+  \item vertical shear in much of ice column
+  \item \emph{not} flat bed topography
+  \item soft temperate ice may play big role
+  \item \alert{simplifications are dubious}
+  \end{itemize}
+
+\medskip
+\item[b.] ice streams:
+  \small
+  \begin{itemize}
+  \item fast surface speed (up to $1 \,\text{km}\,\text{a}^{-1}$)
+  \item very concentrated vertical shear in thin layer near base (``sliding'')
+  \item cold ice nearly down to bed
+  \end{itemize}
+  \normalsize
+\end{itemize}
 \end{column}
 \end{columns}
 \end{frame}
@@ -75,21 +77,24 @@ Jakobshavns Isbrae (\textbf{a}) and Whillans Ice Stream (\textbf{b}); plotted wi
 
 \begin{itemize}
 \item only plane flow case (``flow line'') shown here
-\item the stress balance equation determines velocity (\emph{ice stream case}):
+\item the stress balance equation, ice stream case:
 \begin{empheq}[box=\fbox]{equation}
   \left({\color{red}2 A^{-1/n} H |u_x|^{1/n - 1} u_x}\right)_x - {\color{blue}C|u|^{m-1}u} = {\color{green}\rho g H h_x} \label{ssa}
 \end{empheq}
 \item the {\color{red} red term} inside parentheses is the vertically-integrated ``longitudinal'' or ``membrane'' stress
-\item the {\color{blue} blue term} is basal resistance
+\item the {\color{blue} blue term} is basal resistance; $C=0$ in ice shelf
 \item the {\color{green} green term} is  driving stress
+
+\medskip
+\item this equation determines velocity $u$
 \item derived originally by Morland (1987), MacAyeal (1989)
 \end{itemize}
 
 \bigskip
 \noindent once again, good questions:
 \begin{enumerate}
-\item how to solve (2) numerically?
-\item how to \emph{think} about it?
+\item[] how to solve (2) numerically?
+\item[] how to \emph{think} about it?
 \end{enumerate}
 \end{frame}
 
@@ -98,15 +103,26 @@ Jakobshavns Isbrae (\textbf{a}) and Whillans Ice Stream (\textbf{b}); plotted wi
 
 \begin{itemize}
 \item the inequality ``$\rho H < - \rho_w b$'' is the \alert{flotation criterion}
-\item at the grounding line $x=x_g$ the above inequality switches
-\item \dots and the driving stress switches form:
   \begin{itemize}
-  \item[$\circ$] on the grounded side we know $\rho H > - \rho_w b$ so
-  	$$\rho g H h_x = \rho g H (H_x + b_x)$$
-  \item[$\circ$] on the floating side we know $\rho H < - \rho_w b$ so $h = (1-\rho/\rho_w) H$ and so
-  	$$\rho g H h_x = \rho(1-\rho/\rho_w) g H H_x$$
+  \item[$\circ$] assumes $z=0$ is sea level
+  \item[$\circ$] grounding line $x=x_g$ is where $\rho H = - \rho_w b$
+  \item[$\circ$] $H,u,u_x$ are all continuous at $x=x_g$
   \end{itemize}
-\item also: $H,u,u_x$ are all continuous at $x=x_g$
+\item surface elevation and driving stress according to flotation:
+  \begin{itemize}
+  \item[grounded:]
+\begin{align*}
+\rho H &> - \rho_w b \\
+h &= H + b \\
+\rho g H h_x &= \rho g H (H_x + b_x)
+\end{align*}
+  \item[floating:]
+\begin{align*}
+\rho H &< - \rho_w b \\
+h &= (1-\rho/\rho_w) H \\
+\rho g H h_x &= \rho(1-\rho/\rho_w) g H H_x
+\end{align*}  
+  \end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -135,15 +151,30 @@ Jakobshavns Isbrae (\textbf{a}) and Whillans Ice Stream (\textbf{b}); plotted wi
 \end{frame}
 
 
-\begin{frame}{exact velocity and thickness for steady ice shelf}
+\begin{frame}{steady ice shelf}
 
 \begin{itemize}
-\item limited goal here: describe a steady state, 1D ice shelf
-\item there is a nice \alert{by-hand} result (van der Veen 1983; next slide): the thickness and velocity in the ice shelf can be completely determined in terms of the 
-  \begin{enumerate}
-  \item ice thickness $H_g$ at the grounding line and
-  \item ice velocity $u_g$ at the grounding line
-  \end{enumerate}
+\item I have limited goal here:
+
+\begin{center}
+\alert{describe a steady state, 1D ice shelf}
+\end{center}
+\item \emph{by-hand} result (van der Veen 1983): steady SSA ice shelf found from thickness $H_g$ and velocity $u_g$ at the grounding line
+   \begin{itemize}
+   \item[$\circ$] plots of the exact formulas:
+
+\begin{center}
+  \includegraphics[width=0.35\textwidth]{steadyshelfprofile} \qquad \qquad
+  \includegraphics[width=0.35\textwidth]{steadyshelfvelocity}
+\end{center}
+
+\vspace{-2mm}
+   \item[$\circ$] an ice shelf is a kind of fluid \emph{jet}
+
+   \hfill \includegraphics[width=0.3\textwidth]{rocket-nozzle-expansion}
+   \end{itemize}
+
+\vspace{-9mm}
 \item we will use this to
   \begin{itemize}
   \item[$\circ$] understand the SSA better
@@ -153,65 +184,37 @@ Jakobshavns Isbrae (\textbf{a}) and Whillans Ice Stream (\textbf{b}); plotted wi
 \end{frame}
 
 
-\begin{frame}{exact velocity and thickness for steady ice shelf 2}
+\begin{frame}{numerical SSA stress balance example}
 
-\small see \texttt{testshelf.m} 
-
-\begin{center}
-  \includegraphics[width=0.45\textwidth]{steadyshelfprofile} \quad
-  \includegraphics[width=0.45\textwidth]{steadyshelfvelocity}
-\end{center}
-
-\bigskip\bigskip
-\includegraphics[width=0.3\textwidth]{rocket-nozzle-expansion}
+I will:
+\begin{itemize}
+\item fix the ice thickness $H(x)$ from the exact formula
+\item find the velocity numerically
+\item describe the numerical method for a shelf \emph{or} stream
+\item only give a code for an ice shelf
+\end{itemize}
 \end{frame}
 
 
-\begin{frame}{numerically solving the SSA stress balance}
+\begin{frame}{numerics of SSA stress balance}
 
 \begin{itemize}
-\item here we fix ice thickness $H(x)$ and find the velocity numerically
 \item the stress balance is a nonlinear equation in the velocity:
   $$\left(2 A^{-1/n} H |u_x|^{1/n - 1} u_x\right)_x - C|u|^{m-1}u = \rho g H h_x$$
-\item \alert{iteration is needed}
-\item I'll describe the numerical method for a shelf \emph{or} stream, but only give a code for an ice shelf
-\end{itemize}
-\end{frame}
 
-
-\begin{frame}{numerically solving the SSA stress balance 2}
-
-\begin{itemize}
+\vspace{-2mm}
+    \begin{itemize}
+    \item[$\circ$] thus \alert{iteration is needed}    
+    \end{itemize}
 \item coefficient ${\color{red} \bar \nu} = A^{-1/n} |u_x|^{1/n-1}$ is the ``effective viscosity'':
    $$\left(2 \,{\color{red} \bar \nu}\, H u_x\right)_x - C |u|^{m-1} u = \rho g H h_x$$
-\item \emph{simplest iteration idea}: use old effective viscosity to get new velocity solution, and repeat until things stop changing
+\item \emph{simplest iteration idea}: use old $\bar\nu$ to get new velocity solution, and repeat until things stop changing
   \begin{itemize}
-  \item[$\circ$] this is ``Picard'' iteration
-  \item[$\circ$] (Newton iteration is a superior alternative)
-  \end{itemize}
-\item specifically for Picard:
-  \begin{itemize}
-  \item[$\circ$] last iterate $u^{(k-1)}$
-  \item[$\circ$] define $W^{(k-1)} = 2 \bar \nu H = 2 A^{-1/n} |u^{(k-1)}_x|^{1/n-1} H$
-  \item[$\circ$] current iterate (unknown) $u^{(k)}$
-  \item[$\circ$] solve repeatedly:
+  \item[$\circ$] this is ``Picard'' iteration  (Newton iteration generally superior)
+  \item[$\circ$] from last iterate $u^{(k-1)}$ define
+     $$W^{(k-1)} = 2 \bar \nu H = 2 A^{-1/n} |u^{(k-1)}_x|^{1/n-1} H$$
+  \item[$\circ$] solve for current iterate $u^{(k)}$:
      $$\left(W^{(k-1)} u^{(k)}_x\right)_x - C |u^{(k-1)}|^{m-1} u^{(k)} = \rho g H h_x$$
-  \end{itemize}
-\end{itemize}
-\end{frame}
-
-
-\begin{frame}{solving the ``inner'' linear problem}
-\begin{itemize}
-\item abstract the problem:
-   $$\left(W(x)\, u_x\right)_x - \alpha(x)\, u = \beta(x)$$
-on $0 < x < L$, with boundary conditions
-   $$u(0) = V, \qquad  u_x(L) = \gamma$$
-\item an \emph{elliptic} PDE boundary value problem
-\item $W(x)$, $\alpha(x)$, $\beta(x)$ are known functions in the SSA context:
-  \begin{itemize}
-  \item[$\circ$] both $W(x)$ and $\alpha(x)$ come from previous iteration
-  \item[$\circ$] $\beta(x)$ is driving stress
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -220,11 +223,31 @@ on $0 < x < L$, with boundary conditions
 \begin{frame}{where do you get an initial guess $u^{(0)}$?}
 
 \begin{itemize}
-\item \emph{for floating ice}, a possible initial guess for velocity comes from assuming a uniform strain rate:
-   $$u^{(0)}(x) = \gamma (x-x_g) + u_g$$
-where $\gamma$ is the value of $u_x$ found from calving front stress imbalance
-\item \emph{for grounded ice}, a possible initial guess for velocity is to assume ice is held by basal resistance only:
+\item \emph{for floating ice}, assume a uniform strain rate:
+   $$u^{(0)}(x) = u_g + \gamma (x-x_g)$$
+\item \emph{for grounded ice}, assume ice is held by basal resistance only:
    $$u^{(0)}(x) = \left(-C^{-1} \rho g H h_x\right)^{1/m}$$
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{abstract the ``inner'' linear problem}
+\begin{itemize}
+\item abstract problem:
+   $$\left(W(x)\, u_x\right)_x - \alpha(x)\, u = \beta(x)$$
+
+\vspace{-2mm}
+  \begin{itemize}
+  \item[$\circ$] on $0 < x < L$
+  \item[$\circ$] at grounding line $x_g=0$: \quad $u(0) = u_g$
+  \item[$\circ$] at calving front $x_c=L$: \quad\,\, $u_x(L) = \gamma$
+  \end{itemize}
+\item an \emph{elliptic} boundary value problem
+\item $W(x)$, $\alpha(x)$, $\beta(x)$ are known functions in the SSA context:
+  \begin{itemize}
+  \item[$\circ$] both $W(x)$ and $\alpha(x)$ come from previous iteration
+  \item[$\circ$] $\beta(x)$ is driving stress
+  \end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -235,13 +258,13 @@ where $\gamma$ is the value of $u_x$ found from calving front stress imbalance
 \item suppose $j=1,2,\dots,J+1$, where $x_1 = x_g$ and $x_{J+1} = x_c$ are endpoints
 \item $W(x)$ is needed on the staggered grid; the approximation is:
 $$\frac{W_{j+1/2} (u_{j+1} - u_j) - W_{j-1/2} (u_{j} - u_{j-1})}{\Delta x^2} - \alpha_j u_j \stackrel{\ast}{=} \beta_j$$
-\item left-hand boundary condition: $u_1 = V$ given
-\item right-hand boundary condition (``$u_x(L)=\gamma$''):
+\item left-hand boundary condition: $u_1 = u_g$ given
+\item right-hand boundary condition:
   \begin{itemize}
   \item[$\circ$] introduce notional point $x_{J+2}$
-  \item[$\circ$]
+  \item[$\circ$] approximate ``$u_x(L)=\gamma$'' by
     $$\frac{u_{J+2} - u_J}{2 \Delta x} = \gamma$$
-  \item[$\circ$] using equation $\ast$ in $j=J+1$ case, eliminate $u_{J+2}$ variable ``by-hand'' before coding numerics
+  \item[$\circ$] use $j=J+1$ case of $\ast$ to eliminate $u_{J+2}$ (by-hand)
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -249,9 +272,9 @@ $$\frac{W_{j+1/2} (u_{j+1} - u_j) - W_{j-1/2} (u_{j} - u_{j-1})}{\Delta x^2} - \
 
 \begin{frame}{numerics of the ``inner'' linear problem 2}
 
-\scriptsize
+\footnotesize
 \begin{itemize}
-\item so SSA stress balance has form  \quad $A \mathbf{x} = \mathbf{b}$, \quad namely:
+\item thus iterate of SSA stress balance has form  \quad $A \mathbf{x} = \mathbf{b}$:
 $$
 \begin{bmatrix}
 1 &  &  &  &  \\
@@ -266,14 +289,12 @@ u_1 \\ u_2 \\ u_3 \\ \vdots \\ u_J \\ u_{J+1}
 \end{bmatrix}
 =
 \begin{bmatrix}
-0 \\ \beta_2 \Delta x^2 \\ \beta_3 \Delta x^2 \\ \vdots \\ \beta_J \Delta x^2 \\ b_{J+1}
+u_g \\ \beta_2 \Delta x^2 \\ \beta_3 \Delta x^2 \\ \vdots \\ \beta_J \Delta x^2 \\ b_{J+1}
 \end{bmatrix}
 $$
-\item with diagonal entries
-$$A_{22} = -(W_{3/2}+W_{5/2}+\alpha_1 \Delta x^2)$$
-$$A_{33} = -(W_{5/2}+W_{7/2}+\alpha_2 \Delta x^2)$$
-and so on, up to $A_{JJ}$, 
-\item with special cases in last equation:
+\item diagonal entries
+$$A_{22} = -(W_{3/2}+W_{5/2}+\alpha_1 \Delta x^2), \quad A_{33} = -(W_{5/2}+W_{7/2}+\alpha_2 \Delta x^2), \quad \dots$$
+\item special cases in final equation:
 $$A_{J+1,J} = 2 W_{J+1/2}$$
 $$A_{J+1,J+1} = -(2 W_{J+1/2}+\alpha_{J+1}\Delta x^2)$$
 $$b_{J+1} = -2 \gamma \Delta x W_{J+3/2} + \beta_{J+1} \Delta x^2$$
@@ -289,32 +310,34 @@ $$b_{J+1} = -2 \gamma \Delta x W_{J+3/2} + \beta_{J+1} \Delta x^2$$
 \end{frame}
 
 
-\begin{frame}{testing the ``inner'' linear code}
+\begin{frame}{testing the abstracted linear code}
 
 \begin{itemize}
-\item before proceeding to solve nonlinear SSA problem, we can test the ``abstracted'' code \texttt{flowline.m}
+\item first we test the linear code \texttt{flowline.m} for the abstract problem
 \item test by ``manufacturing'' solutions
   \begin{itemize}
-  \item[$\circ$] see \texttt{testflowline.m}; not shown
+  \item[$\circ$] see \texttt{testflowline.m}
+  \item[$\circ$] result: converges at optimal rate $O(\Delta x^2)$
   \end{itemize}
-\item results:
+
+\bigskip
+\item then write Picard iteration loop to create SSA nonlinear solver
   \begin{itemize}
-  \item[$\circ$] converges at optimal rate $O(\Delta x^2)$
+  \item[$\circ$] \texttt{ssaflowline.m} on next slide
   \end{itemize}
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{numerical: SSA}
+\begin{frame}{numerical SSA implementation}
 
 \minputtiny{ssaflowline}
 \end{frame}
 
 
-\begin{frame}[fragile]
-  \frametitle{\emph{numerical} thickness and velocity for steady ice shelf}
+\begin{frame}{numerical convergence}
 
-lines below are a convergence analysis of \texttt{testshelf.m}, which calls \texttt{ssaflowline.m}:
+convergence analysis of \texttt{ssaflowline.m}:
 
 \begin{center}
   \includegraphics[width=0.75\textwidth]{shelfconv}
@@ -322,7 +345,7 @@ lines below are a convergence analysis of \texttt{testshelf.m}, which calls \tex
 \end{frame}
 
 
-\begin{frame}{SSA model output}
+\begin{frame}{SSA numerical model output}
 
 \begin{center}
   \includegraphics[width=0.45\textwidth]{steadyshelfprofile} \quad
@@ -337,38 +360,18 @@ lines below are a convergence analysis of \texttt{testshelf.m}, which calls \tex
 \end{itemize}
 \end{frame}
 
-
-\begin{frame}{realistic ice shelf modeling}
+\begin{frame}{numerical ice shelf modeling in 2D}
 
 \begin{itemize}
 \item flow lines are never very realistic
-\item you can add parameterized ``side drag'' \dots
-\item also, ice shelves have surprises:
   \begin{itemize}
-  \item[$\circ$] high basal melt near grounding lines
-  \item[$\circ$] marine ice can freeze-on at bottom (below)
-  \item[$\circ$] reverse sloped-bed (marine ice sheet) instability
+  \item[$\circ$] you can add parameterized ``side drag''
   \end{itemize}
-\end{itemize}
-
-\medskip
-\begin{center}
-  \includegraphics[width=0.5\textwidth]{marineice}
-  
-  \medskip
-  \tiny from Grosfeld \& Thyssen 1994
-\end{center}
-\end{frame}
-
-
-\begin{frame}{ice shelf modeling in 2D}
-
-\begin{itemize}
-\item nonetheless ``diagnostic'' (static geometry) ice shelf modeling in 2d has been quite successful
+\item ``diagnostic'' (static geometry) ice shelf modeling in 2d has been quite successful
 \item observed surface velocities validate SSA stress balance model
   \begin{itemize}
   \item[$\circ$] e.g.~Ross ice shelf example below using PISM
-  \item[$\circ$] \dots but many models can do this
+  \item[$\circ$] \dots many models can do this
   \end{itemize}
 \end{itemize}
 
@@ -377,6 +380,7 @@ lines below are a convergence analysis of \texttt{testshelf.m}, which calls \tex
 \end{center}
 \end{frame}
 
+
 \begin{frame}{numerical solution of stress balances: a summary}
 
 \begin{itemize}
@@ -384,22 +388,27 @@ lines below are a convergence analysis of \texttt{testshelf.m}, which calls \tex
 \item for ice the equations are nonlinear so iteration is necessary
   \begin{itemize}
   \item[$\circ$] at each iteration a sparse matrix ``inner'' problem is solved
-  \item[$\circ$] \alert{give it to a linear algebra package}
-  \item[$\circ$] don't write it yourself
+  \item[$\circ$] give it to a linear algebra package; don't write it yourself
+  \end{itemize}
+\item when geometry and boundary stresses are \emph{known}, many modern stress balance solvers do well
+  \begin{itemize}
+  \item[$\circ$] e.g.~ice shelves
+  \item[$\circ$] model shallowness often is \emph{not} the issue
+  \item[$\circ$] see: Aschwanden et al.~(2016), \emph{Complex Greenland outlet glacier flow captured}
   \end{itemize}
 \end{itemize}
 \end{frame}
 
 
-\section{conclusions}
+\section{free advice}
 
-\begin{frame}{conclusion: best practices for numerical modeling}
+\begin{frame}{best practices for numerical modeling}
 
 \begin{itemize}
 \item learn a version-control system \hfill \alert{\texttt{git}}
 \item put your project on a public host from the beginning
   \begin{itemize}
-  \item[$\circ$] to hell with your paranoid advisor \hfill \alert{\texttt{github.com}}
+  \item[$\circ$] to hell with your secretive advisor \hfill \alert{\texttt{github.com}}
   \end{itemize}
 \item modularize your codes
 \item test the parts
@@ -415,7 +424,7 @@ lines below are a convergence analysis of \texttt{testshelf.m}, which calls \tex
 \end{frame}
 
 
-\begin{frame}{conclusion: a last take-away}
+\begin{frame}{}
 \begin{itemize}
 \item this thing
 
