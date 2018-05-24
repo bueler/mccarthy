@@ -56,7 +56,7 @@ else:
 from firedrake import *
 from firedrake.petsc import PETSc
 from gendomain import Hin, L, bdryids, getdomaindims
-from physics import secpera, stokessolve, solutionstats, numericalerrorsslab
+from physics import secpera, stokessolve, solutionstats, numericalerrors_slab
 from meshactions import getranks, getsurfaceelevationfunction_halos, solvevdisp, \
                         getsurfacevdispfunction, getsurfacevelocityfunction
 
@@ -177,7 +177,7 @@ for j in range(args.m):
 
 # compute numerical errors relative to slab-on-slope *if* bs==0.0
 if isslab:
-    (uerrmax,perrmax) = numericalerrorsslab(u,p,mesh,V,W,Hin,args.n_glen,args.alpha)
+    (uerrmax,perrmax) = numericalerrors_slab(u,p,mesh,V,W,Hin,args.n_glen,args.alpha)
     printpar('numerical errors: |u-uex|_inf = %.3e m a-1, |p-pex|_inf = %.3e Pa' \
              % (uerrmax*secpera,perrmax))
 

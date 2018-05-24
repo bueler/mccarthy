@@ -83,6 +83,11 @@ def stokessolve(up,mesh,bdryids,Z,Hin,Hout,n_glen,alpha,eps,Dtyp):
     # in parallel:  -s_fieldsplit_0_ksp_type gmres -s_fieldsplit_0_pc_type asm -s_fieldsplit_0_sub_pc_type ilu
     return up
 
+# return statistics about the solution:
+#     average velocity magnitude
+#     maximum velocity magnitude
+#     average pressure
+#     maximum pressure
 def solutionstats(u,p,mesh):
     P1 = FunctionSpace(mesh, "CG", 1)
     one = Constant(1.0, domain=mesh)
@@ -96,7 +101,10 @@ def solutionstats(u,p,mesh):
         umagmax = vumag.max()[1]
     return (umagav,umagmax,pav,pmax)
 
-def numericalerrorsslab(u,p,mesh,V,W,Hin,n_glen,alpha):
+# return measured numerical errors relative to slab-on-slope solution
+#     maximum magnitude of velocity error
+#     maximum of pressure error
+def numericalerrors_slab(u,p,mesh,V,W,Hin,n_glen,alpha):
     P1 = FunctionSpace(mesh, "CG", 1)
     Z = V * W
     up_exact = Function(Z)
