@@ -266,25 +266,26 @@ Informally, \eqref{surfacekinematical} determines the change in surface elevatio
     $$\Phi(x,z,t) = z - h(x,t)$$
 We regard this function as being defined on the closure of $\Omega^t$, including $\Gamma^t$.  Since $\grad \Phi = \left<-h_x,1\right>$ is an outward normal along $\Gamma^t$,
 \begin{equation}
-h_t = a + \bu\big|_{\Gamma^t} \cdot (\grad \Phi)\big|_{\Gamma^t} \label{surfacekinematicalwithPhi}
+h_t = a + (\grad \Phi)\big|_{\Gamma^t} \cdot \bu\big|_{\Gamma^t}  \label{surfacekinematicalwithPhi}
 \end{equation}
 The advantage of using \eqref{surfacekinematicalwithPhi} over \eqref{surfacekinematical} is that in Firedrake (see below) it is easier to compute the gradient of the current 2D scalar field $\Phi(x,z,t_n)$, and evaluate it along the boundary, than it is to compute the derivative of the current surface elevation $h(x,t_n)$.
 
-We can now describe our explicit time-stepping strategy for modeling a changing glacier.  It solves the surface kinematical equation \eqref{surfacekinematical} or \eqref{surfacekinematicalwithPhi} by vertically-displacing the unstructured triangular mesh.  Given a time step $\Delta t > 0$, the strategy is this loop:
+We can now describe our explicit time-stepping strategy for modeling a changing glacier.  It solves the surface kinematical equation \eqref{surfacekinematical} or \eqref{surfacekinematicalwithPhi} by vertically-displacing the triangular mesh.  Note that in the FE scheme (see below) the mesh is given by scalar coordinate fields $(x,z)$defined on all the nodes of the mesh.  The current ice surface elevation $z=h(x,t_n)$ can be described as the values of $z$ on the identified top boundary of the current domain/mesh $\Omega^n$.  Given a time step $\Delta t > 0$, the strategy is this iteration:
+
+\medskip
 \renewcommand{\labelenumi}{\emph{\arabic{enumi}.}}
 \begin{enumerate}
 \item Solve the weak-form Stokes equation \eqref{weak} for current values $(\bu^n,p^n)$ at $t=t_n$ on the current mesh $\Omega^n$.
-\item From the current mesh $\Omega^n$ generate a function $h^n(x)$ which is the current piecewise-linear upper surface.
-\item Evaluate $\Phi^n(x,z) = z - h^n(x)$ on $\Omega^n$.
-\item Define the following function on $\Omega^n$:
+\item From the current mesh $\Omega^n$ generate the current piecewise-linear surface elevation function $h^n(x)$.
+\item Evaluate $\Phi^n(x,z) = z - h^n(x)$ on $\Omega^n$, and define the following function on $\Omega^n$:
 \begin{equation}
 \Delta h^n =  \Delta t\,\left(a(x,t_n) + \grad \Phi^n\cdot \bu^n\right) \label{deltahfield}
 \end{equation}
-\item Solve the following (strong form) Poisson problem for the new vertical displacement (strain) field $r^n$:
+\item Solve the following Dirichlet problem (Laplace equation) for a vertical displacement field $r^n$:
 \begin{align}
-- \grad^2 r^n &= 0 & &\text{on } \Omega^n \\
+- \grad^2 r^n &= 0 & &\text{on } \Omega^n \label{vdisplacementpoisson} \\
           r^n &= 0 & &\text{on inflow, base, and outflow parts of } \partial \Omega^n \notag \\
-          r^n &= \Delta h^n & &\text{on the top surface } \Gamma^n \notag
+          r^n &= \Delta h^n & &\text{on the top boundary } \Gamma^n \notag
 \end{align}
 (In fact the problem is solved in weak form, namely $\int_{\Omega^n} \grad r^n\cdot \grad w = 0$ for all test functions $w$ satisfying $w=0$ on the entire boundary $\partial \Omega^n$.)
 \item Define a new mesh which has vertical-only displacement by $r^n$:
@@ -294,7 +295,13 @@ We can now describe our explicit time-stepping strategy for modeling a changing 
 \item Repeat at \emph{1}.
 \end{enumerate}
 
-FIXME
+\medskip
+At the end of an iteration the new top boundary $\Gamma^{n+1}$ is the surface $z=h^{n+1}(x)$.  By \eqref{deltahfield} an iteration does an explicit step of \eqref{surfacekinematicalwithPhi}:
+    $$h^{n+1}(x) = h^n(x) + \Delta t\,\left(a(x,t_n) + \grad \Phi^n\cdot \bu^n\right)$$
+The significance of Dirichlet problem \eqref{vdisplacementpoisson} is that the entire mesh is \emph{smoothly} displaced, in the vertical direction only by \eqref{updatemesh}, because solutions of the Laplace equation, which minimize $\int |\grad r|^2$ over functions with the given boundary values, are smooth.
+
+Note that the scheme uses fixed time step $\Delta t > 0$ and is explicit.  At best the strategy is conditionally stable, and in practice that is observed.  It should be expected that, as with an SIA solver, the time step is restricted by a condition like ``$D\Delta t / \Delta x^2 < 1$'' where $\Delta x$ is a representative mesh spacing variable and $D$ is some diffusivity parameter meaningful in the current context.  However, there is presently no theory in the literature which describes $D$ or otherwise supplies a sufficient stability restriction.  The extensive testing needed to develope a practical time-step restriction has barely been started.
+
 
 \section{Firedrake code}
 
