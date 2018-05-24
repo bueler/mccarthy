@@ -192,50 +192,54 @@ This justifies formula \eqref{outflowbc}.
 
 \section{Weak form}
 
-The Stokes equations \eqref{incompagain}, \eqref{stokes} are PDEs called the \emph{strong form} of the model.  The \emph{weak form}, needed to construct an FE method \cite{Elmanetal2014}, is derived by multiplying the equations by arbitrary test functions and then integrating over $\Omega$ so as to define a scalar-valued nonlinear functional $F$.  In the FE method the test functions will be locally constructed from the triangular mesh.
+The Stokes equations \eqref{incompagain}, \eqref{stokes} are PDEs called the \emph{strong form} of the model.  An integral equation form of the same model, called the \emph{weak form}, is needed to construct an FE method \cite{Elmanetal2014}.  Itis derived by multiplying the strong form equations by (nearly) arbitrary \emph{test functions} and then integrating over $\Omega$ so as to define a scalar-valued nonlinear functional $F$, which has formula \eqref{defineF} below.  The weak form says that $F$ must be zero when acting on test functions.  In fact, the significance of the weak form is two-fold:
+\begin{itemize}
+\item The weak form has a larger space of potential solutions, thus it is more flexible with respect to discontinuities in the second derivative, for example.  Thereby it is well-posed in the sense of having a unique solution \cite{JouvetRappaz2011} for many boundary values.
+\item The FE method generates test functions by local constructions which work on any triangular mesh.  Such constructions are more flexible with respect to mesh geometry than are finite difference methods based on the strong form.
+\end{itemize}
+The latter of these points, namely that the FE method can be adapted to unstructured meshes, is of greater practical importance.
 
-The solution is the pair $(\bu,p)$ where $\bu\in V_D$ and $p \in Q$ for function spaces precisely identified in \cite{JouvetRappaz2011}.  The test functions come from nearly the same spaces, with differences relating (only) to the value of Dirichlet boundary conditions: the solution velocity $\bu\in V_D$ satisfies \eqref{basebc}, \eqref{inflowbc} while the test functions $\bv\in V_0$ are zero on both base and inflow surfaces.  The test pressures are from $Q$ just like $p$.
+The solution to the weak form will be the pair $(\bu,p)$ where $\bu\in V_D$ and $p \in Q$ for function spaces (\emph{trial functions}) precisely identified in \cite{JouvetRappaz2011}.  Test functions come from nearly the same spaces as $(\bu,p)$, with differences relating only to the value of Dirichlet boundary conditions.  Namely, the solution velocity $\bu\in V_D$ satisfies \eqref{basebc} and \eqref{inflowbc} while the test velocity functions $\bv\in V_0$ are zero on both base and inflow surfaces.
 
-We multiply \eqref{incompagain} by $q\in Q$ and \eqref{stokes} by $\bv\in V_0$, and add and integrate to define $F$:
+We multiply \eqref{incompagain} by $q\in Q$ and \eqref{stokes} by $\bv\in V_0$, then add and integrate to define $F$:
 \begin{equation}
 F(\bu,p;\bv,q) = \int_\Omega - \left(\nabla \cdot \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu\right)\right)\cdot \bv + \nabla p \cdot \bv - \rho \mathbf{g} \cdot \bv - \left(\nabla \cdot \bu\right) q \label{nonfuncone}
 \end{equation}
-This functional must be zero at the solution $(\bu,p)$ in the sense that $F(\bu,p;\bv,q) = 0$ for all  $\bv\in V_0$ and $q\in Q$.  Next, integration-by-parts rewrites $F$ to balance the number of derivatives on $(\bv,q)$ and $(\bu,p)$.  Recall the product rule $\nabla \cdot(f\bX) = \grad f\cdot \bX + f \nabla \cdot \bX$ and the divergence theorem $\int_\Omega \nabla \cdot \bX = \int_{\partial \Omega} \bX \cdot \hbn$.  Again denoting $\tau = B_n |D\bu|^{\frac{1}{n} - 1} D\bu$, from these rules we have
+Next, integration-by-parts rewrites $F$ to balance the number of derivatives on $(\bv,q)$ and $(\bu,p)$.  For this step, recall the product rule $\nabla \cdot(f\bX) = \grad f\cdot \bX + f \nabla \cdot \bX$ and the divergence theorem $\int_\Omega \nabla \cdot \bX = \int_{\partial \Omega} \bX \cdot \hbn$.  Again denoting $\tau = B_n |D\bu|^{\frac{1}{n} - 1} D\bu$, we have
 \begin{align*}
 \int_\Omega \left(\nabla \cdot \tau\right)\cdot \bv &= \sum_{j=1}^3 \int_\Omega \nabla \cdot (\tau_{j\circ})\, v_j = \sum_{j=1}^3 \int_\Omega \nabla \cdot (\tau_{j\circ} v_j) - \tau_{j\circ} \nabla v_j \\
   &= \sum_{j=1}^3 \int_{\partial \Omega} (\tau_{j\circ} v_j) \cdot \hbn - \int_\Omega \tau_{j\circ} \cdot \nabla v_j = \int_{\partial \Omega} (\tau \hbn)\cdot \bv - \int_\Omega \trace(\tau \nabla \bv)
 \end{align*}
-where $\circ$ denotes an index which is iterated-over and $\tau_{j\circ}$ denotes the $j$th row of $\tau$.  Here $\grad\bv$ defines a $3\times 3$ matrix,
+where $\circ$ denotes a vector entry index and $\tau_{j\circ}$ denotes the $j$th row of $\tau$.  Here $\grad\bv$ defines a $3\times 3$ matrix,
 \newcommand{\trefthree}[3]{\left[\begin{array}{c|c|c} & & \\ #1 & #2 & #3 \\ & & \end{array}\right]}
     $$\grad \bv = \trefthree{\grad v_1}{\grad v_2}{\grad v_3} = \begin{bmatrix}
     (v_1)_{x_1} & (v_2)_{x_1} & (v_3)_{x_1} \\
     (v_1)_{x_2} & (v_2)_{x_2} & (v_3)_{x_2} \\
     (v_1)_{x_3} & (v_2)_{x_3} & (v_3)_{x_3}
     \end{bmatrix}$$
-so
+and so
     $$\trace(\tau \grad \bv) = \sum_{j=1}^3 \tau_{j\circ} \cdot \grad v_j = \sum_{i,j=1}^3 \tau_{ji} (v_j)_{x_i}$$
-Also, because $\trace(AB)=0$ if $A$ is symmetric and $B$ is antisymmetric, in fact $\trace(\tau \grad \bv) = \trace(\tau D\bv)$.  (To show this take $A=\tau$ and $B=\grad\bv-D\bv$.  Note that some sources \cite{JouvetRappaz2011} write $A:B$ for $\trace(AB)$.)
-
-In addition we do a straightforward integration-by-parts on the pressure portion of $F$:
+Some sources \cite{JouvetRappaz2011} write $A:B$ for $\trace(AB)$.  Note $\trace(\tau \grad \bv) = \trace(\tau D\bv)$ because $\trace(AB)=0$ if $A$ is symmetric and $B$ is antisymmetric.  (To show this take $A=\tau$ and $B=\grad\bv-D\bv$.)  Finally we do a straightforward integration-by-parts on the pressure part of $F$:
     $$\int_\Omega \nabla p \cdot \bv = \int_\Omega \nabla\cdot (p\,\bv) - p (\nabla \cdot \bv) = \int_{\partial \Omega} p\hbn \cdot \bv - \int_\Omega p (\nabla \cdot \bv)$$
-These facts, plus denoting $\sigma=\tau-pI$ for clarity, allow us to rewrite \eqref{nonfuncone} with an integral of the normal stress over the boundary:
+
+The above facts, plus denoting $\sigma=\tau-pI$ for clarity, allow us to rewrite \eqref{nonfuncone} with an integral of the normal stress over the boundary:
 \begin{equation}
 F(\bu,p;\bv,q) = -\int_{\partial\Omega} (\sigma \hbn)\cdot \bv + \int_\Omega \trace(\tau D\bv) - p (\nabla \cdot \bv) - \left(\nabla \cdot \bu\right) q - \rho \mathbf{g} \cdot \bv \label{nonfunctwo}
 \end{equation}
 Now $\bu,\bv$ appear with at most first derivatives and $p,q$ appear without derivatives.
 
-Recall that $\bv\in V_0$ satisfies $\bv=0$ along the base and inflow surfaces so these portions of the above integral over $\partial\Omega$ are zero.  Conditions \eqref{topbc}, \eqref{outflowbc} therefore completely eliminate the unknown solution $\bu,p$ from the boundary integral.  This yields our final formula for the nonlinear functional:
+Recall that $\bv\in V_0$ satisfies $\bv=0$ along the base and inflow surfaces so these parts of the integral over $\partial\Omega$ in \eqref{nonfunctwo} are zero.  Conditions \eqref{topbc}, \eqref{outflowbc} therefore completely eliminate the unknown solution $\bu,p$ from the boundary integral.  This yields our final formula for the nonlinear functional:
 \begin{align}
 F(\bu,p;\bv,q) &= \int_\Omega B_n |D\bu|^{\frac{1}{n} - 1} \trace(D\bu D\bv) - p (\nabla \cdot \bv) - \left(\nabla \cdot \bu\right) q \label{defineF} \\
     &\qquad  - \int_\Omega \rho \mathbf{g} \cdot \bv - \int_{\{\text{outflow}\}} \rho g (h-z) v_1  \notag
 \end{align}
-The last two integrals can be regarded as the source terms.  For example, if we replace them by zero---no gravity or outflow stress---then we expect solution $\bu=0$ and $p=0$.
+The last two integrals can be regarded as source terms.  For example, if the inflow velocity is zero and if we replace the source terms by zero---no gravity or outflow stress---then the unique solution is $\bu=0$ and $p=0$ \cite{Elmanetal2014}.
 
-The weak formulation of the Stokes model is the statement that $F$ is zero in all directions at the solution: the solution $\bu\in V_D$ and $p\in Q$ satisfies
+In conclusion the weak formulation of the Stokes model is the statement that $F$ is zero in all test function directions at the solution: $\bu\in V_D$ and $p\in Q$ satisfies
 \begin{equation}
 F(\bu,p;\bv,q) = 0 \qquad \text{ for all } \bv\in V_0 \text{ and } q\in Q  \label{weak}
 \end{equation}
-This weak formulation is proven in \cite{JouvetRappaz2011} to be well-posed under reasonable assumptions about the domain $\Omega$ and boundary data.  These assumptions will be satisfied in the cases we consider.  Thus there is exactly one solution pair $(\bu,p)$.  From now on our goal is to approximate this solution numerically.
+This weak formulation is proven in \cite{JouvetRappaz2011} to be well-posed under reasonable assumptions about the domain $\Omega$ and boundary data, and these assumptions will be satisfied in the cases we consider.  Now our goal is to approximate this one solution pair $(\bu,p)$ numerically.
 
 
 \section{Finite element method}
