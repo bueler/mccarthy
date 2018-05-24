@@ -147,12 +147,12 @@ for j in range(args.m):
         x,z = SpatialCoordinate(mesh)
         xval = Function(P1).interpolate(x)
         zval = Function(P1).interpolate(z)
-        Fs = Function(P1)
-        Fs.dat.data[:] = zval.dat.data_ro - h(xval.dat.data_ro)
+        phi = Function(P1)
+        phi.dat.data[:] = zval.dat.data_ro - h(xval.dat.data_ro)
         dt = args.deltat * (secpera/365.0)
         # FIXME add in climatic mass balance a(x) here; want h_t = a - u[0] h_x + u[1]
         #       currently uses:  a = Constant(0.0)
-        deltah = Function(P1).interpolate( dt * (Constant(0.0) + dot(grad(Fs),u)) )
+        deltah = Function(P1).interpolate( dt * (Constant(0.0) + dot(grad(phi),u)) )
         # solve mesh displacement problem
         r = solvevdisplacement(mesh,bdryids,deltah)
         with r.dat.vec_ro as vr:
