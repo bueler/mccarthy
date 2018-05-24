@@ -56,9 +56,9 @@ else:
 from firedrake import *
 from firedrake.petsc import PETSc
 from gendomain import Hin, L, bdryids, getdomaindims
-from physics import secpera, stokessolve, solvevdisplacement, \
-                    solutionstats, numericalerrorsslab, \
-                    getsurfaceelevation, getsurfaceverticaldisplacement, getsurfacevelocity, getranks
+from physics import secpera, stokessolve, solutionstats, numericalerrorsslab
+from meshactions import getranks, getsurfaceelevationfunction_halos, solvevdisp, \
+                        getsurfacevdispfunction, getsurfacevelocityfunction
 
 def printpar(thestr,comm=COMM_WORLD):
     PETSc.Sys.Print(thestr,comm=comm)
@@ -143,7 +143,7 @@ for j in range(args.m):
     if args.deltat > 0.0:
         printpar('  solving kinematical equation for vertical mesh displacement rate ...')
         # use surface kinematical equation to get boundary condition for mesh displacement problem
-        h = getsurfaceelevation(mesh,bdryids['top'])
+        h = getsurfaceelevationfunction_halos(mesh,bdryids['top'])
         x,z = SpatialCoordinate(mesh)
         xval = Function(P1).interpolate(x)
         zval = Function(P1).interpolate(z)
@@ -154,7 +154,7 @@ for j in range(args.m):
         #       currently uses:  a = Constant(0.0)
         deltah = Function(P1).interpolate( dt * (Constant(0.0) + dot(grad(phi),u)) )
         # solve mesh displacement problem
-        r = solvevdisplacement(mesh,bdryids,deltah)
+        r = solvevdisp(mesh,bdryids,deltah)
         with r.dat.vec_ro as vr:
             absrmax = vr.norm(norm_type=PETSc.NormType.NORM_INFINITY)
         r.rename('vertical_displacement')
@@ -211,8 +211,8 @@ if len(args.osurface) > 0:
     import numpy as np
     import matplotlib.pyplot as plt
     x = np.linspace(0.0,L,401)
-    hfcn = getsurfaceelevation(mesh,bdryids['top'])
-    ufcn,wfcn = getsurfacevelocity(mesh,bdryids['top'],Z,u)
+    hfcn = getsurfaceelevationfunction_halos(mesh,bdryids['top'])
+    ufcn,wfcn = getsurfacevelocityfunction(mesh,bdryids['top'],Z,u)
     plt.figure(figsize=(6.0,8.0))
     if args.deltat > 0.0:
         rows = 4
@@ -236,7 +236,7 @@ if len(args.osurface) > 0:
     plt.legend()
     if args.deltat > 0.0:
         removexticks()
-        rfcn = getsurfaceverticaldisplacement(mesh,bdryids['top'],r)
+        rfcn = getsurfacevdispfunction(mesh,bdryids['top'],r)
         plt.subplot(rows,1,4)
         plt.plot(x,rfcn(x)/(args.deltat/365.2422),'r',label='surface elevation rate (last time step)')
         plt.ylabel('h_t  [m/a]')
