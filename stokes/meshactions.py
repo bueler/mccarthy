@@ -44,7 +44,7 @@ def solvevdisp(mesh,bdryids,deltah):
     bcs = [ DirichletBC(P1, deltah, bdryids['top']),
             DirichletBC(P1, Constant(0.0), (bdryids['base'],bdryids['inflow'])) ]
     rsoln = Function(P1)
-    solve(a == L, rsoln, bcs=bcs, options_prefix='t', solver_parameters={})
+    solve(a == L, rsoln, bcs=bcs, options_prefix='vd', solver_parameters={})
     return rsoln
 
 # following functions are serial-only, and for generating plots
