@@ -22,12 +22,12 @@ Default Stokes-only usage
 Generate the domain geometry and the mesh:
 
         $ ./gendomain.py -o glacier.geo            # creates domain outline
-        $ gmsh -2 glacier.geo                      # generates glacier.msh
+        $ gmsh -2 glacier.geo                      # meshes domain and generates glacier.msh
 
 Start Firedrake and run the solver:
 
         $ source ~/firedrake/bin/activate
-        (firedrake) $ ./flow.py glacier.msh        # solve Stokes problem for velocity and pressure
+        (firedrake) $ ./flow.py glacier.msh        # solves Stokes problem for velocity and pressure
 
 This writes variables (velocity,pressure) into `glacier.pvd`.  Now visualize:
 
