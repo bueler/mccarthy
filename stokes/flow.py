@@ -20,7 +20,7 @@
 import sys,argparse
 mixFEchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
 parser = argparse.ArgumentParser(\
-    description='Solve 2D glacier Glen-Stokes problem with evolving surface.')
+    description='Solve 2D glacier Glen-Stokes problem with evolving surface.  Requires an activated Firedrake environment.')
 parser.add_argument('-alpha', type=float, default=0.1, metavar='X',
                     help='downward slope of bed as angle in radians (default = 0.1)')
 parser.add_argument('-deltat', type=float, default=0.0, metavar='X',
