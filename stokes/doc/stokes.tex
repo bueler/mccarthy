@@ -5,7 +5,7 @@
 \usepackage{empheq}
 \usepackage[dvipsnames]{xcolor}
 \usepackage{graphicx}
-\usepackage{fancyvrb}
+\usepackage{verbatim,fancyvrb}
 \usepackage{tikz}
 \usetikzlibrary{arrows}
 
@@ -67,19 +67,19 @@ urlcolor=black     % only if colorlinks=true
 
 This is an appendix to my notes \emph{Numerical modelling of glaciers, ice sheets, and ice shelves}---here called ``the notes''---for the International Summer School in Glaciology in McCarthy, Alaska.
 
-We start by stating the Stokes model with glacier-suitable boundary conditions.  Next, the specific slab-on-a-slope case is solved exactly, both for verification and to construct boundary conditions for more general cases.  We derive the ``weak form'' of the Stokes problem and then give an overview of finite element (FE) methods \cite{Elmanetal2014}, which are based on weak forms.  Our particular FE method uses an unstructured mesh of triangular elements for an arbitrary planar region and stable mixed elements; these ideas are only briefly explained.  In addition to the FE method which solves the Stokes problem for velocity and pressure, we use a moving-mesh scheme to solve the surface kinematical equation.
+We start by stating the Stokes model for ice flow with glacier-suitable boundary conditions.  Next, the specific slab-on-a-slope case is solved exactly, both for verification purposes and so as to give boundary conditions for general cases.  We then derive the ``weak form'' of the Stokes problem.  A brief overview of finite element (FE) methods \cite{Elmanetal2014}, which are based on weak forms, follows.  Our particular FE method uses an unstructured mesh of triangular elements on an arbitrary planar region.  The Stokes problem is solved by a stable ``mixed element'' method with different approximating spaces for velocity and pressure.  Finally we describe a moving-mesh scheme to solve the surface kinematical equation.
 
-The main goal is a numerical velocity and pressure solution, with surface evolution, for a 2D glacier with steps in the bedrock (Figure \ref{fig:stepflowlin}).  This numerical model is in three Python codes, included at the end, which exploit four advanced open source tools/libraries:
+The main goal is a numerical velocity and pressure solution, with surface evolution, for a 2D glacier with general geometry, for example with steps in the bedrock (Figure \ref{fig:stepflowlin}).  This numerical model is in short Python codes, as documented at the end, which exploit four advanced open source tools/libraries:
 \begin{itemize}
-\item Gmsh, a mesh generator \hfill \url{http://gmsh.info/}
 \item Firedrake, an FE library \hfill \url{https://www.firedrakeproject.org/}
 \item PETSc, a solver library \hfill \url{http://www.mcs.anl.gov/petsc/}
+\item Gmsh, a mesh generator \hfill \url{http://gmsh.info/}
 \item Paraview, a visualization tool \hfill \url{https://www.paraview.org/}
 \end{itemize}
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth,angle=-5.7296]{stepflowlin}  % 0.1 radian = 5.7296 degrees
-\caption{A steady-state 2D glacier flowing over bedrock steps.  Arrows show velocity $\bu$.  Shading is by pressure $p$.}
+\caption{A 2D glacier flowing over bedrock steps.  Arrows show velocity $\bu$.  Shading is by pressure $p$.}
 \label{fig:stepflowlin}
 \end{figure}
 
@@ -192,14 +192,16 @@ This justifies formula \eqref{outflowbc}.
 
 \section{Weak form}
 
-The Stokes equations \eqref{incompagain}, \eqref{stokes} are PDEs called the \emph{strong form} of the model.  An integral equation form of the same model, called the \emph{weak form}, is needed to construct an FE method \cite{Elmanetal2014}.  Itis derived by multiplying the strong form equations by (nearly) arbitrary \emph{test functions} and then integrating over $\Omega$ so as to define a scalar-valued nonlinear functional $F$, which has formula \eqref{defineF} below.  The weak form says that $F$ must be zero when acting on test functions.  In fact, the significance of the weak form is two-fold:
+The Stokes equations \eqref{incompagain}, \eqref{stokes} are PDEs called the \emph{strong form} of the model.  An integral equation form of the same model, called the \emph{weak form}, is needed to construct an FE method \cite{Elmanetal2014}.  It is derived by multiplying the strong form equations by \emph{test functions} and then integrating over $\Omega$ so as to define a scalar-valued nonlinear functional $F$ (formula \eqref{defineF} below).  The weak form says that $F$ must be zero when acting on test functions.
+
+The significance of the weak form is two-fold:
 \begin{itemize}
-\item The weak form has a larger space of potential solutions, thus it is more flexible with respect to discontinuities in the second derivative, for example.  Thereby it is well-posed in the sense of having a unique solution \cite{JouvetRappaz2011} for many boundary values.
-\item The FE method generates test functions by local constructions which work on any triangular mesh.  Such constructions are more flexible with respect to mesh geometry than are finite difference methods based on the strong form.
+\item It has a larger space of potential solutions than the strong form and thus it is more flexible with respect to discontinuities in the data.  It is well-posed in the sense of having a unique solution  for a wide range of boundary values \cite{JouvetRappaz2011}.
+\item The FE method generates weak form test functions by local constructions which work on any triangular mesh.  Such constructions are more flexible with respect to mesh geometry than are finite difference methods based on the strong form.
 \end{itemize}
 The latter of these points, namely that the FE method can be adapted to unstructured meshes, is of greater practical importance.
 
-The solution to the weak form will be the pair $(\bu,p)$ where $\bu\in V_D$ and $p \in Q$ for function spaces (\emph{trial functions}) precisely identified in \cite{JouvetRappaz2011}.  Test functions come from nearly the same spaces as $(\bu,p)$, with differences relating only to the value of Dirichlet boundary conditions.  Namely, the solution velocity $\bu\in V_D$ satisfies \eqref{basebc} and \eqref{inflowbc} while the test velocity functions $\bv\in V_0$ are zero on both base and inflow surfaces.
+The solution to the weak form is the pair $(\bu,p)$ where $\bu\in V_D$ and $p \in Q$ for function spaces (\emph{trial functions}) precisely identified in \cite{JouvetRappaz2011}.  Test functions come from nearly the same spaces: $(\bv,q)$ with $\bv\in V_0$ and $q\in Q$.  The difference in the velocity space relates only to the Dirichlet boundary conditions; $\bu\in V_D$ satisfies base and inflow boundary conditions (namely, equations \eqref{basebc} and \eqref{inflowbc}) while $\bv\in V_0$ is zero on those boundaries.
 
 We multiply \eqref{incompagain} by $q\in Q$ and \eqref{stokes} by $\bv\in V_0$, then add and integrate to define $F$:
 \begin{equation}
@@ -222,11 +224,11 @@ and so
 Some sources \cite{JouvetRappaz2011} write $A:B$ for $\trace(AB)$.  Note $\trace(\tau \grad \bv) = \trace(\tau D\bv)$ because $\trace(AB)=0$ if $A$ is symmetric and $B$ is antisymmetric.  (To show this take $A=\tau$ and $B=\grad\bv-D\bv$.)  Finally we do a straightforward integration-by-parts on the pressure part of $F$:
     $$\int_\Omega \nabla p \cdot \bv = \int_\Omega \nabla\cdot (p\,\bv) - p (\nabla \cdot \bv) = \int_{\partial \Omega} p\hbn \cdot \bv - \int_\Omega p (\nabla \cdot \bv)$$
 
-The above facts, plus denoting $\sigma=\tau-pI$ for clarity, allow us to rewrite \eqref{nonfuncone} with an integral of the normal stress over the boundary:
+The above facts allow us to rewrite \eqref{nonfuncone} with a normal stress boundary integral:
 \begin{equation}
 F(\bu,p;\bv,q) = -\int_{\partial\Omega} (\sigma \hbn)\cdot \bv + \int_\Omega \trace(\tau D\bv) - p (\nabla \cdot \bv) - \left(\nabla \cdot \bu\right) q - \rho \mathbf{g} \cdot \bv \label{nonfunctwo}
 \end{equation}
-Now $\bu,\bv$ appear with at most first derivatives and $p,q$ appear without derivatives.
+(We have denoted $\sigma=\tau-pI$ for brevity.)  Now $\bu,\bv$ appear with at most first derivatives and $p,q$ appear without derivatives.
 
 Recall that $\bv\in V_0$ satisfies $\bv=0$ along the base and inflow surfaces so these parts of the integral over $\partial\Omega$ in \eqref{nonfunctwo} are zero.  Conditions \eqref{topbc}, \eqref{outflowbc} therefore completely eliminate the unknown solution $\bu,p$ from the boundary integral.  This yields our final formula for the nonlinear functional:
 \begin{align}
@@ -235,11 +237,11 @@ F(\bu,p;\bv,q) &= \int_\Omega B_n |D\bu|^{\frac{1}{n} - 1} \trace(D\bu D\bv) - p
 \end{align}
 The last two integrals can be regarded as source terms.  For example, if the inflow velocity is zero and if we replace the source terms by zero---no gravity or outflow stress---then the unique solution is $\bu=0$ and $p=0$ \cite{Elmanetal2014}.
 
-In conclusion the weak formulation of the Stokes model is the statement that $F$ is zero in all test function directions at the solution: $\bu\in V_D$ and $p\in Q$ satisfies
+The finalized weak formulation of the Stokes model is the statement that, at the solution $\bu\in V_D$ and $p\in Q$, functional $F$ in \eqref{defineF} is zero in all test function directions:
 \begin{equation}
 F(\bu,p;\bv,q) = 0 \qquad \text{ for all } \bv\in V_0 \text{ and } q\in Q  \label{weak}
 \end{equation}
-This weak formulation is proven in \cite{JouvetRappaz2011} to be well-posed under reasonable assumptions about the domain $\Omega$ and boundary data, and these assumptions will be satisfied in the cases we consider.  Now our goal is to approximate this one solution pair $(\bu,p)$ numerically.
+This weak formulation is proven in \cite{JouvetRappaz2011} to be well-posed under reasonable assumptions about the domain $\Omega$ and boundary data.  These assumptions will be satisfied in the cases we consider.  Now our goal is to approximate this one solution pair $(\bu,p)$ numerically.
 
 
 \section{Finite element method}
@@ -247,7 +249,7 @@ This weak formulation is proven in \cite{JouvetRappaz2011} to be well-posed unde
 FIXME
 
 
-\section{Surface kinematical equation, and moving the mesh}
+\section{Surface kinematical equation}
 
 A glacier may change shape as it flows, and so we want our model to do that too.  Suppose the domain on which the Stokes equations apply is the time-dependent set
 \begin{equation}
@@ -332,10 +334,10 @@ $ source ~/firedrake/bin/activate              # starts Firedrake
 \medskip
 As shown in Figure \ref{blockdiagram} there are two Python codes which the user calls, namely \texttt{gendomain.py} and \texttt{flow.py}, and two additional Python modules imported into \texttt{flow.py}.  These four Python codes perform the following actions:
 \begin{itemize}
-\item \texttt{flow.py}: \quad  This main driver code reads user options, reads the mesh from a Gmsh \texttt{.msh} file, sets-up Firedrake function spaces, either solves a single time-independent Stokes problem or executes the above time-stepping strategy (according to options), and writes the solution for visualization into a Paraview-readable \texttt{.pvd} file.  The solution can also be visualized in a surface-values figure under option \texttt{-osurface}.  Imports functions from each of the following three Python codes.
-\item \texttt{gendomain.py}: \quad  Writes an outline of the initial domain \eqref{Omegat} into an ASCII file (\texttt{.geo} extension) using the Gmsh-readable geometry description language.  Portions of the boundary are marked with integer tags; see the Python dictionary \texttt{bdryids}.  Also defines a function \texttt{getdomaindims()} which can dynamically-extract certain dimensions from a changing mesh.
-\item \texttt{meshactions.py}: \quad  Provides mesh manipulation functions.  The most important  are \texttt{getsurfaceelevationfunction\_halos()}, which extracts a piecewise-linear surface elevation function $h(x)$ from the current mesh, and \texttt{solvevdisp()}.  The latter assembles and solves the Dirichlet problem \eqref{vdisplacementpoisson}, using Firedrake's linear \texttt{solve()} command, and applies the solution as a vertical mesh movement \eqref{updatemesh}.  It sets the option prefix \texttt{vd\_} for PETSc options to control this solver.  There are also other functions used for visualization.
-\item \texttt{physics.py}: \quad  Most actual ice physics is isolated here, including ice physical constants and the Stokes problem weak form \eqref{defineF}.  The most important function here is \texttt{stokessolve()} which assembles and solves the Stokes problem \eqref{weak} using Firedrake's nonlinear \texttt{solve()} command, and it sets the PETSc solver option prefix \texttt{s\_}.
+\item \texttt{flow.py}: \quad  This executable main driver code reads user options, reads the mesh from a Gmsh \texttt{.msh} file, sets-up Firedrake function spaces, either solves a single time-independent Stokes problem or executes the above time-stepping strategy (according to options), and writes the solution for visualization into a Paraview-readable \texttt{.pvd} file.  The solution can also be visualized in a surface-values figure under option \texttt{-osurface}.  Imports functions from each of the following three Python codes.
+\item \texttt{gendomain.py}: \quad  An executable code which writes an outline of the initial domain \eqref{Omegat} into an ASCII file (\texttt{.geo} extension) using the Gmsh-readable geometry description language.  Portions of the boundary are marked with integer tags; see the Python dictionary \texttt{bdryids}.  Also defines a function \texttt{getdomaindims()} which can dynamically-extract certain dimensions from a changing mesh.
+\item \texttt{meshactions.py}: \quad  This module provides mesh manipulation functions.  The most important  are \texttt{getsurfaceelevationfunction\_halos()}, which extracts a piecewise-linear surface elevation function $h(x)$ from the current mesh, and \texttt{solvevdisp()}.  The latter assembles and solves the Dirichlet problem \eqref{vdisplacementpoisson}, using Firedrake's linear \texttt{solve()} command, and applies the solution as a vertical mesh movement \eqref{updatemesh}.  It sets the option prefix \texttt{vd\_} for PETSc options to control this solver.  There are also other functions used for visualization.
+\item \texttt{physics.py}: \quad  Most actual ice physics is isolated in this module, including ice physical constants and the Stokes problem weak form \eqref{defineF}.  The most important function here is \texttt{stokessolve()} which assembles and solves the Stokes problem \eqref{weak} using Firedrake's nonlinear \texttt{solve()} command, and it sets the PETSc solver option prefix \texttt{s\_}.
 \end{itemize}
 
 \begin{figure}[h]
@@ -347,8 +349,8 @@ As shown in Figure \ref{blockdiagram} there are two Python codes which the user 
     \node [other] (gmsh) [right of= gendomain] {Gmsh};
     \node [tool] (flow) [right of=gmsh] {\texttt{flow.py}};
     \node [other] (paraview) [right of=flow] {Paraview};
-    \node [tool] (physics) [above left of=flow, xshift=1cm, yshift=-0.5cm] {\texttt{physics.py}};
-    \node [tool] (meshactions) [above right of=flow, xshift=-1cm, yshift=-0.5cm] {\texttt{meshactions.py}};
+    \node [tool,dashed] (physics) [above left of=flow, xshift=1cm, yshift=-0.5cm] {\texttt{physics.py}};
+    \node [tool,dashed] (meshactions) [above right of=flow, xshift=-1cm, yshift=-0.5cm] {\texttt{meshactions.py}};
     \path[->] (gendomain) edge node {\texttt{.geo}} (gmsh) ;
     \path[->] (gmsh) edge node {\texttt{.msh}} (flow) ;
     \path[->] (flow) edge node {\texttt{.pvd}} (paraview) ;
@@ -359,7 +361,7 @@ As shown in Figure \ref{blockdiagram} there are two Python codes which the user 
 \label{blockdiagram}
 
 \medskip
-\caption{The tools are used in the given order (solid arrows), with input/output file formats as shown.  Dashed arrows show Python \texttt{import}s.}
+\caption{The tools are used in the given order (solid), with input/output file formats as shown.  Python module \texttt{import}s are dashed.}
 \end{figure}
 
 
@@ -369,43 +371,6 @@ As shown in Figure \ref{blockdiagram} there are two Python codes which the user 
 %from: \bibliographystyle{siam}
 
 \begin{thebibliography}{4}
-
-%@book{hervouet2007hydrodynamics,
-%  title={Hydrodynamics of free surface flows: modelling with the finite element method},
-%  author={Hervouet, Jean-Michel},
-%  year={2007},
-%  publisher={John Wiley \& Sons}
-%}
-
-%@article{nie2002singularity,
-%  title={Singularity formation in free-surface Stokes flows},
-%  author={Nie, Qing and Tanveer, Saleh and Dupont, Todd F and Li, Xiaofan},
-%  journal={Contemporary Mathematics},
-%  volume={306},
-%  pages={147--166},
-%  year={2002},
-%}
-
-%@article{doi:10.1063/1.1401812,
-%author = {Ali Mazouchi and G. M. Homsy},
-%title = {Free surface Stokes flow over topography},
-%journal = {Physics of Fluids},
-%volume = {13},
-%number = {10},
-%pages = {2751-2761},
-%year = {2001},
-%doi = {10.1063/1.1401812},
-%}
-
-%\bibitem{BaliseRaymond1985}
-%{\sc M.~Balise and C.~Raymond}, {\em Transfer of basal sliding variations to
-%  the surface of a linearly-viscous glacier}, J. Glaciol., 31 (1985),
-%  pp.~308--318.
-
-%\bibitem{Brownetal2013}
-%{\sc J.~Brown, B.~Smith, and A.~Ahmadia}, {\em Achieving textbook multigrid
-%  efficiency for hydrostatic ice sheet flow}, SIAM J. Sci. Computing,
-%  35 (2013), pp.~B359--B375.
 
 \bibitem{Elmanetal2014}
 {\sc H.~C. Elman and D.~J. Silvester and A.~J. Wathen}, {\em Finite Elements
@@ -426,12 +391,86 @@ As shown in Figure \ref{blockdiagram} there are two Python codes which the user 
   of a nonlinear stationary {S}tokes problem arising in glaciology}, Advances
   in Numerical Analysis, (2011).
 
-%\bibitem{Lengetal2012}
-%{\sc W.~Leng, L.~Ju, M.~Gunzburger, S.~Price, and T.~Ringler}, {\em A parallel
-%  high-order accurate finite element nonlinear {S}tokes ice sheet model and
-%  benchmark experiments}, J. Geophys. Res., 117 (2012).
-
 \end{thebibliography}
 
+
+\begin{comment}
+OTHER REFERENCES:
+
+@article{BraessWriggers2000,
+  title={Arbitrary Lagrangian Eulerian finite element analysis of free surface flow},
+  author={Braess, Henning and Wriggers, Peter},
+  journal={Computer Methods in Applied Mechanics and Engineering},
+  volume={190},
+  number={1-2},
+  pages={95--109},
+  year={2000},
+  publisher={Elsevier}
+}
+
+\bibitem{Lengetal2012}
+{\sc W.~Leng, L.~Ju, M.~Gunzburger, S.~Price, and T.~Ringler}, {\em A parallel
+  high-order accurate finite element nonlinear {S}tokes ice sheet model and
+  benchmark experiments}, J. Geophys. Res., 117 (2012).
+
+@book{hervouet2007hydrodynamics,
+  title={Hydrodynamics of free surface flows: modelling with the finite element method},
+  author={Hervouet, Jean-Michel},
+  year={2007},
+  publisher={John Wiley \& Sons}
+}
+
+@article{nie2002singularity,
+  title={Singularity formation in free-surface Stokes flows},
+  author={Nie, Qing and Tanveer, Saleh and Dupont, Todd F and Li, Xiaofan},
+  journal={Contemporary Mathematics},
+  volume={306},
+  pages={147--166},
+  year={2002},
+}
+
+@article{doi:10.1063/1.1401812,
+author = {Ali Mazouchi and G. M. Homsy},
+title = {Free surface Stokes flow over topography},
+journal = {Physics of Fluids},
+volume = {13},
+number = {10},
+pages = {2751-2761},
+year = {2001},
+doi = {10.1063/1.1401812},
+}
+
+\bibitem{BaliseRaymond1985}
+{\sc M.~Balise and C.~Raymond}, {\em Transfer of basal sliding variations to
+  the surface of a linearly-viscous glacier}, J. Glaciol., 31 (1985),
+  pp.~308--318.
+
+\bibitem{Brownetal2013}
+{\sc J.~Brown, B.~Smith, and A.~Ahmadia}, {\em Achieving textbook multigrid
+  efficiency for hydrostatic ice sheet flow}, SIAM J. Sci. Computing,
+  35 (2013), pp.~B359--B375.
+
+@article{Jouvetetal2008,
+  title={A new algorithm to simulate the dynamics of a glacier: theory and applications},
+  author={Jouvet, Guillaume and Picasso, Marco and Rappaz, Jacques and Blatter, Heinz},
+  journal={Journal of Glaciology},
+  volume={54},
+  number={188},
+  pages={801--811},
+  year={2008},
+  publisher={Cambridge University Press}
+}
+
+@article{PralongFunk2004,
+  title={A level-set method for modeling the evolution of glacier geometry},
+  author={Pralong, Antoine and Funk, Martin},
+  journal={Journal of Glaciology},
+  volume={50},
+  number={171},
+  pages={485--491},
+  year={2004},
+  publisher={Cambridge University Press}
+}
+\end{comment}
 
 \end{document}
