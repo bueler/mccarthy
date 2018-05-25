@@ -6,8 +6,8 @@
 \usepackage[dvipsnames]{xcolor}
 \usepackage{graphicx}
 \usepackage{fancyvrb}
-
-%\usepackage{palatino}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
 
 % hyperref should be the last package we load
 \usepackage[pdftex,
@@ -48,7 +48,7 @@ urlcolor=black     % only if colorlinks=true
 \begin{document}
 \graphicspath{{figures/}}
 
-\title[Appendix A: A finite element Stokes solver for glacier flow]{Appendix A: A finite element Stokes solver \\ for glacier flow}
+\title[Appendix A]{Appendix A: A finite element Stokes solver \\ for glacier flow}
 
 \author{Ed Bueler}
 
@@ -303,17 +303,67 @@ The significance of Dirichlet problem \eqref{vdisplacementpoisson} is that the e
 Note that the scheme uses fixed time step $\Delta t > 0$ and is explicit.  At best the strategy is conditionally stable, and in practice that is observed.  It should be expected that, as with an SIA solver, the time step is restricted by a condition like ``$D\Delta t / \Delta x^2 < 1$'' where $\Delta x$ is a representative mesh spacing variable and $D$ is some diffusivity parameter meaningful in the current context.  However, there is presently no theory in the literature which describes $D$ or otherwise supplies a sufficient stability restriction.  The extensive testing needed to develope a practical time-step restriction has barely been started.
 
 
-\section{Firedrake code}
+\section{Implementation in Python codes}
 
-FIXME: show block figure with blocks = (gendomain.py,gmsh,flow.py,paraview) and file formats as arrows (.geo,.msh,.pvd)
+We implement the above numerical approach in Python codes which directly import the Firedrake FE library, and indirectly the PETSc solver library as well.  An example time-independent run looks like this:
 
-FIXME: show codes here
+\medskip
+\begin{Verbatim}
+$ ./gendomain.py -o glacier.geo                # creates domain outline
+$ gmsh -2 glacier.geo                          # meshes domain
+$ source ~/firedrake/bin/activate              # starts Firedrake
+(firedrake) $ ./flow.py glacier.msh            # solves Stokes problem
+(firedrake) $ paraview glacier.pvd             # visualizes results
+\end{Verbatim}
+%$
 
-%\VerbatimInput[frame=lines,numbers=left,stepnumber=5,fontsize=\footnotesize]{../genstepmesh.py}
+\medskip
+\noindent In a time-stepping run one also gives the time step in days and the number of steps as arguments to \texttt{flow.py}:
 
-%\VerbatimInput[frame=lines,numbers=left,stepnumber=5,fontsize=\footnotesize]{../flowstep.py}
+\medskip
+\begin{Verbatim}
+(firedrake) $ ./flow.py -deltat 20.0 -m 10 glacier.msh
+\end{Verbatim}
+%$
 
-\footnotesize
+\medskip
+\noindent The Python codes \texttt{gendomain.py} and \texttt{flow.py} also provide command-line help with a \texttt{-h} option.
+
+\medskip
+As shown in Figure \ref{blockdiagram} there are two Python codes which the user calls, namely \texttt{gendomain.py} and \texttt{flow.py}, and two additional Python modules imported into \texttt{flow.py}.  These four Python codes perform the following actions:
+\begin{itemize}
+\item \texttt{flow.py}: \quad  This main driver code reads user options, reads the mesh from a Gmsh \texttt{.msh} file, sets-up Firedrake function spaces, either solves a single time-independent Stokes problem or executes the above time-stepping strategy (according to options), and writes the solution for visualization into a Paraview-readable \texttt{.pvd} file.  The solution can also be visualized in a surface-values figure under option \texttt{-osurface}.  Imports functions from each of the following three Python codes.
+\item \texttt{gendomain.py}: \quad  Writes an outline of the initial domain \eqref{Omegat} into an ASCII file (\texttt{.geo} extension) using the Gmsh-readable geometry description language.  Portions of the boundary are marked with integer tags; see the Python dictionary \texttt{bdryids}.  Also defines a function \texttt{getdomaindims()} which can dynamically-extract certain dimensions from a changing mesh.
+\item \texttt{meshactions.py}: \quad  Provides mesh manipulation functions.  The most important  are \texttt{getsurfaceelevationfunction\_halos()}, which extracts a piecewise-linear surface elevation function $h(x)$ from the current mesh, and \texttt{solvevdisp()}.  The latter assembles and solves the Dirichlet problem \eqref{vdisplacementpoisson}, using Firedrake's linear \texttt{solve()} command, and applies the solution as a vertical mesh movement \eqref{updatemesh}.  It sets the option prefix \texttt{vd\_} for PETSc options to control this solver.  There are also other functions used for visualization.
+\item \texttt{physics.py}: \quad  Most actual ice physics is isolated here, including ice physical constants and the Stokes problem weak form \eqref{defineF}.  The most important function here is \texttt{stokessolve()} which assembles and solves the Stokes problem \eqref{weak} using Firedrake's nonlinear \texttt{solve()} command, and it sets the PETSc solver option prefix \texttt{s\_}.
+\end{itemize}
+
+\begin{figure}[h]
+\bigskip
+\tikzstyle{tool} = [draw, minimum size=2em]
+\tikzstyle{other} = [draw, minimum size=2em,rounded corners=0.2cm]
+\begin{tikzpicture}[node distance=3.8cm,auto,>=latex']
+    \node [tool] (gendomain) {\texttt{gendomain.py}};
+    \node [other] (gmsh) [right of= gendomain] {Gmsh};
+    \node [tool] (flow) [right of=gmsh] {\texttt{flow.py}};
+    \node [other] (paraview) [right of=flow] {Paraview};
+    \node [tool] (physics) [above left of=flow, xshift=1cm, yshift=-0.5cm] {\texttt{physics.py}};
+    \node [tool] (meshactions) [above right of=flow, xshift=-1cm, yshift=-0.5cm] {\texttt{meshactions.py}};
+    \path[->] (gendomain) edge node {\texttt{.geo}} (gmsh) ;
+    \path[->] (gmsh) edge node {\texttt{.msh}} (flow) ;
+    \path[->] (flow) edge node {\texttt{.pvd}} (paraview) ;
+    \path[->] (gendomain) edge [dashed, bend left] node {} (flow) ;
+    \path[->] (physics) edge [dashed] node {} (flow) ;
+    \path[->] (meshactions) edge [dashed] node {} (flow) ;
+\end{tikzpicture}
+\label{blockdiagram}
+
+\medskip
+\caption{The tools are used in the given order (solid arrows), with input/output file formats as shown.  Dashed arrows show Python \texttt{import}s.}
+\end{figure}
+
+
+\small
 
 \bigskip
 %from: \bibliographystyle{siam}
