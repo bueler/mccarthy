@@ -39,8 +39,8 @@ def stokessolve(up,mesh,bdryids,Z,Hin,Hout,n_glen,alpha,eps,Dtyp):
     # define ice hardness
     Bn = getBn(n_glen,alpha,Hin)
 
-    # right side outflow nonhomogeneous Neumann is part of weak form:
-    #    apply hydrostatic normal force; 
+    # right side outflow nonhomogeneous Neumann is part of weak form;
+    #    apply hydrostatic normal force with total force from Hin-height slab
     x,z = SpatialCoordinate(mesh)
     Cout = (Hin/Hout)**2
     outflow_sigma = as_vector([- Cout * rho * g * cos(alpha) * (Hout - z),
