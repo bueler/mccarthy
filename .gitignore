@@ -7,6 +7,8 @@
 *.toc
 *.vrb
 *.synctex.gz
+*.bbl
+*.blg
 slides/lecture.pdf
 slides/printable.pdf
 slides/lecture-nup.pdf
