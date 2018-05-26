@@ -40,6 +40,7 @@ urlcolor=black     % only if colorlinks=true
 \newcommand{\bn}{\mathbf{n}}
 \newcommand{\bu}{\mathbf{u}}
 \newcommand{\bv}{\mathbf{v}}
+\newcommand{\bx}{\mathbf{x}}
 
 \newcommand{\bX}{\mathbf{X}}
 
@@ -63,13 +64,14 @@ urlcolor=black     % only if colorlinks=true
 \thispagestyle{empty}
 \bigskip
 
+\renewcommand{\thefigure}{A\arabic{figure}}
 \renewcommand{\theequation}{A\arabic{equation}}
 
 This is an appendix to my notes \emph{Numerical modelling of glaciers, ice sheets, and ice shelves}---here called ``the notes''---for the International Summer School in Glaciology in McCarthy, Alaska.
 
 We start by stating the Stokes model for ice flow with glacier-suitable boundary conditions.  Next, the specific slab-on-a-slope case is solved exactly, both for verification purposes and so as to give boundary conditions for general cases.  We then derive the ``weak form'' of the Stokes problem.  A brief overview of finite element (FE) methods \cite{Elmanetal2014}, which are based on weak forms, follows.  Our particular FE method uses an unstructured mesh of triangular elements on an arbitrary planar region.  The Stokes problem is solved by a stable ``mixed element'' method with different approximating spaces for velocity and pressure.  Finally we describe a moving-mesh scheme to solve the surface kinematical equation.
 
-The main goal is a numerical velocity and pressure solution, with surface evolution, for a 2D glacier with general geometry, for example with steps in the bedrock (Figure \ref{fig:stepflowlin}).  This numerical model is in short Python codes, as documented at the end, which exploit four advanced open source tools/libraries:
+The main goal is a numerical velocity and pressure solution, with surface evolution, for a 2D glacier with general geometry, for example with steps in the bedrock (Figure \ref{fig:glacier}).  This numerical model is in short Python codes, as documented at the end, which exploit four advanced open source tools/libraries:
 \begin{itemize}
 \item Firedrake, an FE library \hfill \url{https://www.firedrakeproject.org/}
 \item PETSc, a solver library \hfill \url{http://www.mcs.anl.gov/petsc/}
@@ -80,7 +82,7 @@ The main goal is a numerical velocity and pressure solution, with surface evolut
 \begin{figure}[h]
 \includegraphics[width=\textwidth,angle=-5.7296]{stepflowlin}  % 0.1 radian = 5.7296 degrees
 \caption{A 2D glacier flowing over bedrock steps.  Arrows show velocity $\bu$.  Shading is by pressure $p$.}
-\label{fig:stepflowlin}
+\label{fig:glacier}
 \end{figure}
 
 
@@ -123,7 +125,7 @@ Here $B_n = (A_n)^{-1/n}$ is the $n$-dependent ice hardness in units $\text{Pa}\
 \end{align}
 The Stokes model is, from now on, equations \eqref{incompagain}, \eqref{stokes} with certain boundary conditions.  The solution is the velocity-pressure pair $(\bu,p)$.
 
-Certain glacier-suitable velocity and stress boundary conditions are used in our example.  To explain these, consider the numerical solution shown in Figure \ref{fig:stepflowlin}.  We assume that the base, top, inflow, and outflow boundary surfaces can all be identified.  On the base we require no slip:
+Certain glacier-suitable velocity and stress boundary conditions are used in our example.  To explain these, consider the numerical solution shown in Figure \ref{fig:glacier}.  We assume that the base, top, inflow, and outflow boundary surfaces can all be identified.  On the base we require no slip:
 \begin{align}
 \bu &= 0  &&\text{\emph{base}} \label{basebc} \\
 \intertext{On the top we set a condition of zero applied stress, $\sigma\hbn=0$ or equivalently:}
@@ -182,7 +184,7 @@ B_n = \left(\frac{4}{n+1}\right)^{1/n} \Big(\rho g \sin\alpha (h-b)\Big)^{(n-3)/
 \end{equation}
 For example, suppose $h-b=400$ m and $\alpha=0.1$ radians (about $5.7$ degrees).  Using $B_n$ from \eqref{Bnfromsurface} gives a surface velocity of $u(h)=906.092 \,\text{m}\,\text{a}^{-1}$ from \eqref{uslab} independent of $n\ge 1$.  For some glaciologically-relevant end-cases $n=1,4$ \cite{GoldsbyKohlstedt2001}, the result from \eqref{Bnfromsurface} is $B_1=4.9663\times 10^{12}\,\text{Pa}\,\text{s}$ and $B_4=1.7320\times 10^{7}\,\text{Pa}\,\text{s}^{1/4}$.  The Newtonian viscosity $\nu=B_1/2$ is about $10^{16}$ times more viscous than liquid water but about $10^7$ times less viscous than granite (both at $25^\circ \,\text{C}$, and according to wikipedia).
 
-Formulas \eqref{pslab} and \eqref{uslab} will be used for verifying the numerical solver.  Additionally they allow us to set boundary conditions which lead to glaciologically-reasonable solutions even when modeling a small part of a glacier.  Specifically we do this for the geometry shown in Figure \ref{fig:stepflowlin}.  The inflow side of the region has \eqref{uslab} applied as a Dirichlet condition, i.e.~equation \eqref{inflowbc}.  Also, the outflow side has a normal stress computed from the slab-on-slope solution.  From \eqref{uzslab} above, and the facts that $w=0$, $u_x=0$, and $|D\bu| = \frac{1}{2} u_z$, we find that because $\hbn=\left<1,0\right>$ is the outward normal on the outflow side,
+Formulas \eqref{pslab} and \eqref{uslab} will be used for verifying the numerical solver.  Additionally they allow us to set boundary conditions which lead to glaciologically-reasonable solutions even when modeling a small part of a glacier.  Specifically we do this for the geometry shown in Figure \ref{fig:glacier}.  The inflow side of the region has \eqref{uslab} applied as a Dirichlet condition, i.e.~equation \eqref{inflowbc}.  Also, the outflow side has a normal stress computed from the slab-on-slope solution.  From \eqref{uzslab} above, and the facts that $w=0$, $u_x=0$, and $|D\bu| = \frac{1}{2} u_z$, we find that because $\hbn=\left<1,0\right>$ is the outward normal on the outflow side,
 \begin{align*}
 \sigma \hbn &= \left(B_n |D\bu|^{\frac{1}{n}-1} D\bu - pI\right)\hbn = \left(B_n |D\bu|^{\frac{1}{n}-1} \begin{pmatrix} u_x & \frac{1}{2}(u_z+w_x) \\ \frac{1}{2}(u_z+w_x) & w_z \end{pmatrix} - pI\right)\hbn \\
     &= B_n \left(\frac{1}{2} u_z\right)^{\frac{1}{n}-1} \begin{pmatrix} 0 \\ \frac{1}{2} u_z \end{pmatrix} - \begin{pmatrix} p \\ 0 \end{pmatrix} = \begin{pmatrix} - p \\ \frac{B_n}{2^{1/n}} (u_z)^{1/n} \end{pmatrix} = \begin{pmatrix} - \rho g\cos\alpha (h-z) \\ \rho g\sin\alpha (h-z) \end{pmatrix}
@@ -241,12 +243,70 @@ The finalized weak formulation of the Stokes model is the statement that, at the
 \begin{equation}
 F(\bu,p;\bv,q) = 0 \qquad \text{ for all } \bv\in V_0 \text{ and } q\in Q  \label{weak}
 \end{equation}
-This weak formulation is proven in \cite{JouvetRappaz2011} to be well-posed under reasonable assumptions about the domain $\Omega$ and boundary data.  These assumptions will be satisfied in the cases we consider.  Now our goal is to approximate this one solution pair $(\bu,p)$ numerically.
+This weak formulation is proven in \cite[Theorem 3.8]{JouvetRappaz2011} to be well-posed under reasonable assumptions about the domain $\Omega$ and boundary data.  These assumptions will be satisfied in the cases we consider.  Now our goal is to approximate this one solution pair $(\bu,p)$ numerically.
 
 
 \section{Finite element method}
 
-This section gives a necessarily very abbreviated summary of the FE method we apply, through calls to Firedrake (see below), to solve the Stokes equations.  More serious coverage of the FE method is in the references \cite{Braess2007,BuelerBook,Elmanetal2014}
+This section gives a very abbreviated summary of our FE method to solve the Stokes equations.  More serious coverage of FE methods is in the references \cite{Braess2007,BuelerBook,Elmanetal2014}.  Our FE method is actually applied through calls to Firedrake (see below), so we do not implement most of the following techniques ourselves.
+
+The fundamental idea is to replace the infinite-dimensional function spaces appearing in the weak form \eqref{weak} with finite-dimensional subspaces based on local constructions using the mesh.  The function $F$ in \eqref{defineF} can be computed on functions from these finite-dimensional subspaces.  Requiring the functional to be zero over a basis of the finite-dimensional subspace of test functions defines equations which approximate our PDE model.  This approximation is a nonlinear system of equations which is solved by Newton's method using the PETSc solver library \cite{Balayetal2018,BuelerBook}.
+
+The triangular mesh covers the domain $\Omega$ by a finite set $\mathcal{T}_h$ of non-overlapping open triangles $\triangle_k$. The subscript ``$h$'' denotes the maximum diameter of the triangles.  The triangles $\triangle_k$ are indexed $k=1,\dots,K$.  The $N_1$ nodes, which are the vertices of the triangles, are located at $(x_i,z_i)$ for $i=1,\dots,N_1$.
+
+For each triangle $\triangle_k$ there are various choices of the \emph{finite element space}.  This is a finite-dimensional space of low-degree polynomials defined on that triangle.  We use two such spaces, a simpler type denoted $P_1$ for pressure and a more complicated type $(P_2)^2$ for velocity.  The combined spaces $(P_2)^2 \times P_1$ of $(\bu,p)$ pairs are sometimes called \emph{Taylor-Hood} elements or just ``$P_2$-$P_1$'' elements.
+
+For the pressure, $P_1$ refers to the space of linear functions $a + b x + c z$ on the triangle; these have three degrees of freedom $\{a,b,c\}$.  This space exists for every triangle.  A continuous function on $\Omega$ which is piecewise-linear on each triangle $\triangle_k$ is determined by its values at the $N$ nodes.  We define $Q^h$ to be the space of such functions, and observe that it is a subspace of the space of all pressure functions $Q$:
+    $$Q^h \subset Q$$
+Speaking informally, one may say that $Q^h$ is the $P_1$ space.  Partial derivatives of such functions are piecewise-constant, thus integrable, but they are not continuous.  To define a convenient basis for $Q^h$ we let $\psi_j(x,z)$ be the ``hat'' function which is linear on each triangle, continuous on $\Omega$, and equal to one at only one node $j$, so that $\psi_j(x_i,z_i) = \delta_{ij}$.  The set $\{\psi_j\}_1^N \subset Q^h$ is linearly-independent.
+
+For the velocity we use $P_2$ finite elements for each component of $\bu=(u,w)$.  Considering one triangle and a scalar component, $P_2$ is the space of quadratic functions $a + bx + cy + dx^2 + exy + fy^2$ with six degrees of freedom.  A continuous function on $\Omega$ which is piecewise-quadratic on each triangle is determined by its values at the $N$ nodes \emph{plus} the points which are the midpoints of every edge.  That is, the six points for each triangle, shown on the right in Figure \ref{fig:fedofs}, are the degrees of freedom for $P_2$ elements.  We define $V_0^h$ to be the space of pairs of continuous functions on $\Omega$ which are piecewise-quadratic on each triangle and which are zero on the entirety of the boundary $\partial \Omega$.  These functions are vector-valued.  We define $V_D^h$ to be the same kinds of vector-valued functions but satisfying \eqref{inflowbc} on the inflow.  Thereby we have defined finite-dimensional subspaces of the velocity space used in the weak form \eqref{weak} above:
+    $$V_0^h \subset V_0, \quad V_D^h \subset V_D$$
+
+\begin{figure}[ht]
+\begin{tikzpicture}[scale=1.0,dot/.style={draw,circle,fill=black,inner sep=1.5pt,pos=0.5}]
+\newcommand{\ldot}{node[circle,fill=black,inner sep=0.5pt] (0.0pt) {.}}
+\pgfmathsetmacro{\xo}{0.0}
+\pgfmathsetmacro{\yo}{0.0}
+  \draw[black] (0.000000+\xo,-2.000000+\yo) \ldot -- (1.828947+\xo,-0.947368+\yo) \ldot -- (0.000000+\xo,0.000000+\yo) \ldot -- (0.000000+\xo,-2.000000+\yo) ;
+\pgfmathsetmacro{\xo}{4.0}
+  \draw[black] (0.000000+\xo,-2.000000+\yo) \ldot -- node[dot](){}  (1.828947+\xo,-0.947368+\yo) \ldot -- node[dot](){} (0.000000+\xo,0.000000+\yo) \ldot -- node[dot](){} (0.000000+\xo,-2.000000+\yo) ;
+\end{tikzpicture}
+\caption{A triangle $\triangle_k$ with $P_1$ element nodes for pressure (left) and $P_2$ element nodes for a scalar velocity component (right).}
+\label{fig:fedofs}
+\end{figure}
+
+FIXME The FEM itself seeks FIXME so that FIXME holds for all FIXME.  By linearity it suffices to consider only a \emph{basis} of test functions from FIXME, so we require FIXME
+
+Given a triangulation $\mathcal{T}_h$, and the data of the problem, namely FIXME, the FEM solution FIXME is completely specified by equation \eqref{weak} where FIXME (spaces are substituted).  This finite-dimensional problem can be shown to be well-posed by the same theory that applies to the continuum problem \cite[Theorem 4.3]{JouvetRappaz2011}.
+
+FIXME dimension of velocity space much higher than pressure; see Figure \ref{fig:fedims}
+
+\begin{figure}[ht]
+\begin{tikzpicture}[scale=0.8,dot/.style={draw,circle,fill=black,inner sep=1.5pt,pos=0.5}]
+\pgfmathsetmacro{\xo}{0.0}
+\pgfmathsetmacro{\yo}{0.0}
+\newcommand{\ldot}{node[circle,fill=black,inner sep=0.5pt] (0.0pt) {.}}
+  \draw[black] (0.000000+\xo,-2.000000+\yo) \ldot -- node[dot](){}  (1.828947+\xo,-0.947368+\yo) \ldot -- node[dot](){} (0.000000+\xo,0.000000+\yo) \ldot -- node[dot](){} (0.000000+\xo,-2.000000+\yo) ;
+  \draw[black] (2.000000+\xo,-3.000000+\yo) \ldot -- node[dot](){} (1.828947+\xo,-0.947368+\yo) \ldot -- node[dot](){} (0.000000+\xo,-2.000000+\yo) \ldot -- node[dot](){} (2.000000+\xo,-3.000000+\yo) ;
+  \draw[black] (0.000000+\xo,0.000000+\yo) \ldot -- node[dot](){} (1.828947+\xo,-0.947368+\yo) \ldot -- node[dot](){} (2.500000+\xo,1.000000+\yo) \ldot -- node[dot](){} (0.000000+\xo,0.000000+\yo) ;
+  \draw[black] (1.828947+\xo,-0.947368+\yo) \ldot -- node[dot](){} (2.000000+\xo,-3.000000+\yo) \ldot -- node[dot](){} (4.000000+\xo,-1.799890+\yo) \ldot -- node[dot](){} (1.828947+\xo,-0.947368+\yo) ;
+  \draw[black] (4.000000+\xo,-1.799890+\yo) \ldot -- node[dot](){} (5.957182+\xo,-0.804788+\yo) \ldot -- node[dot](){} (2.500000+\xo,1.000000+\yo) \ldot -- node[dot](){} (4.000000+\xo,-1.799890+\yo) ;
+  \draw[black] (2.500000+\xo,1.000000+\yo) \ldot -- node[dot](){} (1.828947+\xo,-0.947368+\yo) \ldot -- node[dot](){} (4.000000+\xo,-1.799890+\yo) \ldot -- node[dot](){} (2.500000+\xo,1.000000+\yo) ;
+  \draw[black] (2.500000+\xo,1.000000+\yo) \ldot -- node[dot](){} (5.957182+\xo,-0.804788+\yo) \ldot -- node[dot](){} (5.000000+\xo,2.000000+\yo) \ldot -- node[dot](){} (2.500000+\xo,1.000000+\yo) ;
+\end{tikzpicture}
+
+\caption{A small mesh with $K=7$ triangular elements, $N_1=8$ total degrees of freedom (DOF) for the $P_1$ space, and $N_2=21$ total DOF for the scalar $P_2$ space.}
+\label{fig:fedims}
+\end{figure}
+
+FIXME the nonlinear system is solved by Newton's method \cite{BuelerBook}; each Newton step solves a symmetric, indefinite linear system \cite{GolubVanLoan2013}; this is done by Schur complement \cite{Elmanetal2014,GolubVanLoan2013} and GMRES \cite{GolubVanLoan2013} but one may also use MINRES \cite{Elmanetal2014,GolubVanLoan2013}
+
+FIXME Firedrake sets a nonlinear residual, namely the functional \eqref{defineF}, and calls its method \texttt{solve()} on the discrete weak form FIXME; the code sets default PETSc options corresponding to
+
+  \texttt{-s\_ksp\_type fgmres -s\_pc\_type fieldsplit -s\_pc\_fieldsplit\_type schur}
+
+\noindent (see the result of \texttt{-s\_snes\_view}) but this is now getting beyond the scope of this brief
 
 
 \section{Surface kinematical equation}
@@ -320,11 +380,11 @@ $ source ~/firedrake/bin/activate              # starts Firedrake
 %$
 
 \medskip
-\noindent In a time-stepping run one also gives the time step in days and the number of steps as arguments to \texttt{flow.py}:
+In a time-stepping run one also gives the time step in days and the number of steps as arguments to \texttt{flow.py}.  For example, the following run will allow the user to reproduce Figure \ref{fig:glacier} using Paraview:
 
 \medskip
 \begin{Verbatim}
-(firedrake) $ ./flow.py -deltat 20.0 -m 10 glacier.msh
+(firedrake) $ ./flow.py -deltat 20.0 -m 100 glacier.msh
 \end{Verbatim}
 %$
 
@@ -332,7 +392,7 @@ $ source ~/firedrake/bin/activate              # starts Firedrake
 \noindent The Python codes \texttt{gendomain.py} and \texttt{flow.py} also provide command-line help with a \texttt{-h} option.
 
 \medskip
-As shown in Figure \ref{blockdiagram} there are two Python codes which the user calls, namely \texttt{gendomain.py} and \texttt{flow.py}, and two additional Python modules imported into \texttt{flow.py}.  These four Python codes perform the following actions:
+As shown in Figure \ref{fig:blockdiagram} there are two Python codes which the user calls, namely \texttt{gendomain.py} and \texttt{flow.py}, and two additional Python modules imported into \texttt{flow.py}.  These four Python codes perform the following actions:
 \begin{itemize}
 \item \texttt{flow.py}: \quad  This executable main driver code reads user options, reads the mesh from a Gmsh \texttt{.msh} file, sets-up Firedrake function spaces, either solves a single time-independent Stokes problem or executes the above time-stepping strategy (according to options), and writes the solution for visualization into a Paraview-readable \texttt{.pvd} file.  The solution can also be visualized in a surface-values figure under option \texttt{-osurface}.  Imports functions from each of the following three Python codes.
 \item \texttt{gendomain.py}: \quad  An executable code which writes an outline of the initial domain \eqref{Omegat} into an ASCII file (\texttt{.geo} extension) using the Gmsh-readable geometry description language.  Portions of the boundary are marked with integer tags; see the Python dictionary \texttt{bdryids}.  Also defines a function \texttt{getdomaindims()} which can dynamically-extract certain dimensions from a changing mesh.
@@ -358,10 +418,10 @@ As shown in Figure \ref{blockdiagram} there are two Python codes which the user 
     \path[->] (physics) edge [dashed] node {} (flow) ;
     \path[->] (meshactions) edge [dashed] node {} (flow) ;
 \end{tikzpicture}
-\label{blockdiagram}
 
 \medskip
 \caption{The tools are used in the given order (solid), with input/output file formats as shown.  Python module \texttt{import}s are dashed.}
+\label{fig:blockdiagram}
 \end{figure}
 
 
