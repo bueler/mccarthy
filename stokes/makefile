@@ -1,3 +1,5 @@
+all:
+
 tmptest/:
 	mkdir -p tmptest/
 
