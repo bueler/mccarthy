@@ -1,6 +1,6 @@
 all: stokes.pdf
 
-stokes.pdf: stokes.tex
+stokes.pdf: stokes.tex stokes.bib
 	pdflatex stokes
 	bibtex stokes
 	pdflatex stokes
