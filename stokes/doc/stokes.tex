@@ -2,6 +2,7 @@
 
 \usepackage[total={6.3in,9.2in},top=1.1in,left=1.1in]{geometry}
 
+\usepackage{bm}
 \usepackage{empheq}
 \usepackage[dvipsnames]{xcolor}
 \usepackage{graphicx}
@@ -66,6 +67,7 @@ urlcolor=black     % only if colorlinks=true
 
 \renewcommand{\thefigure}{A\arabic{figure}}
 \renewcommand{\theequation}{A\arabic{equation}}
+\renewcommand{\thesection}{A.\arabic{section}}
 
 This is an appendix to my notes \emph{Numerical modelling of glaciers, ice sheets, and ice shelves}---here called ``the notes''---for the International Summer School in Glaciology in McCarthy, Alaska.
 
@@ -86,7 +88,7 @@ The main goal is a numerical velocity and pressure solution, with surface evolut
 \end{figure}
 
 
-\section{Stokes problem}
+\section{Stokes problem} \label{sec:stokes}
 
 Recall the Glen-Stokes model in equations (3), (4), (5) from the notes; the model is also described in \cite{GreveBlatter2009,JouvetRappaz2011}.  It applies on a 3D or 2D domain $\Omega$ which must have a smooth-enough boundary to apply the boundary conditions but is otherwise general.  Allowing any Glen exponent $n\ge 1$, the equations are:
 \begin{align}
@@ -138,7 +140,7 @@ Certain glacier-suitable velocity and stress boundary conditions are used in our
 The constant $C_{\text{out}} $ is adjusted so that the total applied stress is equal to its value for ice thicknesses $H_{\text{in}}$: $C_{\text{out}} = (H_{\text{in}}/H_{\text{out}})^2$ where $H_{\text{out}}$ is the varying outflow ice thickness.
 
 
-\section{Slab-on-slope solutions}
+\section{Slab-on-slope solutions}  \label{sec:slab}
 
 Testing a numerical model requires verification tools, namely exact solutions.  Thus we recapitulate the construction of slab-on-slope solutions, as given in the notes, this time allowing any Glen exponent $n$.  We also determine the $n$-dependent ice hardness $B_n$ so that these solutions have the same surface velocity for any $n$, and construct the inflow and outflow boundary conditions based on based on the slab-on-slope case.
 
@@ -192,7 +194,7 @@ Formulas \eqref{pslab} and \eqref{uslab} will be used for verifying the numerica
 This justifies formula \eqref{outflowbc}.
 
 
-\section{Weak form}
+\section{Weak form} \label{sec:weakform}
 
 The Stokes equations \eqref{incompagain}, \eqref{stokes} are PDEs called the \emph{strong form} of the model.  An integral equation form of the same model, called the \emph{weak form}, is needed to construct an FE method \cite{Elmanetal2014}.  It is derived by multiplying the strong form equations by \emph{test functions} and then integrating over $\Omega$ so as to define a scalar-valued nonlinear functional $F$ (formula \eqref{defineF} below).  The weak form says that $F$ must be zero when acting on test functions.
 
@@ -246,22 +248,17 @@ F(\bu,p;\bv,q) = 0 \qquad \text{ for all } \bv\in V_0 \text{ and } q\in Q  \labe
 This weak formulation is proven in \cite[Theorem 3.8]{JouvetRappaz2011} to be well-posed under reasonable assumptions about the domain $\Omega$ and boundary data.  These assumptions will be satisfied in the cases we consider.  Now our goal is to approximate this one solution pair $(\bu,p)$ numerically.
 
 
-\section{Finite element method}
+\section{Finite element method} \label{sec:femethod}
 
-This section gives a very abbreviated summary of our FE method to solve the Stokes equations.  More serious coverage of FE methods is in the references \cite{Braess2007,BuelerBook,Elmanetal2014}.  Our FE method is actually applied through calls to Firedrake (see below), so we do not implement most of the following techniques ourselves.
+This section gives a very abbreviated summary of our FE method to solve the Stokes equations, but better coverage of FE methods is in the references \cite{Braess2007,BuelerBook,Elmanetal2014}.  The method here is actually applied through calls to Firedrake \cite{Rathgeberetal2016}, and so we do not implement most of the following techniques ourselves.
 
-The fundamental idea is to replace the infinite-dimensional function spaces appearing in the weak form \eqref{weak} with finite-dimensional subspaces based on local constructions using the mesh.  The function $F$ in \eqref{defineF} can be computed on functions from these finite-dimensional subspaces.  Requiring the functional to be zero over a basis of the finite-dimensional subspace of test functions defines equations which approximate our PDE model.  This approximation is a nonlinear system of equations which is solved by Newton's method using the PETSc solver library \cite{Balayetal2018,BuelerBook}.
+The fundamental FE idea is to replace the infinite-dimensional function spaces appearing in the weak form \eqref{weak} with finite-dimensional subspaces based on local constructions using the mesh.  An approximate solution $(\bu,p)$ can be sought from these subspaces, and functional $F$ in \eqref{defineF} can be computed on test functions $(\bv,q)$ from these subspaces.  Requiring $F$ to be zero over a basis of the subspaces defines the equations which approximate our PDE model.  Because the Glen-law Stokes problem is nonlinear, this approximation is a nonlinear system of algebraic equations.  We solve it by Newton's method, with preconditioned Krylov iterations to solve the linear equations at each Newton step, as implemented in the PETSc solver library \cite{Balayetal2018,BuelerBook}.
 
-The triangular mesh covers the domain $\Omega$ by a finite set $\mathcal{T}_h$ of non-overlapping open triangles $\triangle_k$. The subscript ``$h$'' denotes the maximum diameter of the triangles.  The triangles $\triangle_k$ are indexed $k=1,\dots,K$.  The $N_1$ nodes, which are the vertices of the triangles, are located at $(x_i,z_i)$ for $i=1,\dots,N_1$.
+To discuss our FE method more precisely, let us start with the triangular mesh.  It covers the domain $\Omega$ by a finite set $\mathcal{T}_h$ of non-overlapping open triangles $\triangle_k$.  The subscript ``$h$'' denotes the maximum diameter of the triangles.  The triangles $\triangle_k$ are indexed $k=1,\dots,K$.  The vertices of the triangles are the $N_1$ nodes, including nodes on $\partial\Omega$.  They are located at $(x_i,z_i)$ for $i=1,\dots,N_1$.  Note that all of this information about the triangulation $\mathcal{T}_h$ is stored in the \texttt{.msh} file generated by Gmsh; see section \ref{sec:implementation}.
 
-For each triangle $\triangle_k$ there are various choices of the \emph{finite element space}.  This is a finite-dimensional space of low-degree polynomials defined on that triangle.  We use two such spaces, a simpler type denoted $P_1$ for pressure and a more complicated type $(P_2)^2$ for velocity.  The combined spaces $(P_2)^2 \times P_1$ of $(\bu,p)$ pairs are sometimes called \emph{Taylor-Hood} elements or just ``$P_2$-$P_1$'' elements.
+For each triangle $\triangle_k$ there are various choices of the \emph{finite element space}, a finite-dimensional space of low-degree polynomials defined on that triangle.  We use two FE spaces, the simpler one denoted $P_1$ for the pressure and a more complicated type $(P_2)^2$ for velocity.  The combined spaces $(P_2)^2 \times P_1$, which approximate $(\bv,q)$ pairs of test functions for example, are called $P_2$-$P_1$ or \emph{Taylor-Hood} elements \cite{Elmanetal2014}.
 
-For the pressure, $P_1$ refers to the space of linear functions $a + b x + c z$ on the triangle; these have three degrees of freedom $\{a,b,c\}$.  This space exists for every triangle.  A continuous function on $\Omega$ which is piecewise-linear on each triangle $\triangle_k$ is determined by its values at the $N$ nodes.  We define $Q^h$ to be the space of such functions, and observe that it is a subspace of the space of all pressure functions $Q$:
-    $$Q^h \subset Q$$
-Speaking informally, one may say that $Q^h$ is the $P_1$ space.  Partial derivatives of such functions are piecewise-constant, thus integrable, but they are not continuous.  To define a convenient basis for $Q^h$ we let $\psi_j(x,z)$ be the ``hat'' function which is linear on each triangle, continuous on $\Omega$, and equal to one at only one node $j$, so that $\psi_j(x_i,z_i) = \delta_{ij}$.  The set $\{\psi_j\}_1^N \subset Q^h$ is linearly-independent.
-
-For the velocity we use $P_2$ finite elements for each component of $\bu=(u,w)$.  Considering one triangle and a scalar component, $P_2$ is the space of quadratic functions $a + bx + cy + dx^2 + exy + fy^2$ with six degrees of freedom.  A continuous function on $\Omega$ which is piecewise-quadratic on each triangle is determined by its values at the $N$ nodes \emph{plus} the points which are the midpoints of every edge.  That is, the six points for each triangle, shown on the right in Figure \ref{fig:fedofs}, are the degrees of freedom for $P_2$ elements.  We define $V_0^h$ to be the space of pairs of continuous functions on $\Omega$ which are piecewise-quadratic on each triangle and which are zero on the entirety of the boundary $\partial \Omega$.  These functions are vector-valued.  We define $V_D^h$ to be the same kinds of vector-valued functions but satisfying \eqref{inflowbc} on the inflow.  Thereby we have defined finite-dimensional subspaces of the velocity space used in the weak form \eqref{weak} above:
-    $$V_0^h \subset V_0, \quad V_D^h \subset V_D$$
+Consider just one triangle.  The name $P_1$ refers to the space of linear functions $a + b x + c z$ on the triangle.  Instead of using three degrees of freedom $\{a,b,c\}$ to describe such a function, as shown in Figure \ref{fig:fedofs}, the three vertices of the triangle are preferred as degrees of freedom.  That is, any function in $P_1$ is determined by its values at the vertices.  The $P_2$ space, used for the scalar components of velocity, is the space of quadratic functions $a + bx + cy + dx^2 + exy + fy^2$.  The preferred six degrees of freedom for $P_2$ elements are the vertices plus the edge midpoints \cite{Elmanetal2014}.
 
 \begin{figure}[ht]
 \begin{tikzpicture}[scale=1.0,dot/.style={draw,circle,fill=black,inner sep=1.5pt,pos=0.5}]
@@ -272,15 +269,20 @@ For the velocity we use $P_2$ finite elements for each component of $\bu=(u,w)$.
 \pgfmathsetmacro{\xo}{4.0}
   \draw[black] (0.000000+\xo,-2.000000+\yo) \ldot -- node[dot](){}  (1.828947+\xo,-0.947368+\yo) \ldot -- node[dot](){} (0.000000+\xo,0.000000+\yo) \ldot -- node[dot](){} (0.000000+\xo,-2.000000+\yo) ;
 \end{tikzpicture}
-\caption{A triangle $\triangle_k$ with $P_1$ element nodes for pressure (left) and $P_2$ element nodes for a scalar velocity component (right).}
+\caption{For a $P_1$ element the vertices are the degrees of freedom (left; used for pressure).  For a $P_2$ element the vertices plus the midpoints of each edge are the degrees of freedom (right; used for velocity components).}
 \label{fig:fedofs}
 \end{figure}
 
-FIXME The FEM itself seeks FIXME so that FIXME holds for all FIXME.  By linearity it suffices to consider only a \emph{basis} of test functions from FIXME, so we require FIXME
+A continuous function on $\Omega$ which is piecewise-linear on each triangle is determined by its values at the $N_1$ nodes, and when restricted to a single triangle it is in the $P_1$ space.  We define $Q^h$ to be the space of such functions, and, speaking informally, one says that $Q^h$ \emph{is} the $P_1$ space.  It is a subspace of the space of pressure functions $Q$ used in the weak form \eqref{weak}:
+    $$Q^h \subset Q$$ 
 
-Given a triangulation $\mathcal{T}_h$, and the data of the problem, namely FIXME, the FEM solution FIXME is completely specified by equation \eqref{weak} where FIXME (spaces are substituted).  This finite-dimensional problem can be shown to be well-posed by the same theory that applies to the continuum problem \cite[Theorem 4.3]{JouvetRappaz2011}.
+A continuous function on $\Omega$ which is piecewise-quadratic on each triangle is determined by its values at the $N_1$ nodes \emph{plus} at the additional points which are the midpoints of every edge \cite{Elmanetal2014}, the six $P_2$ nodes shown on the right in Figure \ref{fig:fedofs}.  We define $V_0^h$ to be the space of \emph{pairs} of continuous functions on $\Omega$ which are piecewise-quadratic on each triangle and which are zero on the base and inflow boundaries where we have Dirichlet boundary conditions (i.e.~equations \eqref{basebc} and \eqref{inflowbc}).  Note functions from $V_0^h$ are 2D vector fields.  We define $V_D^h$ to be the nearly the same 2D vector-valued and piecewise-quadratic functions, except that these satisfy \eqref{inflowbc} on the inflow boundary.  Thus we have defined finite-dimensional subspaces of the velocity spaces used in the weak form \eqref{weak}:
+    $$V_0^h \subset V_0, \quad V_D^h \subset V_D$$
+In brief, for the velocity we use $P_2$ finite elements for each component of $\bu=(u,w)$.
 
-FIXME dimension of velocity space much higher than pressure; see Figure \ref{fig:fedims}
+To define a convenient pressure test function basis, i.e.~for $Q^h$, we let $\psi_j(x,z)$ be the ``hat'' function which is linear on each triangle, continuous on $\Omega$, and equal to one only at the one node $(x_j,z_j)$, so that $\psi_j(x_i,z_i) = \delta_{ij}$.  The set $\{\psi_j\}$ is a set of $N_1$ linearly-independent functions in $Q^h$.  Similarly, for every $P_2$ node which is not in the base or inflow boundary, whether a triangle vertex or edge midpoint, one may define a pair of basis functions for the velocity test space $V_0^h$.  These are pairs of piecewise-quadratic hat functions: $(\phi_j(x,z),0)$ or $(0,\phi_j(x,z))$.  If we let $N_2$ denote the number of all such nodes then these hat functions form a set of $2N_2$ linearly-independent functions in $V_0^h$.
+
+A small example of this kind of mesh is shown in Figure \ref{fig:fedims}.  The meshes used for the Stokes equations have identified Dirichlet boundaries at the base and inflow, and again note that $N_2$ only counts $P_2$ nodes \emph{not} on these boundaries. 
 
 \begin{figure}[ht]
 \begin{tikzpicture}[scale=0.8,dot/.style={draw,circle,fill=black,inner sep=1.5pt,pos=0.5}]
@@ -296,20 +298,26 @@ FIXME dimension of velocity space much higher than pressure; see Figure \ref{fig
   \draw[black] (2.500000+\xo,1.000000+\yo) \ldot -- node[dot](){} (5.957182+\xo,-0.804788+\yo) \ldot -- node[dot](){} (5.000000+\xo,2.000000+\yo) \ldot -- node[dot](){} (2.500000+\xo,1.000000+\yo) ;
 \end{tikzpicture}
 
-\caption{A small mesh with $K=7$ triangular elements, $N_1=8$ total degrees of freedom (DOF) for the $P_1$ space, and $N_2=21$ total DOF for the scalar $P_2$ space.}
+\caption{A small mesh with $K=7$ elements, $N_1=8$ vertices ($P_1$ nodes), and $N_2=21$ $P_2$ nodes.}
 \label{fig:fedims}
 \end{figure}
 
-FIXME the nonlinear system is solved by Newton's method \cite{BuelerBook}; each Newton step solves a symmetric, indefinite linear system \cite{GolubVanLoan2013}; this is done by Schur complement \cite{Elmanetal2014,GolubVanLoan2013} and GMRES \cite{GolubVanLoan2013} but one may also use MINRES \cite{Elmanetal2014,GolubVanLoan2013}
+Using $P_2$-$P_1$ elements the dimension of the velocity space is always higher than the pressure space, and often much higher.  For example, for the $N_1=356$ vertex mesh shown in Figure \ref{fig:glacier}, the velocity dimension $2N_2=2646$ is seven times greater than $N_1$.  A dimension imbalance turns out to be desirable because, as explained in the FE literature \cite{Braess2007,Elmanetal2014} under the obscure name ``inf-sup condition,'' mixed methods for the Stokes equations are only stable if the velocity space is sufficiently-large relative to the pressure space.
 
-FIXME Firedrake sets a nonlinear residual, namely the functional \eqref{defineF}, and calls its method \texttt{solve()} on the discrete weak form FIXME; the code sets default PETSc options corresponding to
+The FE method itself can now be stated, namely as a finite-dimensional restatement (approximation) of the weak form \eqref{weak}.  It seeks $\bu^h \in V_D^h$ and $p^h \in Q^h$ so that
+\begin{equation}
+F(\bu^h,p^h;\bv^h,q^h) = 0 \qquad \text{ for all } \bv^h\in V_0^h \text{ and } q^h\in Q^h  \label{feweak}
+\end{equation}
+(The approximation arises merely by adding ``$h$'' superscripts to all continuum quantities!)  The FEM solution to \eqref{feweak} can be shown to be well-posed by the same theory that applies to the continuum problem \cite[Theorem 4.3]{JouvetRappaz2011}.  Note that the nonlinear functional $F$ is unchanged, and that it can be computed concretely, though approximately, by quadrature \cite{BuelerBook,Elmanetal2014}.
 
-  \texttt{-s\_ksp\_type fgmres -s\_pc\_type fieldsplit -s\_pc\_fieldsplit\_type schur}
+By linearity of $F$ in the $\bv,q$ positions, it suffices to consider only a \emph{basis} of test functions from $V_0^h \times Q^h$.  The system of nonlinear equations, the sparse \emph{discrete Stokes problem}, is formed by requiring \eqref{feweak} to hold for all of the basis functions identified above.  Interestingly, however, the equations are actually assembled \emph{element-by-element} in the sense that for each triangle $\triangle_k$ the contribution from that triangle to each equation is added \cite[chapter 9]{BuelerBook}.
 
-\noindent (see the result of \texttt{-s\_snes\_view}) but this is now getting beyond the scope of this brief
+The nonlinear system \eqref{feweak} is solved by Newton's method \cite{Kelley2003}.  Because of the block structure of the discrete  Stokes problem, each Newton step solves a symmetric, indefinite linear system \cite{GolubVanLoan2013}.  This linear system is solved by a Schur complement \cite{Elmanetal2014,GolubVanLoan2013} preconditioner and a GMRES Krylov iteration \cite{GolubVanLoan2013}.  (This buzzword salad is an indication of the complexity of solver technology \dots and not meaningfully explained here!)  Our Python code defines a nonlinear residual function, namely $F$ from \eqref{defineF}, using a domain-specific language for describing such weak forms, and it then calls the Firedrake method \texttt{solve()} on \eqref{feweak} \cite{Rathgeberetal2016}.
+
+A more practical view of our codes---for instance the sequence in which they are used in practice, and the way the job is divided into modules---is in section \ref{sec:implementation}.
 
 
-\section{Surface kinematical equation}
+\section{Surface kinematical equation} \label{sec:kinematical}
 
 A glacier may change shape as it flows, and so we want our model to do that too.  Suppose the domain on which the Stokes equations apply is the time-dependent set
 \begin{equation}
@@ -365,7 +373,7 @@ The significance of Dirichlet problem \eqref{vdisplacementpoisson} is that the e
 Note that the scheme uses fixed time step $\Delta t > 0$ and is explicit.  At best the strategy is conditionally stable, and in practice that is observed.  It should be expected that, as with an SIA solver, the time step is restricted by a condition like ``$D\Delta t / \Delta x^2 < 1$'' where $\Delta x$ is a representative mesh spacing variable and $D$ is some diffusivity parameter meaningful in the current context.  However, there is presently no theory in the literature which describes $D$ or otherwise supplies a sufficient stability restriction.  The extensive testing needed to develope a practical time-step restriction has barely been started.
 
 
-\section{Implementation in Python codes}
+\section{Implementation in Python codes} \label{sec:implementation}
 
 We implement the above numerical approach in Python codes which directly import the Firedrake FE library, and indirectly the PETSc solver library as well.  An example time-independent run looks like this:
 
