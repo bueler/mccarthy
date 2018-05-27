@@ -24,7 +24,7 @@ def getranks(mesh):
 #        4)  default for interp1d() is 'linear', which is what we want
 #        5)  by turning off bounds_error, and allowing extrapolation,
 #            there is parallel functionality for this function
-def getsurfaceelevationfunction_halos(mesh,top_id):
+def getsurfaceelevation(mesh,top_id):
     P1 = FunctionSpace(mesh, "CG", 1)
     bc = DirichletBC(P1, 1.0, top_id)
     x,z = SpatialCoordinate(mesh)

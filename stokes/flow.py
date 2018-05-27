@@ -57,7 +57,7 @@ from firedrake import *
 from firedrake.petsc import PETSc
 from gendomain import Hin, L, bdryids, getdomaindims
 from physics import secpera, stokessolve, solutionstats, numericalerrors_slab
-from meshactions import getranks, getsurfaceelevationfunction_halos, solvevdisp, \
+from meshactions import getranks, getsurfaceelevation, solvevdisp, \
                         getsurfacevdispfunction, getsurfacevelocityfunction
 
 def printpar(thestr,comm=COMM_WORLD):
@@ -143,7 +143,7 @@ for j in range(args.m):
     if args.deltat > 0.0:
         printpar('  solving kinematical equation for vertical mesh displacement rate ...')
         # use surface kinematical equation to get boundary condition for mesh displacement problem
-        h = getsurfaceelevationfunction_halos(mesh,bdryids['top'])
+        h = getsurfaceelevation(mesh,bdryids['top'])
         x,z = SpatialCoordinate(mesh)
         xval = Function(P1).interpolate(x)
         zval = Function(P1).interpolate(z)
