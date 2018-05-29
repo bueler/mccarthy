@@ -5,7 +5,7 @@ Ice shelves with side-wall stresses
 reassurance
 -----------
 
-The point of the project is not to reach a particular destination!  The point is to _help you learn fast from whereever you currently are_.  So please be honest with yourself about what you don't know, and ask about it.  Another student may know more programming than you, or have seen more differential equations, or have more glaciers background, or whatever.  But things like that are irrelevant to my goal, which is to help you move forward as far as possible in one intense week.  Forward progress must be from the things _you_ understand into things _you_ do not understand.
+The point of the project is not to reach a particular destination!  It is to _help you learn fast from whereever you currently are_.  So please be honest with yourself about what you don't know, and ask about it.  Another student may know more programming than you, or have seen more differential equations, or have more glaciers background, or whatever.  But things like that are irrelevant to my goal, which is to help you move forward as far as possible in one intense week.  Forward progress must be from the things _you_ understand into things _you_ do not understand.
 
 
 description
@@ -27,7 +27,7 @@ references and reading
 
 See the notes `notes/notes-bueler-2018.pdf` in the current repository.  Pay special attention to section 9 about the SSA model of ice shelves.  This project directly extends that material.
 
-The following papers are available in the current directory (and possibly on paper):
+The following papers are available in the current directory (and on paper):
 
   * S. Pegler, 2016.  _The dynamics of confined extensional flows_, J. Fluid Mech. 804, 24--57.  https://doi.org/10.1017/jfm.2016.516
 
@@ -36,5 +36,5 @@ on grounding-line dynamics_, J. Fluid Mech. 722, R1.  https://doi.org/10.1017/jf
 
   * S. Pegler and G. Worster, 2012.  _Dynamics of a viscous layer flowing radially over an inviscid ocean_, J. Fluid Mech. 696, 152--174.  https://doi.org/10.1017/jfm.2012.21
 
-The first of these papers is the one we will follow closely.  The others are useful comparison/background.
+We will closely follow the first of these papers, while the others are useful for comparison and background.
 
