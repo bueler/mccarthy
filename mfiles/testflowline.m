@@ -8,7 +8,11 @@ function maxerr = testflowline(test,J)
 % where:
 %   test = explained above
 %   J    = grid has J subintervals
-% example: see convanalysis.m
+% calls: FLOWLINE
+% example:
+%   >> testflowline(3,10)
+%   >> testflowline(3,20)
+% example (called by): CONVANALYSIS
 
 if nargin<2, J=300; end
 if nargin<1, test=2; end

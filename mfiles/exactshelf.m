@@ -16,7 +16,7 @@ function [u,H] = exactshelf(x,L,M0,Hg,ug)
 %   >> h = 0.1 * H; b = -0.9 * H;  % flotation surface elevation and base elev
 %   >> figure(1), plot(x/1000,h,x/1000,b), xlabel('x  (km)'), ylabel('elev (m)')
 %   >> figure(2), plot(x/1000,u*3.1556926e7), xlabel('x  (km)'), ylabel('u (m/a)')
-
+% called by: TESTSHELF, SHELFCONV
 
 % use a structure for physical parameters (values are from MISMIP)
 param = struct('secpera',31556926,...

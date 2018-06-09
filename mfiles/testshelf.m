@@ -11,7 +11,7 @@ function [averr,maxerr] = testshelf(J,L)
 %   >> testshelf(25,200e3);        % show figure, coarse grid
 %   >> err = testshelf(400,200e3)  % no figure, return vel error in m/s
 % Called by:  SHELFCONV
-% Calls:  SSAFLOWLINE
+% Calls:  EXACTSHELF, SSAFLOWLINE
 
 % use a structure for physical parameters (values are from MISMIP)
 param = struct('secpera',31556926,...

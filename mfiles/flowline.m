@@ -1,6 +1,6 @@
 function u = flowline(L,J,gamma,W,alpha,beta,ug)
-% FLOWLINE  compute finite difference solution to elliptic PDE problem (i.e.
-%   2-point BVP)
+% FLOWLINE  finite difference solution to 1D elliptic PDE problem (i.e.
+% 2-point BVP)
 %     (W(x) u_x)_x - alpha(x) u = beta(x)     on  0 < x < L
 %     u(0) = ug,   u_x(L) = gamma
 % form:
@@ -8,16 +8,15 @@ function u = flowline(L,J,gamma,W,alpha,beta,ug)
 % where:
 %   L     = length of domain
 %   J     = number of subintervals
-%   gamma = constant right-hand Neumann boundary condition
+%   gamma = right-hand Neumann boundary value
 %   W     = vector of length J+1 (staggered grid values W_{j+1/2}, j=1:J+1)
 %           (yes, last value should be at L+dx/2, past the end)
 %   alpha = vector of length J+1 (regular grid values alpha_j, j=1:J+1)
 %   beta  = same size as alpha
-%   ug    = constant left-hand Dirichlet boundary condition
+%   ug    = left-hand Dirichlet boundary value
 % returns:
 %   u     = solution vector (regular grid values u_j, j=1:J+1)
-% example: TESTFLOWLINE, CONVANALYSIS
-% main example: SSAFLOWLINE
+% examples (called by): TESTFLOWLINE, CONVANALYSIS, SSAFLOWLINE
 
 dx = L / J;
 rhs = dx^2 * beta(:); % a (J+1) length column vector

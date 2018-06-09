@@ -4,13 +4,14 @@ function convanalysis(test)
 %   convanalysis(test)
 % where:
 %   test = see comments in testflowline.m
-% example: >> convanalysis
+% example:
+%   >> convanalysis
 % notes:
 %   1. execution time is a few seconds
-%   2. use "more off" to flush Octave print statements
-%   3. result for test=1 case meaningless; merely shows build-up of roundoff
+%   2. result for test=1 case meaningless; merely shows build-up of roundoff
 %      error because solution is already exact for small J cases
-%   3. results for test=2 and test=3 cases shows optimal convergence O(dx^2)
+%   3. results for test=2 and test=3 cases shows expected convergence O(dx^2)
+% calls: TESTFLOWLINE
 
 if nargin<1, test = 2; end
 
