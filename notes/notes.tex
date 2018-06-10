@@ -314,7 +314,9 @@ Regarding the surface slope, note $\sin \alpha \approx \tan\alpha = - h_x$ when 
 
 Equation \eqref{sia1D} is the primary SIA equation for nonsliding plane flow.  Noting $h=H+b$, it models the evolution of an ice sheet's thickness $H$.  The model should, however, be solved subject to the constraint that the thickness is positive ($H\ge 0$) \cite{Bueler2016,JouvetBueler2012}.
 
-Additional arguments are needed to derive the SIA in the general case.  Such arguments reduce the Stokes equations under the assumption of small surface and bed slopes, and small depth-to-width ratio; see Notes and References.  Here we state the model in preparation for numerical solutions in section \ref{sec:numericalsia}.  Let $\mathbf{U} = (u,v)$ be the vector horizontal velocity; this is a 2D vector-valued funciton of 3D coordinates $(x,y,z)$.  The shear stress approximation is $(\tau_{13},\tau_{23}) \approx - \rho g (h-z) \nabla h$.  Equation \eqref{flowlaw} then gives the SIA formula for shear strain rates
+Additional arguments are needed to derive the SIA in the general case.  Such arguments reduce the Stokes equations under the assumption of small surface and bed slopes, and small depth-to-width ratio; see Notes and References.
+
+For now we merely state the SIA model in preparation for numerical solutions in section \ref{sec:numericalsia}.  Let $\mathbf{U} = (u,v)$ be the vector horizontal velocity; this is a 2D vector-valued function of 3D coordinates $(x,y,z)$.  The SIA shear stress approximation is $(\tau_{13},\tau_{23}) \approx - \rho g (h-z) \nabla h$, and Equation \eqref{flowlaw} gives a formula for shear strain rates
 \begin{equation*}
 \mathbf{U}_z = 2 A |(\tau_{13},\tau_{23})|^{n-1} (\tau_{13},\tau_{23}) = - 2 A (\rho g)^n (h-z)^n |\nabla h|^{n-1} \nabla h.
 \end{equation*}
@@ -332,7 +334,9 @@ Combining Equations \eqref{siavelocity} and \eqref{masscont}, we get an equation
 \begin{equation}
 H_t = M + \Div \left(\Gamma H^{n+2} |\grad h|^{n-1} \grad h \right). \label{sia}
 \end{equation}
-We have defined the positive constant $\Gamma = 2 A (\rho g)^n / (n+2)$ only to improve appearance.  Equation \eqref{sia} is the SIA in 2D.  Recalling our earlier promise, if we can solve \eqref{sia} numerically then we have a usable model for certain ice sheets.  For example, Mahaffy \cite{Mahaffy} used it in a 1976 numerical model of the Barnes ice cap in Canada, a particularly-simple ice sheet on a rather flat bed.
+We have defined the positive constant $\Gamma = 2 A (\rho g)^n / (n+2)$ only to improve appearance.
+
+Equation \eqref{sia} is the SIA in 2D.  Recalling our earlier promise, if we can solve \eqref{sia} numerically then we have a usable model for certain ice sheets.  Mahaffy \cite{Mahaffy} used it in a 1976 numerical model of the Barnes ice cap in Canada, a particularly-simple ice sheet on a rather flat bed.  This was the start of numerical ice sheet modeling.
 
 \subsection*{Analogy with diffusion equations}  Numerical methods for solving \eqref{sia} are modifications of methods for the better-known heat equation, which, in its simplest 1D form, is the equation $T_t = D T_{xx}$.  This model of the temperature $T(t,x)$ in a conducting rod, for example, applies when material properties are constant and there are no heat sources.  The positive constant $D$ is the ``diffusivity,'' with SI units which can be read from comparing sides of the equation: $D\sim \text{m}^2 \text{s}^{-1}$.  The heat equation has a smoothing effect on the solution $T$ as it evolves in time, because any local maximum or minimum in the temperature is flattened.  In fact, $T_{xx}<0$ implies $T_t<0$, so $T$ decreases near a maximum, while $T_{xx}>0$ implies $T_t>0$ so $T$ increases near a minimum.
 
@@ -340,7 +344,7 @@ The 2D heat equation, which describes the temperature $T(t,x,y)$ of a planar obj
 \begin{equation}
 \rho c T_t = f + \Div (\kappa \grad T). \label{heatearly}
 \end{equation}
-Here $\rho$ is density and $c$ is specific heat capacity.  Assuming $\rho c$ is constant, define the ``diffusivity'' $D=\kappa/(\rho c)$.  Let $F = f/(\rho c)$, a rescaled source term.  Then the revised 2D heat equation is
+Here $\rho$ is density and $c$ is specific heat capacity.  Assuming $\rho c$ is constant, define the diffusivity $D=\kappa/(\rho c)$.  Let $F = f/(\rho c)$, a rescaled source term.  The 2D heat equation becomes
 \begin{equation}
 T_t = F + \Div (D\, \grad T), \label{heat}
 \end{equation}
@@ -366,7 +370,7 @@ The analogy suggests that we identify the \emph{SIA diffusivity} as:
 \begin{equation}
 	D = {\color{red}\Gamma H^{n+2} |\grad h|^{n-1}}.  \label{siadiffusivity}
 \end{equation}
-When $D$ is large then the diffusion acts most quickly.  As a product of powers of $H$ and $|\grad h|$, $D$ is large if the ice is both thick and steep, because then ice flows downhill most strongly.  Our analogy explains why the surfaces of ice sheets are smooth, at least overlooking non-flow processes like crevassing.
+The diffusion acts quickly when $D$ is large, and it \emph{is} large when the ice is both thick and steep.  That is, ice flows downhill most strongly in this case.  Our analogy also explains why the surfaces of ice sheets are smooth (at least overlooking non-flow processes like crevassing).
 
 There are, however, conceptual and practical concerns about the analogy:
 \begin{itemize}
