@@ -211,7 +211,7 @@ if len(args.osurface) > 0:
     import numpy as np
     import matplotlib.pyplot as plt
     x = np.linspace(0.0,L,401)
-    hfcn = getsurfaceelevationfunction_halos(mesh,bdryids['top'])
+    hfcn = getsurfaceelevation(mesh,bdryids['top'])
     ufcn,wfcn = getsurfacevelocityfunction(mesh,bdryids['top'],Z,u)
     plt.figure(figsize=(6.0,8.0))
     if args.deltat > 0.0:
