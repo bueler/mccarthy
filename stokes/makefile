@@ -27,12 +27,9 @@ runflow_3: tmptest/lowtest.msh
 runflow_4: tmptest/lowtest.msh
 	-@./testit.sh flow.py "-o tmptest/test4.pvd tmptest/lowtest.msh -s_snes_converged_reason" 2 4 "parallel u,p solve"
 
-runflow_5: tmptest/lowtest.msh
-	-@./testit.sh flow.py "-deltat 10.0 -m 1 -o tmptest/test5.pvd tmptest/lowtest.msh" 2 5 "parallel u,p,h solve"
+test: rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4
 
-test: rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5
-
-.PHONY: clean rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 test
+.PHONY: clean rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 test
 
 clean:
 	rm -f *~ *.pyc *.pvd *.vtu *.pvtu *.geo *.msh

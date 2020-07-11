@@ -1,11 +1,11 @@
 reading initial mesh from tmptest/slabtest.msh ...
-  mesh has 148 elements (cells) and 98 vertices
+  mesh has 128 elements (cells) and 88 vertices
 geometry [m]: L = 3000.000, bs = 0.000, Hin = 400.000, Hout = 400.000
   bed slope angle alpha = 0.100000 radians
   slab geometry case ...
 power law case with n_glen = 3.000 and visc. reg. eps = 0.010000
   solving for velocity and pressure ...
-    flow speed: av =    723.729 m a-1,  max =    908.064 m a-1
-    pressure:   av =     17.765 bar,    max =     35.637 bar
-numerical errors: |u-uex|_inf = 3.692e+00 m a-1, |p-pex|_inf = 1.094e+04 Pa
+    flow speed: av =    723.563 m a-1,  max =    907.558 m a-1
+    pressure:   av =     17.765 bar,    max =     35.577 bar
+numerical errors: |u-uex|_inf = 2.856e+00 m a-1, |p-pex|_inf = 1.063e+04 Pa
 writing (velocity,pressure) to tmptest/slabtest.pvd ...
