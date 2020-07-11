@@ -135,7 +135,7 @@ for j in range(args.m):
         printpar('step %d: t = %.3f days' % (j,t_days))
     printpar('  solving for velocity and pressure ...')
 
-    # solve Stokes problem for u,p
+    # solve Stokes problem for u,p; defined in physics.py; prefix s_
     up = stokessolve(up,mesh,bdryids,Z,
                      Hin = Hin,
                      Hout = Hout,
@@ -167,7 +167,7 @@ for j in range(args.m):
         # FIXME add in climatic mass balance a(x) here; want h_t = a - u[0] h_x + u[1]
         #       currently uses:  a = Constant(0.0)
         deltah = Function(P1).interpolate( dt * (Constant(0.0) + dot(grad(phi),u)) )
-        # solve mesh displacement problem
+        # solve mesh displacement problem; defined in meshactions.py; prefix vd_
         r = solvevdisp(mesh,bdryids,deltah)
         with r.dat.vec_ro as vr:
             absrmax = vr.norm(norm_type=PETSc.NormType.NORM_INFINITY)

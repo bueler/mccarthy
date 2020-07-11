@@ -94,11 +94,23 @@ to get going:
 Solver performance information
 ------------------------------
 
-A PETSc solver solves the Stokes equations.  It is nonlinear and computes the velocity and pressure.  Basic information on solver performance comes from asking for the number of iterations in each solver, for example
+Firedrake calls PETSc to solve the Glen-Stokes equations.  Because this is a nonlinear problem, the SNES object from PETSc is used.  Also, the solver is referred-to using option prefix `-s_`.  Therefore basic information on solver performance comes, for example, from asking for the number of iterations in each solver, for example
 
-        (firedrake) $ ./flow.py -mesh glacier.msh -deltat 10.0 -m 60 -s_snes_converged_reason
+        (firedrake) $ ./flow.py -mesh glacier.msh -deltat 10.0 -m 10 -s_snes_monitor -s_snes_converged_reason
 
-Note that all PETSc options must come _after_ the options to the script `flow.py`.
+For another example, a direct linear solver for each Newton step, and PETSc documentation on the solver, is chosen by
+
+        (firedrake) $ ./flow.py -mesh glacier.msh -s_snes_view -s_mat_type aij -s_ksp_type preonly -s_pc_type lu
+
+To explain, the usual matrix type for this solver is `nest`, but it does not work directly with LU.  Insider the SNES solver are KSP (Krylov space) and PC (preconditioner) components.  For more on PETSc and Firedrake solvers see their documentation or my book, [_PETSc for PDEs_](https://github.com/bueler/p4pdes).
+
+One can write-out the system matrix as a Matlab file `matrix.m` as follows:
+
+        (firedrake) $ ./flow.py -mesh glacier.msh -s_mat_type aij -s_ksp_view_mat :matrix.m:ascii_matlab
+
+See the default PETSc solver options in `physics.py`.  Note that all PETSc options must come _after_ any options read by the script `flow.py`.
+
+In time-stepping mode there is a second solver which computes the mesh vertical displacement field by solving Laplace's equation.  It has option prefix `-vd_` and it is defined, with default options, in `meshactions.py`.
 
 Info on using Firedrake
 -----------------------

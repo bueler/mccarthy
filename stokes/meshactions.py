@@ -38,6 +38,7 @@ def solvevdisp(mesh,bdryids,deltah):
     P1 = FunctionSpace(mesh, "CG", 1)
     r = TrialFunction(P1)
     s = TestFunction(P1)
+    # POSSIBILITY TO IMPROVE SLIGHTLY:  make the Laplacian isotropic?
     a = inner(grad(r), grad(s)) * dx   # note natural b.c. on outflow
     L = inner(Constant(0.0), s) * dx
     # WARNING: top must go *first* so closed top gets zero; is this documented behavior?

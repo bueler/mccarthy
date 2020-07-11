@@ -78,7 +78,7 @@ def stokessolve(up,mesh,bdryids,Z,Hin,Hout,n_glen,alpha,eps,Dtyp):
                              "fieldsplit_1_pc_type": "none"})
     # ALSO CONSIDER:
     #    "ksp_type": "minres", "pc_type": "jacobi",
-    #    "mat_type": "aij", "ksp_type": "preonly", "pc_type": "svd",  # fully-direct solver
+    #    "mat_type": "aij", "ksp_type": "preonly", "pc_type": "lu",  # fully-direct solver
     #    "mat_type": "aij", "ksp_view_mat": ":foo.m:ascii_matlab"
     # in parallel:  -s_fieldsplit_0_ksp_type gmres -s_fieldsplit_0_pc_type asm -s_fieldsplit_0_sub_pc_type ilu
     return up
