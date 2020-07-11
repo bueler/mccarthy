@@ -59,7 +59,7 @@ urlcolor=black     % only if colorlinks=true
 \vspace{-8mm}
 \begin{center}
 \footnotesize
-\emph{June 2018}
+\emph{version: \today; updates since McCarthy 2018}
 \end{center}
 
 \thispagestyle{empty}
@@ -388,26 +388,24 @@ Note that the scheme uses fixed time step $\Delta t > 0$ and is explicit.  At be
 
 We implement the above numerical solution method in Python codes.  These codes use the Firedrake FE library, and, through Firedrake, the PETSc solver library \cite{Balayetal2018,BuelerBook} as well.
 
-For example, solving a time-independent Stokes problem for $(\bu,p)$ looks like this:
+The \verb|README.md| file documents usags, but for a simple example, solving a time-independent Stokes problem for $(\bu,p)$ looks like this:
 
 \medskip
 \begin{Verbatim}
 $ ./gendomain.py -o glacier.geo                # create domain outline
 $ gmsh -2 glacier.geo                          # mesh domain
 $ source ~/firedrake/bin/activate              # start Firedrake
-(firedrake) $ ./flow.py glacier.msh            # solve Stokes problem
+(firedrake) $ ./flow.py      # solve Stokes problem
 (firedrake) $ paraview glacier.pvd             # visualize results
 \end{Verbatim}
 %$
 
 \medskip
-\noindent Note that codes \texttt{gendomain.py} and \texttt{flow.py} can also provide help by the \texttt{-h} option.
-
-In a time-stepping run one supplies the time step in days (\texttt{-deltat}) and the number of steps (\texttt{-m}) as arguments to \texttt{flow.py}.  For example, at the final time the following run generates the result shown in Figure \ref{fig:glacier}:
+\noindent In a time-stepping run one supplies the time step in days (\texttt{-deltat}) and the number of steps (\texttt{-m}) as arguments to \texttt{flow.py}.  For example, at the final time the following run generates the result shown in Figure \ref{fig:glacier}:
 
 \medskip
 \begin{Verbatim}
-(firedrake) $ ./flow.py -deltat 20.0 -m 100 glacier.msh
+(firedrake) $ ./flow.py -mesh glacier.msh -deltat 20.0 -m 100
 \end{Verbatim}
 %$
 
@@ -415,7 +413,7 @@ In a time-stepping run one supplies the time step in days (\texttt{-deltat}) and
 \noindent (Paraview was used to actually generate Figure \ref{fig:glacier}.)
 
 \medskip
-As shown in Figure \ref{fig:blockdiagram} there are two additional Python modules imported into \texttt{flow.py} for a total of four Python codes.  They perform the following actions:
+As shown in Figure \ref{fig:blockdiagram} there are a total of four Python codes:
 \begin{itemize}
 \item \texttt{flow.py}: \quad  This executable driver reads user options, reads the mesh from a Gmsh \texttt{.msh} file, sets-up Firedrake function spaces, either solves a single time-independent Stokes problem or executes the above time-stepping strategy (according to options), and writes the solution into a Paraview-readable \texttt{.pvd} file.  Surface values of the solution can also be visualized in a separate figure using option \texttt{-osurface}.  Note this driver imports functions from each of the following three.
 

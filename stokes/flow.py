@@ -3,6 +3,9 @@
 
 # Solve glacier Glen-Stokes problem with evolving surface.  See README.md for usage.
 
+# note this code misses out on geometric multigrid because it does not create a
+# mesh hierarchy
+
 # classic stability:
 #   ./gendomain.py -bs 0.0 -o slab.geo
 #   gmsh -2 slab.geo
@@ -17,10 +20,13 @@
 #   use of gmsh to split cells ONCE gives dt=15 or better
 
 # process options
-import argparse
+from argparse import ArgumentParser, RawTextHelpFormatter
 mixFEchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
-parser = argparse.ArgumentParser(\
-    description='Solve 2D glacier Glen-Stokes problem with evolving surface.  Requires an activated Firedrake environment.')
+parser = ArgumentParser(\
+    description='Solve 2D glacier Glen-Stokes problem with evolving surface.  Requires an activated Firedrake environment.',
+    formatter_class=RawTextHelpFormatter,add_help=False)
+parser.add_argument('-flowhelp', action='store_true', default=False,
+                    help='print help for flow.py options and stop')
 parser.add_argument('-alpha', type=float, default=0.1, metavar='X',
                     help='downward slope of bed as angle in radians (default = 0.1)')
 parser.add_argument('-deltat', type=float, default=0.0, metavar='X',
@@ -36,22 +42,32 @@ parser.add_argument('-eps', type=float, default=0.01, metavar='X',
                     help='regularize viscosity using "+(eps Dtyp)^2" (default = 0.01)')
 parser.add_argument('-m', type=int, default=1, metavar='X',
                     help='number of time steps of deltat days of surface evolution')
+parser.add_argument('-mesh', metavar='MESH', type=str, default='',
+                    help='input file name ending with .msh')
 parser.add_argument('-n_glen', type=float, default=3.0, metavar='X',
                     help='Glen flow law exponent (default = 3.0)')
 parser.add_argument('-o', metavar='NAME', type=str, default='',
-                    help='output file name ending with .pvd (default = INNAME-.msh+.pvd)')
+                    help='output file name ending with .pvd (default = MESH-.msh+.pvd)')
 parser.add_argument('-save_rank', action='store_true',
                     help='add fields (element_rank,vertex_rank) to output file', default=False)
 parser.add_argument('-osurface', metavar='NAME', type=str, default='',
                     help='save a plot of surface values of (h,u,w) in this image file (.png,.pdf,...)')
-parser.add_argument('inname', metavar='INNAME',
-                    help='input file name ending with .msh')
 args, unknown = parser.parse_known_args()
+
+import sys
+if args.flowhelp:
+    parser.print_help()
+    sys.exit(0)
+if len(args.mesh) == 0:
+    print('ERROR: option -mesh required')
+    print('')
+    parser.print_help()
+    sys.exit(0)
 
 if len(args.o) > 0:
     outname = args.o
 else:
-    outname = '.'.join(args.inname.split('.')[:-1]) + '.pvd'  # strip .msh and replace with .pvd
+    outname = '.'.join(args.mesh.split('.')[:-1]) + '.pvd'  # strip .msh and replace with .pvd
 
 from firedrake import *
 from firedrake.petsc import PETSc
@@ -64,8 +80,8 @@ def printpar(thestr,comm=COMM_WORLD):
     PETSc.Sys.Print(thestr,comm=comm)
 
 # read mesh and report on parallel decomposition (if appropriate)
-printpar('reading initial mesh from %s ...' % args.inname)
-mesh = Mesh(args.inname)
+printpar('reading initial mesh from %s ...' % args.mesh)
+mesh = Mesh(args.mesh)
 assert (mesh.comm.size == 1 or len(args.osurface) == 0)  # -osurface not available in parallel
 if mesh.comm.size == 1:
     printpar('  mesh has %d elements (cells) and %d vertices' \
