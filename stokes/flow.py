@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# (C) 2018 Ed Bueler
+# (C) 2018--2020 Ed Bueler
 
 # Solve glacier Glen-Stokes problem with evolving surface.  See README.md for usage.
 
@@ -17,7 +17,7 @@
 #   use of gmsh to split cells ONCE gives dt=15 or better
 
 # process options
-import sys,argparse
+import argparse
 mixFEchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
 parser = argparse.ArgumentParser(\
     description='Solve 2D glacier Glen-Stokes problem with evolving surface.  Requires an activated Firedrake environment.')
@@ -66,9 +66,7 @@ def printpar(thestr,comm=COMM_WORLD):
 # read mesh and report on parallel decomposition (if appropriate)
 printpar('reading initial mesh from %s ...' % args.inname)
 mesh = Mesh(args.inname)
-if mesh.comm.size > 1 and len(args.osurface) > 0:
-    print("ERROR: -osurface output only available in serial, not parallel")
-    sys.exit(1)
+assert (mesh.comm.size == 1 or len(args.osurface) == 0)  # -osurface not available in parallel
 if mesh.comm.size == 1:
     printpar('  mesh has %d elements (cells) and %d vertices' \
           % (mesh.num_cells(),mesh.num_vertices()))
@@ -172,7 +170,7 @@ for j in range(args.m):
         bs,_,Hout = getdomaindims(mesh)
         printpar('    max. vert. mesh disp. = %.3f m,  Hout = %.3f m' % (absrmax,Hout))
         if any(f.dat.data_ro[:,1] < bmin_initial - 1.0):  # mesh z values below bed is extreme instability
-            printpar('\n\nSURFACE EVEVATION INSTABILITY DETECTED ... stopping\n\n')
+            printpar('\n\nSURFACE ELEVATION INSTABILITY DETECTED ... stopping\n\n')
             break
 
 # compute numerical errors relative to slab-on-slope *if* bs==0.0
