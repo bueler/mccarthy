@@ -15,7 +15,7 @@
 # Main purpose is to solve the Stokes equations on this domain.  See
 # README.md and flow.py.
 
-# immutable domain distances in meters
+# computational domain dimensions in meters
 Hin = 400.0      # input (and initial output) thickness (z)
 L = 3000.0       # total along-flow length (x)
 Lup = 1500.0     # location of bedrock step up (x)
@@ -28,13 +28,15 @@ bdryids = {'outflow' : 41,
            'base'    : 44}
 
 def writegeometry(geo,bs):
-    # points on boundary
+    # points on boundary, with target mesh densities
     Hout = Hin
     Lmid = 0.5 * (Lup + Ldown)
     geo.write('Point(1) = {%f,%f,0,lc};\n' % (L,0.0))
     geo.write('Point(2) = {%f,%f,0,lc};\n' % (L,Hout))
-    geo.write('Point(3) = {%f,%f,0,lc};\n' % (0.0,Hin))
+    # a bit of *coarsening* in upper left helps the explicit surface instability
+    geo.write('Point(3) = {%f,%f,0,lc_upperleft};\n' % (0.0,Hin))
     geo.write('Point(4) = {%f,%f,0,lc};\n' % (0.0,0.0))
+    # if there is a bedrock step, *refine* in the interior corners
     if abs(bs) > 1.0:
         geo.write('Point(5) = {%f,%f,0,lc};\n' % (Lup,0.0))
         geo.write('Point(6) = {%f,%f,0,lc_corner};\n' % (Lup,bs))
@@ -109,6 +111,8 @@ def processopts():
                         help='height of bed step (default=100 m)')
     parser.add_argument('-hmesh', type=float, default=80.0, metavar='X',
                         help='default target mesh spacing (default=80 m)')
+    parser.add_argument('-coarsen_upperleft', type=float, default=2.0, metavar='X',
+                        help='coarsen in upperleft by this factor (default=2)')
     parser.add_argument('-refine', type=float, default=1.0, metavar='X',
                         help='refine resolution by this factor (default=1)')
     parser.add_argument('-refine_corner', type=float, default=4.0, metavar='X',
@@ -135,6 +139,7 @@ if __name__ == "__main__":
     lc = args.hmesh / args.refine
     print('setting target mesh size of %g m' % lc)
     geo.write('lc = %f;\n' % lc)
+    geo.write('lc_upperleft = %f;\n' % (args.coarsen_upperleft * lc))
     if abs(args.bs) > 1.0:
         lc_corner = lc / args.refine_corner
         print('setting target mesh size of %g m at interior corners' % lc_corner)

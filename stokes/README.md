@@ -108,7 +108,7 @@ One can write-out the system matrix as a Matlab file `matrix.m` as follows:
 
         (firedrake) $ ./flow.py -mesh glacier.msh -s_mat_type aij -s_ksp_view_mat :matrix.m:ascii_matlab
 
-See the default PETSc solver options in `physics.py`.  Note that all PETSc options must come _after_ any options read by the script `flow.py`.
+See the default PETSc solver options in `physics.py`.
 
 In time-stepping mode there is a second solver which computes the mesh vertical displacement field by solving Laplace's equation.  It has option prefix `-vd_` and it is defined, with default options, in `meshactions.py`.
 

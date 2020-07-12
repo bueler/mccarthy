@@ -1,11 +1,11 @@
 reading initial mesh from tmptest/lowtest.msh ...
-  rank 0 owns 62 elements (cells) and can access 44 vertices
-  rank 1 owns 62 elements (cells) and can access 44 vertices
+  rank 0 owns 49 elements (cells) and can access 37 vertices
+  rank 1 owns 49 elements (cells) and can access 37 vertices
 geometry [m]: L = 3000.000, bs = 100.000, Hin = 400.000, Hout = 400.000
   bed slope angle alpha = 0.100000 radians
 power law case with n_glen = 3.000 and visc. reg. eps = 0.010000
   solving for velocity and pressure ...
-Nonlinear s_ solve converged due to CONVERGED_FNORM_RELATIVE iterations 20
-    flow speed: av =    589.647 m a-1,  max =    906.092 m a-1
-    pressure:   av =     17.465 bar,    max =     41.389 bar
+Nonlinear s_ solve converged due to CONVERGED_FNORM_RELATIVE iterations 15
+    flow speed: av =    586.817 m a-1,  max =    906.092 m a-1
+    pressure:   av =     17.464 bar,    max =     40.173 bar
 writing (velocity,pressure) to tmptest/test4.pvd ...
