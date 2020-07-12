@@ -421,7 +421,7 @@ As shown in Figure \ref{fig:blockdiagram} there are a total of four Python codes
 
 \item \texttt{meshactions.py}: \quad  This module provides mesh extraction and manipulation functions \texttt{getsurfaceelevation()} and \texttt{solvevdisp()}.  The former extracts a piecewise-linear surface elevation function $h(x)$ from the current mesh.  The latter assembles and solves the linear Dirichlet problem \eqref{vdisplacementpoisson} using Firedrake's \texttt{solve()} command.  Then \texttt{flow.py} applies the solution as a vertical mesh movement \eqref{updatemesh}.  It sets the option prefix \texttt{vd\_} for PETSc options to control this solver.  This module also provides other functions used only for visualization.
 
-\item \texttt{physics.py}: \quad  Most actual ice physics is isolated here, including physical constants and the Stokes problem weak form \eqref{defineF}.  The most important function is \texttt{stokessolve()} which assembles and solves the nonlinear Glen-Stokes problem \eqref{weak} using Firedrake's \texttt{solve()} command; it also sets the solver option prefix \texttt{s\_}.
+\item FIXME: REPLACED WITH momentummodel.py \texttt{physics.py}: \quad  Most actual ice physics is isolated here, including physical constants and the Stokes problem weak form \eqref{defineF}.  The most important function is \texttt{stokessolve()} which assembles and solves the nonlinear Glen-Stokes problem \eqref{weak} using Firedrake's \texttt{solve()} command; it also sets the solver option prefix \texttt{s\_}.
 \end{itemize}
 
 \begin{figure}[h]

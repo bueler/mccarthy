@@ -49,13 +49,12 @@ class MomentumModel:
     def secpera(self):
         return self._secpera
 
-    # FIXME self.mesh should be private?
+    # FIXME self.mesh should be private!
 
     def set_mesh_coordinates(self,f):
         self.mesh.coordinates.assign(f)
 
-    def Z(self):  # FIXME self.mesh should be private!
-        return self.Z
+    # FIXME self.Z should be private!
 
     def set_nglen(self, n_glen):
         self.n_glen = n_glen

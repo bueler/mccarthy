@@ -25,11 +25,14 @@ runflow_3: tmptest/lowtest.msh
 	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -deltat 20.0 -m 2 -o tmptest/test3.pvd" 1 3 "evolving surface u,p,h solve"
 
 runflow_4: tmptest/lowtest.msh
-	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -o tmptest/test4.pvd -s_snes_converged_reason" 2 4 "parallel u,p solve"
+	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -save_rank -o tmptest/test4.pvd -s_snes_converged_reason" 2 4 "parallel u,p solve"
 
-test: rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4
+runflow_5: tmptest/lowtest.msh
+	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -osurface tmptest/test5.png" 1 5 "write a .png for surface values"
 
-.PHONY: clean rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 test
+test: rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5
+
+.PHONY: clean rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 test
 
 clean:
 	rm -f *~ *.pyc *.pvd *.vtu *.pvtu *.geo *.msh
