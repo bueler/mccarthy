@@ -4,13 +4,16 @@ set -e
 P=$1
 
 # measure convergence on sequence of refining slab geometries
-# note viscosity regularization relevant
+# note viscosity regularization relevant: -eps ...
 # after setting-up firedrake in parent directory, run as:
 #    ./convergeslab.sh P &> convergeslabP.txt
 # where P is number of processes
 
+# grid-sequencing (and multigrid) would help here with reducing SNES
+# iterations, but flow.py does not set up a grid hierarchy
+
 function runcase() {
-  CMD="mpiexec -n $P ../flow.py -eps $2 $1 -s_snes_converged_reason -s_snes_max_it 200"
+  CMD="mpiexec -n $P ../flow.py -mesh $1 -eps $2 -s_snes_converged_reason -s_snes_max_it 200"
   echo $CMD
   rm -f tmp.txt
   #/usr/bin/time -f "real %e" $CMD &> tmp.txt
@@ -30,7 +33,7 @@ for REFINE in 0 1 2 4; do
     else
         ../gendomain.py -refine $REFINE -bs 0.0 -o $MESH.geo | grep setting
     fi
-    gmsh -2 $MESH.geo | grep vertices
+    gmsh -2 $MESH.geo | grep nodes
     runcase $MESH.msh $EPS 
 done
 
