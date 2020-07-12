@@ -1,11 +1,12 @@
 # module defining class MomentumModel
 
-# principles about this class:
-#   0. it owns the mesh AND the velocity,pressure spaces
+# design principles for this class:
+#  -1. FIXME THIS IS BAD IDEA?  it owns the mesh
+#   0. it owns the velocity,pressure spaces
 #   1. it does not interact with options, stdout
 #   2. it does not know about time stepping or surface kinematical
 #   3. FIXME for now it calls existing functionality in physics.py, meshactions.py
-#   4. FIXME for now it does not interact with files, but a purpose is to write itself to .pvd or to .png
+#   4. it does not interact with files
 
 from firedrake import *
 import sys
@@ -53,6 +54,9 @@ class MomentumModel:
 
     def set_mesh_coordinates(self,f):
         self.mesh.coordinates.assign(f)
+        bmin_initial = 0.0  # FIXME
+        # mesh z values below bed is extreme instability
+        return any(f.dat.data_ro[:,1] < bmin_initial - 1.0)
 
     # FIXME self.Z should be private!
 
@@ -75,8 +79,8 @@ class MomentumModel:
         self.Hout = Hout
 
     def solve(self):  # FIXME just calls physics
-        self.up = Function(self.Z)
-        self.up = stokessolve(self.up,self.mesh,self.bdryids,self.Z,
+        self.up = stokessolve(Function(self.Z),
+                              self.mesh,self.bdryids,self.Z,
                               Hin = self.Hin,
                               Hout = self.Hout,
                               n_glen = self.n_glen,

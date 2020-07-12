@@ -66,27 +66,27 @@ from meshactions import getranks, getsurfaceelevation, solvevdisp, \
 def printpar(thestr,comm=COMM_WORLD):
     PETSc.Sys.Print(thestr,comm=comm)
 
-# read initial mesh and report on parallel decomposition (if appropriate)
+# read initial mesh and report on it
 printpar('reading initial mesh from %s ...' % args.mesh)
 mesh0 = Mesh(args.mesh)
-assert (mesh0.comm.size == 1 or len(args.osurface) == 0)  # -osurface not available in parallel
 if mesh0.comm.size == 1:
     printpar('  mesh has %d elements (cells) and %d vertices' \
-          % (mesh0.num_cells(),mesh0.num_vertices()))
+             % (mesh0.num_cells(),mesh0.num_vertices()))
 else:
     PETSc.Sys.syncPrint('  rank %d owns %d elements (cells) and can access %d vertices' \
-                        % (mesh0.comm.rank,mesh0.num_cells(),mesh0.num_vertices()), comm=mesh0.comm)
+                        % (mesh0.comm.rank,mesh0.num_cells(),mesh0.num_vertices()),
+                        comm=mesh0.comm)
     PETSc.Sys.syncFlush(comm=mesh0.comm)
-
-# extract mesh geometry needed in solver
-bs,bmin_initial,Hout_initial = getdomaindims(mesh0)
+bs,_,Hout_initial = getdomaindims(mesh0)
 printpar('  geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f' \
          %(L,bs,Hin))
-isslab = bs < 1.0
-if isslab:
+if bs < 1.0:
     printpar('    slab geometry case ...')
 
-# initialize momentum model
+# -osurface is not available in parallel
+assert (mesh0.comm.size == 1 or len(args.osurface) == 0)
+
+# initialize momentum model, which will own the mesh from now on
 mm = MomentumModel(mesh0,bdryids,args.elements)
 mm.set_nglen(args.n_glen)
 mm.set_eps(args.eps)
@@ -148,18 +148,17 @@ for j in range(args.m):
         # actually move mesh
         Vc = mm.mesh.coordinates.function_space()
         f = Function(Vc).interpolate(as_vector([x, z + r]))
-        mm.set_mesh_coordinates(f)
+        if mm.set_mesh_coordinates(f):
+            printpar('\n\nSURFACE ELEVATION INSTABILITY DETECTED ... stopping\n\n')
+            break
         # report on amount of movement
         t_days += args.deltat
         bs,_,Hout = getdomaindims(mm.mesh)
         mm.set_Hout(Hout)
         printpar('  max. vert. mesh disp. = %.3f m,  Hout = %.3f m' % (absrmax,Hout))
-        if any(f.dat.data_ro[:,1] < bmin_initial - 1.0):  # mesh z values below bed is extreme instability
-            printpar('\n\nSURFACE ELEVATION INSTABILITY DETECTED ... stopping\n\n')
-            break
 
 # compute numerical errors relative to slab-on-slope *if* bs==0.0
-if isslab:
+if bs < 1.0:
     uerrmax,perrmax = mm.numerical_errors_slab()
     printpar('numerical errors: |u-uex|_inf = %.3e m a-1, |p-pex|_inf = %.3e Pa' \
              % (uerrmax*mm.secpera(),perrmax))
