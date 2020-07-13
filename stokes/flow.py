@@ -13,7 +13,7 @@ from firedrake import *
 from gendomain import Hin, L, bdryids, getdomaindims
 from momentummodel import mixFEchoices, secpera, dayspera, MomentumModel
 from meshmotion import surfacekinematical, movemesh
-from surfaceutils import getsurfaceelevation, surfaceplot
+from surfaceutils import surfaceplot
 
 # process options
 parser = ArgumentParser(\

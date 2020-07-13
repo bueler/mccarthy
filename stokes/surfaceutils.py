@@ -3,7 +3,8 @@
 import firedrake as fd
 from scipy.interpolate import interp1d
 
-# return linear-interpolated surface elevation function  z = h(x)  for current mesh
+# return linear-interpolated along a part of the boundary of the mesh
+#   (e.g. surface or base elevation function z = h(x), z = b(x))
 # PARALLEL
 # notes: 1)  bc.nodes  gives indices to mesh; is a 1D dtype=int32 numpy array
 #        2)  bc.nodes  includes the halo nodes so need .dat.data_with_halos
@@ -11,9 +12,9 @@ from scipy.interpolate import interp1d
 #        4)  default for interp1d() is 'linear', which is what we want
 #        5)  by turning off bounds_error, and allowing extrapolation,
 #            there is parallel functionality for this function
-def getsurfaceelevation(mesh,top_id):
+def getboundaryelevation(mesh,bdrypartid):
     P1 = fd.FunctionSpace(mesh, 'CG', 1)
-    bc = fd.DirichletBC(P1, 1.0, top_id)
+    bc = fd.DirichletBC(P1, 1.0, bdrypartid)
     x,z = fd.SpatialCoordinate(mesh)
     xh_halos = fd.Function(P1).interpolate(x).dat.data_with_halos[bc.nodes]  # 1D numpy array
     zh_halos = fd.Function(P1).interpolate(z).dat.data_with_halos[bc.nodes]
@@ -54,7 +55,7 @@ def surfaceplot(mesh,u,r,deltat,filename):
     from gendomain import L, bdryids
 
     x = np.linspace(0.0,L,401)
-    hfcn = getsurfaceelevation(mesh,bdryids['top'])
+    hfcn = getboundaryelevation(mesh,bdryids['top'])
     ufcn,wfcn = getsurfacevelocityfunction(mesh,bdryids['top'],u)
     plt.figure(figsize=(6.0,8.0))
     if deltat > 0.0:

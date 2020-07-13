@@ -1,7 +1,7 @@
 # module for motion of mesh from surface kinematical equation
 
 import firedrake as fd
-from surfaceutils import getsurfaceelevation
+from surfaceutils import getboundaryelevation
 
 # use surface kinematical equation to compute mesh vertical displacement field
 #   computes vertical mesh displacement given its surface value
@@ -13,7 +13,7 @@ from surfaceutils import getsurfaceelevation
 #                h_t = a - u[0] h_x + u[1], but currently uses a = Constant(0.0)
 def surfacekinematical(mesh,bdryids,u,dt):
     # get deltah = change in surface elevation
-    h = getsurfaceelevation(mesh,bdryids['top'])
+    h = getboundaryelevation(mesh,bdryids['top'])
     x,z = fd.SpatialCoordinate(mesh)
     P1 = fd.FunctionSpace(mesh,'CG',1)
     xval = fd.Function(P1).interpolate(x)
