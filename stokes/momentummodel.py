@@ -6,8 +6,6 @@
 #   3. it does not know about time stepping or surface kinematical
 #   4. it does not interact with files
 
-# FIXME   - move set_mesh_coordinates() to mesh motion module
-
 import sys
 import numpy as np
 import firedrake as fd
@@ -57,12 +55,6 @@ class MomentumModel:
                * (self._rho*self._g*np.sin(self.alpha)*self.Hin)\
                  **((self.n_glen-3.0)/self.n_glen) \
                * self._B3**(3.0/self.n_glen)
-
-    def set_mesh_coordinates(self,mesh,f):
-        mesh.coordinates.assign(f)
-        bmin_initial = 0.0  # FIXME
-        # mesh z values below bed is extreme instability
-        return any(f.dat.data_ro[:,1] < bmin_initial - 1.0)
 
     def set_n_glen(self, n_glen):
         self.n_glen = n_glen
@@ -128,8 +120,8 @@ class MomentumModel:
         self._Z = self._V * self._W
 
         # define the nonlinear weak form F(u,p;v,q)
-        self.up = fd.Function(self._Z)
-        u,p = fd.split(self.up)
+        up = fd.Function(self._Z)
+        u,p = fd.split(up)
         v,q = fd.TestFunctions(self._Z)
         if self.n_glen == 1.0:  # Newtonian ice case
             F = ( fd.inner(Bn * D(u), D(v)) - p * fd.div(v) - fd.div(u) * q \
@@ -149,15 +141,14 @@ class MomentumModel:
                 fd.DirichletBC(self._Z.sub(0), inflow_u, bdryids['inflow']) ]
 
         # solve
-        fd.solve(F == 0, self.up, bcs=bcs, options_prefix='s',
+        fd.solve(F == 0, up, bcs=bcs, options_prefix='s',
                  solver_parameters=self.params)
-        return self.up
 
-    def getsolution(self):
-        u,p = self.up.split()
-        u.rename('velocity')
-        p.rename('pressure')
-        return u,p
+        # split solution
+        self.u,self.p = up.split()
+        self.u.rename('velocity')
+        self.p.rename('pressure')
+        return self.u,self.p
 
     # statistics about the solution:
     #   umagav  = average velocity magnitude
@@ -165,15 +156,14 @@ class MomentumModel:
     #   pav     = average pressure
     #   pmax    = maximum pressure
     def solutionstats(self,mesh):
-        u,p = self.getsolution()
         P1 = fd.FunctionSpace(mesh, 'CG', 1)
         one = fd.Constant(1.0, domain=mesh)
         area = fd.assemble(fd.dot(one,one) * fd.dx)
-        pav = fd.assemble(fd.sqrt(fd.dot(p, p)) * fd.dx) / area
-        with p.dat.vec_ro as vp:
+        pav = fd.assemble(fd.sqrt(fd.dot(self.p, self.p)) * fd.dx) / area
+        with self.p.dat.vec_ro as vp:
             pmax = vp.max()[1]
-        umagav = fd.assemble(fd.sqrt(fd.dot(u, u)) * fd.dx) / area
-        umag = fd.interpolate(fd.sqrt(fd.dot(u,u)),P1)
+        umagav = fd.assemble(fd.sqrt(fd.dot(self.u, self.u)) * fd.dx) / area
+        umag = fd.interpolate(fd.sqrt(fd.dot(self.u,self.u)),P1)
         with umag.dat.vec_ro as vumag:
             umagmax = vumag.max()[1]
         return umagav,umagmax,pav,pmax
@@ -182,7 +172,6 @@ class MomentumModel:
     #   uerrmax = maximum magnitude of velocity error
     #   perrmax = maximum of pressure error
     def numerical_errors_slab(self,mesh):
-        u,p = self.getsolution()
         P1 = fd.FunctionSpace(mesh, 'CG', 1)
         up_exact = fd.Function(self._Z)
         u_exact,p_exact = up_exact.split()
@@ -191,8 +180,8 @@ class MomentumModel:
         _,z = fd.SpatialCoordinate(mesh)
         p_exact.interpolate(self._rho * self._g * np.cos(self.alpha) \
                             * (self.Hin - z))
-        uerr = fd.interpolate(fd.sqrt(fd.dot(u_exact-u,u_exact-u)),P1)
-        perr = fd.interpolate(fd.sqrt(fd.dot(p_exact-p,p_exact-p)),self._W)
+        uerr = fd.interpolate(fd.sqrt(fd.dot(u_exact-self.u,u_exact-self.u)),P1)
+        perr = fd.interpolate(fd.sqrt(fd.dot(p_exact-self.p,p_exact-self.p)),self._W)
         with uerr.dat.vec_ro as vuerr:
             uerrmax = vuerr.max()[1]
         with perr.dat.vec_ro as vperr:
