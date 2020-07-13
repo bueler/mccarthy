@@ -93,6 +93,7 @@ printpar('  geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f' \
          %(L,bs,Hin))
 if bs < 1.0:
     printpar('    slab geometry case ...')
+mesh._topology_dm.viewFromOptions('-dm_view')
 
 # -osurface is not available in parallel
 assert (mesh.comm.size == 1 or len(args.osurface) == 0)
