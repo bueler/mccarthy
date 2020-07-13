@@ -4,12 +4,12 @@
 # Solve glacier Glen-Stokes problem with explicit evolution of the free surface.
 # See README.md for usage.
 
-# FIXME this code misses out on geometric multigrid because it does not create a
-# mesh hierarchy
+# FIXME this code misses out on grid-sequencing and geometric multigrid because
+#       it does not create a mesh hierarchy
 
 # process options
 from argparse import ArgumentParser, RawTextHelpFormatter
-from momentummodel import mixFEchoices, MomentumModel
+from momentummodel import mixFEchoices, secpera, dayspera, MomentumModel
 
 parser = ArgumentParser(\
     description='Solve 2D glacier Glen-Stokes problem with evolving surface.  Requires an activated Firedrake environment.',
@@ -60,35 +60,34 @@ else:
 
 from firedrake import *
 from gendomain import Hin, L, bdryids, getdomaindims
-from meshactions import getranks, getsurfaceelevation, solvevdisp, \
-                        getsurfacevdispfunction, getsurfacevelocityfunction
+from meshactions import getranks, getsurfaceelevation, solvevdisp
 
 def printpar(thestr,comm=COMM_WORLD):
     PETSc.Sys.Print(thestr,comm=comm)
 
 # read initial mesh and report on it
 printpar('reading initial mesh from %s ...' % args.mesh)
-mesh0 = Mesh(args.mesh)
-if mesh0.comm.size == 1:
+mesh = Mesh(args.mesh)
+if mesh.comm.size == 1:
     printpar('  mesh has %d elements (cells) and %d vertices' \
-             % (mesh0.num_cells(),mesh0.num_vertices()))
+             % (mesh.num_cells(),mesh.num_vertices()))
 else:
     PETSc.Sys.syncPrint('  rank %d owns %d elements (cells) and can access %d vertices' \
-                        % (mesh0.comm.rank,mesh0.num_cells(),mesh0.num_vertices()),
-                        comm=mesh0.comm)
-    PETSc.Sys.syncFlush(comm=mesh0.comm)
-bs,_,Hout_initial = getdomaindims(mesh0)
+                        % (mesh.comm.rank,mesh.num_cells(),mesh.num_vertices()),
+                        comm=mesh.comm)
+    PETSc.Sys.syncFlush(comm=mesh.comm)
+bs,_,Hout_initial = getdomaindims(mesh)
 printpar('  geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f' \
          %(L,bs,Hin))
 if bs < 1.0:
     printpar('    slab geometry case ...')
 
 # -osurface is not available in parallel
-assert (mesh0.comm.size == 1 or len(args.osurface) == 0)
+assert (mesh.comm.size == 1 or len(args.osurface) == 0)
 
 # initialize momentum model, which will own the mesh from now on
-mm = MomentumModel(mesh0,bdryids,args.elements)
-mm.set_nglen(args.n_glen)
+mm = MomentumModel()
+mm.set_n_glen(args.n_glen)
 mm.set_eps(args.eps)
 mm.set_alpha(args.alpha)
 mm.set_Dtyp_pera(args.Dtyp)
@@ -101,20 +100,20 @@ if args.deltat > 0.0:
     printpar('writing (velocity,pressure,vertical_displacement) at each time step to %s ...' % outname)
 if args.save_rank:
     printpar('writing (element_rank,vertex_rank) into output file %s ...' % outname)
-    (element_rank,vertex_rank) = getranks(mm.mesh)  # FIXME mm.mesh should be private
+    (element_rank,vertex_rank) = getranks(mesh)
 t_days = 0.0
 for j in range(args.m):
     if args.deltat > 0.0:
         printpar('step %d: t = %.3f days' % (j,t_days))
 
-    # solve Stokes problem; defined in FIXME physics.py; prefix s_
+    # solve Stokes problem; solver prefix s_
     printpar('solving for velocity and pressure ...')
-    mm.solve()
+    mm.solve(mesh,bdryids,args.elements)
 
     # report
-    umagav,umagmax,pav,pmax = mm.solutionstats()
+    umagav,umagmax,pav,pmax = mm.solutionstats(mesh)
     printpar('  flow speed: av = %10.3f m a-1,  max = %10.3f m a-1' \
-             % (mm.secpera()*umagav,mm.secpera()*umagmax))
+             % (secpera*umagav,secpera*umagmax))
     printpar('  pressure:   av = %10.3f bar,    max = %10.3f bar' \
              % (1.0e-5*pav,1.0e-5*pmax))
 
@@ -122,21 +121,20 @@ for j in range(args.m):
     if args.deltat > 0.0:
         printpar('solving kinematical equation for vertical mesh displacement rate ...')
         # use surface kinematical equation to get boundary condition for mesh displacement problem
-        # FIXME mm.mesh should be private
-        h = getsurfaceelevation(mm.mesh,bdryids['top'])
-        x,z = SpatialCoordinate(mm.mesh)
-        P1 = FunctionSpace(mm.mesh,'CG',1)
+        h = getsurfaceelevation(mesh,bdryids['top'])
+        x,z = SpatialCoordinate(mesh)
+        P1 = FunctionSpace(mesh,'CG',1)
         xval = Function(P1).interpolate(x)
         zval = Function(P1).interpolate(z)
         phi = Function(P1)
         phi.dat.data[:] = zval.dat.data_ro - h(xval.dat.data_ro)
-        dt = args.deltat * (mm.secpera()/365.0)  # FIXME inconsistent with below
+        dt = args.deltat * (secpera/dayspera)
         # FIXME add in climatic mass balance a(x) here; want h_t = a - u[0] h_x + u[1]
         #       currently uses:  a = Constant(0.0)
         u,p = mm.getsolution()
         deltah = Function(P1).interpolate( dt * (Constant(0.0) + dot(grad(phi),u)) )
         # solve mesh displacement problem; defined in meshactions.py; prefix vd_
-        r = solvevdisp(mm.mesh,bdryids,deltah)
+        r = solvevdisp(mesh,bdryids,deltah)
         with r.dat.vec_ro as vr:
             absrmax = vr.norm(norm_type=PETSc.NormType.NORM_INFINITY)
         r.rename('vertical_displacement')
@@ -146,25 +144,25 @@ for j in range(args.m):
         else:
             outfile.write(u,p,r, time=t_days)
         # actually move mesh
-        Vc = mm.mesh.coordinates.function_space()
+        Vc = mesh.coordinates.function_space()
         f = Function(Vc).interpolate(as_vector([x, z + r]))
-        if mm.set_mesh_coordinates(f):
+        if mm.set_mesh_coordinates(mesh,f):
             printpar('\n\nSURFACE ELEVATION INSTABILITY DETECTED ... stopping\n\n')
             break
         # report on amount of movement
         t_days += args.deltat
-        bs,_,Hout = getdomaindims(mm.mesh)
+        bs,_,Hout = getdomaindims(mesh)
         mm.set_Hout(Hout)
         printpar('  max. vert. mesh disp. = %.3f m,  Hout = %.3f m' % (absrmax,Hout))
 
 # compute numerical errors relative to slab-on-slope *if* bs==0.0
 if bs < 1.0:
-    uerrmax,perrmax = mm.numerical_errors_slab()
+    uerrmax,perrmax = mm.numerical_errors_slab(mesh)
     printpar('numerical errors: |u-uex|_inf = %.3e m a-1, |p-pex|_inf = %.3e Pa' \
-             % (uerrmax*mm.secpera(),perrmax))
+             % (uerrmax*secpera,perrmax))
 
 # save results in .pvd
-u,p = mm.getsolution()  # FIXME?
+u,p = mm.getsolution()
 if args.deltat > 0.0:
     printpar('writing END step (t = %.3f days) to file %s ...' % (t_days,outname))
     if args.save_rank:
@@ -178,21 +176,16 @@ else:
     else:
         outfile.write(u,p)
 
-def removexticks():
-    plt.tick_params(
-        axis='x',          # changes apply to the x-axis
-        which='both',      # both major and minor ticks are affected
-        bottom=False,      # ticks along the bottom edge are off
-        top=False,         # ticks along the top edge are off
-        labelbottom=False) # labels along the bottom edge are off
-
+# FIXME stuff below should be factored out (and into mesh motion module)
 # generate plot of surface values if desired
 if len(args.osurface) > 0:
     import numpy as np
     import matplotlib.pyplot as plt
+    import meshactions as ma
+
     x = np.linspace(0.0,L,401)
-    hfcn = getsurfaceelevation(mm.mesh,bdryids['top'])
-    ufcn,wfcn = getsurfacevelocityfunction(mm.mesh,bdryids['top'],mm.Z,u)
+    hfcn = ma.getsurfaceelevation(mesh,bdryids['top'])
+    ufcn,wfcn = ma.getsurfacevelocityfunction(mesh,bdryids['top'],u)
     plt.figure(figsize=(6.0,8.0))
     if args.deltat > 0.0:
         rows = 4
@@ -204,21 +197,30 @@ if len(args.osurface) > 0:
     plt.plot(x,hfcn(x),'g',label='surface elevation')
     plt.ylabel('h  [m]')
     plt.legend()
+
+    def removexticks():
+        plt.tick_params(
+            axis='x',          # changes apply to the x-axis
+            which='both',      # both major and minor ticks are affected
+            bottom=False,      # ticks along the bottom edge are off
+            top=False,         # ticks along the top edge are off
+            labelbottom=False) # labels along the bottom edge are off
+
     removexticks()
     plt.subplot(rows,1,2)
-    plt.plot(x,mm.secpera()*ufcn(x),label='horizontal velocity')
+    plt.plot(x,secpera*ufcn(x),label='horizontal velocity')
     plt.ylabel('u  [m/a]')
     plt.legend()
     removexticks()
     plt.subplot(rows,1,3)
-    plt.plot(x,mm.secpera()*wfcn(x),label='vertical velocity')
+    plt.plot(x,secpera*wfcn(x),label='vertical velocity')
     plt.ylabel('w  [m/a]')
     plt.legend()
     if args.deltat > 0.0:
         removexticks()
-        rfcn = getsurfacevdispfunction(mm.mesh,bdryids['top'],r)
+        rfcn = ma.getsurfacevdispfunction(mesh,bdryids['top'],r)
         plt.subplot(rows,1,4)
-        plt.plot(x,rfcn(x)/(args.deltat/365.2422),'r',label='surface elevation rate (last time step)')
+        plt.plot(x,rfcn(x)/(args.deltat/dayspera),'r',label='surface elevation rate (last time step)')
         plt.ylabel('h_t  [m/a]')
         plt.legend()
     plt.xlabel('x  [m]')

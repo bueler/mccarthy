@@ -64,7 +64,7 @@ def getsurfacevdispfunction(mesh,top_id,r):
     return interp1d(xh,r.dat.data_ro[bc.nodes],copy=False)
 
 # return linear-interpolated surface velocity functions  u(x), w(x)
-def getsurfacevelocityfunction(mesh,top_id,Z,u):
+def getsurfacevelocityfunction(mesh,top_id,u):
     xh,bc = getxsurface(mesh,top_id)
     P1V = VectorFunctionSpace(mesh, "CG", 1)
     uP1 = Function(P1V).interpolate(u)
