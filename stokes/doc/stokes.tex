@@ -364,13 +364,14 @@ We solve the surface kinematical equation \eqref{surfacekinematicalwithPhi} by s
 \begin{equation}
 \Delta h^n(x,z) =  \left(a(x,t_n) + \grad \Phi^n(x,z)\cdot \bu^n(x,z)\right)\Delta t_n \label{deltahfield}
 \end{equation}
-\item Solve a Laplace equation Dirichlet problem for the vertical displacement field $r^n$:
+\item Solve a Laplace equation problem for the vertical displacement field $r^n$:
 \begin{align}
 - \grad^2 r^n &= 0 & &\text{on } \Omega^n \label{vdisplacementpoisson} \\
-          r^n &= 0 & &\text{on inflow, base, and outflow parts of } \partial \Omega^n \notag \\
-          r^n &= \Delta h^n & &\text{on the top boundary } \Gamma^n \notag
+          r^n &= \Delta h^n & &\text{(Dirichlet) on the top boundary } \Gamma^n \notag \\
+          r^n &= 0 & &\text{(Dirichlet) on inflow and base of } \partial \Omega^n \notag \\
+\grad r^n\cdot \bn &= 0 & &\text{(Neumann) on outflow of } \partial \Omega^n \notag
 \end{align}
-This linear problem is solved in weak form: $\int_{\Omega^n} \grad r^n\cdot \grad w = 0$ for all test functions $w$ with zero values on the entire boundary $\partial \Omega^n$.
+This linear problem is solved in weak form: $\int_{\Omega^n} \grad r^n\cdot \grad w = 0$ for all test functions $w$ with zero values on the Dirichlet part of the boundary $\partial \Omega^n$.
 \item Update the mesh coordinates using vertical-only displacement by $r^n$:
 \begin{equation}
   x^{n+1} = x^n, \quad z^{n+1} = z^n + r^n \label{updatemesh}
