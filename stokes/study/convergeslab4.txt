@@ -1,24 +1,35 @@
+writing domain geometry to file base.geo ...
 setting target mesh size of 160 m
-Info    : 69 nodes 140 elements
-mpiexec -n 4 ../flow.py -mesh slab0.msh -eps 0.0001 -s_snes_converged_reason -s_snes_max_it 200
-Nonlinear s_ solve converged due to CONVERGED_SNORM_RELATIVE iterations 76
-    flow speed: av =    723.602 m a-1,  max =    912.923 m a-1
-numerical errors: |u-uex|_inf = 2.098e+01 m a-1, |p-pex|_inf = 2.058e+04 Pa
-setting target mesh size of 80 m
-Info    : 205 nodes 412 elements
-mpiexec -n 4 ../flow.py -mesh slab1.msh -eps 0.0001 -s_snes_converged_reason -s_snes_max_it 200
-Nonlinear s_ solve converged due to CONVERGED_SNORM_RELATIVE iterations 32
-    flow speed: av =    724.840 m a-1,  max =    906.571 m a-1
-numerical errors: |u-uex|_inf = 2.580e+00 m a-1, |p-pex|_inf = 1.100e+04 Pa
-setting target mesh size of 40 m
-Info    : 701 nodes 1404 elements
-mpiexec -n 4 ../flow.py -mesh slab2.msh -eps 0.0001 -s_snes_converged_reason -s_snes_max_it 200
-Nonlinear s_ solve converged due to CONVERGED_SNORM_RELATIVE iterations 56
-    flow speed: av =    724.880 m a-1,  max =    906.160 m a-1
-numerical errors: |u-uex|_inf = 2.124e-01 m a-1, |p-pex|_inf = 3.591e+03 Pa
-setting target mesh size of 20 m
-Info    : 2635 nodes 5272 elements
-mpiexec -n 4 ../flow.py -mesh slab4.msh -eps 0.0001 -s_snes_converged_reason -s_snes_max_it 200
-Nonlinear s_ solve converged due to CONVERGED_SNORM_RELATIVE iterations 49
-    flow speed: av =    724.873 m a-1,  max =    906.097 m a-1
-numerical errors: |u-uex|_inf = 2.144e-02 m a-1, |p-pex|_inf = 1.650e+03 Pa
+Info    : Running 'gmsh -2 base.geo' [Gmsh 4.6.0, 1 node, max. 1 thread]
+mpiexec -n 4 ../flow.py -mesh base.msh -eps 0.0001 -refine 0 -s_snes_converged_reason -s_snes_max_it 200
+  rank 0 owns 30 elements (cells) and can access 23 vertices
+  rank 1 owns 31 elements (cells) and can access 25 vertices
+  rank 2 owns 30 elements (cells) and can access 23 vertices
+  rank 3 owns 31 elements (cells) and can access 25 vertices
+Nonlinear s_ solve converged due to CONVERGED_SNORM_RELATIVE iterations 42
+  flow speed: av =    723.913 m a-1,  max =    906.726 m a-1
+numerical errors: |u-uex|_inf = 3.260e+00 m a-1, |p-pex|_inf = 8.479e+03 Pa
+mpiexec -n 4 ../flow.py -mesh base.msh -eps 0.0001 -refine 1 -s_snes_converged_reason -s_snes_max_it 200
+  rank 0 owns 126 elements (cells) and can access 81 vertices
+  rank 1 owns 136 elements (cells) and can access 90 vertices
+  rank 2 owns 126 elements (cells) and can access 81 vertices
+  rank 3 owns 136 elements (cells) and can access 91 vertices
+Nonlinear s_ solve converged due to CONVERGED_SNORM_RELATIVE iterations 55
+  flow speed: av =    724.815 m a-1,  max =    906.133 m a-1
+numerical errors: |u-uex|_inf = 3.439e-01 m a-1, |p-pex|_inf = 3.307e+03 Pa
+mpiexec -n 4 ../flow.py -mesh base.msh -eps 0.0001 -refine 2 -s_snes_converged_reason -s_snes_max_it 200
+  rank 0 owns 492 elements (cells) and can access 281 vertices
+  rank 1 owns 520 elements (cells) and can access 305 vertices
+  rank 2 owns 492 elements (cells) and can access 281 vertices
+  rank 3 owns 520 elements (cells) and can access 306 vertices
+Nonlinear s_ solve converged due to CONVERGED_FNORM_RELATIVE iterations 49
+  flow speed: av =    724.868 m a-1,  max =    906.096 m a-1
+numerical errors: |u-uex|_inf = 4.235e-02 m a-1, |p-pex|_inf = 2.001e+03 Pa
+mpiexec -n 4 ../flow.py -mesh base.msh -eps 0.0001 -refine 3 -s_snes_converged_reason -s_snes_max_it 200
+  rank 0 owns 1944 elements (cells) and can access 1041 vertices
+  rank 1 owns 2032 elements (cells) and can access 1107 vertices
+  rank 2 owns 1944 elements (cells) and can access 1041 vertices
+  rank 3 owns 2032 elements (cells) and can access 1108 vertices
+Nonlinear s_ solve converged due to CONVERGED_FNORM_RELATIVE iterations 51
+  flow speed: av =    724.871 m a-1,  max =    906.094 m a-1
+numerical errors: |u-uex|_inf = 6.588e-03 m a-1, |p-pex|_inf = 3.887e+03 Pa
