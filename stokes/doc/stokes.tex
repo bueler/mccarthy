@@ -8,7 +8,6 @@
 \usepackage{graphicx}
 \usepackage{verbatim,fancyvrb}
 \usepackage{tikz}
-\usetikzlibrary{arrows}
 
 % hyperref should be the last package we load
 \usepackage[pdftex,
@@ -333,49 +332,46 @@ Our Python codes define the nonlinear residual function $F$, equation \eqref{def
 
 \section{Surface kinematical equation} \label{sec:kinematical}
 
-A glacier will change shape as it flows, and we want our model to do this too.  So we now suppose that the domain on which the equations apply is the time-dependent set
+A glacier will change shape as it flows, and we want our model to include this action.  So now suppose that the domain on which the equations apply is the time-dependent set
 \begin{equation}
 \Omega^t = \left\{(x,z)\,\big|\, b(x) < z < h(x,t)\right\}  \label{Omegat}
 \end{equation}
-where $z=b(x)$ is the base elevation and $z=h(x,t)$ is the ice surface elevation.  In our simplified model the base elevation function $b(x)$ is time-independent, and the ice does not slide \eqref{basebc} nor melt or refreeze liquid water at the base, and thus the base kinematical equation, which is (42) in the notes, reduces to ``$0=0$,'' which requires no further effort.
+where $z=b(x)$ is the base elevation and $z=h(x,t)$ is the ice surface elevation.
 
-The time-dependent surface $z=h(x,t)$ evolves according to the surface kinematical equation, (41) in the notes.  Here the ice velocity is $\bu=\left<u(x,z,t),w(x,z,t)\right>$:
+The time-dependent surface $z=h(x,t)$ evolves according to the surface kinematical equation, (41) in the notes, using ice velocity $\bu=\left<u(x,z,t),w(x,z,t)\right>$:
 \begin{equation}
 h_t = a(x,t) - u(x,h,t) h_x + w(x,h,t) \label{surfacekinematical}
 \end{equation}
-Informally, \eqref{surfacekinematical} determines the change in surface elevation $\Delta h \approx h_t\,\Delta t$ from the climatically added/removed ice $a\,\Delta t$ plus the component of the ice motion in the outward (upward) normal direction $\bn = \left<-h_x,1\right>$.  In summary, $\Delta h \approx a \,\Delta t + \bn\cdot \bu\big|_{z=h} \Delta t$.
-
-Here $a(x,t)$ is the climatic mass balance in units of ice-equivalent $\text{m}\,\text{s}^{-1}$.  In our examples below $a=0$ because we are studying ice fluid dynamics in isolation.  However, most scientific questions about glaciers require nontrivial models for $a$.  Once this is done, implementation of nonzero values for $a(x,t)$ is straightforward if applied in an explicit (time-split) manner.
+Here $a(x,t)$ is the climatic mass balance in units of ice-equivalent $\text{m}\,\text{s}^{-1}$.  Informally, \eqref{surfacekinematical} determines the change in surface elevation $\Delta h \approx h_t\,\Delta t$ from the climatically added/removed ice $a\,\Delta t$ plus the component of the ice motion in the outward (upward) normal direction $\bn = \left<-h_x,1\right>$.  In summary, $\Delta h \approx \left(a + \bn\cdot \bu|_{z=h}\right) \Delta t$.
 
 Equation \eqref{surfacekinematical} applies on the time-dependent ice surface $\Gamma^t = \left\{(x,z) \,\big|\, z = h(x,t)\right\}$.  The surface $\Gamma^t$ is also the $\Phi=0$ level surface of the function
     $$\Phi(x,z,t) = z - h(x,t)$$
-\cite[pp.~65--66]{GreveBlatter2009}.  We regard this function as being defined on the closure of $\Omega^t$, thus including the surface $\Gamma^t$.  Since $\grad \Phi = \left<-h_x,1\right>$ is an outward normal along $\Gamma^t$ we have
+\cite[pp.~65--66]{GreveBlatter2009}.  We regard $\Phi$ as being defined on the closure of $\Omega^t$, including the surface $\Gamma^t$.  Since the spatial gradient $\grad \Phi = \left<-h_x,1\right>$ is an outward normal along $\Gamma^t$ we have
 \begin{equation}
-h_t = a + (\grad \Phi)\big|_{\Gamma^t} \cdot \bu\big|_{\Gamma^t}  \label{surfacekinematicalwithPhi}
+h_t = a + \bu|_{\Gamma^t} \cdot (\grad \Phi)|_{\Gamma^t}  \label{surfacekinematicalwithPhi}
 \end{equation}
-The advantage of using \eqref{surfacekinematicalwithPhi} in Firedrake, over \eqref{surfacekinematical}, is that it is easier to compute the gradient of the current 2D scalar field $\Phi(x,z,t_n)$, and evaluate it along the boundary, than it is to differentiate the surface elevation function $h(x,t_n)$.
+In Firedrake the advantage of using \eqref{surfacekinematicalwithPhi}, over \eqref{surfacekinematical}, is that it is easier to compute the gradient of the 2D scalar field $\Phi(x,z,t_n)$, and evaluate it along the boundary, than it is to differentiate the surface elevation function $h(x,t_n)$.
 
-We solve the surface kinematical equation \eqref{surfacekinematicalwithPhi} by smoothly and vertically displacing the mesh.  Note that the mesh is given by scalar coordinate fields $(x,z)$, defined on the nodes of the mesh, so the current ice surface elevation $z=h(x,t_n)=h^n(x)$ equals the value of the coordinate field $z$ on the top boundary of the current mesh $\Omega^n$.
+In our examples below, because we are studying ice fluid dynamics in isolation, we set $a=0$.  Scientific questions generally require nontrivial models for $a$, but, given such a model, implementation of nonzero values for $a(x,t)$ is straightforward if applied in an explicit (time-split) manner.  Regarding the base, in our simplified model the elevation $b(x)$ is time-independent, and the base does not slide, nor melt/refreeze liquid water, and thus the base kinematical equation, (42) in the notes, reduces to ``$0=0$.''  Solving this equation requires no further effort.
 
-In fact, we now describe our explicit time-stepping strategy for moving the surface of a glacier.  Given a time step $\Delta t > 0$, one time step is this sequence:
+We solve the surface kinematical equation \eqref{surfacekinematicalwithPhi} by smoothly and vertically displacing the mesh.  Note that the mesh is given by scalar coordinate fields $(x,z)$, defined on the nodes of the mesh, and that the time $t_n$ ice surface elevation $h^n(x) \approx h(x,t_n)$ equals the value of the coordinate field $z$ on the top boundary of the current mesh $\Omega^n$.  We make this surface elevation the boundary value of a Laplace equation problem for the vertical displacement $r^n$ of every node in the mesh.  In fact, we can now describe our explicit time-stepping strategy for moving the surface of a glacier.  Given the current geometry of the ice, i.e.~at time $t_n$, and a time step $\Delta t_n > 0$, one applies this sequence:
 
 \medskip
 \renewcommand{\labelenumi}{\emph{\arabic{enumi}.}}
 \begin{enumerate}
-\item Solve the weak-form Stokes equation \eqref{weak} on the current mesh $\Omega^n$ to compute current values $(\bu^n,p^n)$ at $t=t_n$.
-\item From $\Omega^n$ also generate the piecewise-linear surface elevation function $h^n(x)$.  Then evaluate $\Phi^n(x,z) = z - h^n(x)$ on $\Omega^n$, and define the following function on $\Omega^n$:
+\item Solve the weak-form Stokes equation \eqref{weak} on the current mesh $\Omega^n$ to compute current velocity and pressure values $(\bu^n,p^n)$.
+\item From $\Omega^n$ also generate the piecewise-linear surface elevation function $h^n(x)$.  Then evaluate $\Phi^n(x,z) = z - h^n(x)$ on $\Omega^n$ and compute:
 \begin{equation}
-\Delta h^n =  \Delta t\,\left(a(x,t_n) + \grad \Phi^n\cdot \bu^n\right) \label{deltahfield}
+\Delta h^n(x,z) =  \left(a(x,t_n) + \grad \Phi^n(x,z)\cdot \bu^n(x,z)\right)\Delta t_n \label{deltahfield}
 \end{equation}
-(Only the values of $\Delta h^n$ on $\Gamma^n$ are actually used.)
-\item Solve the following Dirichlet problem (Laplace equation) for a vertical displacement field $r^n$:
+\item Solve a Laplace equation Dirichlet problem for the vertical displacement field $r^n$:
 \begin{align}
 - \grad^2 r^n &= 0 & &\text{on } \Omega^n \label{vdisplacementpoisson} \\
           r^n &= 0 & &\text{on inflow, base, and outflow parts of } \partial \Omega^n \notag \\
           r^n &= \Delta h^n & &\text{on the top boundary } \Gamma^n \notag
 \end{align}
 This linear problem is solved in weak form: $\int_{\Omega^n} \grad r^n\cdot \grad w = 0$ for all test functions $w$ with zero values on the entire boundary $\partial \Omega^n$.
-\item Define a new mesh which has vertical-only displacement by $r^n$:
+\item Update the mesh coordinates using vertical-only displacement by $r^n$:
 \begin{equation}
   x^{n+1} = x^n, \quad z^{n+1} = z^n + r^n \label{updatemesh}
 \end{equation}
@@ -383,31 +379,34 @@ This linear problem is solved in weak form: $\int_{\Omega^n} \grad r^n\cdot \gra
 
 \medskip
 At the end of this sequence the new top boundary $\Gamma^{n+1}$ is the surface $z=h^{n+1}(x)$.  By \eqref{deltahfield} the sequence has done an explicit step of \eqref{surfacekinematical}:
-    $$h^{n+1}(x) = h^n(x) + \Delta t\,\left(a(x,t_n) - u(x,h^n,t_n) h_x^n + w(x,h^n,t_n)\right)$$
+    $$h^{n+1}(x) = h^n(x) + \Delta t_n\,\left(a(x,t_n) - u(x,h^n,t_n) h_x^n + w(x,h^n,t_n)\right)$$
 
-The significance of Dirichlet problem \eqref{vdisplacementpoisson} is that the entire mesh is \emph{smoothly} displaced, in the vertical direction only by \eqref{updatemesh}, because solutions of the Laplace equation are smooth.  In fact, $r^n$ minimizes $\int |\grad f|^2$ over functions with the given boundary values.
+The significance of Dirichlet problem \eqref{vdisplacementpoisson} is that the entire mesh is \emph{smoothly} displaced, in the vertical direction only by \eqref{updatemesh}, because solutions of the Laplace equation are smooth.  (Note $r^n$ minimizes $\int |\grad f|^2$ over functions with the given boundary values.)  This way of displacing the mesh avoids shearing the mesh near sharp discontinuities in base topography.
 
-Note that the scheme uses fixed time step $\Delta t > 0$ and is explicit.  At best it is conditionally stable, and in practice that is observed.  However, no time step restriction is known with any precision.  It should be expected that, as with an SIA solver, the time step is restricted by a condition like ``$D\Delta t / \Delta x^2 < 1$'' where $\Delta x$ is a representative mesh spacing variable and $D$ is some diffusivity parameter meaningful in the current context.  However, there is no literature which connects the $D$ from the SIA (see the notes) with Stokes time-stepping, or otherwise supplies a sufficient stability restriction.  The extensive testing needed to develop an empirical time-step restriction, which would depend on the size and aspect-ratio of the elements in some complicated way, has barely been started.
+Note that the scheme uses fixed time step $\Delta t > 0$ and is explicit.  At best it can be conditionally stable, and in practice that \emph{is} what is observed, but no time step restriction is known \emph{a priori}.  As with an SIA solver it might be expected that a sufficient condition like ``$D\Delta t / \Delta x^2 < 1$,'' where $\Delta x$ is a representative mesh spacing variable, perhaps taken near the surface and along the surface, and $D$ is some diffusivity parameter meaningful in the current context, might apply.  However, there is no literature which connects the $D$ from the SIA (see the notes) with Stokes time-stepping, or otherwise supplies this stability restriction.  Two ways of addressing this numerical modeling weakness have, I think, barely been started by the glacier modeling community:
+\renewcommand{\labelenumi}{(\roman{enumi})}
+\begin{enumerate}
+\item extensively test various configurations to develop an empirical time-step restriction; it would depend on the size and aspect-ratio of the elements in some complicated way, or
+\item solve the Stokes and surface kinematical equations, the later in implicit-step form, as a coupled system.
+\end{enumerate}
 
 
 \section{Implementation in Python codes} \label{sec:implementation}
 
-We implement the above numerical solution method in Python codes.  These codes use the Firedrake FE library, and, through Firedrake, the PETSc solver library \cite{Balayetal2018,BuelerBook} as well.
-
-The \verb|README.md| file documents usags, but for a simple example, solving a time-independent Stokes problem for $(\bu,p)$ looks like this:
+We implement the above numerical solution method in Python codes.  These codes use the Firedrake FE \cite{Rathgeberetal2016} and PETSc solver libraries \cite{Balayetal2018,BuelerBook} as well.  Here is a simple example solving a time-independent Stokes problem:
 
 \medskip
 \begin{Verbatim}
 $ ./gendomain.py -o glacier.geo                # create domain outline
 $ gmsh -2 glacier.geo                          # mesh domain
 $ source ~/firedrake/bin/activate              # start Firedrake
-(firedrake) $ ./flow.py      # solve Stokes problem
+(firedrake) $ ./flow.py -mesh glacier.msh      # solve Stokes problem
 (firedrake) $ paraview glacier.pvd             # visualize results
 \end{Verbatim}
 %$
 
 \medskip
-\noindent In a time-stepping run one supplies the time step in days (\texttt{-deltat}) and the number of steps (\texttt{-m}) as arguments to \texttt{flow.py}.  For example, at the final time the following run generates the result shown in Figure \ref{fig:glacier}:
+\noindent In a time-stepping run one supplies the time step in days (\texttt{-deltat}) and the number of steps (\texttt{-m}).  For example, the following run generates the result shown in Figure \ref{fig:glacier}:
 
 \medskip
 \begin{Verbatim}
@@ -416,41 +415,47 @@ $ source ~/firedrake/bin/activate              # start Firedrake
 %$
 
 \medskip
-\noindent (Paraview was used to actually generate Figure \ref{fig:glacier}.)
+\noindent The \verb|README.md| file documents usage more thoroughly.
 
 \medskip
-As shown in Figure \ref{fig:blockdiagram} there are a total of four Python codes:
+As shown in Figure \ref{fig:blockdiagram} there are a total of five Python codes:
 \begin{itemize}
-\item \texttt{flow.py}: \quad  This executable driver reads user options, reads the mesh from a Gmsh \texttt{.msh} file, sets-up Firedrake function spaces, either solves a single time-independent Stokes problem or executes the above time-stepping strategy (according to options), and writes the solution into a Paraview-readable \texttt{.pvd} file.  Surface values of the solution can also be visualized in a separate figure using option \texttt{-osurface}.  Note this driver imports functions from each of the following three.
+\item \texttt{flow.py}: \quad  This driver reads user options, reads the mesh from a Gmsh \texttt{.msh} file, uses a \texttt{MomentumModel} object to solve the Stokes problem, optionally calls \texttt{meshmotion.py} to do the above time-stepping strategy, and writes the solution into a Paraview-readable \texttt{.pvd} file.
 
-\item \texttt{gendomain.py}: \quad  This executable writes an outline of the initial domain $\Omega^0$ into an ASCII file (\texttt{.geo} extension) using the Gmsh \cite{GeuzaineRemacle2009} geometry description language.  Note Gmsh can be used to examine and mesh this domain interactively or at the command-line (as shown above).  Portions of the boundary are marked with integer tags; see the Python dictionary \texttt{bdryids} which this module exports.  This module also exports a function \texttt{getdomaindims()} which can dynamically-extract certain dimensions from a changing mesh.
+\item \texttt{gendomain.py}: \quad  This writes an outline of the initial domain $\Omega^0$ into an ASCII file (\texttt{.geo} extension) using the Gmsh \cite{GeuzaineRemacle2009} geometry description language.  Note Gmsh can be used to examine and mesh this domain interactively or at the command-line.  Portions of the boundary are marked with integer tags; see the Python dictionary \texttt{bdryids}.  This module also exports a function \texttt{getdomaindims()} which dynamically-extracts dimensions from a changing mesh.
 
-\item \texttt{meshactions.py}: \quad  This module provides mesh extraction and manipulation functions \texttt{getsurfaceelevation()} and \texttt{solvevdisp()}.  The former extracts a piecewise-linear surface elevation function $h(x)$ from the current mesh.  The latter assembles and solves the linear Dirichlet problem \eqref{vdisplacementpoisson} using Firedrake's \texttt{solve()} command.  Then \texttt{flow.py} applies the solution as a vertical mesh movement \eqref{updatemesh}.  It sets the option prefix \texttt{vd\_} for PETSc options to control this solver.  This module also provides other functions used only for visualization.
+\item \texttt{meshmotion.py}: \quad  This module assembles and solves linear Dirichlet problem \eqref{vdisplacementpoisson} for vertical mesh displacement using Firedrake's \texttt{solve()}, and it updates the mesh coordinates as described.  This solver has option prefix \texttt{vd\_}.
 
-\item FIXME: REPLACED WITH momentummodel.py \texttt{physics.py}: \quad  Most actual ice physics is isolated here, including physical constants and the Stokes problem weak form \eqref{defineF}.  The most important function is \texttt{stokessolve()} which assembles and solves the nonlinear Glen-Stokes problem \eqref{weak} using Firedrake's \texttt{solve()} command; it also sets the solver option prefix \texttt{s\_}.
+\item \texttt{momentummodel.py}: \quad  Implements \texttt{class MomentumModel}.  Most actual ice physics is isolated here, including physical constants and the Stokes problem weak form \eqref{defineF}.  The \texttt{solve()} method of this class assembles and solves the nonlinear Glen-Stokes problem \eqref{weak} using Firedrake's \texttt{solve()} command; this solver has option prefix \texttt{s\_}.
+
+\item \texttt{surfaceutils.py}: \quad  Provides functions which extract boundary values of solution fields and mesh coordinates.  Note that the surface values of the solution can be visualized in a separate image file (e.g.~\texttt{.png}) using option \texttt{-osurface}.
 \end{itemize}
 
 \begin{figure}[h]
 \bigskip
 \tikzstyle{tool} = [draw, minimum size=2em]
-\tikzstyle{other} = [draw, minimum size=2em,rounded corners=0.2cm]
-\begin{tikzpicture}[node distance=3.8cm,auto,>=latex']
-    \node [tool] (gendomain) {\texttt{gendomain.py}};
-    \node [other] (gmsh) [right of= gendomain] {Gmsh};
-    \node [tool] (flow) [right of=gmsh] {\texttt{flow.py}};
-    \node [other] (paraview) [right of=flow] {Paraview};
-    \node [tool,dashed] (physics) [above left of=flow, xshift=1cm, yshift=-0.5cm] {\texttt{physics.py}};
-    \node [tool,dashed] (meshactions) [above right of=flow, xshift=-1cm, yshift=-0.5cm] {\texttt{meshactions.py}};
-    \path[->] (gendomain) edge node {\texttt{.geo}} (gmsh) ;
-    \path[->] (gmsh) edge node {\texttt{.msh}} (flow) ;
-    \path[->] (flow) edge node {\texttt{.pvd}} (paraview) ;
-    \path[->] (gendomain) edge [dashed, bend left] node {} (flow) ;
-    \path[->] (physics) edge [dashed] node {} (flow) ;
-    \path[->] (meshactions) edge [dashed] node {} (flow) ;
+\tikzstyle{module} = [draw, dashed, minimum size=2em]
+\tikzstyle{other} = [draw, minimum size=2em, rounded corners=0.2cm]
+\begin{tikzpicture}[node distance=3.8cm,>=latex]
+    \node [tool]   (gendomain) {\texttt{gendomain.py}};
+    \node [other]  (gmsh)[right of= gendomain] {Gmsh};
+    \node [tool]   (flow)[right of=gmsh] {\texttt{flow.py}};
+    \node [other]  (paraview)[right of=flow] {Paraview};
+    \node [module] (momentummodel)[above left of=flow, xshift=-2.1cm] {\begin{minipage}{4.0cm} \texttt{momentummodel.py} \footnotesize (\texttt{class MomentumModule}) \end{minipage}};
+    \node [module] (meshmotion)[above right of=flow, xshift=-3cm] {\texttt{meshmotion.py}};
+    \node [module] (surfaceutils)[right of=meshmotion, xshift=0.3cm] {\texttt{surfaceutils.py}};
+    \path[->] (gendomain) edge node[below] {\texttt{.geo}} (gmsh) ;
+    \path[->] (gmsh) edge node[below] {\texttt{.msh}} (flow) ;
+    \path[->] (flow) edge node[below] {\texttt{.pvd}} (paraview) ;
+    \path[->] (gendomain) edge[dashed, bend left] node {} (flow) ;
+    \path[->] (momentummodel) edge[dashed] node {} ([xshift=-0.2cm]flow.north) ;
+    \path[->] (meshmotion) edge[dashed] node {} (flow) ;
+    \path[->] (surfaceutils) edge[dashed] node {} (flow) ;
+    \path[->] (surfaceutils) edge[dashed, bend right] node {} (meshmotion) ;
 \end{tikzpicture}
 
 \medskip
-\caption{The tools are used in the given order (solid), with input/output file formats as shown.  Python module \texttt{import}s are dashed.}
+\caption{Users interact with (solid) tools in the given order.}
 \label{fig:blockdiagram}
 \end{figure}
 
