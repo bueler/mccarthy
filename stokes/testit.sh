@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ./testit.sh PROGRAM OPTS PROCESSES TESTNUM
+# ./testit.sh PROGRAM OPTS PROCESSES TESTNUM DESCRIPTION
 
 mkdir -p tmptest/
 
@@ -9,7 +9,7 @@ make $1 > tmptest/maketmp 2>&1;
 CMD="mpiexec -n $3 ./$1 $2"
 
 if [[ ! -f output/$1.test$4 ]]; then
-    echo "FAIL: Test #$4 of $1"
+    echo "FAIL: Test #$4 of $1  ($5)"
     echo "       command = '$CMD'"
     echo "       OUTPUT MISSING"
 
