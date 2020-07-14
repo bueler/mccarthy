@@ -12,7 +12,7 @@ tmptest/slabtest.msh: tmptest/
 	-@gmsh -2 tmptest/slabtest.geo > /dev/null
 
 # testing
-rungendomain_1:
+rungendomain_1: tmptest/
 	-@./testit.sh gendomain.py "-testspew -o tmptest/medtest.geo" 1 1 "generate basic .geo"
 
 runflow_1: tmptest/lowtest.msh
@@ -30,9 +30,12 @@ runflow_4: tmptest/lowtest.msh
 runflow_5: tmptest/lowtest.msh
 	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -osurface tmptest/test5.png" 1 5 "write a .png for surface values"
 
-test: rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5
+runflow_6: tmptest/lowtest.msh
+	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -refine 1" 1 6 "refine one level"
 
-.PHONY: clean rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 test
+test: rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6
+
+.PHONY: clean rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 test
 
 clean:
 	rm -f *~ *.pyc *.pvd *.vtu *.pvtu *.geo *.msh

@@ -44,8 +44,11 @@ parser.add_argument('-o', metavar='NAME', type=str, default='',
                     help='output file name ending with .pvd (default = MESH-.msh+.pvd)')
 parser.add_argument('-osurface', metavar='NAME', type=str, default='',
                     help='save a plot of surface values of (h,u,w) in this image file (.png,.pdf,...)')
+parser.add_argument('-refine', type=int, default=0, metavar='N',
+                    help='number of refinement levels after reading mesh')
 parser.add_argument('-save_rank', action='store_true',
                     help='add fields (element_rank,vertex_rank) to output file', default=False)
+# FIXME add -sequence; see p4pdes-next/py/surface/minimal.py for implementation
 args, unknown = parser.parse_known_args()
 
 if args.flowhelp:
@@ -80,6 +83,9 @@ def getranks(mesh):
 # read initial mesh and report on it
 printpar('reading initial mesh from %s ...' % args.mesh)
 mesh = Mesh(args.mesh)
+if args.refine > 0:
+    hierarchy = MeshHierarchy(mesh, args.refine)
+    mesh = hierarchy[args.refine]
 if mesh.comm.size == 1:
     printpar('  mesh has %d elements (cells) and %d vertices' \
              % (mesh.num_cells(),mesh.num_vertices()))
