@@ -1,23 +1,39 @@
 writing domain geometry to file base.geo ...
 setting target mesh size of 160 m
-Info    : Running 'gmsh -2 base.geo' [Gmsh 4.6.0, 1 node, max. 1 thread]
-mpiexec -n 1 ../flow.py -mesh base.msh -eps 0.0001 -refine 0 -s_snes_converged_reason -s_snes_max_it 200
-  mesh has 122 elements (cells) and 84 vertices
-Nonlinear s_ solve converged due to CONVERGED_SNORM_RELATIVE iterations 41
-  flow speed: av =    723.913 m a-1,  max =    906.726 m a-1
-numerical errors: |u-uex|_inf = 3.260e+00 m a-1, |p-pex|_inf = 8.479e+03 Pa
-mpiexec -n 1 ../flow.py -mesh base.msh -eps 0.0001 -refine 1 -s_snes_converged_reason -s_snes_max_it 200
-  mesh has 488 elements (cells) and 289 vertices
-Nonlinear s_ solve converged due to CONVERGED_SNORM_RELATIVE iterations 54
-  flow speed: av =    724.815 m a-1,  max =    906.133 m a-1
-numerical errors: |u-uex|_inf = 3.439e-01 m a-1, |p-pex|_inf = 3.307e+03 Pa
-mpiexec -n 1 ../flow.py -mesh base.msh -eps 0.0001 -refine 2 -s_snes_converged_reason -s_snes_max_it 200
-  mesh has 1952 elements (cells) and 1065 vertices
-Nonlinear s_ solve converged due to CONVERGED_FNORM_RELATIVE iterations 50
-  flow speed: av =    724.868 m a-1,  max =    906.096 m a-1
-numerical errors: |u-uex|_inf = 4.235e-02 m a-1, |p-pex|_inf = 2.001e+03 Pa
-mpiexec -n 1 ../flow.py -mesh base.msh -eps 0.0001 -refine 3 -s_snes_converged_reason -s_snes_max_it 200
+Info    : Running 'gmsh -2 base.geo' [Gmsh 4.5.6, 1 node, max. 1 thread]
+mpiexec -n 1 ../flow.py -mesh base.msh -eps 0.00001 -sequence 4 -s_snes_converged_reason -s_snes_max_it 200
+using 4 levels of grid-sequencing ...
+        reading initial mesh from base.msh ...
+          mesh has 122 elements (cells) and 84 vertices
+          geometry [m]: L = 3000.000, bs = 0.000, Hin = 400.000
+            slab geometry case ...
+        solving for velocity and pressure ...
+Nonlinear s_ solve converged due to CONVERGED_SNORM_RELATIVE iterations 31
+          flow speed: av =    723.913 m a-1,  max =    906.726 m a-1
+          pressure:   av =     17.767 bar,    max =     35.581 bar
+        numerical errors: |u-uex|_inf = 3.260e+00 m a-1, |p-pex|_inf = 8.481e+03 Pa
+      mesh has 488 elements (cells) and 289 vertices
+      solving for velocity and pressure ...
+Nonlinear s_ solve converged due to CONVERGED_SNORM_RELATIVE iterations 25
+        flow speed: av =    724.815 m a-1,  max =    906.132 m a-1
+        pressure:   av =     17.765 bar,    max =     35.541 bar
+      numerical errors: |u-uex|_inf = 3.439e-01 m a-1, |p-pex|_inf = 3.261e+03 Pa
+    mesh has 1952 elements (cells) and 1065 vertices
+    solving for velocity and pressure ...
+Nonlinear s_ solve converged due to CONVERGED_SNORM_RELATIVE iterations 14
+      flow speed: av =    724.870 m a-1,  max =    906.095 m a-1
+      pressure:   av =     17.765 bar,    max =     35.532 bar
+    numerical errors: |u-uex|_inf = 4.221e-02 m a-1, |p-pex|_inf = 1.264e+03 Pa
   mesh has 7808 elements (cells) and 4081 vertices
-Nonlinear s_ solve converged due to CONVERGED_FNORM_RELATIVE iterations 51
-  flow speed: av =    724.871 m a-1,  max =    906.094 m a-1
-numerical errors: |u-uex|_inf = 6.588e-03 m a-1, |p-pex|_inf = 3.886e+03 Pa
+  solving for velocity and pressure ...
+Nonlinear s_ solve converged due to CONVERGED_SNORM_RELATIVE iterations 6
+    flow speed: av =    724.873 m a-1,  max =    906.092 m a-1
+    pressure:   av =     17.765 bar,    max =     35.531 bar
+  numerical errors: |u-uex|_inf = 5.451e-03 m a-1, |p-pex|_inf = 8.593e+02 Pa
+mesh has 31232 elements (cells) and 15969 vertices
+solving for velocity and pressure ...
+Nonlinear s_ solve converged due to CONVERGED_FNORM_RELATIVE iterations 5
+  flow speed: av =    724.873 m a-1,  max =    906.092 m a-1
+  pressure:   av =     17.765 bar,    max =     35.530 bar
+numerical errors: |u-uex|_inf = 7.135e-04 m a-1, |p-pex|_inf = 1.464e+03 Pa
+writing (velocity,pressure) to base.pvd ...

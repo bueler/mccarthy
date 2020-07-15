@@ -1,35 +1,26 @@
 #!/bin/bash
 set -e
 
-P=$1
+# measure convergence relative to slab-on-slope on sequence of refining meshes
 
-# measure convergence on sequence of refining slab geometries
-# note viscosity regularization relevant: -eps ...
 # after setting-up firedrake in parent directory, run as:
 #    ./convergeslab.sh P &> convergeslabP.txt
 # where P is number of processes
 
-# grid-sequencing (and multigrid) would help here with reducing SNES
-# iterations, but flow.py does not set up a grid hierarchy
+# FIXME multigrid should help here with reducing KSP iterations
 
-function runcase() {
-  CMD="mpiexec -n $P ../flow.py -mesh $1 -eps $2 -refine $3 -s_snes_converged_reason -s_snes_max_it 200"
-  echo $CMD
-  rm -f tmp.txt
-  #/usr/bin/time -f "real %e" $CMD &> tmp.txt
-  $CMD &> tmp.txt
-  grep 'elements' tmp.txt
-  grep 'converged due to' tmp.txt
-  grep 'flow speed' tmp.txt
-  grep 'numerical errors' tmp.txt
-  #grep real tmp.txt
-  rm -f tmp.txt
-}
+# FIXME parallel runs are not really worthwhile with LU solvers ... redo after
+#       solver testing
 
-EPS=0.0001
+P=$1
+EPS=0.00001  # viscosity regularization important to get close to exact
+SEQUENCE=4
+
+
 ../gendomain.py -hmesh 160.0 -bs 0.0 -coarsen_upperleft 1.0 -o base.geo
 gmsh -2 base.geo | grep Running
-for REFINE in 0 1 2 3; do
-    runcase base.msh $EPS $REFINE
-done
+
+CMD="mpiexec -n $P ../flow.py -mesh base.msh -eps $EPS -sequence $SEQUENCE -s_snes_converged_reason -s_snes_max_it 200"
+echo $CMD
+$CMD
 
