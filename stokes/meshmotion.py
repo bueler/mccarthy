@@ -41,5 +41,5 @@ def movemesh(mesh,r,bmin):
     f = fd.Function(Vc).interpolate(fd.as_vector([x, z + r]))
     mesh.coordinates.assign(f)
     unstable = any(f.dat.data_ro[:,1] < bmin - 1.0)
-    return mesh,unstable
+    return unstable
 
