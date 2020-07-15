@@ -10,6 +10,7 @@ V = VectorFunctionSpace(mesh, 'CG', 2)
 W = FunctionSpace(mesh, 'CG', 1)
 Z = V * W
 up = Function(Z)
-u,p = split(up)
+#u,p = split(up)
+u,p = up.split()
 File('bar.pvd').write(u,p)
 
