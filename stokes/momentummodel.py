@@ -119,14 +119,11 @@ class MomentumModel:
             sys.exit(1)
         self._Z = self._V * self._W
 
-        # space for solution, either initialized to zero or by prolonging
-        #     a coarser solution
+        # solution; initialized to zero
         up = fd.Function(self._Z)
+
+        # get component ufl expressions for defining the form
         u,p = fd.split(up)
-        if ucoarse:
-            fd.prolong(ucoarse,u)
-        if pcoarse:
-            fd.prolong(pcoarse,p)
 
         # define the nonlinear weak form F(u,p;v,q)
         v,q = fd.TestFunctions(self._Z)
@@ -146,6 +143,14 @@ class MomentumModel:
         inflow_u = self._get_uin(mesh)
         bcs = [ fd.DirichletBC(self._Z.sub(0), noslip, bdryids['base']),
                 fd.DirichletBC(self._Z.sub(0), inflow_u, bdryids['inflow']) ]
+
+        # optionally prolong a coarser solution
+        if ucoarse or pcoarse:
+            u,p = up.split()  # not!: fd.split(up)
+            if ucoarse:
+                fd.prolong(ucoarse,u)
+            if pcoarse:
+                fd.prolong(pcoarse,p)
 
         # solve
         fd.solve(F == 0, up, bcs=bcs, options_prefix='s',

@@ -1,6 +1,6 @@
 reading initial mesh from tmptest/lowtest.msh ...
-  rank 0 owns 49 elements (cells) and can access 37 vertices
-  rank 1 owns 49 elements (cells) and can access 37 vertices
+rank 0 owns 49 elements (cells) and can access 37 vertices
+rank 1 owns 49 elements (cells) and can access 37 vertices
   geometry [m]: L = 3000.000, bs = 100.000, Hin = 400.000
 solving for velocity and pressure ...
 Nonlinear s_ solve converged due to CONVERGED_FNORM_RELATIVE iterations 15

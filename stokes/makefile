@@ -33,9 +33,12 @@ runflow_5: tmptest/lowtest.msh
 runflow_6: tmptest/lowtest.msh
 	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -refine 1" 1 6 "refine one level"
 
-test: rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6
+runflow_7: tmptest/lowtest.msh
+	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -sequence 1 -s_snes_converged_reason" 1 7 "grid-sequence one level"
 
-.PHONY: clean rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 test
+test: rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7
+
+.PHONY: clean rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7 test
 
 clean:
 	rm -f *~ *.pyc *.pvd *.vtu *.pvtu *.geo *.msh

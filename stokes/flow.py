@@ -4,8 +4,7 @@
 # Solve glacier Glen-Stokes problem with explicit evolution of the free surface.
 # See README.md for usage.
 
-# TODO 1. add grid-sequencing
-#      2. package solver options
+# TODO explore and package solver options
 
 import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
@@ -74,31 +73,36 @@ if len(args.o) > 0:
 else:
     outname = '.'.join(args.mesh.split('.')[:-1]) + '.pvd'
 
-def printpar(thestr,comm=COMM_WORLD):
-    PETSc.Sys.Print(thestr,comm=comm)
+def printpar(thestr,comm=COMM_WORLD,indent=0):
+    spaces = indent * '  '
+    PETSc.Sys.Print('%s%s' % (spaces,thestr),comm=comm)
 
-def describe(thismesh):
+def describe(thismesh,indent=0):
     if thismesh.comm.size == 1:
-        printpar('  mesh has %d elements (cells) and %d vertices' \
-                 % (thismesh.num_cells(),thismesh.num_vertices()))
+        printpar('mesh has %d elements (cells) and %d vertices' \
+                 % (thismesh.num_cells(),thismesh.num_vertices()),
+                 indent=indent)
     else:
-        PETSc.Sys.syncPrint('  rank %d owns %d elements (cells) and can access %d vertices' \
+        PETSc.Sys.syncPrint('rank %d owns %d elements (cells) and can access %d vertices' \
                             % (thismesh.comm.rank,thismesh.num_cells(),thismesh.num_vertices()),
                             comm=thismesh.comm)
         PETSc.Sys.syncFlush(comm=thismesh.comm)
 
+if args.sequence > 0:
+    printpar('using %d levels of grid-sequencing ...' % args.sequence)
+
 # read initial mesh, refine, and report on it
-printpar('reading initial mesh from %s ...' % args.mesh)
+printpar('reading initial mesh from %s ...' % args.mesh,indent=args.sequence)
 mesh = Mesh(args.mesh)
 if args.refine + args.sequence > 0:
     hierarchy = MeshHierarchy(mesh, args.refine + args.sequence)
     mesh = hierarchy[args.refine]
-describe(mesh)
+describe(mesh,indent=args.sequence+1)
 bs,bmin_initial,Hout_initial = getdomaindims(mesh)
-printpar('  geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f' \
-         %(L,bs,Hin))
+printpar('geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f' \
+         %(L,bs,Hin),indent=args.sequence+1)
 if bs < 1.0:
-    printpar('    slab geometry case ...')
+    printpar('slab geometry case ...',indent=args.sequence+2)
 mesh._topology_dm.viewFromOptions('-dm_view')
 
 # -osurface is not available in parallel
@@ -128,14 +132,16 @@ def getranks():
     return (element_rank,vertex_rank)
 
 # solver mode: momentum-only solve of Stokes problem
-def momentumsolve(ucoarse = None, pcoarse = None):
+def momentumsolve(ucoarse = None, pcoarse = None, indent=0):
     u,p = mm.solve(mesh,bdryids,args.elements,\
                    ucoarse=ucoarse,pcoarse=pcoarse)
     umagav,umagmax,pav,pmax = mm.solutionstats(mesh)
-    printpar('  flow speed: av = %10.3f m a-1,  max = %10.3f m a-1' \
-             % (secpera*umagav,secpera*umagmax))
-    printpar('  pressure:   av = %10.3f bar,    max = %10.3f bar' \
-             % (1.0e-5*pav,1.0e-5*pmax))
+    printpar('flow speed: av = %10.3f m a-1,  max = %10.3f m a-1' \
+             % (secpera*umagav,secpera*umagmax),
+             indent=indent+1)
+    printpar('pressure:   av = %10.3f bar,    max = %10.3f bar' \
+             % (1.0e-5*pav,1.0e-5*pmax),
+             indent=indent+1)
     return u,p
 
 # solver mode: time-stepping loop with evolving surface
@@ -165,26 +171,35 @@ def timestepping():
         mm.set_Hout(Hout)
         with r.dat.vec_ro as vr:
             absrmax = vr.norm(norm_type=PETSc.NormType.NORM_INFINITY)
-        printpar('  max. vert. mesh disp. = %.3f m,  Hout = %.3f m' % (absrmax,Hout))
+        printpar('max. vert. mesh disp. = %.3f m,  Hout = %.3f m' % (absrmax,Hout),
+                 indent=1)
     return u,p,r,t_days
 
-# decide on solver mode
+# in slab-on-slope case, compute numerical errors
+def numericalerrorsslab(indent=0):
+    if bs < 1.0:
+        uerrmax,perrmax = mm.numerical_errors_slab(mesh)
+        printpar('numerical errors: |u-uex|_inf = %.3e m a-1, |p-pex|_inf = %.3e Pa' \
+                 % (uerrmax*secpera,perrmax),indent=indent)
+
+# solve, after deciding on solver mode
 if args.deltat > 0.0:
     printpar('writing (velocity,pressure,vertical_displacement) at each time step to %s ...' % outname)
     u,p,r,t_days = timestepping()  # returns at final time
+elif args.sequence > 0:
+    l = args.sequence
+    printpar('solving for velocity and pressure ...',indent=l)
+    u,p = momentumsolve(indent=l)
+    for j in range(l):
+        numericalerrorsslab(indent=l-j)
+        mesh = hierarchy[args.refine+j+1]
+        describe(mesh,indent=l-j-1)
+        printpar('solving for velocity and pressure ...',indent=l-j-1)
+        u,p = momentumsolve(ucoarse=u.copy(),pcoarse=p.copy(),indent=l-j-1)
 else:
     printpar('solving for velocity and pressure ...')
     u,p = momentumsolve()
-    for j in range(args.sequence):  # may run zero times
-        mesh = hierarchy[args.refine+j+1]
-        describe(mesh)
-        u,p = momentumsolve(ucoarse=u.copy(),pcoarse=p.copy())
-
-# in slab-on-slope case, compute numerical errors
-if bs < 1.0:
-    uerrmax,perrmax = mm.numerical_errors_slab(mesh)
-    printpar('numerical errors: |u-uex|_inf = %.3e m a-1, |p-pex|_inf = %.3e Pa' \
-             % (uerrmax*secpera,perrmax))
+numericalerrorsslab()
 
 # save results in paraview-readable file
 if args.deltat > 0.0:
