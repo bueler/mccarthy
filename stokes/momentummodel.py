@@ -85,7 +85,7 @@ class MomentumModel:
                             0.0])
         return uin
 
-    def solve(self,mesh,bdryids,mixedtype):
+    def solve(self,mesh,bdryids,mixedtype, ucoarse = None, pcoarse = None):
         # define body force and ice hardness
         rhog = self._rho * self._g
         f_body = fd.Constant((rhog * np.sin(self.alpha), - rhog * np.cos(self.alpha)))
@@ -119,9 +119,16 @@ class MomentumModel:
             sys.exit(1)
         self._Z = self._V * self._W
 
-        # define the nonlinear weak form F(u,p;v,q)
+        # space for solution, either initialized to zero or by prolonging
+        #     a coarser solution
         up = fd.Function(self._Z)
         u,p = fd.split(up)
+        if ucoarse:
+            fd.prolong(ucoarse,u)
+        if pcoarse:
+            fd.prolong(pcoarse,p)
+
+        # define the nonlinear weak form F(u,p;v,q)
         v,q = fd.TestFunctions(self._Z)
         if self.n_glen == 1.0:  # Newtonian ice case
             F = ( fd.inner(Bn * D(u), D(v)) - p * fd.div(v) - fd.div(u) * q \

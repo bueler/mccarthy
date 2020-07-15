@@ -60,11 +60,13 @@ if len(args.mesh) == 0:
     parser.print_help()
     sys.exit(1)
 
-# time-stepping requires both positive deltat and positive m
+# time-stepping requires both positive deltat and positive m, and does not
+#     allow grid-sequencing
 if args.m > 0:
     assert (args.deltat > 0.0)
 if args.deltat > 0.0:
     assert (args.m > 0)
+    assert (args.sequence == 0)
 
 # output file name: strip .msh and replace with .pvd
 if len(args.o) > 0:
@@ -75,20 +77,23 @@ else:
 def printpar(thestr,comm=COMM_WORLD):
     PETSc.Sys.Print(thestr,comm=comm)
 
-# read initial mesh and report on it
+def describe(thismesh):
+    if thismesh.comm.size == 1:
+        printpar('  mesh has %d elements (cells) and %d vertices' \
+                 % (thismesh.num_cells(),thismesh.num_vertices()))
+    else:
+        PETSc.Sys.syncPrint('  rank %d owns %d elements (cells) and can access %d vertices' \
+                            % (thismesh.comm.rank,thismesh.num_cells(),thismesh.num_vertices()),
+                            comm=thismesh.comm)
+        PETSc.Sys.syncFlush(comm=thismesh.comm)
+
+# read initial mesh, refine, and report on it
 printpar('reading initial mesh from %s ...' % args.mesh)
 mesh = Mesh(args.mesh)
-if args.refine > 0:
-    hierarchy = MeshHierarchy(mesh, args.refine)
+if args.refine + args.sequence > 0:
+    hierarchy = MeshHierarchy(mesh, args.refine + args.sequence)
     mesh = hierarchy[args.refine]
-if mesh.comm.size == 1:
-    printpar('  mesh has %d elements (cells) and %d vertices' \
-             % (mesh.num_cells(),mesh.num_vertices()))
-else:
-    PETSc.Sys.syncPrint('  rank %d owns %d elements (cells) and can access %d vertices' \
-                        % (mesh.comm.rank,mesh.num_cells(),mesh.num_vertices()),
-                        comm=mesh.comm)
-    PETSc.Sys.syncFlush(comm=mesh.comm)
+describe(mesh)
 bs,bmin_initial,Hout_initial = getdomaindims(mesh)
 printpar('  geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f' \
          %(L,bs,Hin))
@@ -123,8 +128,9 @@ def getranks():
     return (element_rank,vertex_rank)
 
 # solver mode: momentum-only solve of Stokes problem
-def momentumsolve():
-    u,p = mm.solve(mesh,bdryids,args.elements)
+def momentumsolve(ucoarse = None, pcoarse = None):
+    u,p = mm.solve(mesh,bdryids,args.elements,\
+                   ucoarse=ucoarse,pcoarse=pcoarse)
     umagav,umagmax,pav,pmax = mm.solutionstats(mesh)
     printpar('  flow speed: av = %10.3f m a-1,  max = %10.3f m a-1' \
              % (secpera*umagav,secpera*umagmax))
@@ -169,6 +175,10 @@ if args.deltat > 0.0:
 else:
     printpar('solving for velocity and pressure ...')
     u,p = momentumsolve()
+    for j in range(args.sequence):  # may run zero times
+        mesh = hierarchy[args.refine+j+1]
+        describe(mesh)
+        u,p = momentumsolve(ucoarse=u.copy(),pcoarse=p.copy())
 
 # in slab-on-slope case, compute numerical errors
 if bs < 1.0:
