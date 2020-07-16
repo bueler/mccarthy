@@ -180,6 +180,18 @@ class MomentumModel:
             umagmax = vumag.max()[1]
         return umagav,umagmax,pav,pmax
 
+    # generate regularized effective viscosity from the solution:
+    #   nu = (1/2) B_n X^((1/n)-1)
+    # where X = sqrt(|Du|^2 + eps^2 Dtyp^2)
+    def effectiveviscosity(self,mesh):
+        P1 = fd.FunctionSpace(mesh, 'CG', 1)
+        Du2 = 0.5 * fd.inner(D(self.u), D(self.u)) + (self.eps * self.Dtyp)**2.0
+        rr = 1.0/self.n_glen - 1.0
+        Bn = self._getBn()
+        nu = fd.interpolate(0.5 * Bn * Du2**(rr/2.0), P1)
+        nu.rename('effective viscosity')
+        return nu
+
     # numerical errors relative to slab-on-slope solution:
     #   uerrmax = maximum magnitude of velocity error
     #   perrmax = maximum of pressure error

@@ -156,10 +156,11 @@ def timestepping():
         dt = args.deltat * (secpera/dayspera)
         r = surfacekinematical(mesh,bdryids,u,dt)
         # save current state
+        nu = mm.effectiveviscosity(mesh)
         if args.save_rank:
-            outfile.write(u,p,r,element_rank,vertex_rank, time=t_days)
+            outfile.write(u,p,nu,r,element_rank,vertex_rank, time=t_days)
         else:
-            outfile.write(u,p,r, time=t_days)
+            outfile.write(u,p,nu,r, time=t_days)
         # actually move mesh
         unstable = movemesh(mesh,r,bmin_initial)
         if unstable:
@@ -171,7 +172,7 @@ def timestepping():
         mm.set_Hout(Hout)
         with r.dat.vec_ro as vr:
             absrmax = vr.norm(norm_type=PETSc.NormType.NORM_INFINITY)
-        printpar('max. vert. mesh disp. = %.3f m,  Hout = %.3f m' % (absrmax,Hout),
+        printpar('max. vert. disp. = %.3f m,  Hout = %.3f m' % (absrmax,Hout),
                  indent=1)
     return u,p,r,t_days
 
@@ -184,7 +185,7 @@ def numericalerrorsslab(indent=0):
 
 # solve, after deciding on solver mode
 if args.deltat > 0.0:
-    printpar('writing (velocity,pressure,vertical_displacement) at each time step to %s ...' % outname)
+    printpar('writing (velocity,pressure,eff.visc.,vert.disp.) at each time step to %s ...' % outname)
     u,p,r,t_days = timestepping()  # returns at final time
 elif args.sequence > 0:
     l = args.sequence
@@ -202,21 +203,22 @@ else:
 numericalerrorsslab()
 
 # save results in paraview-readable file
+nu = mm.effectiveviscosity(mesh)
 if args.deltat > 0.0:
     printpar('writing END step (t = %.3f days) to file %s ...' % (t_days,outname))
     if args.save_rank:
         printpar('  writing (element_rank,vertex_rank) ...')
-        outfile.write(u,p,r,element_rank,vertex_rank, time=t_days)
+        outfile.write(u,p,nu,r,element_rank,vertex_rank, time=t_days)
     else:
-        outfile.write(u,p,r, time=t_days)
+        outfile.write(u,p,nu,r, time=t_days)
 else:
-    printpar('writing (velocity,pressure) to %s ...' % outname)
+    printpar('writing (velocity,pressure,eff.visc.) to %s ...' % outname)
     if args.save_rank:
         (element_rank,vertex_rank) = getranks()
         printpar('  writing (element_rank,vertex_rank) ...')
-        outfile.write(u,p,element_rank,vertex_rank)
+        outfile.write(u,p,nu,element_rank,vertex_rank)
     else:
-        outfile.write(u,p)
+        outfile.write(u,p,nu)
 
 # generate image file with plot of surface values if desired
 if len(args.osurface) > 0:
