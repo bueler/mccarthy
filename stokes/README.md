@@ -132,9 +132,13 @@ For another example, a direct linear solver for each Newton step, with a print-o
 
         (firedrake) $ ./flow.py -mesh glacier.msh -s_snes_view -s_mat_type aij -s_ksp_type preonly -s_pc_type lu
 
-To explain, the usual matrix type for this solver is `nest`, but it does not work directly with LU.  Insider the [SNES](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/SNES/index.html) solver are [KSP (Krylov space)](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/KSP/index.html) and [PC (preconditioner)](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/PC/index.html) components.
+Note the usual matrix type is `nest`, but it does not work directly with the LU solver.  Inside the [SNES](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/SNES/index.html) solver are [KSP (Krylov space)](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/KSP/index.html) and [PC (preconditioner)](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/PC/index.html) components.
 
-One can write-out the system matrix as a Matlab file `matrix.m` as follows:
+The solvers are packaged so that users have guidance on PETSc options.  The default is `-package SchurDirect`.  For another example, the best solver so far for high-resolution grids uses Schur decomposition and geometric multigrid:
+
+        (firedrake) $ ./flow.py -mesh glacier.msh -sequence 4 -package SchurGMGSelfp -s_snes_converged_reason -s_ksp_converged_reason
+
+For easy cases (i.e. grids with a smallish number of nodes) one can write-out the system matrix as a Matlab file `matrix.m` as follows:
 
         (firedrake) $ ./flow.py -mesh glacier.msh -s_mat_type aij -s_ksp_view_mat :matrix.m:ascii_matlab
 
