@@ -12,8 +12,41 @@ import firedrake as fd
 
 # public data
 mixFEchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
+packagechoices = ['SchurDirect','SchurGMGSelfp','Direct']
 secpera = 31556926.0    # seconds per year
 dayspera = 365.2422     # days per year
+
+# solver packages
+# FIXME: add SchurGMGMass using variable viscosity
+_SchurDirect = {"ksp_type": "fgmres",  # or "gmres" or "minres"
+          "pc_type": "fieldsplit",
+          "pc_fieldsplit_type": "schur",
+          "pc_fieldsplit_schur_factorization_type": "full",  # or "diag"
+          "pc_fieldsplit_schur_precondition": "a11",  # the default
+          "fieldsplit_0_ksp_type": "preonly",
+          "fieldsplit_0_pc_type": "lu",  # uses mumps in parallel
+          "fieldsplit_1_ksp_rtol": 1.0e-3,
+          "fieldsplit_1_ksp_type": "gmres",
+          "fieldsplit_1_pc_type": "none"}
+_SchurGMGSelfp = {"ksp_type": "fgmres",
+          "pc_type": "fieldsplit",
+          "pc_fieldsplit_type": "schur",
+          "pc_fieldsplit_schur_factorization_type": "full",
+          "pc_fieldsplit_schur_precondition": "selfp",
+          "fieldsplit_0_ksp_type": "preonly",
+          "fieldsplit_0_pc_type": "mg",
+          "fieldsplit_0_mg_levels_ksp_type": "richardson",
+          "fieldsplit_0_mg_levels_pc_type": "sor",  # the default
+          "fieldsplit_1_ksp_rtol": 1.0e-3,
+          "fieldsplit_1_ksp_type": "gmres",
+          "fieldsplit_1_pc_type": "jacobi",
+          "fieldsplit_1_pc_jacobi_type": "diagonal"}
+_Direct = {"mat_type": "aij",
+          "ksp_type": "preonly",
+          "pc_type": "lu",
+          "pc_factor_shift_type": "inblocks"}
+packagelist = [_SchurDirect,_SchurGMGSelfp,_Direct]  # match packagechoices above
+
 
 def D(U):    # strain-rate tensor from velocity U
     return 0.5 * (fd.grad(U) + fd.grad(U).T)
@@ -25,25 +58,6 @@ class MomentumModel:
     _rho = 910.0             # kg m-3
     _A3 = 3.1689e-24         # Pa-3 s-1; EISMINT I value of ice softness
     _B3 = _A3**(-1.0/3.0)    # Pa s(1/3);  ice hardness
-
-    # PETSc solver parameter defaults; also consider
-    #     minres solver:
-    #        "ksp_type": "minres", "pc_type": "jacobi"
-    #     fully-direct solver:
-    #        "mat_type": "aij", "ksp_type": "preonly", "pc_type": "lu"
-    #     view matrix:
-    #        "mat_type": "aij", "ksp_view_mat": ":foo.m:ascii_matlab"
-    #     in parallel:  -s_fieldsplit_0_ksp_type gmres -s_fieldsplit_0_pc_type asm
-    #                   -s_fieldsplit_0_sub_pc_type ilu
-    params = {"ksp_type": "fgmres",  # or "gmres" or "minres"
-              "pc_type": "fieldsplit",
-              "pc_fieldsplit_type": "schur",
-              "pc_fieldsplit_schur_factorization_type": "full",  # or "diag"
-              "fieldsplit_0_ksp_type": "preonly",
-              "fieldsplit_0_pc_type": "lu",  # uses mumps in parallel
-              "fieldsplit_1_ksp_rtol": 1.0e-3,
-              "fieldsplit_1_ksp_type": "gmres",
-              "fieldsplit_1_pc_type": "none"}
 
     def __init__(self):
         pass
@@ -85,7 +99,9 @@ class MomentumModel:
                             0.0])
         return uin
 
-    def solve(self,mesh,bdryids,mixedtype, ucoarse = None, pcoarse = None):
+    def solve(self,mesh,bdryids,mixedtype,
+              package = 'SchurDirect',
+              ucoarse = None, pcoarse = None):
         # define body force and ice hardness
         rhog = self._rho * self._g
         f_body = fd.Constant((rhog * np.sin(self.alpha), - rhog * np.cos(self.alpha)))
@@ -154,7 +170,7 @@ class MomentumModel:
 
         # solve
         fd.solve(F == 0, up, bcs=bcs, options_prefix='s',
-                 solver_parameters=self.params)
+                 solver_parameters=packagelist[packagechoices.index(package)])
 
         # split solution
         self.u,self.p = up.split()

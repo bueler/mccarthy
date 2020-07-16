@@ -4,13 +4,16 @@
 # Solve glacier Glen-Stokes problem with explicit evolution of the free surface.
 # See README.md for usage.
 
-# TODO explore and package solver options
+# TODO 1. explore solver options, esp. Mass type precond for Schur block using variable visc.
+#      2. find regularization which actually helps with harder surface-evolution
+#         instability cases (e.g. -bs 200 in gendomain.py)
 
 import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
 from firedrake import *
 from gendomain import Hin, L, bdryids, getdomaindims
-from momentummodel import mixFEchoices, secpera, dayspera, MomentumModel
+from momentummodel import mixFEchoices, packagechoices, secpera, dayspera, \
+                          MomentumModel
 from meshmotion import surfacekinematical, movemesh
 from surfaceutils import surfaceplot
 
@@ -43,6 +46,10 @@ parser.add_argument('-o', metavar='NAME', type=str, default='',
                     help='output file name ending with .pvd (default=MESH-.msh+.pvd)')
 parser.add_argument('-osurface', metavar='NAME', type=str, default='',
                     help='save plot of surface values in this image file\n(i.e. .png,.pdf,...)')
+parser.add_argument('-package', metavar='X', default='SchurDirect',
+                    choices=packagechoices,
+                    help='PETSc solver package from: %s\n(default=SchurDirect)' \
+                         % (','.join(packagechoices)) )
 parser.add_argument('-refine', type=int, default=0, metavar='N',
                     help='number of refinement levels after reading mesh (default=0)')
 parser.add_argument('-save_rank', action='store_true',
@@ -133,7 +140,8 @@ def getranks():
 
 # solver mode: momentum-only solve of Stokes problem
 def momentumsolve(ucoarse = None, pcoarse = None, indent=0):
-    u,p = mm.solve(mesh,bdryids,args.elements,\
+    u,p = mm.solve(mesh,bdryids,args.elements,
+                   package=args.package,
                    ucoarse=ucoarse,pcoarse=pcoarse)
     umagav,umagmax,pav,pmax = mm.solutionstats(mesh)
     printpar('flow speed: av = %10.3f m a-1,  max = %10.3f m a-1' \
