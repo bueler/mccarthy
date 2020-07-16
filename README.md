@@ -15,7 +15,7 @@ The codes in subdirectory `mfiles/` solve SIA and SSA problems.  They should wor
 stokes solver
 -------------
 
-The Python tools in `stokes/` solve a free-surface 2D Glen-Stokes flow over a bedrock step.  This is used to generate some images in the slides and for student projects.  Note that the numerical technology used here is more advanced, and more experimental, than the `mfiles/` content.  The workflow uses the following tools: [Firedrake finite element library](https://www.firedrakeproject.org/), [Gmsh mesh generator](http://gmsh.info/), [PETSc solver library](http://www.mcs.anl.gov/petsc/), and [Paraview visualization](https://www.paraview.org/).  See `stokes/README.md` for more information.
+The Python tools in `stokes/` solve a free-surface 2D Glen-Stokes flow over a bedrock step.  This is used to generate some images in the slides and for student projects.  Note that the numerical technology used here is more advanced, and more experimental, than the `mfiles/` content.  The workflow uses the following tools: [Firedrake finite element library](https://www.firedrakeproject.org/), [Gmsh mesh generator](http://gmsh.info/), [PETSc solver library](http://www.mcs.anl.gov/petsc/), and [Paraview visualization](https://www.paraview.org/).  See [stokes/README.md](stokes/README.md) for more information.
 
 
 versions
