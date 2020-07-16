@@ -75,13 +75,13 @@ The default `glacier.msh` mesh above has a typical mesh size of 100 m with grid 
 
 There are four refinement methods to get finer resolution:
 
-  1. One may use the script `gendomain.py` to create a finer or locally-finer mesh, before it is read by `flow.py`.  The script allows setting the target mesh size (`-hmesh H`) and/or setting a uniform refinement factor (`-refine X`).  Another option controls the factor used for additional refinement at the interior corner (`-refine_corner Y`).  (_The default case corresponds to_ `-hmesh 100 -refine 1 -refine_corner 4`.)  For example the following creates a mesh with target mesh size varying from 25 m to about 3 m near the interior corner.  The resulting grid has about 15 times as many elements as the default mesh:
+1. One may use the script `gendomain.py` to create a finer or locally-finer mesh, before it is read by `flow.py`.  The script allows setting the target mesh size (`-hmesh H`) and/or setting a uniform refinement factor (`-refine X`).  Another option controls the factor used for additional refinement at the interior corner (`-refine_corner Y`).  (_The default case corresponds to_ `-hmesh 100 -refine 1 -refine_corner 4`.)  For example the following creates a mesh with target mesh size varying from 25 m to about 3 m near the interior corner.  The resulting grid has about 15 times as many elements as the default mesh:
 
         (firedrake) $ ./gendomain.py -refine 4 -refine_corner 8 -o fine1.geo
         (firedrake) $ gmsh -2 fine1.geo
         (firedrake) $ ./flow.py -mesh fine1.msh
 
-  2. One may use [Gmsh](http://gmsh.info/) to refine an existing mesh in `.msh`, specifically by splitting each triangular cell (element) into four similar triangles:
+2. One may use [Gmsh](http://gmsh.info/) to refine an existing mesh in `.msh`, specifically by splitting each triangular cell (element) into four similar triangles:
 
         (firedrake) $ ./gendomain.py -refine 2 -refine_corner 4 -o start.geo
         (firedrake) $ gmsh -2 start.geo
@@ -90,13 +90,13 @@ There are four refinement methods to get finer resolution:
 
     As with method 1, this refinement is done before the mesh is read by `flow.py`.
 
-  3. One may read an initial mesh and ask the `flow.py` script, i.e. ask [Firedrake](https://www.firedrakeproject.org/), to refine:
+3. One may read an initial mesh and ask the `flow.py` script, i.e. ask [Firedrake](https://www.firedrakeproject.org/), to refine:
 
         (firedrake) $ ./flow.py -mesh start.msh -refine 1
 
     This is slightly-simpler usage compared to method 2, and with the same result.
 
-  4. For Stokes-only computations one may use _grid-sequencing_.  This solves the problem on the initially-read mesh, interpolates onto the next finer one, and then solves there
+4. For Stokes-only computations one may use _grid-sequencing_.  This solves the problem on the initially-read mesh, interpolates onto the next finer one, and then solves there
 
         (firedrake) $ ./flow.py -mesh start.msh -sequence 1
 
@@ -138,9 +138,9 @@ One can write-out the system matrix as a Matlab file `matrix.m` as follows:
 
         (firedrake) $ ./flow.py -mesh glacier.msh -s_mat_type aij -s_ksp_view_mat :matrix.m:ascii_matlab
 
-See the [PETSc](http://www.mcs.anl.gov/petsc/) solver options in `momentummodel.py`.
+See the [PETSc](http://www.mcs.anl.gov/petsc/) solver options in [momentummodel.py](momentummodel.py).
 
-In time-stepping mode there is a second solver which computes the mesh vertical displacement field by solving Laplace's equation.  It has option prefix `-vd_` and it is defined, with default options, in `meshmotion.py`.
+In time-stepping mode there is a second solver which computes the mesh vertical displacement field by solving Laplace's equation.  It has option prefix `-vd_` and it is defined, with default options, in [meshmotion.py](meshmotion.py).
 
 For more on [PETSc](http://www.mcs.anl.gov/petsc/) and [Firedrake](https://www.firedrakeproject.org/) solvers see their online documentation, or see my book [_PETSc for PDEs_](https://github.com/bueler/p4pdes).
 
