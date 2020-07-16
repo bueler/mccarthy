@@ -25,12 +25,12 @@ Start [Firedrake](https://www.firedrakeproject.org/):
 
         $ source ~/firedrake/bin/activate
 
-Generate the domain geometry using `gendomain.py` and then mesh the domain using [Gmsh](http://gmsh.info/):
+Generate the domain geometry using [gendomain.py](gendomain.py) and then mesh the domain using [Gmsh](http://gmsh.info/):
 
         (firedrake) $ ./gendomain.py -o glacier.geo   # create domain outline
         (firedrake) $ gmsh -2 glacier.geo             # writes glacier.msh
 
-Run the solver on the mesh, which will write velocity and pressure fields into `glacier.pvd`.
+Run the solver [flow.py](flow.py) on the mesh, which will write velocity and pressure fields into `glacier.pvd`.
 
         (firedrake) $ ./flow.py -mesh glacier.msh
 
