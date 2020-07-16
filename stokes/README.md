@@ -3,7 +3,7 @@ stokes/
 
 Copyright 2018--2020 Ed Bueler
 
-The programs in this directory use [Firedrake](https://www.firedrakeproject.org/), [Gmsh](http://gmsh.info/), [PETSc](http://www.mcs.anl.gov/petsc/), and [Paraview](https://www.paraview.org/).  They are more advanced, and more experimental, than the Matlab/Octave programs in `mfiles/`.  The solver is documented in `stokes/doc/stokes.pdf`.
+The programs in this directory use [Firedrake](https://www.firedrakeproject.org/), [Gmsh](http://gmsh.info/), [PETSc](http://www.mcs.anl.gov/petsc/), and [Paraview](https://www.paraview.org/).  They are more advanced, and more experimental, than the Matlab/Octave programs in [mfiles/](../mfiles/).  The solver is documented in [doc/](doc/).
 
 Installation
 ------------
@@ -51,7 +51,7 @@ Set the height of the bedrock step to zero when creating the domain geometry:
         (firedrake) $ gmsh -2 slab.geo
         (firedrake) $ ./flow.py -mesh slab.msh
 
-In this mode the numerical error is displayed because the exact solution is known.  (See `notes/notes.pdf` for the slab-on-slope solution.)
+In this mode the numerical error is displayed because the exact solution is known.  (See [notes/](../notes/) and/or [doc/](doc/) for the slab-on-slope solution.)
 
 Surface evolution usage
 -----------------------
@@ -66,7 +66,7 @@ This writes variables (velocity,pressure,vertical\_displacement) into `glacier.p
 
         (firedrake) $ ./flow.py -mesh glacier.msh -deltat 10.0 -m 60 -osurface foo.png
 
-Unstable examples are in the script `study/genunstable.sh`.
+Unstable examples are in the script [study/genunstable.sh](study/genunstable.sh).
 
 Mesh refinement
 ---------------
@@ -100,7 +100,7 @@ There are four refinement methods to get finer resolution:
 
         (firedrake) $ ./flow.py -mesh start.msh -sequence 1
 
-    This is slightly faster than methods 2 and 3, but the result should be the same.  A convergence test using this refinement method and the exact slab-on-a-slope solution is in `study/convergeslab.sh`.
+    This is slightly faster than methods 2 and 3, but the result should be the same.  A convergence test using this refinement method and the exact slab-on-a-slope solution is in [study/convergeslab.sh](study/convergeslab.sh).
 
 Coupled steady-state usage
 --------------------------
