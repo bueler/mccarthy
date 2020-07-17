@@ -4,9 +4,8 @@
 # Solve glacier Glen-Stokes problem with explicit evolution of the free surface.
 # See README.md for usage.
 
-# TODO 1. explore solver options, esp. Mass type precond for Schur block using variable visc.
-#      2. find regularization which actually helps with harder surface-evolution
-#         instability cases (e.g. -bs 200 in gendomain.py)
+# TODO find regularization which actually helps with harder surface-evolution
+#      instability cases (e.g. -bs 200 in gendomain.py)
 
 import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
@@ -48,7 +47,7 @@ parser.add_argument('-osurface', metavar='NAME', type=str, default='',
                     help='save plot of surface values in this image file\n(i.e. .png,.pdf,...)')
 parser.add_argument('-package', metavar='X', default='SchurDirect',
                     choices=packagechoices,
-                    help='PETSc solver package from: %s\n(default=SchurDirect)' \
+                    help='solver package from: %s\n(default=SchurDirect)' \
                          % (','.join(packagechoices)) )
 parser.add_argument('-refine', type=int, default=0, metavar='N',
                     help='number of refinement levels after reading mesh (default=0)')
@@ -56,6 +55,9 @@ parser.add_argument('-save_rank', action='store_true',
                     help='add fields (element_rank,vertex_rank) to output file', default=False)
 parser.add_argument('-sequence', type=int, default=0, metavar='N',
                     help='number of grid-sequencing levels (default=0)')
+parser.add_argument('-sequence_coarse_package', metavar='X', default='Direct',
+                    choices=packagechoices,
+                    help='solver package for coarsest mesh in sequence\n(default=Direct)')
 args, unknown = parser.parse_known_args()
 
 if args.flowhelp:
@@ -156,10 +158,9 @@ def getranks():
     return (element_rank,vertex_rank)
 
 # solver mode: momentum-only solve of Stokes problem
-def momentumsolve(ucoarse = None, pcoarse = None, indent=0):
+def momentumsolve(package=args.package, ucoarse = None, pcoarse = None, indent=0):
     u,p = mm.solve(mesh,bdryids,args.elements,
-                   package=args.package,
-                   ucoarse=ucoarse,pcoarse=pcoarse)
+                   package=package,ucoarse=ucoarse,pcoarse=pcoarse)
     umagav,umagmax,pav,pmax = mm.solutionstats(mesh)
     printpar('flow speed: av = %10.3f m a-1,  max = %10.3f m a-1' \
              % (secpera*umagav,secpera*umagmax),
@@ -215,7 +216,7 @@ if args.deltat > 0.0:
 elif args.sequence > 0:
     l = args.sequence
     printpar('solving for velocity and pressure ...',indent=l)
-    u,p = momentumsolve(indent=l)
+    u,p = momentumsolve(package=args.sequence_coarse_package,indent=l)
     for j in range(l):
         numericalerrorsslab(indent=l-j)
         mesh = hierarchy[args.refine+j+1]

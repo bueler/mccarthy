@@ -3,7 +3,7 @@ using 1 levels of grid-sequencing ...
     mesh has 98 elements (cells) and 69 vertices
     geometry [m]: L = 3000.000, bs = 100.000, Hin = 400.000
   solving for velocity and pressure ...
-Nonlinear s_ solve converged due to CONVERGED_FNORM_RELATIVE iterations 14
+Nonlinear s_ solve converged due to CONVERGED_FNORM_RELATIVE iterations 13
     flow speed: av =    586.817 m a-1,  max =    906.092 m a-1
     pressure:   av =     17.464 bar,    max =     40.173 bar
 mesh has 392 elements (cells) and 235 vertices
