@@ -19,7 +19,7 @@ runflow_1: tmptest/lowtest.msh
 	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh" 1 1 "basic u,p solve with bed step"
 
 runflow_2: tmptest/slabtest.msh
-	-@./testit.sh flow.py "-mesh tmptest/slabtest.msh" 1 2 "slab u,p solve"
+	-@./testit.sh flow.py "-mesh tmptest/slabtest.msh -package Direct" 1 2 "slab u,p solve w direct solver"
 
 runflow_3: tmptest/lowtest.msh
 	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -deltat 20.0 -m 2 -o tmptest/test3.pvd" 1 3 "evolving surface u,p,h solve"
@@ -36,9 +36,12 @@ runflow_6: tmptest/lowtest.msh
 runflow_7: tmptest/lowtest.msh
 	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -sequence 1 -s_snes_converged_reason" 1 7 "grid-sequence one level"
 
-test: rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7
+runflow_8: tmptest/lowtest.msh
+	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -refine 1 -s_snes_rtol 1.0e-2 -s_ksp_converged_reason -package SchurGMGMass" 1 8 "Schur + GMG + variable-viscosity mass matrix"
 
-.PHONY: clean rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7 test
+test: rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7 runflow_8
+
+.PHONY: clean rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7 runflow_8 test
 
 clean:
 	rm -f *~ *.pyc *.pvd *.vtu *.pvtu *.geo *.msh

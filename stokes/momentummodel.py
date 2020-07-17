@@ -12,12 +12,11 @@ import firedrake as fd
 
 # public data
 mixFEchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
-packagechoices = ['SchurDirect','SchurGMGSelfp','Direct']
+packagechoices = ['SchurDirect','Direct','SchurGMGSelfp','SchurGMGMass'] # list default first
 secpera = 31556926.0    # seconds per year
 dayspera = 365.2422     # days per year
 
 # solver packages
-# FIXME: add SchurGMGMass using variable viscosity
 _SchurDirect = {"ksp_type": "fgmres",  # or "gmres" or "minres"
           "pc_type": "fieldsplit",
           "pc_fieldsplit_type": "schur",
@@ -28,6 +27,10 @@ _SchurDirect = {"ksp_type": "fgmres",  # or "gmres" or "minres"
           "fieldsplit_1_ksp_rtol": 1.0e-3,
           "fieldsplit_1_ksp_type": "gmres",
           "fieldsplit_1_pc_type": "none"}
+_Direct = {"mat_type": "aij",
+          "ksp_type": "preonly",
+          "pc_type": "lu",
+          "pc_factor_shift_type": "inblocks"}
 _SchurGMGSelfp = {"ksp_type": "fgmres",
           "pc_type": "fieldsplit",
           "pc_fieldsplit_type": "schur",
@@ -41,11 +44,24 @@ _SchurGMGSelfp = {"ksp_type": "fgmres",
           "fieldsplit_1_ksp_type": "gmres",
           "fieldsplit_1_pc_type": "jacobi",
           "fieldsplit_1_pc_jacobi_type": "diagonal"}
-_Direct = {"mat_type": "aij",
-          "ksp_type": "preonly",
-          "pc_type": "lu",
-          "pc_factor_shift_type": "inblocks"}
-packagelist = [_SchurDirect,_SchurGMGSelfp,_Direct]  # match packagechoices above
+_SchurGMGMass = {"ksp_type": "fgmres",
+          "pc_type": "fieldsplit",
+          "pc_fieldsplit_type": "schur",
+          "pc_fieldsplit_schur_factorization_type": "full",
+          "pc_fieldsplit_schur_precondition": "a11",
+          "fieldsplit_0_ksp_type": "preonly",
+          "fieldsplit_0_pc_type": "mg",
+          "fieldsplit_0_mg_levels_ksp_type": "richardson",
+          "fieldsplit_0_mg_levels_pc_type": "sor",  # the default
+          "fieldsplit_1_ksp_rtol": 1.0e-3,
+          "fieldsplit_1_ksp_type": "gmres",
+          "fieldsplit_1_pc_type": "python",
+          "fieldsplit_1_pc_python_type": '__main__.Mass'}
+          #  'fieldsplit_1_aux_pc_type': 'bjacobi',
+          #  'fieldsplit_1_aux_sub_pc_type': 'icc'},
+
+# match packagechoices order above:
+packagelist = [_SchurDirect,_Direct,_SchurGMGSelfp,_SchurGMGMass]
 
 
 def D(U):    # strain-rate tensor from velocity U
@@ -62,19 +78,17 @@ class MomentumModel:
     def __init__(self):
         pass
 
-    # determine B_n so that slab-on-slope solutions have surface velocity
-    #   which is n-independent
-    def _getBn(self):
-        return (4.0/(self.n_glen+1.0))**(1.0/self.n_glen) \
-               * (self._rho*self._g*np.sin(self.alpha)*self.Hin)\
-                 **((self.n_glen-3.0)/self.n_glen) \
-               * self._B3**(3.0/self.n_glen)
-
     def set_n_glen(self, n_glen):
         self.n_glen = n_glen
 
+    def get_n_glen(self):
+        return self.n_glen
+
     def set_eps(self, eps):
         self.eps = eps
+
+    def get_eps(self):
+        return self.eps
 
     def set_alpha(self, alpha):
         self.alpha = alpha
@@ -82,16 +96,27 @@ class MomentumModel:
     def set_Dtyp_pera(self, Dtyp):
         self.Dtyp = Dtyp / secpera
 
+    def get_Dtyp(self):
+        return self.Dtyp
+
     def set_Hin(self, Hin):
         self.Hin = Hin
 
     def set_Hout(self, Hout):
         self.Hout = Hout
 
+    # determine B_n so that slab-on-slope solutions have surface velocity
+    #   which is n-independent
+    def get_Bn(self):
+        return (4.0/(self.n_glen+1.0))**(1.0/self.n_glen) \
+               * (self._rho*self._g*np.sin(self.alpha)*self.Hin)\
+                 **((self.n_glen-3.0)/self.n_glen) \
+               * self._B3**(3.0/self.n_glen)
+
     # compute slab-on-slope inflow velocity
     def _get_uin(self,mesh):
         _,z = fd.SpatialCoordinate(mesh)
-        Bn = self._getBn()
+        Bn = self.get_Bn()
         C = (2.0 / (self.n_glen + 1.0)) \
             * (self._rho * self._g * np.sin(self.alpha) / Bn)**self.n_glen
         uin = fd.as_vector([C * (self.Hin**(self.n_glen+1.0) \
@@ -105,7 +130,7 @@ class MomentumModel:
         # define body force and ice hardness
         rhog = self._rho * self._g
         f_body = fd.Constant((rhog * np.sin(self.alpha), - rhog * np.cos(self.alpha)))
-        Bn = self._getBn()
+        Bn = self.get_Bn()
 
         # right side outflow nonhomogeneous Neumann is part of weak form;
         #    apply hydrostatic normal force with total force from Hin-height slab
@@ -203,7 +228,7 @@ class MomentumModel:
         P1 = fd.FunctionSpace(mesh, 'CG', 1)
         Du2 = 0.5 * fd.inner(D(self.u), D(self.u)) + (self.eps * self.Dtyp)**2.0
         rr = 1.0/self.n_glen - 1.0
-        Bn = self._getBn()
+        Bn = self.get_Bn()
         nu = fd.interpolate(0.5 * Bn * Du2**(rr/2.0), P1)
         nu.rename('effective viscosity')
         return nu

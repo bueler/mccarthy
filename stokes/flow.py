@@ -12,7 +12,7 @@ import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
 from firedrake import *
 from gendomain import Hin, L, bdryids, getdomaindims
-from momentummodel import mixFEchoices, packagechoices, secpera, dayspera, \
+from momentummodel import mixFEchoices, packagechoices, secpera, dayspera, D, \
                           MomentumModel
 from meshmotion import surfacekinematical, movemesh
 from surfaceutils import surfaceplot
@@ -97,6 +97,8 @@ def describe(thismesh,indent=0):
 
 if args.sequence > 0:
     printpar('using %d levels of grid-sequencing ...' % args.sequence)
+if args.package != packagechoices[0]:
+    printpar('using solver package %s ...' % args.package)
 
 # read initial mesh, refine, and report on it
 printpar('reading initial mesh from %s ...' % args.mesh,indent=args.sequence)
@@ -123,6 +125,21 @@ mm.set_alpha(args.alpha)
 mm.set_Dtyp_pera(args.Dtyp)
 mm.set_Hin(Hin)
 mm.set_Hout(Hout_initial)
+
+# FIXME this should be in momentummodel.py; no need to import D
+class Mass(AuxiliaryOperatorPC):
+
+    def form(self, pc, test, trial):
+        # note test, trial are for pressure space; need to go get the current
+        # velocity state ...; thanks P Farrell
+        ctx = self.get_appctx(pc)
+        u = split(ctx["state"])[0]
+        Du2 = 0.5 * inner(D(u), D(u)) + (mm.get_eps() * mm.get_Dtyp())**2.0
+        rr = 1.0/mm.get_n_glen() - 1.0
+        coeff = 1.0 / (mm.get_Bn() * Du2**(rr/2.0))
+        a = coeff * inner(test, trial) * dx
+        bcs = None
+        return (a, bcs)
 
 outfile = File(outname)
 
