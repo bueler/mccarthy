@@ -12,11 +12,13 @@ import firedrake as fd
 
 # public data
 mixFEchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
-packagechoices = ['SchurDirect','Direct','SchurGMGSelfp','SchurGMGMass'] # list default first
+packagechoices = ['SchurDirect','Direct','SchurGMGSelfp','SchurGMGMass','SchurGMGMassFull']
 secpera = 31556926.0    # seconds per year
 dayspera = 365.2422     # days per year
 
 # solver packages
+# notes on FGMRES:  1. needed if fieldsplit_0,1_ksp_type is *not* preonly
+#                   2. always applies PC on right (-s_ksp_pc_side right)
 _SchurDirect = {"ksp_type": "fgmres",  # or "gmres" or "minres"
           "pc_type": "fieldsplit",
           "pc_fieldsplit_type": "schur",
@@ -44,7 +46,30 @@ _SchurGMGSelfp = {"ksp_type": "fgmres",
           "fieldsplit_1_ksp_type": "gmres",
           "fieldsplit_1_pc_type": "jacobi",
           "fieldsplit_1_pc_jacobi_type": "diagonal"}
-_SchurGMGMass = {"ksp_type": "fgmres",
+# notes on this package:
+#   1. right+upper faster than left+lower; not sure why
+#   2. -fieldsplit_1_aux_pc_type ilu in serial is implied, but
+#      -fieldsplit_1_aux_pc_type bjacobi -fieldsplit_1_aux_sub_pc_type ilu
+#      is implied in parallel
+#   3. seems to be more robust, but slower, with -fieldsplit_1_aux_pc_type jacobi
+#      -fieldsplit_1_aux_pc_jacobi_type rowsum, instead of default ILU
+_SchurGMGMass = {"ksp_type": "gmres",
+          "ksp_pc_side": "right",
+          "pc_type": "fieldsplit",
+          "pc_fieldsplit_type": "schur",
+          "pc_fieldsplit_schur_factorization_type": "upper",
+          "pc_fieldsplit_schur_precondition": "a11",
+          "fieldsplit_0_ksp_type": "preonly",
+          "fieldsplit_0_pc_type": "mg",
+          "fieldsplit_0_mg_levels_ksp_type": "richardson",
+          "fieldsplit_0_mg_levels_pc_type": "sor",  # the default
+          "fieldsplit_1_ksp_type": "preonly",
+          "fieldsplit_1_pc_type": "python",
+          "fieldsplit_1_pc_python_type": "__main__.Mass"}
+          #"fieldsplit_1_aux_pc_type": "jacobi",
+          #"fieldsplit_1_aux_pc_jacobi_type": "rowsum"}
+_SchurGMGMassFull = {"ksp_type": "fgmres",
+          "ksp_pc_side": "right",
           "pc_type": "fieldsplit",
           "pc_fieldsplit_type": "schur",
           "pc_fieldsplit_schur_factorization_type": "full",
@@ -56,12 +81,10 @@ _SchurGMGMass = {"ksp_type": "fgmres",
           "fieldsplit_1_ksp_rtol": 1.0e-3,
           "fieldsplit_1_ksp_type": "gmres",
           "fieldsplit_1_pc_type": "python",
-          "fieldsplit_1_pc_python_type": '__main__.Mass'}
-          #  'fieldsplit_1_aux_pc_type': 'bjacobi',
-          #  'fieldsplit_1_aux_sub_pc_type': 'icc'},
+          "fieldsplit_1_pc_python_type": "__main__.Mass"}
 
-# match packagechoices order above:
-packagelist = [_SchurDirect,_Direct,_SchurGMGSelfp,_SchurGMGMass]
+# match packagechoices order above; default goes first:
+packagelist = [_SchurDirect,_Direct,_SchurGMGSelfp,_SchurGMGMass,_SchurGMGMassFull]
 
 
 def D(U):    # strain-rate tensor from velocity U
