@@ -37,7 +37,7 @@ runflow_7: tmptest/lowtest.msh
 	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -sequence 1 -s_snes_converged_reason" 1 7 "grid-sequence one level"
 
 runflow_8: tmptest/lowtest.msh
-	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -refine 1 -s_snes_rtol 1.0e-2 -s_ksp_converged_reason -package SchurGMGMassFull" 1 8 "Schur (full) + GMG + variable-viscosity mass matrix"
+	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -refine 1 -s_snes_rtol 1.0e-2 -s_ksp_converged_reason -package SchurGMGMassFull -mass_more_reg 1.0" 1 8 "Schur(full)+GMG+ visc. Mass matrix"
 
 test: rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7 runflow_8
 

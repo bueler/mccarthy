@@ -11,10 +11,13 @@ import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
 from firedrake import *
 from gendomain import Hin, L, bdryids, getdomaindims
-from momentummodel import mixFEchoices, packagechoices, secpera, dayspera, D, \
+from momentummodel import mixFEchoices, packagechoices, secpera, dayspera, \
                           MomentumModel
 from meshmotion import surfacekinematical, movemesh
 from surfaceutils import surfaceplot
+
+# needed for useful error messages
+PETSc.Sys.popErrorHandler()
 
 # process options
 parser = ArgumentParser(\
@@ -39,6 +42,8 @@ parser.add_argument('-m', type=int, default=0, metavar='X',
                     help='number of time steps of deltat days of surface evolution\n(default=0)')
 parser.add_argument('-mesh', metavar='MESH', type=str, default='',
                     help='input file name ending with .msh')
+parser.add_argument('-mass_more_reg', type=float, default=2.0, metavar='X',
+                    help='multiply regularization in Mass aux. PC for Schur\n(default=2.0)')
 parser.add_argument('-n_glen', type=float, default=3.0, metavar='X',
                     help='Glen flow law exponent (default=3.0)')
 parser.add_argument('-o', metavar='NAME', type=str, default='',
@@ -47,7 +52,7 @@ parser.add_argument('-osurface', metavar='NAME', type=str, default='',
                     help='save plot of surface values in this image file\n(i.e. .png,.pdf,...)')
 parser.add_argument('-package', metavar='X', default='SchurDirect',
                     choices=packagechoices,
-                    help='solver package from: %s\n(default=SchurDirect)' \
+                    help='solver package from:\n%s\n(default=SchurDirect)' \
                          % (','.join(packagechoices)) )
 parser.add_argument('-refine', type=int, default=0, metavar='N',
                     help='number of refinement levels after reading mesh (default=0)')
@@ -57,7 +62,7 @@ parser.add_argument('-sequence', type=int, default=0, metavar='N',
                     help='number of grid-sequencing levels (default=0)')
 parser.add_argument('-sequence_coarse_package', metavar='X', default='Direct',
                     choices=packagechoices,
-                    help='solver package for coarsest mesh in sequence\n(default=Direct)')
+                    help='solver package for coarsest mesh in sequence (default=Direct)')
 args, unknown = parser.parse_known_args()
 
 if args.flowhelp:
@@ -128,28 +133,13 @@ mm.set_Dtyp_pera(args.Dtyp)
 mm.set_Hin(Hin)
 mm.set_Hout(Hout_initial)
 
-# FIXME this should be in momentummodel.py; no need to import D
-class Mass(AuxiliaryOperatorPC):
-    #_prefix = "aux_"
-    def form(self, pc, test, trial):
-        # note test, trial are for pressure space; need to go get the current
-        # velocity state ...; thanks P Farrell
-        ctx = self.get_appctx(pc)
-        u = split(ctx["state"])[0]
-
-        # FIXME an idea ... does not work
-        #themesh = ctx["mesh"]
-        #P1 = FunctionSpace(themesh, 'CG', 1)
-        #u = interpolate(split(ctx["state"])[0])
-
-        Du2 = 0.5 * inner(D(u), D(u)) + (mm.get_eps() * mm.get_Dtyp())**2.0
-        #Du2 = 0.5 * inner(D(u), D(u)) + (10.0 * mm.get_eps() * mm.get_Dtyp())**2.0
-
-        mrr = 1.0 - 1.0/mm.get_n_glen()  # positive power if n_glen > 1
-        coeff = Du2**(mrr/2.0) / mm.get_Bn()
-        a = coeff * inner(test, trial) * dx
-        bcs = None
-        return (a, bcs)
+# use options database to pass constants to Mass class (see momentummodel.py)
+opts = PETSc.Options()
+opts.setValue("pcMass_eps", mm.get_eps())
+opts.setValue("pcMass_Dtyp", mm.get_Dtyp())
+opts.setValue("pcMass_n_glen", mm.get_n_glen())
+opts.setValue("pcMass_Bn", mm.get_Bn())
+opts.setValue("pcMass_mass_more_reg", args.mass_more_reg)
 
 outfile = File(outname)
 

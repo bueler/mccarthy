@@ -65,7 +65,7 @@ _SchurGMGMass = {"ksp_type": "gmres",
           "fieldsplit_0_mg_levels_pc_type": "sor",  # the default
           "fieldsplit_1_ksp_type": "preonly",
           "fieldsplit_1_pc_type": "python",
-          "fieldsplit_1_pc_python_type": "__main__.Mass"}
+          "fieldsplit_1_pc_python_type": "momentummodel.Mass"}
           #"fieldsplit_1_aux_pc_type": "jacobi",
           #"fieldsplit_1_aux_pc_jacobi_type": "rowsum"}
 _SchurGMGMassFull = {"ksp_type": "fgmres",
@@ -81,11 +81,37 @@ _SchurGMGMassFull = {"ksp_type": "fgmres",
           "fieldsplit_1_ksp_rtol": 1.0e-3,
           "fieldsplit_1_ksp_type": "gmres",
           "fieldsplit_1_pc_type": "python",
-          "fieldsplit_1_pc_python_type": "__main__.Mass"}
+          "fieldsplit_1_pc_python_type": "momentummodel.Mass"}
 
 # match packagechoices order above; default goes first:
 packagelist = [_SchurDirect,_Direct,_SchurGMGSelfp,_SchurGMGMass,_SchurGMGMassFull]
 
+class Mass(fd.AuxiliaryOperatorPC):
+
+    def form(self, pc, test, trial):
+        # FIXME there should be a better way to pass in parameters than through
+        #       the options database?
+        opts = fd.PETSc.Options()
+        eps = opts.getReal("pcMass_eps")
+        Dtyp = opts.getReal("pcMass_Dtyp")
+        n_glen = opts.getReal("pcMass_n_glen")
+        Bn = opts.getReal("pcMass_Bn")
+        more = opts.getReal("pcMass_mass_more_reg")
+
+        ctx = self.get_appctx(pc)
+        u = fd.split(ctx["state"])[0]
+
+        # FIXME an idea ... does not work
+        #themesh = ctx["mesh"]
+        #P1 = FunctionSpace(themesh, 'CG', 1)
+        #u = interpolate(split(ctx["state"])[0])
+
+        Du2 = 0.5 * fd.inner(D(u), D(u)) + (more * eps * Dtyp)**2.0
+        mrr = 1.0 - 1.0/n_glen  # positive power if n_glen > 1
+        coeff = Du2**(mrr/2.0) / Bn
+        a = coeff * fd.inner(test, trial) * fd.dx
+        bcs = None
+        return (a, bcs)
 
 def D(U):    # strain-rate tensor from velocity U
     return 0.5 * (fd.grad(U) + fd.grad(U).T)
