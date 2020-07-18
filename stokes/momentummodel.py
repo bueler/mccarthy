@@ -173,22 +173,7 @@ class MomentumModel:
                             0.0])
         return uin
 
-    def solve(self,mesh,bdryids,mixedtype,
-              package = 'SchurDirect',
-              ucoarse = None, pcoarse = None):
-        # define body force and ice hardness
-        rhog = self._rho * self._g
-        f_body = fd.Constant((rhog * np.sin(self.alpha), - rhog * np.cos(self.alpha)))
-        Bn = self.get_Bn()
-
-        # right side outflow nonhomogeneous Neumann is part of weak form;
-        #    apply hydrostatic normal force with total force from Hin-height slab
-        _,z = fd.SpatialCoordinate(mesh)
-        Cout = (self.Hin/self.Hout)**2
-        outflow_sigma = fd.as_vector([- Cout * rhog * np.cos(self.alpha) * (self.Hout - z),
-                                     Cout * rhog * np.sin(self.alpha) * (self.Hout - z)])
-
-        # create function spaces
+    def create_mixed_space(self,mesh,mixedtype):
         if   mixedtype == 'P2P1': # Taylor-Hood
             self._V = fd.VectorFunctionSpace(mesh, 'CG', 2)
             self._W = fd.FunctionSpace(mesh, 'CG', 1)
@@ -209,11 +194,33 @@ class MomentumModel:
             sys.exit(1)
         self._Z = self._V * self._W
 
-        # solution; initialized to zero
-        up = fd.Function(self._Z)
+    def solve(self,mesh,bdryids,mixedtype,
+              package = 'SchurDirect',
+              upold = None, upcoarse = None):
+        # define body force and ice hardness
+        rhog = self._rho * self._g
+        f_body = fd.Constant((rhog * np.sin(self.alpha), - rhog * np.cos(self.alpha)))
+        Bn = self.get_Bn()
 
-        # get component ufl expressions for defining the form
-        u,p = fd.split(up)
+        # right side outflow nonhomogeneous Neumann is part of weak form;
+        #    apply hydrostatic normal force with total force from Hin-height slab
+        _,z = fd.SpatialCoordinate(mesh)
+        Cout = (self.Hin/self.Hout)**2
+        outflow_sigma = fd.as_vector([- Cout * rhog * np.cos(self.alpha) * (self.Hout - z),
+                                     Cout * rhog * np.sin(self.alpha) * (self.Hout - z)])
+
+        # create, use old, or prolong coarse solution as initial iterate
+        if upold:
+            up = upold
+        else:
+            self.create_mixed_space(mesh,mixedtype)
+            up = fd.Function(self._Z)
+            if upcoarse:
+                fd.prolong(upcoarse,up)
+        u,p = fd.split(up)  # get component ufl expressions to define form
+        self.u,self.p = up.split()
+        self.u.rename('velocity')
+        self.p.rename('pressure')
 
         # define the nonlinear weak form F(u,p;v,q)
         v,q = fd.TestFunctions(self._Z)
@@ -234,23 +241,11 @@ class MomentumModel:
         bcs = [ fd.DirichletBC(self._Z.sub(0), noslip, bdryids['base']),
                 fd.DirichletBC(self._Z.sub(0), inflow_u, bdryids['inflow']) ]
 
-        # optionally prolong a coarser solution
-        if ucoarse or pcoarse:
-            u,p = up.split()  # not!: fd.split(up)
-            if ucoarse:
-                fd.prolong(ucoarse,u)
-            if pcoarse:
-                fd.prolong(pcoarse,p)
-
         # solve
         fd.solve(F == 0, up, bcs=bcs, options_prefix='s',
                  solver_parameters=packagelist[packagechoices.index(package)])
 
-        # split solution
-        self.u,self.p = up.split()
-        self.u.rename('velocity')
-        self.p.rename('pressure')
-        return self.u,self.p
+        return up
 
     # statistics about the solution:
     #   umagav  = average velocity magnitude

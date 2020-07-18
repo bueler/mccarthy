@@ -4,8 +4,9 @@
 # Solve glacier Glen-Stokes problem with explicit evolution of the free surface.
 # See README.md for usage.
 
-# TODO find regularization which actually helps with harder surface-evolution
-#      instability cases (e.g. -bs 200 in gendomain.py)
+# TODO 1. find regularization which actually helps with harder surface-evolution
+#         instability cases (e.g. -bs 200 in gendomain.py)
+#      2. set it up so -sequence k can be used in time-dependent mode too
 
 import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
@@ -156,9 +157,9 @@ def getranks():
     return (element_rank,vertex_rank)
 
 # solver mode: momentum-only solve of Stokes problem
-def momentumsolve(package=args.package, ucoarse = None, pcoarse = None, indent=0):
-    u,p = mm.solve(mesh,bdryids,args.elements,
-                   package=package,ucoarse=ucoarse,pcoarse=pcoarse)
+def momentumsolve(package=args.package, upold = None, upcoarse = None, indent=0):
+    up = mm.solve(mesh,bdryids,args.elements,
+                  package=package,upold=upold,upcoarse=upcoarse)
     umagav,umagmax,pav,pmax = mm.solutionstats(mesh)
     printpar('flow speed: av = %10.3f m a-1,  max = %10.3f m a-1' \
              % (secpera*umagav,secpera*umagmax),
@@ -166,7 +167,7 @@ def momentumsolve(package=args.package, ucoarse = None, pcoarse = None, indent=0
     printpar('pressure:   av = %10.3f bar,    max = %10.3f bar' \
              % (1.0e-5*pav,1.0e-5*pmax),
              indent=indent+1)
-    return u,p
+    return up
 
 # solver mode: time-stepping loop with evolving surface
 def timestepping():
@@ -176,7 +177,11 @@ def timestepping():
     for j in range(args.m):
         printpar('solving at step %d: t = %.3f days ...' % (j,t_days))
         # get velocity, pressure, and mesh vertical displacement
-        u,p = momentumsolve()
+        if j == 0:
+            up = momentumsolve()
+        else:
+            up = momentumsolve(upold=up)
+        u,p = up.split()
         dt = args.deltat * (secpera/dayspera)
         r = surfacekinematical(mesh,bdryids,u,dt)
         # save current state
@@ -198,7 +203,7 @@ def timestepping():
             absrmax = vr.norm(norm_type=PETSc.NormType.NORM_INFINITY)
         printpar('max. vert. disp. = %.3f m,  Hout = %.3f m' % (absrmax,Hout),
                  indent=1)
-    return u,p,r,t_days
+    return up,r,t_days
 
 # in slab-on-slope case, compute numerical errors
 def numericalerrorsslab(indent=0):
@@ -210,21 +215,22 @@ def numericalerrorsslab(indent=0):
 # solve, after deciding on solver mode
 if args.deltat > 0.0:
     printpar('writing (velocity,pressure,eff.visc.,vert.disp.) at each time step to %s ...' % outname)
-    u,p,r,t_days = timestepping()  # returns at final time
+    up,r,t_days = timestepping()  # returns at final time
 elif args.sequence > 0:
     l = args.sequence
     printpar('solving for velocity and pressure ...',indent=l)
-    u,p = momentumsolve(package=args.sequence_coarse_package,indent=l)
+    up = momentumsolve(package=args.sequence_coarse_package,indent=l)
     for j in range(l):
         numericalerrorsslab(indent=l-j)
         mesh = hierarchy[args.refine+j+1]
         describe(mesh,indent=l-j-1)
         printpar('solving for velocity and pressure ...',indent=l-j-1)
-        u,p = momentumsolve(ucoarse=u.copy(),pcoarse=p.copy(),indent=l-j-1)
+        up = momentumsolve(upcoarse=up,indent=l-j-1)
 else:
     printpar('solving for velocity and pressure ...')
-    u,p = momentumsolve()
+    up = momentumsolve()
 numericalerrorsslab()
+u,p = up.split()
 
 # save results in paraview-readable file
 nu = mm.effectiveviscosity(mesh)
