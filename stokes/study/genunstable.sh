@@ -13,11 +13,11 @@ set -e
 #   (firedrake) $ paraview unstableA.pvd
 #   (firedrake) $ paraview unstableB.pvd
 
-../gendomain.py -o unstableA.geo
+../domain.py -o unstableA.geo
 gmsh -2 unstableA.geo
 ../flow.py -mesh unstableA.msh -deltat 60.0 -m 20 -s_snes_converged_reason
 
-../gendomain.py -coarsen_upperleft 0.5 -o unstableB.geo
+../domain.py -coarsen_upperleft 0.5 -o unstableB.geo
 gmsh -2 unstableB.geo
 ../flow.py -mesh unstableB.msh -deltat 40.0 -m 30 -s_snes_converged_reason
 

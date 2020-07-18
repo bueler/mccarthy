@@ -11,7 +11,7 @@ set -e
 SEQ=3
 SOLVERS="SchurDirect SchurGMGSelfp SchurGMGMass SchurGMGMassFull"
 
-../gendomain.py -o glacier.geo | grep writing
+../domain.py -o glacier.geo | grep writing
 gmsh -2 glacier.geo | grep Writing
 echo
 

@@ -1,14 +1,14 @@
 all:
 
 tmptest/:
-	mkdir -p tmptest/
+	@mkdir -p tmptest/
 
 tmptest/lowtest.msh: tmptest/
-	-@./gendomain.py -hmesh 200 -o tmptest/lowtest.geo > /dev/null
+	-@./domain.py -hmesh 200 -o tmptest/lowtest.geo > /dev/null
 	-@gmsh -2 tmptest/lowtest.geo > /dev/null
 
 tmptest/slabtest.msh: tmptest/
-	-@./gendomain.py -hmesh 150 -bs 0.0 -o tmptest/slabtest.geo > /dev/null
+	-@./domain.py -hmesh 150 -bs 0.0 -o tmptest/slabtest.geo > /dev/null
 	-@gmsh -2 tmptest/slabtest.geo > /dev/null
 
 # testing
