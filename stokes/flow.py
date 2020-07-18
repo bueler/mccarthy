@@ -130,15 +130,23 @@ mm.set_Hout(Hout_initial)
 
 # FIXME this should be in momentummodel.py; no need to import D
 class Mass(AuxiliaryOperatorPC):
-
+    #_prefix = "aux_"
     def form(self, pc, test, trial):
         # note test, trial are for pressure space; need to go get the current
         # velocity state ...; thanks P Farrell
         ctx = self.get_appctx(pc)
         u = split(ctx["state"])[0]
+
+        # FIXME an idea ... does not work
+        #themesh = ctx["mesh"]
+        #P1 = FunctionSpace(themesh, 'CG', 1)
+        #u = interpolate(split(ctx["state"])[0])
+
         Du2 = 0.5 * inner(D(u), D(u)) + (mm.get_eps() * mm.get_Dtyp())**2.0
-        rr = 1.0/mm.get_n_glen() - 1.0
-        coeff = 1.0 / (mm.get_Bn() * Du2**(rr/2.0))
+        #Du2 = 0.5 * inner(D(u), D(u)) + (10.0 * mm.get_eps() * mm.get_Dtyp())**2.0
+
+        mrr = 1.0 - 1.0/mm.get_n_glen()  # positive power if n_glen > 1
+        coeff = Du2**(mrr/2.0) / mm.get_Bn()
         a = coeff * inner(test, trial) * dx
         bcs = None
         return (a, bcs)
