@@ -86,11 +86,13 @@ _SchurGMGMassFull = {"ksp_type": "fgmres",
 # match packagechoices order above; default goes first:
 packagelist = [_SchurDirect,_Direct,_SchurGMGSelfp,_SchurGMGMass,_SchurGMGMassFull]
 
+# see https://www.firedrakeproject.org/demos/geometric_multigrid.py.html for
+# a constant viscosity version of this AuxiliaryOperatorPC approach
 class Mass(fd.AuxiliaryOperatorPC):
 
     def form(self, pc, test, trial):
-        # FIXME there should be a better way to pass in parameters than through
-        #       the options database?
+        # pass in parameters from flow.py
+        # FIXME there should be a better way than through the options database?
         opts = fd.PETSc.Options()
         eps = opts.getReal("pcMass_eps")
         Dtyp = opts.getReal("pcMass_Dtyp")
@@ -98,15 +100,16 @@ class Mass(fd.AuxiliaryOperatorPC):
         Bn = opts.getReal("pcMass_Bn")
         more = opts.getReal("pcMass_mass_more_reg")
 
+        # this approach seems to be slightly faster than either keeping u from
+        # P2 or using project(u,P1)
         ctx = self.get_appctx(pc)
         u = fd.split(ctx["state"])[0]
+        mesh = test.ufl_domain()
+        P1 = fd.VectorFunctionSpace(mesh, "CG", 1, dim=2)
+        ulow = fd.interpolate(u,P1)
+        Du2 = 0.5 * fd.inner(D(ulow), D(ulow)) + (more * eps * Dtyp)**2.0
 
-        # FIXME an idea ... lawrence advice:
-        #mesh = test.ufl_domain()
-        #P1 = FunctionSpace(mesh, 'CG', 1)
-        #u = interpolate(split(ctx["state"])[0])
-
-        Du2 = 0.5 * fd.inner(D(u), D(u)) + (more * eps * Dtyp)**2.0
+        # define weak form of viscosity-weighted mass matrix
         mrr = 1.0 - 1.0/n_glen  # positive power if n_glen > 1
         coeff = Du2**(mrr/2.0) / Bn
         a = coeff * fd.inner(test, trial) * fd.dx
