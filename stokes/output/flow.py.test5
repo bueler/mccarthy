@@ -1,8 +1,14 @@
+using solver package SchurGMGMassFull ...
 reading initial mesh from tmptest/lowtest.msh ...
-  mesh has 98 elements (cells) and 69 vertices
+  mesh has 392 elements (cells) and 235 vertices
   geometry [m]: L = 3000.000, bs = 100.000, Hin = 400.000
 solving for velocity and pressure ...
-  flow speed: av =    586.817 m a-1,  max =    906.092 m a-1
-  pressure:   av =     17.464 bar,    max =     40.173 bar
+  Linear s_ solve converged due to CONVERGED_RTOL iterations 7
+  Linear s_ solve converged due to CONVERGED_RTOL iterations 5
+  Linear s_ solve converged due to CONVERGED_RTOL iterations 5
+  Linear s_ solve converged due to CONVERGED_RTOL iterations 5
+  Linear s_ solve converged due to CONVERGED_RTOL iterations 6
+  Linear s_ solve converged due to CONVERGED_RTOL iterations 6
+  flow speed: av =    592.658 m a-1,  max =    906.092 m a-1
+  pressure:   av =     17.471 bar,    max =     41.008 bar
 writing (velocity,pressure,eff.visc.) to tmptest/lowtest.pvd ...
-plotting surface values of (h,u,w) in file tmptest/test5.png ...
