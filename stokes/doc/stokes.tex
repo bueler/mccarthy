@@ -319,7 +319,7 @@ Nonlinear system \eqref{feweak} is solved by Newton's method \cite{BuelerBook,Ke
 
 \begin{figure}[h]
 \includegraphics[width=0.45\textwidth]{lowspy}
-%./gendomain.py -hmesh 300.0 -refine_corner 2 -o low.geo
+%./domain.py -hmesh 300.0 -refine_corner 2 -o low.geo
 %gmsh -2 low.geo
 %./flow.py -mesh low.msh -s_mat_type aij -s_ksp_view_mat :low.m:ascii_matlab
 % then spy() in Matlab
@@ -398,7 +398,7 @@ We implement the above numerical solution method in Python codes.  These codes u
 
 \medskip
 \begin{Verbatim}
-$ ./gendomain.py -o glacier.geo                # create domain outline
+$ ./domain.py -o glacier.geo                   # create domain outline
 $ gmsh -2 glacier.geo                          # mesh domain
 $ source ~/firedrake/bin/activate              # start Firedrake
 (firedrake) $ ./flow.py -mesh glacier.msh      # solve Stokes problem
@@ -423,7 +423,7 @@ As shown in Figure \ref{fig:blockdiagram} there are a total of five Python codes
 \begin{itemize}
 \item \texttt{flow.py}: \quad  This driver reads user options, reads the mesh from a Gmsh \texttt{.msh} file, uses a \texttt{MomentumModel} object to solve the Stokes problem, optionally calls \texttt{meshmotion.py} to do the above time-stepping strategy, and writes the solution into a Paraview-readable \texttt{.pvd} file.
 
-\item \texttt{gendomain.py}: \quad  This writes an outline of the initial domain $\Omega^0$ into an ASCII file (\texttt{.geo} extension) using the Gmsh \cite{GeuzaineRemacle2009} geometry description language.  Note Gmsh can be used to examine and mesh this domain interactively or at the command-line.  Portions of the boundary are marked with integer tags; see the Python dictionary \texttt{bdryids}.  This module also exports a function \texttt{getdomaindims()} which dynamically-extracts dimensions from a changing mesh.
+\item \texttt{domain.py}: \quad  This writes an outline of the initial domain $\Omega^0$ into an ASCII file (\texttt{.geo} extension) using the Gmsh \cite{GeuzaineRemacle2009} geometry description language.  Note Gmsh can be used to examine and mesh this domain interactively or at the command-line.  Portions of the boundary are marked with integer tags; see the Python dictionary \texttt{bdryids}.  This module also exports a function \texttt{getdomaindims()} which dynamically-extracts dimensions from a changing mesh.
 
 \item \texttt{meshmotion.py}: \quad  This module assembles and solves linear Dirichlet problem \eqref{vdisplacementpoisson} for vertical mesh displacement using Firedrake's \texttt{solve()}, and it updates the mesh coordinates as described.  This solver has option prefix \texttt{vd\_}.
 
@@ -438,17 +438,17 @@ As shown in Figure \ref{fig:blockdiagram} there are a total of five Python codes
 \tikzstyle{module} = [draw, dashed, minimum size=2em]
 \tikzstyle{other} = [draw, minimum size=2em, rounded corners=0.2cm]
 \begin{tikzpicture}[node distance=3.8cm,>=latex]
-    \node [tool]   (gendomain) {\texttt{gendomain.py}};
-    \node [other]  (gmsh)[right of= gendomain] {Gmsh};
+    \node [tool]   (domain) {\texttt{domain.py}};
+    \node [other]  (gmsh)[right of= domain] {Gmsh};
     \node [tool]   (flow)[right of=gmsh] {\texttt{flow.py}};
     \node [other]  (paraview)[right of=flow] {Paraview};
     \node [module] (momentummodel)[above left of=flow, xshift=-2.1cm] {\begin{minipage}{4.0cm} \texttt{momentummodel.py} \footnotesize (\texttt{class MomentumModule}) \end{minipage}};
     \node [module] (meshmotion)[above right of=flow, xshift=-3cm] {\texttt{meshmotion.py}};
     \node [module] (surfaceutils)[right of=meshmotion, xshift=0.3cm] {\texttt{surfaceutils.py}};
-    \path[->] (gendomain) edge node[below] {\texttt{.geo}} (gmsh) ;
+    \path[->] (domain) edge node[below] {\texttt{.geo}} (gmsh) ;
     \path[->] (gmsh) edge node[below] {\texttt{.msh}} (flow) ;
     \path[->] (flow) edge node[below] {\texttt{.pvd}} (paraview) ;
-    \path[->] (gendomain) edge[dashed, bend left] node {} (flow) ;
+    \path[->] (domain) edge[dashed, bend left] node {} (flow) ;
     \path[->] (momentummodel) edge[dashed] node {} ([xshift=-0.2cm]flow.north) ;
     \path[->] (meshmotion) edge[dashed] node {} (flow) ;
     \path[->] (surfaceutils) edge[dashed] node {} (flow) ;

@@ -12,8 +12,8 @@ tmptest/slabtest.msh: tmptest/
 	-@gmsh -2 tmptest/slabtest.geo > /dev/null
 
 # testing
-rungendomain_1: tmptest/
-	-@./testit.sh gendomain.py "-testspew -o tmptest/medtest.geo" 1 1 "generate basic .geo"
+rundomain_1: tmptest/
+	-@./testit.sh domain.py "-testspew -o tmptest/medtest.geo" 1 1 "generate basic .geo"
 
 runflow_1: tmptest/lowtest.msh
 	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh" 1 1 "basic u,p solve with bed step"
@@ -39,9 +39,9 @@ runflow_7: tmptest/lowtest.msh
 runflow_8: tmptest/lowtest.msh
 	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -refine 1 -s_snes_rtol 1.0e-2 -s_ksp_converged_reason -package SchurGMGMassFull -mass_more_reg 1.0" 1 8 "Schur(full)+GMG+ visc. Mass matrix"
 
-test: rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7 runflow_8
+test: rundomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7 runflow_8
 
-.PHONY: clean rungendomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7 runflow_8 test
+.PHONY: clean rundomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7 runflow_8 test
 
 clean:
 	rm -f *~ *.pyc *.pvd *.vtu *.pvtu *.geo *.msh

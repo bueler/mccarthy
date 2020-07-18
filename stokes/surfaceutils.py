@@ -52,7 +52,7 @@ def surfaceplot(mesh,u,r,deltat,filename):
     import numpy as np
     import matplotlib.pyplot as plt
     from momentummodel import secpera, dayspera
-    from gendomain import L, bdryids
+    from domain import L, bdryids
 
     x = np.linspace(0.0,L,401)
     hfcn = getboundaryelevation(mesh,bdryids['top'])

@@ -25,9 +25,9 @@ Start [Firedrake](https://www.firedrakeproject.org/):
 
         $ source ~/firedrake/bin/activate
 
-Generate the domain geometry using [gendomain.py](gendomain.py) and then mesh the domain using [Gmsh](http://gmsh.info/):
+Generate the domain geometry using [domain.py](domain.py) and then mesh it using [Gmsh](http://gmsh.info/):
 
-        (firedrake) $ ./gendomain.py -o glacier.geo   # create domain outline
+        (firedrake) $ ./domain.py -o glacier.geo      # create domain outline
         (firedrake) $ gmsh -2 glacier.geo             # writes glacier.msh
 
 Run the solver [flow.py](flow.py) on the mesh, which will write velocity and pressure fields into `glacier.pvd`.
@@ -47,7 +47,7 @@ Slab-on-slope usage
 
 Set the height of the bedrock step to zero when creating the domain geometry:
 
-        (firedrake) $ ./gendomain.py -bs 0.0 -o slab.geo
+        (firedrake) $ ./domain.py -bs 0.0 -o slab.geo
         (firedrake) $ gmsh -2 slab.geo
         (firedrake) $ ./flow.py -mesh slab.msh
 
@@ -75,15 +75,15 @@ The default `glacier.msh` mesh above has a typical mesh size of 100 m with grid 
 
 There are four refinement methods to get finer resolution:
 
-1. One may use the script `gendomain.py` to create a finer or locally-finer mesh, before it is read by `flow.py`.  The script allows setting the target mesh size (`-hmesh H`) and/or setting a uniform refinement factor (`-refine X`).  Another option controls the factor used for additional refinement at the interior corner (`-refine_corner Y`).  (_The default case corresponds to_ `-hmesh 100 -refine 1 -refine_corner 4`.)  For example the following creates a mesh with target mesh size varying from 25 m to about 3 m near the interior corner.  The resulting grid has about 15 times as many elements as the default mesh:
+1. One may use the script `domain.py` to create a finer or locally-finer mesh, before it is read by `flow.py`.  The script allows setting the target mesh size (`-hmesh H`) and/or setting a uniform refinement factor (`-refine X`).  Another option controls the factor used for additional refinement at the interior corner (`-refine_corner Y`).  (_The default case corresponds to_ `-hmesh 100 -refine 1 -refine_corner 4`.)  For example the following creates a mesh with target mesh size varying from 25 m to about 3 m near the interior corner.  The resulting grid has about 15 times as many elements as the default mesh:
 
-        (firedrake) $ ./gendomain.py -refine 4 -refine_corner 8 -o fine1.geo
+        (firedrake) $ ./domain.py -refine 4 -refine_corner 8 -o fine1.geo
         (firedrake) $ gmsh -2 fine1.geo
         (firedrake) $ ./flow.py -mesh fine1.msh
 
 2. One may use [Gmsh](http://gmsh.info/) to refine an existing mesh in `.msh`, specifically by splitting each triangular cell (element) into four similar triangles:
 
-        (firedrake) $ ./gendomain.py -refine 2 -refine_corner 4 -o start.geo
+        (firedrake) $ ./domain.py -refine 2 -refine_corner 4 -o start.geo
         (firedrake) $ gmsh -2 start.geo
         (firedrake) $ gmsh -refine start.msh -o fine2.msh
         (firedrake) $ ./flow.py -mesh fine2.msh

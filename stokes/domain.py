@@ -2,7 +2,7 @@
 # (C) 2018 Ed Bueler
 
 # Usage:
-#   $ ./gendomain.py glacier.geo
+#   $ ./domain.py glacier.geo
 #   $ gmsh -2 glacier.geo
 #   ...
 # which generates glacier.msh.  (Use "gmsh glacier.geo" for GUI version.)

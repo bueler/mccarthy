@@ -101,9 +101,9 @@ class Mass(fd.AuxiliaryOperatorPC):
         ctx = self.get_appctx(pc)
         u = fd.split(ctx["state"])[0]
 
-        # FIXME an idea ... does not work
-        #themesh = ctx["mesh"]
-        #P1 = FunctionSpace(themesh, 'CG', 1)
+        # FIXME an idea ... lawrence advice:
+        #mesh = test.ufl_domain()
+        #P1 = FunctionSpace(mesh, 'CG', 1)
         #u = interpolate(split(ctx["state"])[0])
 
         Du2 = 0.5 * fd.inner(D(u), D(u)) + (more * eps * Dtyp)**2.0

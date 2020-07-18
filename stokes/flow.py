@@ -5,13 +5,13 @@
 # See README.md for usage.
 
 # TODO 1. find regularization which actually helps with harder surface-evolution
-#         instability cases (e.g. -bs 200 in gendomain.py)
+#         instability cases (e.g. -bs 200 in domain.py)
 #      2. set it up so -sequence k can be used in time-dependent mode too
 
 import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
 from firedrake import *
-from gendomain import Hin, L, bdryids, getdomaindims
+from domain import Hin, L, bdryids, getdomaindims
 from momentummodel import mixFEchoices, packagechoices, secpera, dayspera, \
                           MomentumModel
 from meshmotion import surfacekinematical, movemesh
