@@ -28,13 +28,13 @@ runflow_4: tmptest/lowtest.msh
 	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -save_rank -o tmptest/test4.pvd -s_snes_converged_reason" 2 4 "parallel u,p solve"
 
 runflow_5: tmptest/lowtest.msh
-	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -refine 1 -s_snes_rtol 1.0e-2 -s_ksp_converged_reason -package SchurGMGMassFull -mass_more_reg 1.0" 1 5 "Schur(full)+GMG+ visc. Mass matrix"
+	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -refine 1 -s_snes_rtol 1.0e-2 -s_ksp_converged_reason -package SchurGMGMassFull -mass_more_reg 1.0" 1 5 "Schur(full)+GMG+nuMass: refine one level"
 
 runflow_6: tmptest/lowtest.msh
 	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -refine 1 -osurface tmptest/test6.png" 1 6 "refine one level and write surface .png"
 
 runflow_7: tmptest/lowtest.msh
-	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -sequence 1 -s_snes_converged_reason" 1 7 "grid-sequence one level"
+	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -sequence 1 -s_snes_converged_reason -package SchurGMGMass" 1 7 "Schur+GMG+nuMass: grid-sequence one level"
 
 test: rundomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7
 

@@ -61,9 +61,9 @@ parser.add_argument('-save_rank', action='store_true',
                     help='add fields (element_rank,vertex_rank) to output file', default=False)
 parser.add_argument('-sequence', type=int, default=0, metavar='N',
                     help='number of grid-sequencing levels (default=0)')
-parser.add_argument('-sequence_coarse_package', metavar='X', default='Direct',
+parser.add_argument('-sequence_coarse_package', metavar='X', default='SchurDirect',
                     choices=packagechoices,
-                    help='solver package for coarsest mesh in sequence (default=Direct)')
+                    help='solver package for coarsest mesh in sequence (default=SchurDirect)')
 args, unknown = parser.parse_known_args()
 
 if args.flowhelp:
