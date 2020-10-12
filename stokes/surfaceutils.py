@@ -3,7 +3,7 @@
 import firedrake as fd
 from scipy.interpolate import interp1d
 
-# return linear-interpolated along a part of the boundary of the mesh
+# return linear-interpolated z-value along a part of the boundary of the mesh
 #   (e.g. surface or base elevation function z = h(x), z = b(x))
 # PARALLEL
 # notes: 1)  bc.nodes  gives indices to mesh; is a 1D dtype=int32 numpy array

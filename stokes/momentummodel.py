@@ -46,7 +46,7 @@ _SchurGMGSelfp = {"ksp_type": "fgmres",
           "fieldsplit_1_ksp_type": "gmres",
           "fieldsplit_1_pc_type": "jacobi",
           "fieldsplit_1_pc_jacobi_type": "diagonal"}
-# notes on this package:
+# notes on following package:
 #   1. right+upper faster than left+lower; not sure why
 #   2. -fieldsplit_1_aux_pc_type ilu in serial is implied, but
 #      -fieldsplit_1_aux_pc_type bjacobi -fieldsplit_1_aux_sub_pc_type ilu
