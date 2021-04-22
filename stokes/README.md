@@ -10,6 +10,8 @@ Installation
 
   * Install [Gmsh](http://gmsh.info/) and [Paraview](https://www.paraview.org/),
     for instance by installing Debian or OSX packages.
+  * Install [scipy](https://www.scipy.org/), which we need for interpolation
+    at the ice surface.
   * Follow the instructions at the
     [Firedrake download page](https://www.firedrakeproject.org/download.html)
     to install Firedrake.
@@ -153,4 +155,3 @@ Info on installing Firedrake
 
   * You may need to `unset PETSC_DIR` and `unset PETSC_ARCH` before running `activate` when starting [Firedrake](https://www.firedrakeproject.org/).
   * Do `python3 firedrake-status` in the `firedrake/bin/` directory, after running `activate`, to see the current configuration of your [Firedrake](https://www.firedrakeproject.org/) installation.
-
