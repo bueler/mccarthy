@@ -245,8 +245,13 @@ class MomentumModel:
                 fd.DirichletBC(self._Z.sub(0), inflow_u, bdryids['inflow']) ]
 
         # solve
+        params = packagelist[packagechoices.index(package)]
+        # note: Sometime in 2020, Firedrake decided to override the default
+        #       PETSc linesearch of 'bt' and replace it with 'basic', i.e. NO
+        #       linesearch.  We need linesearch for n = 3 etc.
+        params['snes_linesearch_type'] = 'bt'
         fd.solve(F == 0, up, bcs=bcs, options_prefix='s',
-                 solver_parameters=packagelist[packagechoices.index(package)])
+                 solver_parameters=params)
 
         return up
 
