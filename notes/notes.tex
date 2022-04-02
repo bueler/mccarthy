@@ -95,7 +95,9 @@ urlcolor=black     % only if colorlinks=true
 
     International Summer School in Glaciology
 
-    McCarthy Alaska, June 2018
+    McCarthy Alaska
+
+    2010, 2012, 2014, 2016, 2018, 2022
 
     \vfill
     
@@ -113,42 +115,43 @@ urlcolor=black     % only if colorlinks=true
 %\setcounter{section}{1}
 \section{Introduction}  \label{sec:intro}
 
-The greatest importance of mathematical and numerical models in science, and glaciology in particular, is a kind of introspection.  In building and using a model you are asking yourself: When I combine my imperfect and incomplete understanding of glacier processes into this model does it behave as I expect?  When you put the mathematical model on a computer it will not nod and say ``yes, I understand'' like a person would---who might not actually understand.  The dumb computer can only tell you consequences of your model, inadequacies and all.
+The greatest importance of mathematical and numerical models to science, and to glaciology in particular, is in \emph{introspection}.  In building and using a model you are asking yourself: When I combine my imperfect and incomplete understanding of glacier processes into this model does it behave as I expect?  I person who does not actually understand might nod and say ``yes, I understand.''  The dumb computer can only tell you consequences of your model, inadequacies and all.  Numerical models can show how processes interact to give overall behavior, and they can demonstrate flaws in understanding of those processes.
 
-Thus numerical models can show how processes interact to give overall behavior, and they can demonstrate flaws in understanding of those processes.  But they should be built with care.  An avoidable bad outcome is to spend time---or worse, reputation---interpreting, explaining, or justifying model behavior that is actually an artifact of buggy computer programming or flawed numerical analysis.
+But numerical models must be built with care.  An \emph{avoidable} bad outcome is to spend time---or worse, reputation---interpreting, explaining, or justifying model behavior that is actually an artifact of buggy computer programming or flawed numerical analysis.
 
-The reader may be surprised that continuum models, and not computer codes, seem to be the focus of these notes much of the time.  While all codes produce numbers, we want numbers that actually come from the intended continuum model.  Only careful analysis of a numerical implementation can confirm that it matches the model equations.
+Continuum models, and not computer codes, will be the primary focus of these notes.  This might be surprising!  However, while all codes produce numbers, we want numbers that actually come from the intended continuum model.  Only careful analysis of a numerical implementation can confirm that it matches the model equations.
 
 \subsection*{Scope}  These notes have a limited scope:
   \begin{quote}\emph{shallow approximations of ice flow.}\end{quote}
 They adopt a constructive approach:
-  \begin{quote}\emph{we provide numerical codes that actually work.}\end{quote}
-Within our scope are the shallow ice approximation (SIA) in two horizontal dimensions (2D), the shallow shelf approximation (SSA) in 1D, and the mass continuity and surface kinematical equations; these technical terms will be defined in due course!  We also recall the Stokes model, but we do not address its numerical solution except in a separate Appendix A.
+  \begin{quote}\emph{we provide numerical codes that actually run.}\end{quote}
+
+Our scope includes the shallow ice approximation (SIA) in two horizontal dimensions (2D), the shallow shelf approximation (SSA) in 1D, and the mass continuity and surface kinematical equations.  (These technical terms will be defined in due course.)  We also recall the Stokes model here, but a separate Appendix addresses its numerical solution.
 
 Numerical concepts within our scope include finite difference schemes, solving algebraic systems from stress balances, and the verification of codes using exact solutions.
 
-\subsection*{Notation}  Our notation, which generally follows \cite{GreveBlatter2009}, is covered by Table \ref{tab:notation}.  Cartesian coordinates are $x,y,z$ with $z$ positive-upward.  If these coordinates, or the letter $t$, appear as subscripts then they denote partial derivatives: $u_x = \partial u/\partial x$.  Tensor notation also uses subscripts, but from the list $\{1,2,3,i,j\}$.  Thus ``$\tau_{ij}$'' and ``$\tau_{13}$'' denote entries of the deviatoric stress tensor.
+\subsection*{Notation}  Our notation, which generally follows \cite{GreveBlatter2009}, is covered by Table \ref{tab:notation}.  Cartesian coordinates are $x,y,z$ with $z$ positive-upward, plus time $t$.  These coordinates appear as subscripts to denote partial derivatives: $u_x = \partial u/\partial x$.  Tensor notation uses subscripts from the list $\{1,2,3,i,j\}$.  Thus $\tau_{ij}$, $\tau_{13}$ denote entries of the deviatoric stress tensor.
 
 \begin{table}[ht]
-\caption{Notation used in these notes, with values for some constants.}
+\caption{Notation used in these notes.}
 \begin{tabular}{clll}
 variable  & description & SI units & value \\
 \hline
-$A$ & $A=A(T)=$ ice softness in the Glen flow law & $\text{Pa}^{-n}\,\text{s}^{-1}$ \\
+$A$ & $A=A(T)=$ ice softness in Glen law & $\text{Pa}^{-n}\,\text{s}^{-1}$ \\
 $B$ & ice hardness; $B=A^{-1/n}$ & $\text{Pa}\,\text{s}^{1/n}$ \\
 $b$ & bedrock elevation & m \\
-$c$ & specific heat in general & J kg$^{-1}$ K$^{-1}$ \\
+$c$ & specific heat & J kg$^{-1}$ K$^{-1}$ \\
 $\nabla$ & (spatial) gradient & m$^{-1}$ \\
 $\nabla\cdot$ & (spatial) divergence & m$^{-1}$ \\
 $\mathbf{g}$ & gravity & m s$^{-2}$\phantom{foobar} & 9.81 \\
 $H$ & ice thickness & m \\
 $h$ & ice surface elevation & m \\
-$\kappa$ & conductivity in general & J s$^{-1}$ m$^{-1}$ K$^{-1}$ \\
+$\kappa$ & temperature conductivity & J s$^{-1}$ m$^{-1}$ K$^{-1}$ \\
 $M$ & climatic mass balance & m s$^{-1}$ \\
 $n$ & exponent in Glen flow law & & 3 \\
 $\nu$ & viscosity & Pa s \\
 $p$ & pressure & Pa \\
-$\bq$ & map-plane ice flux: $\bq = \int_{b}^{h} \bU\,dx = \bar{\bU} H$ & $\text{m}^2\,\text{s}^{-1}$ \\
+$\bq$ & map-plane ice flux: $\bq = \int_{b}^{h} \bU\,dx$ & $\text{m}^2\,\text{s}^{-1}$ \\
 $\rho$ & density of ice & kg m$^{-3}$ & 910 \\
 $\rho_w$ & density of sea water & kg m$^{-3}$ & 1028 \\
 $\sigma_{ij}$ & Cauchy stress tensor: $\sigma_{ij} = \tau_{ij} - p\, \delta_{ij}$ & Pa \\
@@ -166,7 +169,7 @@ $x_i$ & $x_1,x_2,x_3=x,y,z$ coordinates & m
 \begin{quote}
 \url{https://github.com/bueler/mccarthy}
 \end{quote}
-\noindent The codes are in the \texttt{mfiles/} subdirectory.  Five of them are printed below, but with their comments stripped for compactness and clarity.  The electronic versions all have generous comments and help files.
+\noindent The codes are in the \texttt{mfiles/} subdirectory.  Five of them are printed below, but with their comments stripped for compactness and clarity.  The electronic versions have generous comments and help files.
 
 
 \section{Ice flow equations}  \label{sec:continuum}
@@ -175,16 +178,19 @@ Our initial goal is an equation for which one may say:
 \begin{center}
 \emph{by numerically solving this equation, we have a usable model for an ice sheet.}
 \end{center}
-\noindent This initial model will not be complete by any modern standard.  However, a ``usable'' model tends to be \emph{understood} as much as it is \emph{correct} in a physical sense.
+A usable model must be \emph{understood} at least as much as it is \emph{correct} in a physical sense.  Our initial model will not be complete by any modern standard.
 
-First we (briefly!) recall the continuum mechanical equations of ice flow.  Ice in glaciers is a moving fluid so we describe its motion by a velocity field $\mathbf{u}(t,x,y,z)$.  If the ice fluid were faster-moving than it actually is, and if it were linearly-viscous like liquid water, then it would be a ``typical'' incompressible fluid and we would use the Navier-Stokes equations as the model:
+First we (briefly!) recall the continuum mechanical equations of ice flow.  Ice in glaciers is a moving fluid so we describe its motion by a velocity field $\mathbf{u}(t,x,y,z)$.  If the ice fluid were faster-moving than in reality, and if it were linearly-viscous like liquid water, then it would be a ``typical'' incompressible fluid and we would use the Navier-Stokes equations as the model:
 \begin{align}
 \nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \label{incompressible} \\
 \rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) &= \nabla \cdot (\nu \nabla \mathbf{u}) - \nabla p + \rho \mathbf{g} &&\text{\emph{stress balance}} \label{navierstokes}
 \end{align}
-The term $\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}$ in \eqref{navierstokes} is an acceleration and the right-hand side is the net force per unit volume $\nabla \cdot \sigma + \rho \mathbf{g}$.  Thus equation \eqref{navierstokes} says ``$ma=F$''; it is Newton's second law.  Investigation has yielded only partial understanding of the rich solutions of equations \eqref{incompressible} and \eqref{navierstokes}.  A book-length introduction like \cite{Acheson} is recommended, but not needed here.
 
-The numerical solution of the Navier-Stokes equations is \emph{computational fluid dynamics} (CFD).  One might ask is ice flow modelling a part of CFD?  (Or: Does a good general-purpose CFD text like \cite{Wesseling} help a glaciers student?)  Glacier flow is a large-scale fluid problem like atmosphere and ocean circulation, but, from the point of view of general CFD, it is odd.   Topics which might make ocean circulation exciting, for example turbulence, convection, coriolis force, and density stratification, are irelevant to ice flow.  What could be interesting about the flow of slow, thick ice?
+Equation \eqref{navierstokes} says ``$ma=F$''; it is Newton's second law.  The term $\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}$ is an acceleration while the right-hand side is net force per unit volume, from viscous, pressure, and gravity forces respectively.  If $\sigma$ is the Cauchy stress tensor, the right side can also be written $\nabla \cdot \sigma + \rho \mathbf{g}$.
+
+The space of solutions to \eqref{incompressible} and \eqref{navierstokes} is rich.  It includes turbulent flows, which we will not need here, so a book-length introduction like \cite{Acheson} is overkill.  (But recommended!)
+
+The numerical solution of the Navier-Stokes equations is \emph{computational fluid dynamics} (CFD).  One might ask: is ice flow modelling really a part of CFD?  Does a good general-purpose CFD text like \cite{Wesseling} help a glaciers student?  In fact, glacier flow is a large-scale fluid problem like atmosphere and ocean circulation, but, from the point of view of general CFD, it is odd.   Topics which might make ocean circulation exciting, for example turbulence, convection, coriolis force, and density stratification, are irelevant to ice flow.  What could be interesting about the flow of slow, thick ice?
 
 \subsection*{The Glen-Stokes equations}  Glacier ice is a slow fluid.  In terms of equation \eqref{navierstokes}, ``slow'' is a reasonably-precise term which means that $\rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) \approx 0$, in other words that the forces (stresses) of inertia are negligible.  However, ice is also a shear-thinning fluid with a specific kind of nonlinearly-viscous (``non-Newtonian'') behavior in which larger strain rates imply smaller viscosity.  The viscosity $\nu$ in \eqref{navierstokes} is therefore not constant, and one must add an empirically-based flow law.  Combining these ideas gives the standard model for isothermal ice flow:
 \begin{align}
@@ -193,61 +199,64 @@ The numerical solution of the Navier-Stokes equations is \emph{computational flu
 Du_{ij} &= A \tau^2 \tau_{ij} &&\text{\emph{$n$=3 Glen flow law}} \label{flowlaw}
 \end{align}
 
-In \eqref{flowlaw} the deviatoric stress tensor $\tau_{ij}$ and the strain rate tensor $Du_{ij}$ now appear.  Other McCarthy lectures cover these ideas, but recall that by definition
+In \eqref{flowlaw} the deviatoric stress tensor $\tau_{ij}$ and the strain rate tensor $Du_{ij}$ now appear.  Other lectures cover these ideas, but recall that by definition
     $$Du_{ij} = \frac{1}{2} \left((u_i)_{x_j}+(u_j)_{x_i}\right).$$
 Both tensors in \eqref{flowlaw} are symmetric and have trace zero.  Note that $\tau^2 = (1/2) \tau_{ij} \tau_{ij}$, using the summation convention, which defines the \emph{effective stress} $\tau$.
 
-Because the Stokes equations do not contain a time derivative, the combined effect of boundary stresses, gravity $\rho \mathbf{g} = \left<0,0,-\rho g\right>$, and a value for ice softness $A>0$ will determine the velocity and stress fields ($\bu$, $p$, $\tau_{ij}$), i.e.~the solution to \eqref{incompressibleagain}--\eqref{flowlaw}, instantaneously.  Thus ice flow simulation codes have no memory of prior momentum or velocity.  Said another way, velocity is a ``diagnostic'' output of ice flow models.  Unlike in a Navier-Stokes-based simulation, velocity is not needed for (re)starting a simulation.
+Because the Stokes equations do not contain a time derivative, the combined effect of boundary stresses, gravity $\rho \mathbf{g} = \left<0,0,-\rho g\right>$, and a value for ice softness $A>0$ will determine the velocity and stress fields ($\bu$, $p$, $\tau_{ij}$).  That is, equations \eqref{incompressibleagain}--\eqref{flowlaw} apply at each instant, even as the geometry of a glacier changes, and the solution fields change.  Ice flow simulation codes need no memory of prior momentum or velocity.  Said another way, velocity is a ``diagnostic'' output of ice flow models.  Unlike in a Navier-Stokes-based simulation, velocity is not needed for (re)starting a simulation.
 
 Consider now the $x,z$-plane case of equations \eqref{incompressibleagain}--\eqref{flowlaw}.  Such a planar flow has velocity component $v=0$.  All derivatives with respect to $y$ are also zero so the equations are:
 \begin{align}
 u_x + w_z &= 0 &&\text{\emph{incompressibility}} \label{incompressiblexz} \\
 - \tau_{11,x} - \tau_{13,z} + p_x &= 0 &&\text{\emph{stress balance} ($x$)} \label{stokespx} \\
-- \tau_{13,x} + \tau_{11,z} + p_z &= - \rho g &&\text{\emph{stress balance} ($z$)} \label{stokespz} \\
+- \tau_{13,x} - \tau_{33,z} + p_z &= - \rho g &&\text{\emph{stress balance} ($z$)} \label{stokespz} \\
 u_x &= A \tau^2 \tau_{11} &&\text{\emph{flow law (diagonal)}}  \label{forceflowx} \\
 u_z + w _x &= 2 A \tau^2 \tau_{13} &&\text{\emph{flow law (off-diagonal)}} \label{forceflowz}
 \end{align}
 Note that $\tau_{13}$ is a shear stress while $\tau_{11}$ and $\tau_{33}=-\tau_{11}$ are deviatoric longitudinal stresses.  Also $\tau^2 = \tau_{11}^2+\tau_{13}^2$ in this case.  Equations \eqref{incompressiblexz}--\eqref{forceflowz} form a system of five nonlinear equations in five scalar unknowns ($u,w,p,\tau_{11},\tau_{13}$).
 
-\subsection*{Slab-on-a-slope}  Equations \eqref{incompressiblexz}--\eqref{forceflowz} are complicated enough to make us pause before jumping in to numerical solution methods.  We start with a simplified situation, namely a uniform slab of ice, in which we can both solve the Stokes equations exactly and motivate the shallow model in the next subsection.
+\subsection*{Slab-on-a-slope}  Equations \eqref{incompressiblexz}--\eqref{forceflowz} are complicated enough to make us pause before jumping into numerical solution methods.  For now we start with a simplified situation, namely a uniform slab of ice, in which we can both solve the Stokes equations exactly and motivate the shallow model in the next subsection.
 
 \onefig{slab}{Rotated axes for a slab-on-a-slope flow calculation.}
 
-We rotate our coordinates only for this example (and not elsewhere in these notes, except in the separate Appendix A).  The two-dimensional axes ($x$,$z$) shown in Figure \ref{fig:slab} are rotated clockwise at angle $\alpha>0$ so that the gravity vector has components $\mathbf{g} = (g \sin\alpha,- g \cos \alpha)$ in the new axes.  Equations \eqref{stokespx} and \eqref{stokespz} are now
+We rotate our coordinates only for this example.  The two-dimensional axes ($x$,$z$) shown in Figure \ref{fig:slab} are rotated clockwise at angle $\alpha>0$ so that the gravity vector has components $\mathbf{g} = (g \sin\alpha,- g \cos \alpha)$ in the new axes.  Equations \eqref{stokespx} and \eqref{stokespz} are now
 \begin{align}
 - \tau_{11,x} - \tau_{13,z} + p_x &= \rho g \sin\alpha, \label{stokespxrot} \\
 - \tau_{13,x} + \tau_{11,z} + p_z &= - \rho g \cos\alpha. \label{stokespzrot}
 \end{align}
 
-Assume further that there is no variation with $x$. Then the whole set of Stokes equations \eqref{incompressiblexz}, \eqref{forceflowx}, \eqref{forceflowz}, \eqref{stokespxrot}, \eqref{stokespzrot} simplifies greatly:
+Assume further that there is no variation with $x$. Then the whole set of Stokes equations \eqref{incompressiblexz}, \eqref{forceflowx}--\eqref{stokespzrot} simplifies greatly:
 \begin{align}
 w_z &= 0 &   \tau_{11} &= 0 \label{stokesslab} \\
 \tau_{13,z} &= - \rho g \sin\alpha &   u_z &= 2 A \tau^2 \tau_{13} \notag \\
 p_z &= - \rho g \cos\alpha \notag
 \end{align}
-Each unknown is now a function of $z$ only.  Boundary conditions come from assuming that the ice is not crossing the bed, that the surface of the ice is moving parallel to the $x$-axis, and that it is stress free: $w(0)=0$, $p(H)=0$, $\tau_{13}(H)=0$.  Then, by integrating some of equations \eqref{stokesslab} with respect to $z$, we get $w=0$, $p = \rho g \cos\alpha (H-z)$, and $\tau_{13} = \rho g \sin\alpha (H-z)$.  Note that $H-z$ is the depth below the ice surface; both pressure and shear stress are proportional to depth.  Integrating the remaining equation in \eqref{stokesslab} yields horizontal velocity:
+Each unknown is now a function of $z$ only.  Boundary conditions come from assuming that the ice is not crossing the bed, that the surface of the ice is moving parallel to the $x$-axis, and that it is stress free: $w(0)=0$, $p(H)=0$, $\tau_{13}(H)=0$.  Then, by integrating equations \eqref{stokesslab} with respect to $z$, we get $w=0$, $p = (\rho g \cos\alpha) (H-z)$, and $\tau_{13} = (\rho g \sin\alpha) (H-z)$.  Note that $H-z$ is the depth below the ice surface; both pressure and shear stress are proportional to depth.  Integrating the remaining equation in \eqref{stokesslab} yields horizontal velocity:
 \begin{align}
 u &= u_0 + \frac{1}{2} A (\rho g \sin\alpha)^3  \left(H^4 - (H-z)^4\right)  \label{uslab}
 \end{align}
 The basal velocity $u_0=u(0)$ remains undetermined for now.
 
-Do we believe formula \eqref{uslab}, which makes a specific prediction about the profile of flow in a glacier?  Figure \ref{fig:slabvel} compares \eqref{uslab} to observations of a mountain glacier.  Our model for velocity indeed does a credible job of capturing deformation flow in this case.  However, until section \ref{sec:shelvesandstreams}, we will not have a reasonable dynamical model for the sliding velocity $u_0$.  We assume until then that the ice is frozen to the bed and there is no sliding.
+Do we believe formula \eqref{uslab}, which makes a specific prediction about the profile of flow in a glacier?  Figure \ref{fig:slabvel} compares observations of a mountain glacier, showing that our model does a credible job of capturing deformation flow in this case.
 
 \twofigsizes{slabvel}{athabasca-deform}{Left:  Velocity from formula \eqref{uslab}.  Right:  Measured velocity in a glacier (Athabasca Glacier \cite{SavagePaterson}).}{2.0in}{1.8in}
 
-\subsection*{Viscosity form of the flow law}  Flow law \eqref{flowlaw} has another form which we will use next, and also later in describing ice shelf and stream flow.  Recall $\tau^2 = (1/2) \tau_{ij} \tau_{ij}$; also define $|Du|^2 = (1/2) Du_{ij} Du_{ij}$.  (The scalars $\tau$ and $|Du|$ are tensor \emph{norms}.)  By taking norms of both sides of \eqref{flowlaw} we get $|Du| = A \tau^3$ so $\tau = A^{-1/3} |Du|^{1/3}$.  Thus \eqref{flowlaw} can be rewritten
+Until section \ref{sec:shelvesandstreams}, we will not have a reasonable dynamical model for the sliding velocity $u_0$.  We assume until then that the ice is frozen to the bed and there is no sliding.
+
+
+\subsection*{Viscosity form of the flow law}  Flow law \eqref{flowlaw} has another form.  Recall $\tau^2 = (1/2) \tau_{ij} \tau_{ij}$; also define $|Du|^2 = (1/2) Du_{ij} Du_{ij}$.  (The scalars $\tau$ and $|Du|$ are tensor \emph{norms}.)  From \eqref{flowlaw} we get $|Du| = A \tau^3$ so $\tau = A^{-1/3} |Du|^{1/3}$.  Thus \eqref{flowlaw} can be rewritten
 \begin{equation}
-\tau_{ij} = 2 \nu\, Du_{ij}  \qquad \text{\emph{flow law (viscosity form)}} \label{viscosityflowlaw}
+\tau_{ij} = 2 \nu\, Du_{ij}  \qquad \text{\emph{flow law}} \label{viscosityflowlaw}
 \end{equation}
 where
     $$2\nu = A^{-1/3} |Du|^{-2/3}$$
-defines the nonlinear \emph{viscosity} $\nu$.  Often $B = A^{-1/3}$ is called the \emph{ice hardness}.  Flow law \eqref{viscosityflowlaw} allows us to eliminate stresses $\tau_{ij}$ from the Stokes equations, resulting in formulas depending only on the strain rates $Du_{ij}$.
+defines the nonlinear \emph{viscosity} $\nu$.  Often $B = A^{-1/3}$ is called the \emph{ice hardness}.  Equation \eqref{viscosityflowlaw} allows us to eliminate stresses $\tau_{ij}$ from the Stokes equations, resulting in formulas depending only on the strain rates $Du_{ij}$.
 
 \subsection*{The Blatter-Pattyn approximation}  One may approximate the plane-flow Stokes equations \eqref{incompressiblexz}--\eqref{forceflowz} by assuming that horizontal variation in the vertical shear stress is small compared to the other terms.  This removes the single term  $\tau_{13,x}$ from the $z$-component of the stress balance \eqref{stokespz}:
 \begin{equation}
 p_z = - \tau_{11,z} - \rho g. \label{hydrostaticpz}
 \end{equation}
-Because $\sigma_{ij} = \tau_{ij} - p \delta_{ij}$, thus $p + \tau_{11} = p - \tau_{33} = - \sigma_{33}$, equation \eqref{hydrostaticpz} says that the vertical normal stress $\sigma_{33}$ is linear in depth.  (This is similar, but not identical, to the statement that the pressure $p$ is hydrostatic.)  Taking $\sigma_{33}$ to have surface value zero we get
+Because $\sigma_{ij} = \tau_{ij} - p \delta_{ij}$, thus $p + \tau_{11} = p - \tau_{33} = - \sigma_{33}$, equation \eqref{hydrostaticpz} says that the vertical normal stress $\sigma_{33}$ is linear in depth.  (A slightly-different model assumes that the pressure $p$ itself is hydrostatic.)  Taking $\sigma_{33}$ to have surface value zero we get
 \begin{equation}
 p + \tau_{11} = \rho g (h-z). \label{hydrostaticitself}
 \end{equation}
@@ -262,13 +271,13 @@ If we additionally drop $w_x$ from equation \eqref{stresshydrostatic} then we ge
 \begin{equation}
 \left(4 \nu u_x\right)_x + \left(\nu u_z\right)_z = \rho g h_x \qquad\text{\emph{Blatter-Pattyn stress balance}} \label{stressblatter}
 \end{equation}
-Using this equation one can solve first for the horizontal velocity $u$ and then afterward recover $w$ from \eqref{incompressiblexz}.  In other words the stress balance and incompressibility are coupled only in one direction.  Also, because it is similar to the well-understood Poisson equation $u_{xx} + u_{zz} = f$ \cite{MortonMayers}, solving equation \eqref{stressblatter} is more familiar to numerical analysts than are solutions to \eqref{stresshydrostatic}.
+Solving \eqref{stressblatter} as a boundary value problem yields the horizontal velocity $u$.  Then one may recover $w$ from incompressibility \eqref{incompressiblexz}.  Because it is somewhat similar to the well-understood Poisson equation $u_{xx} + u_{zz} = f$, as described in \cite{LeVequeFD,MortonMayers} for example, solving equation \eqref{stressblatter} is more familiar to numerical analysts than are solutions to \eqref{stresshydrostatic}.
 
-\subsection*{Plane-flow mass-continuity equation}  The equations so far do not address the change in shape of the glacier or ice sheet.  For this we need the \emph{mass continuity equation}.  We derive it first in an informal way, but we also return to the topic in section \ref{sec:masscont}.
+\subsection*{Plane-flow mass-continuity equation}  The equations so far do not address how a glacier or ice sheet changes shape.  For this we need to add a mass conservation equation.  We derive it here in an informal way, returning to the topic in section \ref{sec:masscont}.
 
 Consider any $x,z$-plane flow with variable thickness and velocity, not just slab-on-a-slope.  Define the vertical average of the horizontal velocity:
 	$$\bar U = \frac{1}{H}\int_0^{H} u\,dz.$$
-The flux $q=\bar U\, H = \int_0^{H} u\,dz$ is the rate of flow input into the side of the area in Figure \ref{fig:slabmasscontfig}.  Ice can be added by climatic (surface) mass balance $M$ or by a difference in the flux $q=\bar u H$ between the left and right sides.
+The ice flux $q= \int_0^{H} u\,dz$ is the rate of flow input into the side of the area in Figure \ref{fig:slabmasscontfig}.  Ice can be added by climatic (surface) mass balance $M$ or by a difference in the flux $q=\bar U H$ between the left and right sides.
 
 \onefigsize{slabmasscontfig}{Mass continuity equation \eqref{masscont1D} follows from considering this domain of ice, which has time-dependent area $A$.}{2.5in}
 
@@ -282,7 +291,7 @@ If the width $\Delta x=x_2-x_1$ is small then $A\approx \Delta x\, H$.  So we di
 \begin{equation}
 H_t = M - \left(\bar U H\right)_x \label{masscont1D}
 \end{equation}
-This differential equation for mass continuity describes change in the ice thickness in terms of surface mass balance and ice velocity.  Ice flow simulations must compute the velocity $u$ in order to use this equation for the changing glacier geometry.
+This \emph{mass continuity} differential equation describes change in the ice thickness in terms of surface mass balance and ice velocity.  Ice flow simulations can compute the velocity $u$ and then use this equation for the changing glacier geometry.
 
 
 \section{Shallow ice sheets}   \label{sec:sia}
@@ -297,11 +306,11 @@ Ice sheet flow has four outstanding properties as a fluids problem.  Ice sheets 
 \end{enumerate}
 The first numerical ice flow model in these notes accounts for the first three properties only.  It is the non-sliding, isothermal \emph{shallow ice approximation} (SIA).
 
-Regarding shallowness (\emph{ii}), Figure \ref{fig:green-transect} shows both a no-vertical-exaggeration cross-section of Greenland at $71^\circ$ and the standard vertically-exaggerated version which is more familiar in the glaciological literature.  Without vertical exaggeration we see the ice sheet as a thin blanket, barely three-dimensional.  In other words, ice sheets \emph{are} shallow.  (Note, however, that the portion of an ice sheet which you want to model may not be.)
+Regarding shallowness (\emph{ii}), Figure \ref{fig:green-transect} shows both a no-vertical-exaggeration cross-section of Greenland at $71^\circ$ and the standard vertically-exaggerated version which is more familiar in the glaciological literature.  Without vertical exaggeration we see the ice sheet as a thin blanket, barely three-dimensional.  This illustrates that ice sheets are shallow.  Note, however, that the portion of an ice sheet which you seek to model may not be.
 
 \medskip
 
-\onefigsize{green-transect}{A cross-section of the Greenland ice sheet ($71^\circ$ N), with width about 760 km and maximum thickness 3200 m, is shown by the upper two curves.  The thickened horizontal line (bottom) shows the same cross-section without exaggeration.}{4.0in}
+\onefigsize{green-transect}{A cross-section of the Greenland ice sheet ($71^\circ$ N), with width about 760 km and maximum thickness 3200 m, is shown by the upper two curves.  The thickened horizontal line (bottom) shows the same cross-section without vertical exaggeration.}{4.0in}
 
 Our earlier slab-on-a-slope example can be converted into a rough derivation of the plane-flow SIA.  We vertically integrate velocity formula \eqref{uslab} in the $u_0=0$ case to get
 \begin{equation}
@@ -312,11 +321,9 @@ Regarding the surface slope, note $\sin \alpha \approx \tan\alpha = - h_x$ when 
   H_t = M + \left(\frac{2}{5} (\rho g)^3 A H^5 |h_x|^2 h_x\right)_x. \label{sia1D}
 \end{equation}
 
-Equation \eqref{sia1D} is the primary SIA equation for nonsliding plane flow.  Noting $h=H+b$, it models the evolution of an ice sheet's thickness $H$.  The model should, however, be solved subject to the constraint that the thickness is positive ($H\ge 0$) \cite{Bueler2016,JouvetBueler2012}.
+Equation \eqref{sia1D} is the SIA equation for nonsliding plane flow.  Noting $h=H+b$, it models the evolution of an ice sheet's thickness $H$.  The model should, however, be solved subject to the constraint that the thickness is positive ($H\ge 0$) \cite{Bueler2016,JouvetBueler2012}.  For careful SIA derivations, which reduce the Stokes equations under a small depth-to-width ratio assumption, follow the Notes and References at the end.
 
-Additional arguments are needed to derive the SIA in the general case.  Such arguments reduce the Stokes equations under the assumption of small surface and bed slopes, and small depth-to-width ratio; see Notes and References.
-
-For now we merely state the SIA model in preparation for numerical solutions in section \ref{sec:numericalsia}.  Let $\mathbf{U} = (u,v)$ be the vector horizontal velocity; this is a 2D vector-valued function of 3D coordinates $(x,y,z)$.  The SIA shear stress approximation is $(\tau_{13},\tau_{23}) \approx - \rho g (h-z) \nabla h$, and Equation \eqref{flowlaw} gives a formula for shear strain rates
+We now state the complete SIA model in preparation for numerical solutions in section \ref{sec:numericalsia}.  Let $\mathbf{U} = (u,v)$ be the vector horizontal velocity; this is a 2D vector-valued function of 3D coordinates $(x,y,z)$.  The SIA shear stress approximation is $(\tau_{13},\tau_{23}) \approx - \rho g (h-z) \nabla h$, and equation \eqref{flowlaw} gives a formula for shear strain rates
 \begin{equation*}
 \mathbf{U}_z = 2 A |(\tau_{13},\tau_{23})|^{n-1} (\tau_{13},\tau_{23}) = - 2 A (\rho g)^n (h-z)^n |\nabla h|^{n-1} \nabla h.
 \end{equation*}
@@ -328,9 +335,7 @@ Mass continuity in 2D, which generalizes the 1D version \eqref{masscont1D}, appl
 \begin{equation}
     H_t = M - \Div\left(\bar{\mathbf{U}} H\right)  \label{masscont}
 \end{equation}
-Equation \eqref{masscont} may also be written $H_t = M - \Div \bq$ in terms of the map-plane flux $\bq = \int_{b}^{h} \mathbf{U}\,dz = \bar{\mathbf{U}}\,H$.  Note $\bar{\mathbf{U}}$ and $\bq$ are functions of 2D coordinates $(x,y)$ only.
-
-Combining Equations \eqref{siavelocity} and \eqref{masscont}, we get an equation for the rate of thickness change in terms of mass balance $M$, thickness $H$, and surface gradient $\grad h$:
+Equation \eqref{masscont} may also be written $H_t = M - \Div \bq$ in terms of the map-plane flux $\bq = \int_{b}^{h} \mathbf{U}\,dz = \bar{\mathbf{U}}\,H$.  Note $\bar{\mathbf{U}}$ and $\bq$ are functions of 2D coordinates $(x,y)$ only.  Combining equations \eqref{siavelocity} and \eqref{masscont}, we get an equation for the rate of thickness change in terms of mass balance $M$, thickness $H$, and surface gradient $\grad h$:
 \begin{equation}
 H_t = M + \Div \left(\Gamma H^{n+2} |\grad h|^{n-1} \grad h \right). \label{sia}
 \end{equation}
@@ -338,19 +343,21 @@ We have defined the positive constant $\Gamma = 2 A (\rho g)^n / (n+2)$ only to 
 
 Equation \eqref{sia} is the SIA in 2D.  Recalling our earlier promise, if we can solve \eqref{sia} numerically then we have a usable model for certain ice sheets.  Mahaffy \cite{Mahaffy} used it in a 1976 numerical model of the Barnes ice cap in Canada, a particularly-simple ice sheet on a rather flat bed.  This was the start of numerical ice sheet modeling.
 
-\subsection*{Analogy with diffusion equations}  Numerical methods for solving \eqref{sia} are modifications of methods for the better-known heat equation, which, in its simplest 1D form, is the equation $T_t = D T_{xx}$.  This model of the temperature $T(t,x)$ in a conducting rod, for example, applies when material properties are constant and there are no heat sources.  The positive constant $D$ is the ``diffusivity,'' with SI units which can be read from comparing sides of the equation: $D\sim \text{m}^2 \text{s}^{-1}$.  The heat equation has a smoothing effect on the solution $T$ as it evolves in time, because any local maximum or minimum in the temperature is flattened.  In fact, $T_{xx}<0$ implies $T_t<0$, so $T$ decreases near a maximum, while $T_{xx}>0$ implies $T_t>0$ so $T$ increases near a minimum.
+\subsection*{Analogy with diffusion equations}  Numerical methods for solving \eqref{sia} are modifications of methods for the better-known heat equation.
 
-The 2D heat equation, which describes the temperature $T(t,x,y)$ of a planar object, is a better analogy to \eqref{sia}.  Recall that Fourier's law for conduction is the formula $\mathbf{Q} = - \kappa \grad T$ for heat flux $\mathbf{Q}$, where $\kappa$ is conductivity.  We will assume, so as to help the analogy to the SIA, that $\kappa(x,y)$ may vary in space, and we suppose there is a variable heat source $f(t,x,y)$.  Then conservation of internal energy says
+In its simplest 1D form, the heat equation is $T_t = D T_{xx}$.  This model of the temperature $T(t,x)$ in a conducting rod, for example, applies when material properties are constant and there are no heat sources.  The positive constant $D$ is the ``diffusivity,'' with SI units which can be read from comparing sides of the equation: $D\sim \text{m}^2 \text{s}^{-1}$.  The heat equation has a smoothing effect on the solution $T$ as it evolves in time, because any local maximum or minimum in the temperature is flattened: $T_{xx}<0$ implies $T_t<0$, so $T$ decreases near a maximum, while $T_{xx}>0$ implies $T_t>0$, so $T$ increases near a minimum.
+
+The 2D heat equation, which describes the temperature $T(t,x,y)$ of a planar object, is a closer analog of \eqref{sia}.  Recall that Fourier's law for conduction is the formula $\mathbf{Q} = - \kappa \grad T$ for heat flux $\mathbf{Q}$, where $\kappa$ is conductivity.  We will assume, so as to help the analogy to the SIA, that $\kappa(x,y)$ may vary in space, and we suppose the heat source $f(t,x,y)$ is variable.  Then conservation of internal energy says
 \begin{equation}
 \rho c T_t = f + \Div (\kappa \grad T). \label{heatearly}
 \end{equation}
-Here $\rho$ is density and $c$ is specific heat capacity.  Assuming $\rho c$ is constant, define the diffusivity $D=\kappa/(\rho c)$.  Let $F = f/(\rho c)$, a rescaled source term.  The 2D heat equation becomes
+Here $\rho$ is density and $c$ is specific heat capacity.  Assuming $\rho c$ is constant, define the diffusivity $D=\kappa/(\rho c)$.  Defining $F = f/(\rho c)$, a rescaled source term, \eqref{heatearly} becomes
 \begin{equation}
-T_t = F + \Div (D\, \grad T), \label{heat}
+T_t = F + \Div (D\, \grad T). \label{heat}
 \end{equation}
-which is similar to the above 1D equation, but with variable diffusivity and an additional heat source.
+This 2D heat equation is similar to the above 1D equation $T_t = D T_{xx}$, but now with variable diffusivity and an additional heat source.
 
-Figure \ref{fig:initialheat} shows a solution of \eqref{heat} in which the initial condition is a localized ``hot spot''.  Solutions of the heat equation always involve the spreading, in all directions, of any local maxima or minima, that is, diffusion.
+Figure \ref{fig:initialheat} shows a solution of \eqref{heat} in which the initial condition is a localized ``hot spot''.  Solutions of the heat equation always involve the spreading, in all directions, of any local concentration of heat; this is diffusion.
 
 \twofigsizes{initialheat}{finalheat}{Left: Initial condition $T(0,x,y)$.   Right: A solution $T(t,x,y)$ of  \eqref{heat}, with $D=1$ and $F=0$, at $t=0.02$.}{2.8in}{2.8in}
 
@@ -364,52 +371,56 @@ SIA:\, $H$ is ice thickness & \phantom{foo bar} heat: $T$ is temperature\phantom
 \end{tabular}
 \end{center}
 \vspace{1mm}
-Notice that the number of derivatives (one time and two space) and the signs of the various terms are the same.  Surface mass balance $M$ is analogous to heat source $F$.
-
-The analogy suggests that we identify the \emph{SIA diffusivity} as:
+Notice that the number of derivatives (one time and two space) and the signs of the various terms are the same.  Surface mass balance $M$ is analogous to heat source $F$.  The analogy suggests that we identify the \emph{SIA diffusivity} as:
 \begin{equation}
 	D = {\color{red}\Gamma H^{n+2} |\grad h|^{n-1}}.  \label{siadiffusivity}
 \end{equation}
-The diffusion acts quickly when $D$ is large, and it \emph{is} large when the ice is both thick and steep.  That is, ice flows downhill most strongly in this case.  Our analogy also explains why the surfaces of ice sheets are smooth (at least overlooking non-flow processes like crevassing).
+
+Diffusion acts quickly where $D$ is large.  The $D$ in the SIA is large when the ice is both thick and steep.  That is, ice flows downhill most strongly in this case.  Our analogy also explains why the surfaces of ice sheets are smooth, at least overlooking non-flow processes like crevassing.
 
 There are, however, conceptual and practical concerns about the analogy:
 \begin{itemize}
 \item The letters ``$H$'' and ``$h$'' denote different quantities in \eqref{sia}.  Are we allowed to regard \eqref{sia} as a diffusion anyway, when the bed is not flat?
-\item The diffusivity $D$ in \eqref{siadiffusivity} depends on the solution---both on thickness $H$ and surface slope $|\grad h|$---so equation \eqref{sia} is a nonlinear PDE.  Numerical solutions for nonlinear equations are both more difficult to implement and to analyze.
-\item The diffusivity $D$ in \eqref{siadiffusivity} goes to zero at margins, where $H\to 0$, and at divides and domes, where $|\grad h|\to 0$.  This ultimately means that the solution $h$ is not smooth, even though the thickness is continuous everywhere.  The solution $h$ is not smooth even if the bed $b$ and surface mass balance $M$ \emph{are} smooth.  A non-smooth solution inevitably generates larger numerical errors.
+\item The diffusivity $D$ in \eqref{siadiffusivity} depends on the solution---both on thickness $H$ and surface slope $|\grad h|$---so equation \eqref{sia} is a nonlinear PDE.  Numerical solutions for nonlinear equations are more difficult to implement and analyze.
+\item The diffusivity $D$ in \eqref{siadiffusivity} goes to zero at margins, where $H\to 0$, and at divides and domes, where $|\grad h|\to 0$.  Thus the solution ($h$ or $H$) is not smooth at these locations, though it is continuous everywhere.  The solution is not smooth even if the bed $b$ and surface mass balance $M$ \emph{are} smooth.  Large numerical errors will arise where the solution is not smooth.
 \end{itemize}
-Just as important is a deficiency of the SIA model, namely
-\begin{itemize}
-\item Ice flow is not very diffusive when significant longitudinal (membrane) stresses are present, as when ice is floating or sliding or when the flow is confined by terrain.
-\end{itemize}
-This last item is a deficiency of the SIA model, not just of our analogy to explain it.
 
-All of these concerns are areas of active research in mathematical glaciology; see the Notes and References.  For now we continue toward a verified numerical scheme for \eqref{sia}.  The next Section introduces numerical PDE methods.
+Just as important is a physical deficiency of the SIA model, namely
+\begin{itemize}
+\item Ice flow is not very diffusive when significant longitudinal (membrane) stresses are present, as when ice is floating or sliding, or when the flow is significantly confined by terrain.
+\end{itemize}
+This is a deficiency of the SIA model, not just of our analogy to explain it.
+
+All of these concerns are areas of active research in mathematical glaciology; see the Notes and References.
 
 
 \section{Finite difference numerics}  \label{sec:fd}
 
-The above diffusion analogy suggests that numerical schemes for the heat equation are a good starting point for solving the SIA equation \eqref{sia}.  Here we demonstrate only finite difference (FD) schemes.  These schemes replace derivatives by mere arithmetic by using Taylor's theorem which says that for a smooth function $f(x)$,
+For now we introduce numerical PDE methods, leading toward a verified numerical scheme for \eqref{sia}.  The above diffusion analogy suggests that numerical schemes for the heat equation are a good starting point for solving the SIA equation \eqref{sia}.
+
+We demonstrate only finite difference (FD) schemes.  These schemes replace derivatives by difference quotients.  Taylor's theorem says that for a smooth function $f(x)$,
 	$$f(x+\Delta) = f(x) + f'(x) \Delta + \frac{1}{2} f''(x) \Delta^2 + \frac{1}{3!} f'''(x) \Delta^3 + \dots$$
-In Taylor's theorem one may also replace ``$\Delta$'' by its multiples, for example:
+One may also replace ``$\Delta$'' by its multiples, for example:
 \begin{align*}
 f(x+2\Delta) &= f(x) + 2 f'(x) \Delta + 2 f''(x) \Delta^2 + \frac{4}{3} f'''(x) \Delta^3 + \dots \\
 f(x-\Delta) &= f(x) - f'(x) \Delta + \frac{1}{2} f''(x) \Delta^2 - \frac{1}{3!} f'''(x) \Delta^3 + \dots
 \end{align*}
-When constructing solution methods for differential equations the idea is to combine expressions like these to give approximations of the derivatives in the equation.  Thereby an algebraic equation relating grid values will approximate the differential equation.  Here we want partial derivative approximations, so we apply the Taylor's expansions one variable at a time.  For example, for $u=u(t,x)$ we have
+When constructing FD methods for differential equations the idea is to combine expressions like these to give approximations of the derivatives in the equation.  The resulting algebraic equation, relating grid values via mere arithmetic, will approximate the differential equation.
+
+We must apply Taylor expansions for each variable to approximate the partial derivatives appearing in the heat and SIA equations.  For example, for $u=u(t,x)$ we have
 \begin{align*}
 u_t(t,x) &= \frac{u(t+\Delta t,x) - u(t,x)}{\Delta t} + O(\Delta t), \\
 u_t(t,x) &= \frac{u(t+\Delta t,x) - u(t-\Delta t,x)}{2\Delta t} + O((\Delta t)^2), \\
 u_x(t,x) &= \frac{u(t,x+\Delta x) - u(t,x-\Delta x)}{2\Delta x} + O((\Delta x)^2), \\
 u_{xx}(t,x) &= \frac{u(t,x+\Delta x) - 2\, u(t,x) + u(t,x-\Delta x)}{\Delta x^2} + O((\Delta x)^2)
 \end{align*}
-Note that if $\Delta$ is a small number then the remainder $O(\Delta^2)$ is smaller than $O(\Delta)$, so the approximation is closer.
+Note that if $\Delta$ is a small number then $O(\Delta^2)$ is smaller than $O(\Delta)$; the first approximation is inferior to the latter three.
 
-\subsection*{Explicit scheme for the heat equation}  We first build the simplest ``explicit'' scheme which approximates the 1D heat equation $T_t=D T_{xx}$.  It is based on the fact that because $T_t$ and $D T_{xx}$ are equal, these two FD expressions are nearly equal:
+\subsection*{Explicit scheme for the heat equation}  Our simplest scheme approximates the 1D heat equation $T_t=D T_{xx}$ \emph{explicitly}.  It is based on the fact that because $T_t$ and $D T_{xx}$ are equal, these two FD expressions are nearly equal:
 \begin{equation}
 \frac{T(t+\Delta t,x) - T(t,x)}{\Delta t} \approx D\,\frac{T(t,x+\Delta x) - 2\, T(t,x) + T(t,x-\Delta x)}{\Delta x^2}.  \label{heat1Dapproximated}
 \end{equation}
-While \eqref{heat1Dapproximated} approximates the PDE, making it into an equality allows us to determine grid values.  Let $(t_n,x_j)$ denote the points of the time-space grid shown in Figure \ref{fig:timespacegrid}.  Denote our approximation of the solution value $T(t_n,x_j)$ by $T_j^n$.  The finite difference scheme is
+While \eqref{heat1Dapproximated} only approximates the PDE, making it into an equality allows us to determine grid values.  Let $(t_n,x_j)$ denote the points of the time-space grid shown in Figure \ref{fig:timespacegrid}.  Denote our approximation of the solution value $T(t_n,x_j)$ by $T_j^n$.  The finite difference scheme is
 	$$\frac{T_j^{n+1} - T_j^n}{\Delta t} = D\,\frac{T_{j+1}^n - 2\, T_j^n + T_{j-1}^n}{\Delta x^2}.$$
 To get a simplified formula, let $\mu = D \Delta t / (\Delta x)^2$ and solve for $T_j^{n+1}$:
 \begin{equation}
@@ -418,15 +429,15 @@ To get a simplified formula, let $\mu = D \Delta t / (\Delta x)^2$ and solve for
 
 \onefigsize{timespacegrid}{A grid for a finite difference solution to the 1D heat equation.}{2.0in}
 
-FD scheme \eqref{heat1Dfd} is \emph{explicit} because it directly computes $T_j^{n+1}$ in terms of values at time $t_n$.  Figure \ref{fig:expstencil} (left) shows the ``stencil'' for scheme \eqref{heat1Dfd}: three values at the current time $t_n$ are combined to update the one value at the next time $t_{n+1}$.
+FD scheme \eqref{heat1Dfd} is \emph{explicit} because it directly computes $T_j^{n+1}$ in terms of values at time $t_n$.  Figure \ref{fig:expstencil} (left) shows the ``stencil'' for scheme \eqref{heat1Dfd}: three values at the current time $t_n$ are combined to update one value at the next time $t_{n+1}$.
 
-The expression ``$T(t_n,x_j)$'' evaluates a heat equation solution at a grid point.  This is generally a different number from the value $T_j^n$ computed by a scheme like \eqref{heat1Dfd}.  We intend that the numbers $T(t_n,x_j)$ and $T_j^n$ become closer together as the grid is made finer (i.e.~$\Delta t \to 0$ and $\Delta x \to 0$), because the FD expressions become closer to the derivatives they approximate.  That is, we intend our FD scheme to \emph{converge} under \emph{grid refinement}.  Even if we expect that convergence will happen, this needs checking (``verification''; Section \ref{sec:exactsolutions}).
+The expression $T(t_n,x_j)$ is the value of a heat equation solution at a grid point.  This is generally a different number from $T_j^n$, the value actually computed by a scheme like \eqref{heat1Dfd}.  We intend that the numbers $T(t_n,x_j)$ and $T_j^n$ become closer together as the grid is made finer (i.e.~$\Delta t \to 0$ and $\Delta x \to 0$), because the FD expressions become closer to the derivatives they approximate.  That is, we intend our FD scheme to \emph{converge} under \emph{grid refinement}.  Proving that such convergence happens is a main topic in numerical textbooks \cite{LeVequeFD,MortonMayers}.  Even if we expect convergence to happen, this needs checking for the actual computer program which is our implementation (\emph{verification}; Section \ref{sec:exactsolutions}).
 
 \twofigsizes{expstencil}{exp2dstencil}{Left: Space-time stencil for the explicit scheme \eqref{heat1Dfd} for the 1D heat equation.  Right: Spatial-only stencil for scheme \eqref{heat2dexplicit}.}{2.0in}{2.1in}
 
-How accurate is scheme \eqref{heat1Dfd}?  The construction of the scheme tells us that the difference between the scheme \eqref{heat1Dfd} and the PDE it solves is $O(\Delta t + (\Delta x)^2)$.  This difference goes to zero as we refine the grid in space and time, a property of the scheme called \emph{consistency}.  With care about the smoothness of boundary conditions, and using mathematical facts about the heat equation itself, one can also show that the difference between $T_j^n$ and $T(t_n,x_j)$ is $O(\Delta t + (\Delta x)^2)$, which is thus the \emph{convergence rate}; see Notes and References.  To get convergence the scheme must be \emph{stable}, which we address below.  The main theorem for numerical PDE schemes asserts that ``consistency plus stability implies convergence''; see Notes and References.
+How accurate is scheme \eqref{heat1Dfd}?  The construction of the scheme tells us that the difference between the scheme \eqref{heat1Dfd} and the PDE it solves is $O(\Delta t + (\Delta x)^2)$.  This difference goes to zero as we refine the grid in space and time, a property of the scheme called \emph{consistency}.  With care about the smoothness of boundary conditions, and using mathematical facts about the heat equation itself, one can also show that the difference between $T_j^n$ and $T(t_n,x_j)$ is $O(\Delta t + (\Delta x)^2)$, which is thus the \emph{convergence rate}.  To get convergence the scheme must be \emph{stable}, which we address below.  The main theorem for numerical PDE schemes asserts that ``consistency plus stability implies convergence''.  See the Notes and References.
 
-Instead of pursuing theory, in these notes we do something practical, namely verification using exact solutions.  That is, we find problems for which we already know an exact solution $T(t,x)$, and then compute the differences $|T_j^n - T(t_n,x_j)|$.  This determines directly whether our actual implementation converges, not just whether it should in theory.  Then the verified code can be more confidently applied to real situations.
+Instead of pursuing theory, in these notes we emphasize something practical, namely verification using exact solutions.  We will find PDE problems for which we already know an exact solution $T(t,x)$, and then compute differences like $|T_j^n - T(t_n,x_j)|$.  This determines directly whether our actual implementation converges, not just whether it should in theory.  A verified code can be confidently applied to real situations.
 
 \subsection*{A first implemented scheme}  Our first Matlab implementation is for the 2D heat equation \eqref{heat} with $D$ constant and $F=0$:
 \begin{equation}
@@ -438,13 +449,13 @@ Writing $T_{jk}^n \approx T(t_n,x_j,y_k)$, the 2D explicit scheme is
 \begin{equation}
 	\frac{T_{jk}^{n+1} - T_{jk}^n}{\Delta t} = D\,\left(\frac{T_{j+1,k}^n - 2\, T_{jk}^n + T_{j-1,k}^n}{\Delta x^2} + \frac{T_{j,k+1}^n - 2\, T_{jk}^n + T_{j,k-1}^n}{\Delta y^2}\right). \label{heat2dexplicit}
 \end{equation}
-The stencil for the right side of \eqref{heat2dexplicit} is in Figure \ref{fig:expstencil}..
+The stencil for the right side of \eqref{heat2dexplicit} is in Figure \ref{fig:expstencil}, and its implementation is \texttt{heat.m} below.  Matlab colon notation removes loops over spatial variables.
 
-The implementation of \eqref{heat2dexplicit} is \texttt{heat.m} below.  It uses Matlab ``colon'' notation to remove loops over spatial variables.  The following example run
+Consider the example run:
 \begin{Verbatim}
 >>  heat(1.0,30,30,0.001,20);
 \end{Verbatim}
-sets $D=1.0$, uses a $30\times 30$ spatial grid, and takes $N=20$ time steps of $\Delta t = 0.001$.  The result is shown in Figure \ref{fig:initialheat} (right), the look of success.
+This sets $D=1.0$, uses a $30\times 30$ spatial grid, and takes $N=20$ time steps of $\Delta t = 0.001$.  The result is shown in Figure \ref{fig:initialheat} (right), the look of success.
 
 \minput{heat}
 
@@ -453,83 +464,86 @@ However, very similar runs seem to succeed or fail according to some as-yet uncl
 >> heat(1.0,40,40,0.0005,100);    % Figure 8, left
 >> heat(1.0,40,40,0.001,50);      % Figure 8, right
 \end{Verbatim}
-Both runs compute temperature $T$ on the same spatial grid, for the same final time $t_f = N \Delta t = 0.05$, but with different time steps.  Noting the vertical axes, the second run clearly shows ``instability,'' an extreme form of inaccuracy characterized in practice by exponentially-growing solution magnitude in cases where the exact solution is bounded.
+Both runs compute temperature $T$ on the same spatial grid, for the same final time $t_f = N \Delta t = 0.05$, but with different time steps.  Noting the vertical axes, the second run clearly shows ``instability,'' an extreme form of inaccuracy characterized in practice by exponentially-growing solution magnitude.  (Here the exact solution is bounded!)
 
 \twofig{stability}{instability}{Numerically-computed temperature on $40\times 40$ grids.  The two runs are the same except that the left has $\Delta t=0.0005$ and $D\Delta t/(\Delta x)^2= 0.2$, while the right has $\Delta t=0.001$ and $D\Delta t/(\Delta x)^2= 0.4$.  Compare \eqref{stabcrit}.}
 
-\subsection*{Stability criteria and adaptive time stepping}  To avoid the instability shown above, we need to understand the scheme better.  We have not made an implementation error, but we must be more careful when choosing space and time steps.
+\subsection*{Stability criteria and adaptive time stepping}  To avoid such instabilities we need to understand the scheme better.  While we have not made an implementation error, we must be more careful when choosing space and time steps.
 
-Recall the 1D explicit scheme in form \eqref{heat1Dfd}: $T_j^{n+1} = \mu T_{j+1}^n + (1 - 2 \mu) T_j^n + \mu T_{j-1}^n$.  The new value $T_j^{n+1}$ is an average of the old values, in the sense that the coefficients add to one.  Averaging is stable because averaged wiggles are smaller than the wiggles themselves.  However, the scheme is only an average \emph{if} the middle coefficient is positive.  (A linear combination with coefficients which add to one is not an average if any coefficients are negative.  For example, one would not accept 15 as an ``average'' of 5 and 7, but: $15 = -4 \times 5 + 5 \times 7$, and $-4+5=1$.)
+Recall the 1D explicit scheme in form \eqref{heat1Dfd}: $T_j^{n+1} = \mu T_{j+1}^n + (1 - 2 \mu) T_j^n + \mu T_{j-1}^n$.  The new value $T_j^{n+1}$ is an average of the old values, in the sense that the coefficients add to one.  Averaging is stable because averaged wiggles are smaller than the wiggles themselves.  However, the scheme is only an average \emph{if} the middle coefficient is positive.  (A linear combination with coefficients which add to one is not an average if some coefficients are negative.  For example, one would not accept 15 as an ``average'' of 5 and 7, but: $15 = -4 \times 5 + 5 \times 7$, and $-4+5=1$.)
 
-So, what follows from requiring the middle coefficient in \eqref{heat1Dfd} to be positive so it computes such an average?  A \emph{stability criterion}, with these equivalent forms:
+What follows from requiring the middle coefficient in \eqref{heat1Dfd} to be positive?  A \emph{stability criterion}, with these equivalent forms:
 \begin{equation}
    1 - 2 \mu \ge 0 \quad \iff \quad \frac{D\Delta t}{\Delta x^2} \le \frac{1}{2} \quad \iff \quad \Delta t \le \frac{\Delta x^2}{2 D}.  \label{stabcrit}
 \end{equation}
-The third form states the condition as a limitation on the size of $\Delta t$.  It is a \emph{sufficient} stability criterion; it is enough to guarantee stability, though something weaker might do.  In summary, for given $\Delta x$, shortening the time steps $\Delta t$ so that \eqref{stabcrit} holds will make FD scheme \eqref{heat1Dfd} into a stable averaging process.
+The third form states the condition as a limitation on the size of $\Delta t$.  It is a \emph{sufficient} stability criterion; it is enough to guarantee stability, though something weaker might do.  In summary, for given $\Delta x$, shortening the time steps $\Delta t$ until \eqref{stabcrit} holds will make FD scheme \eqref{heat1Dfd} into a stable averaging process.
 
-Applying this same idea to the 2D heat equation \eqref{heat2D} leads to the stability condition that $1-2\mu^x-2\mu^y \ge 0$ where $\mu^x = D \Delta t / (\Delta x^2)$ and $\mu^y = D \Delta t / (\Delta y^2)$.  In the cases shown in Figure \ref{fig:stability}, wherein $\Delta x=\Delta y$, this condition requires $D \Delta t /(\Delta x^2) \le 0.25$.  This inequality precisely distinguishes between the two parts of Figure \ref{fig:stability}.
+Applying this same idea to the 2D heat equation \eqref{heat2D} leads to the stability condition that $1-2\mu^x-2\mu^y \ge 0$ where $\mu^x = D \Delta t / (\Delta x^2)$ and $\mu^y = D \Delta t / (\Delta y^2)$.  In the cases shown in Figure \ref{fig:stability}, wherein $\Delta x=\Delta y$, this condition requires $D \Delta t /(\Delta x^2) \le 0.25$.  This inequality precisely distinguishes between the two parts of Figure \ref{fig:stability}.  In summary, runs of \texttt{heat.m} are unstable if the time step $\Delta t$ is too big relative to the spacing $\Delta x$.
 
-In summary, runs of \texttt{heat.m} are unstable if the time step $\Delta t$ is too big relative to the spacing $\Delta x$.  The stability criterion can always be satisfied by making each time step shorter, and enforcing it inside the code is an \emph{adaptive} implementation.  We illustrate this idea with small changes to \texttt{heat.m} which yield \texttt{heatadapt.m} (not shown).  Adaptive codes can be stable even if the diffusivity $D$ is changing in time.  However, if the diffusivity $D$ is large or the grid spacings $\Delta x$, $\Delta y$ are small, then adaptive explicit implementations must take many short time steps to assure stability; adaptive explicit schemes can be slow.
+Stability criterion \eqref{stabcrit} can always be satisfied by making each time step shorter, and enforcing this inside a code makes an \emph{adaptive} implementation.  Such small changes to \texttt{heat.m} yield \texttt{heatadapt.m} (not shown).  Adaptive codes can be stable even if the diffusivity $D$ is changing in space or time.  However, if the diffusivity $D$ is large, or if grid spacings $\Delta x$, $\Delta y$ are small, then adaptive explicit implementations must take many short time steps to assure stability; adaptive explicit schemes are slow.
 
-\subsection*{Implicit schemes}  There is an alternative stability fix instead of adaptivity, namely ``implicitness.''  For example, the finite difference scheme
+\subsection*{Implicit schemes}  \emph{Implicitness} is an alternative stability fix to adaptivity.  For example, the finite difference scheme
 \begin{equation}
   \frac{T_j^{n+1} - T_j^n}{\Delta t} = D\,\frac{T_{j+1}^{n+1} - 2\, T_j^{n+1} + T_{j-1}^{n+1}}{\Delta x^2} \label{implicit1D}
 \end{equation}
-is an $O(\Delta t + (\Delta x)^2)$ implicit scheme for the 1D heat equation $T_t = D T_{xx}$.  This implicit scheme is stable for \emph{any} positive time step $\Delta t>0$ (``unconditionally stable''); see Notes and References.  Another well-known implicit scheme is \emph{Crank-Nicolson}, which is unconditionally stable for the heat equation, but with smaller error $O((\Delta t)^2 +(\Delta x)^2)$.
+is an $O(\Delta t + (\Delta x)^2)$ implicit scheme for the 1D heat equation $T_t = D T_{xx}$.  This implicit \emph{backward Euler} scheme is stable for any positive time step $\Delta t>0$; it is \emph{unconditionally stable} \cite{LeVequeFD,MortonMayers}.  Another well-known implicit scheme for the heat equation is \emph{Crank-Nicolson}, unconditionally stable with smaller error $O((\Delta t)^2 +(\Delta x)^2)$.
 
-Implicit schemes are harder to implement because the unknown solution at time step $t_{n+1}$ must be treated as a vector and a large linear or nonlinear system of equations must be formed and solved at each time step.  Though the SIA is a highly-nonlinear diffusion equation, implicit schemes are indeed implementable and effective when the right tools are used \cite{Bueler2016}.  In the tradeoff between the easy implementability of adaptive explicit schemes and the better stability of implicit schemes, for these notes we choose the former.
+Implicit schemes are more difficult to implement because the unknown solution at time step $t_{n+1}$ must be treated as a vector, and a (large) linear or nonlinear system of equations must be formed and solved at each time step.  Though the SIA is a highly-nonlinear diffusion equation, implicit schemes are possible and effective when the right tools are used \cite{Bueler2016}.  However, for these notes, in the tradeoff between the easy implementability of adaptive explicit schemes and the better stability of implicit schemes, we choose the former. 
 
-\subsection*{Numerical solution of generalized diffusion equations}  While we have an analogy which says that the SIA is diffusive, we are trying to numerically model flowing ice not heat conduction.  In this section, as a step toward an SIA code which works on nonflat beds, we construct a numerical scheme for a generalized diffusion equation which has an extra ``tilt'' inside the gradient, namely
+\subsection*{Numerical solution of generalized diffusion equations}  We are trying to model flowing ice not heat conduction!  In this section, as a step toward an SIA code which works on nonflat beds, \texttt{diffusion.m} below is an implemented numerical scheme for a generalized diffusion equation:
 \begin{equation}
   T_t = F + \Div \left(D \grad (T + b)\right). \label{gendiffusion}
 \end{equation}
-In \eqref{gendiffusion} the source term $F(x,y)$, diffusivity $D(x,y)$, and tilt $b(x,y)$ may all vary in space.  The following code is called by the SIA-specific schemes we build next, with $b(x,y)$ equal to the bedrock elevation.
+Equation \eqref{gendiffusion} has an extra ``tilt'' $b$ inside the gradient.  The source term $F(x,y)$, diffusivity $D(x,y)$, and tilt $b(x,y)$ may all vary in space.
 
 \minput{diffusion}
 
-The adaptive explicit method in \texttt{diffusion.m} is conditionally stable, with the same essential time step restriction as for the constant diffusivity case, as long as we evaluate $D(x,y)$ at \emph{staggered} grid points and we the following approximation:
+This function is called for SIA-specific solution schemes, which we build next, using $b(x,y)$ equal to the bedrock elevation.  Its adaptive explicit method is conditionally stable, with the same time step restriction as for the constant diffusivity case, because we evaluate $D(x,y)$ at \emph{staggered} grid points.  That is, we using the approximation
 \begin{align*}
 \Div \left(D \grad X\right) &\approx \frac{D_{j+1/2,k}(X_{j+1,k} - X_{j,k}) - D_{j-1/2,k}(X_{j,k} - X_{j-1,k})}{\Delta x^2} \\
 	&\qquad + \frac{D_{j,k+1/2}(X_{j,k+1} - X_{j,k}) - D_{j,k-1/2}(X_{j,k} - X_{j,k-1})}{\Delta y^2}.
 \end{align*}
-Here $X=T+b$.  The left part of Figure \ref{fig:diffstencil} shows the stencil.  The user supplies the diffusivity $D(x,y)$ on the staggered grid.  The initial values $T(0,x,y)$, source term $F(x,y)$, and tilt $b(x,y)$ are supplied on the regular grid.  When using this code for standard diffusions, such as for the flat-bed case of the SIA, we take $b=0$.
+Here $X=T+b$.  The left part of Figure \ref{fig:diffstencil} shows the stencil.  The user supplies the diffusivity $D(x,y)$ on the staggered grid (triangles).  The initial values $T(0,x,y)$, source term $F(x,y)$, and tilt $b(x,y)$ are supplied on the regular grid.  When using this code for standard diffusions, such as for the flat-bed case of the SIA, we take $b=0$.
 
 \twofigsizes{diffstencil}{mahaffystencil}{Left:  Spatial stencil for staggered-grid (triangles) evaluation of diffusivity $D$ in \eqref{gendiffusion}.  Right: Stencil showing how $D$ is evaluated in the SIA, from surface elevation (diamonds) and thicknesses (squares).}{2.2in}{2.2in}
 
 
 \section{Numerically solving the SIA} \label{sec:numericalsia}
 
-In SIA equation \eqref{sia} we have diffusivity $D = \Gamma H^{n+2} |\grad h|^{n-1}$.  As already noted, $D$ goes to zero, i.e.~the diffusion ``degenerates,'' when either $H\to 0$ or $\grad h \to 0$.  Degenerate diffusion equations are automatically free boundary problems, but this aspect of the thickness evolution problem should be no surprise to a glaciologist because the determination of the location of the ice margin is a standard goal when modelling a glacier.  To address this free boundary problem in an explicit time-stepping scheme it suffices to numerically compute new thicknesses and then set them to zero if they come out negative.
+The determination of the location of the ice margin, equivalently the determination of the glacier-covered area, is a standard goal when modelling a glacier.  On the other hand, in SIA equation \eqref{sia} we have diffusivity $D = \Gamma H^{n+2} |\grad h|^{n-1}$.  As already noted, $D$ goes to zero, i.e.~the diffusion \emph{degenerates}, when either $H\to 0$ or $\grad h \to 0$.  Such degenerate diffusion equations are automatically free-boundary problems.  To address our free-boundary problem in an explicit time-stepping scheme it suffices to numerically compute new thicknesses and then set them to zero if they come out negative.
 
-For numerical stability and mass conservation we compute $D$ on a ``staggered'' grid.  Various finite difference schemes have been proposed, but all involve averaging $H$ and differencing $h$ in a ``balanced'' way onto the staggered grid.  In the code \texttt{siaflat.m} below we use the Mahaffy \cite{Mahaffy} method, with the stencil for computing $D$ shown in Figure \ref{fig:diffstencil} (right).  This code only works for a flat bed and zero surface mass balance, deficiences which will be corrected shortly in an extended code \texttt{siageneral.m}.
+For numerical stability and mass conservation we compute $D$ on a staggered grid, as above in \texttt{diffusion.m}.  Various schemes for staggered-grid diffusivity have been proposed, but all involve averaging $H$ and differencing $h$ in a ``balanced'' way onto the staggered grid.  In the code \texttt{siaflat.m} below, which only works for a flat bed and zero surface mass balance, we use the Mahaffy \cite{Mahaffy} method, with the stencil for computing $D$ shown in Figure \ref{fig:diffstencil} (right).  The deficiences of \texttt{siaflat.m} are corrected in an extended code \texttt{siageneral.m} (not shown).
 
 \minput{siaflat}
 
 
 \section{Exact solutions and verification} \label{sec:exactsolutions}
 
-In \texttt{siaflat.m}, which calls \texttt{diffusion.m}, we already have a complicated code.  How do we make sure that such an implemented numerical scheme is correct?  Here are three proposed techniques:
+Program \texttt{siaflat.m} calls \texttt{diffusion.m}, so we already have a complicated code.  How do we make sure that such an implemented numerical scheme is correct?  Here are three proposed techniques:
 \begin{enumerate}
   \item don't make any mistakes, or
-  \item compare your numerical results with results from other researchers, and assume the outliers are in error, or
+  \item compare your numerical results with results from other researchers, and hope the outliers are in error, or
   \item compare your numerical results to an exact solution.   \end{enumerate}
-The first two approaches, which one might call ``infallibility'' and ``intercomparison,'' respectively, should be less common than they are.  The last one, preferred by the CFD community generally \cite{Roache,Wesseling}, is called ``verification.''  It is a simple idea:  A computer code should be tested in cases where we know the right answer.  To do this we must return to the PDE itself seeking useful exact solutions.
+The first two approaches, \emph{infallibility} and \emph{intercomparison} respectively, should be less common than they are.  The last one, preferred by the CFD community generally \cite{Roache,Wesseling}, is \emph{verification}.  It is a simple idea:  A computer code should be tested in cases where we know the right answer.  To do this we must return to the PDE itself.  We seek useful exact solutions.
 
-\subsection*{Exact solution of heat equation}  First we return to the simpler 1D heat equation $T_t = D T_{xx}$ with constant $D$.  Many exact solutions are known, but consider the time-dependent ``Green's function,'' circa 1830, also known as the ``heat kernel.''  It starts at time $t=0$ with a delta function $T(0,x)=\delta(x)$ of heat at the origin and then it spreads out over time, solving the equation on $-\infty<x<\infty$ and for $t>0$.  We calculate it by a method which generalizes to the SIA.  The Green's function is ``self-similar'' over time, in the sense that it changes shape \emph{only} by shrinking the output (vertical) axis and lengthening the input (horizontal) axis (Figure \ref{fig:heatscaling}).  These scalings are related to each other by conservation of energy.  Similarity variables for this solution involve multiplying the input and output of an invariant shape function $\phi(s)$ by the same power of $t$:
+\subsection*{Exact solution of heat equation}  Again consider the 1D heat equation $T_t = D T_{xx}$ with constant $D$.  Many exact solutions are known, but we will use the time-dependent \emph{Green's function}, circa 1830, also known as the \emph{heat kernel}.  It starts at time $t=0$ with a delta function $T(0,x)=\delta(x)$ of heat at the origin.  Then it spreads out over time, solving the equation on $-\infty<x<\infty$ and for $t>0$.  We calculate it by a method which generalizes to the SIA.
+
+The Green's function is self-similar over time, in the sense that it changes shape \emph{only} by shrinking the output (vertical) axis and lengthening the input (horizontal) axis (Figure \ref{fig:heatscaling}).  These scalings are related to each other by conservation of energy.  Similarity variables for this solution involve multiplying the input and output of an invariant shape $\phi(s)$ by the same power of $t$:
 \begin{equation}
 s \stackrel{\text{\emph{input scaling}}}{\phantom{\Big|}=\phantom{\Big|}} t^{-1/2} x, \qquad\qquad T(t,x) \stackrel{\text{\emph{output scaling}}}{\phantom{\Big|}=\phantom{\Big|}} t^{-1/2} \phi(s).  \label{heatscalings}
 \end{equation}
 One may then show that $\phi(s) = (4 \pi D)^{-1/2}\, e^{-s^2/(4D)}$ so the Green's function is
   $$T(t,x) = (4 \pi D t)^{-1/2}\, e^{-x^2/(4Dt)}.$$
-A numerical solver for the 1D heat equation which starts with initial values $T(t_0,x)$, from this exact solution at $t_0>0$ should, at a later time $t>t_0$, produce numbers which are close to the exact solution $T(t,x)$; see the Exercises.
 
-\onefigsize{heatscaling}{The heat equation Green's function in 1D has the same shape at each time, but with time-dependent input- and output-scalings.}{2.4in}
+To verify a numerical solver for the 1D heat equation we start with initial values $T(t_0,x)$, that is, we evaluate this exact solution at $t_0>0$.  At a later time $t>t_0$ the numerical solution should be close to the exact solution $T(t,x)$; see the Exercises.
 
-\subsection*{Halfar's similarity solution to the SIA}  Now we jump to the year 1981.  P.~Halfar \cite{Halfar81} published the similarity solution of the SIA in the case of flat bed and zero surface mass balance.  For the 2D SIA model \eqref{sia} using a Glen exponent $n=3$ this solution \cite{Halfar83} has scalings similar to \eqref{heatscalings} above:
+\onefigsize{heatscaling}{The Green's function of the heat equation has the same shape at each time, but with time-dependent input- and output-scalings.}{2.4in}
+
+\subsection*{Halfar's similarity solution to the SIA}  Now we jump to the year 1981 in which P.~Halfar \cite{Halfar81,Halfar83} published the similarity solution of the SIA, at least for flat bed and zero surface mass balance.  For the 2D SIA model \eqref{sia} using a Glen exponent $n=3$ this solution has scalings similar to \eqref{heatscalings} above:
 \begin{equation}
 s = t^{-1/18} r, \qquad \qquad H(t,r)=t^{-1/9} \phi(s), \label{halfarscalings}
 \end{equation}
-where $r=(x^2+y^2)^{1/2}$ is the distance from the origin.  These scalings are related to each other by the constancy of total mass/volume, because no mass is gained or lost through the surface (see the Exercises). Scalings \eqref{halfarscalings} imply that, differently from heat, the diffusion of ice slows down dramatically as the shape flattens out because the powers $t^{-1/9}$ and $t^{-1/18}$ change very slowly for large times $t$.
+where $r=(x^2+y^2)^{1/2}$ is the distance from the origin.  These scalings are related to each other by the constancy of total mass/volume, because no mass is gained or lost through the surface (see the Exercises). Scalings \eqref{halfarscalings} imply that, differently from heat, the diffusion of ice slows down dramatically as the shape flattens out.  That is, the powers $t^{-1/9}$ and $t^{-1/18}$ change very slowly for large times $t$.
 
 \onefigsize{siascaling}{Radial sections of Halfar's solution \eqref{halfar} of \eqref{sia}, shown on $H$ (m) versus $r$ (km) axes at $t=1,10,100,1000,10000$ years.}{5.5in}
 
@@ -537,9 +551,12 @@ The formula for the Halfar solution is remarkably simple given all it accomplish
 \begin{equation}
 H(t,r) = H_0 \left(\frac{t_0}{t}\right)^{1/9} \left[1 - \left(\left(\frac{t_0}{t}\right)^{1/18} \frac{r}{R_0}\right)^{4/3}\right]^{3/7}. \label{halfar}
 \end{equation}
-Here the characteristic time satisfies $t_0 = (18 \Gamma)^{-1} (7/4)^3 R_0^4 H_0^{-7}$ for center height $H_0$ and radius $R_0$.  In Figure \ref{fig:siascaling} we see that for times significantly greater than $t_0$ ($t/t_0 \gg 1$) the solution changes very slowly.  For example, the change between years $1$ and $100$ is larger than that between years $1000$ and $10000$.
+Here the characteristic time $t_0 = (18 \Gamma)^{-1} (7/4)^3 R_0^4 H_0^{-7}$ depends on the radius $R_0$ and the center height $H_0$.  In Figure \ref{fig:siascaling} we see that for times significantly greater than $t_0$ ($t/t_0 \gg 1$) the solution changes very slowly.  For example, the change between years $1$ and $100$ is larger than that between years $1000$ and $10000$.
 
-\subsection*{Using Halfar's solution}  Formula \eqref{halfar} is simple to use for verifying time-dependent SIA models.  The code \texttt{verifysia.m} (not shown) takes as input the number of grid points in each ($x,y$) direction.  It uses the Halfar solution at 200 a as the initial condition, does a numerical run of \texttt{siaflat.m} to a final time 20000 a, and then compares to the Halfar formula at that time.  By ``compares'' we mean it computes the thickness \emph{numerical error}, the absolute differences between the numerical and exact thicknesses at the final time:
+\subsection*{Using Halfar's solution}  Formula \eqref{halfar} is simple to use for verifying time-dependent SIA models.  The code \texttt{verifysia.m} (not shown) takes as input the number of grid points in each ($x,y$) direction.  It uses the Halfar solution at 200 a as the initial condition, does a numerical run of \texttt{siaflat.m} to a final time 20000 a, and then compares to the Halfar formula at that time.  By ``compares'' we mean it computes the thickness \emph{numerical error}, the absolute difference between the numerical and exact thicknesses at the final time:
+
+FIXME the numbers below are not quite what I get with Octave; to test also with Matlab I need to fix the \texttt{diffusion.m} shadow issue by renaming to \texttt{diffstag.m}
+
 \small
 \begin{verbatim}
 >> verifysia(20)
@@ -552,7 +569,7 @@ average thickness error     = 2.800
 average thickness error     = 1.059
 \end{verbatim}
 \normalsize
-We see that the average thickness error decreases with increasing grid resolution, as expected for a correctly-implemented code.  What is less obvious is that almost any numerical implementation mistake will break such convergence.  That is, the reported errors will not shrink if there is any meaningful bug (see the Exercises).  The essential benefit of verification against an exact solution is thus that it is \emph{fragile}!  One must implement the model correctly, not just generate good-looking results, to get convergence as above.
+We see that the average numerical thickness error decreases with increasing grid resolution, as expected for a correctly-implemented code.  What is less obvious is that almost any numerical implementation mistake will break such convergence.  That is, the reported errors will not shrink if there is any meaningful bug (see the Exercises).  The essential benefit of verification against an exact solution is thus that success is \emph{fragile}.  One must implement the model correctly, not just generate good-looking results, to get convergence as above.
 
 The Halfar solution has also been used for modelling real ice masses.  J.~Nye and others \cite{NyeIcarus2000} used it to compare the long-time consequences of different flow laws for the south polar cap on Mars.  In particular, they evaluated $\text{CO}_2$ and $\text{H}_2\text{O}$ ice softness parameters by comparing the long-time behavior of the corresponding Halfar solutions to the observed polar cap properties.  Their conclusions:
   \begin{quote}
@@ -816,29 +833,27 @@ Where to find exact solutions for ice flow models?  Textbooks by van der Veen \c
 
 \exer{8}{In the text, and the code \texttt{verifysia.m}, we used Halfar's solution to verify our numerical scheme \texttt{siaflat.m}.  Create the analogous code \texttt{verifyheat.m} to use the Green's function of the 2D heat equation \eqref{heat2D}---see the last exercise---to verify \texttt{heatadapt.m}.  You can use the high quality approximation $e^{-A^2}\approx 0$ for $|A|>10$ to choose a rectangular domain in space for which you may use $T=0$ Dirichlet boundary conditions.}
 
-\exer{9}{Is P.~Halfar male or female, and what does the first initial ``P.'' stand for?  (\emph{I don't know the answers to these questions.})}
+\exer{9}{Show that the Halfar solution formula \eqref{halfar} solves the SIA equation \eqref{sia} in the case of flat bed ($h=H$), zero climatic mass balance ($M=0$), and $n=3$.  You will want to express divergence and gradient in polar coordinates.}
 
-\exer{10}{Show that the Halfar solution formula \eqref{halfar} solves the SIA equation \eqref{sia} in the case of flat bed ($h=H$), zero climatic mass balance ($M=0$), and $n=3$.  You will want to express divergence and gradient in polar coordinates.}
+\exer{10}{Show, by changing variables in integrating formula \eqref{halfar}, that the volume of ice in the Halfar solution is independent of $t$.}
 
-\exer{11}{Show, by changing variables in integrating formula \eqref{halfar}, that the volume of ice in the Halfar solution is independent of $t$.}
+\exer{11}{In the text it is claimed that any modification of \texttt{siaflat.m} will make the output of \texttt{verifysia.m} show non-convergence, e.g.~the reported average thickness error will not go to zero as the grid is refined.  By randomly altering lines of \texttt{siaflat.m}, or by other methods of your choice, evaluate this claim.}
 
-\exer{12}{In the text it is claimed that any modification of \texttt{siaflat.m} will make the output of \texttt{verifysia.m} show non-convergence, e.g.~the reported average thickness error will not go to zero as the grid is refined.  By randomly altering lines of \texttt{siaflat.m}, or by other methods of your choice, evaluate this claim.}
+\exer{12}{Some output from \texttt{verifysia.m} has been suppressed in the text, including a map-plane view of the numerical ice thickness error.  Run the program to see this error map.  Near the grounded margin of an ice sheet this error is much larger than elsewhere.  Why?  On the same grids, would a higher-order or Stokes model for an ice sheet with an advancing margin have significantly smaller thickness error, supposing we knew a relevant exact solution?}
 
-\exer{13}{Some output from \texttt{verifysia.m} has been suppressed in the text, including a map-plane view of the numerical ice thickness error.  Run the program to see this error map.  Near the grounded margin of an ice sheet this error is much larger than elsewhere.  Why?  On the same grids, would a higher-order or Stokes model for an ice sheet with an advancing margin have significantly smaller thickness error, supposing we knew a relevant exact solution?}
-
-\exer{14}{Derive the surface kinematical equation \eqref{surfkine} from the mass continuity \eqref{masscont} and base kinematical \eqref{basekine} equations.  You will use the incompressibility of ice, equation \eqref{incompressible}.  Note that the Leibniz rule for differentiating integrals, mentioned in the text, is
+\exer{13}{Derive the surface kinematical equation \eqref{surfkine} from the mass continuity \eqref{masscont} and base kinematical \eqref{basekine} equations.  You will use the incompressibility of ice, equation \eqref{incompressible}.  Note that the Leibniz rule for differentiating integrals, mentioned in the text, is
   $$\frac{d}{dx}\left(\int_{g(x)}^{f(x)} h(x,y)\,dy\right) = f'(x) h(x,f(x)) - g'(x) h(x,g(x)) + \int_{g(x)}^{f(x)} h_x(x,y)\,dy.$$}
 
-\exer{15}{Let $C_s = A (\rho g (1-r)/4)^n$ where $r=\rho/\rho_w$.  Assume $x_g=0$ is the location of the grounding line.  Derive the two parts of the van der Veen exact ice shelf solution, namely
+\exer{14}{Let $C_s = A (\rho g (1-r)/4)^n$ where $r=\rho/\rho_w$.  Assume $x_g=0$ is the location of the grounding line.  Derive the two parts of the van der Veen exact ice shelf solution, namely
 \begin{align*}
   u &= \left[ u_g^{n+1} + (C_s/M_0) \left((M_0 x + u_g H_g)^{n+1} - (u_g H_g)^{n+1}\right) \right]^{1/(n+1)}, \quad H = (M_0 x + u_g H_g) / u,
 \end{align*}
 Start from equation \eqref{ssafloat}, and use the fact $(H^2)_x = 2 H H_x$ to generate the first integral of \eqref{ssafloat}.  Also use boundary condition \eqref{calvingstress}.  Get an equation $u_x = C_s H^n$ or equivalent.  On the other hand, note that the mass continuity equation $M_0=(uH)_x$ can be integrated to give the formula $uH = M_0 (x-x_g) + u_g H_g$ for the flux.  Use this expression for $uH$ to find $u(x)$ first, and then write $H(x)$ in terms of $u(x)$ as above.  These exact solutions are from \cite{vanderVeen83}.  They are used in code \texttt{exactshelf.m}.}
 
-\exer{16}{Modify the code \texttt{ssaflowline.m} to solve the ice stream SSA equation \eqref{ssa}.  For boundary conditions it would be reasonable to have fixed velocity at the upstream end, but keep the calving front boundary condition at the downstream end.  For instance, consider the case where the calving front is at the point where the ice stream reaches flotation.  (See also \cite{Bodvardsson,Bueler2014exactmarine}.)}
+\exer{15}{Modify the code \texttt{ssaflowline.m} to solve the ice stream SSA equation \eqref{ssa}.  For boundary conditions it would be reasonable to have fixed velocity at the upstream end, but keep the calving front boundary condition at the downstream end.  For instance, consider the case where the calving front is at the point where the ice stream reaches flotation.  (See also \cite{Bodvardsson,Bueler2014exactmarine}.)}
 
-\exer{17}{Derive the hydrostatic \eqref{stresshydrostatic} equation, in detail.}
+\exer{16}{Derive the hydrostatic \eqref{stresshydrostatic} equation, in detail.}
 
-\exer{18}{Build a better ice sheet model.}
+\exer{17}{Build a better ice sheet model.}
 
 \end{document}
