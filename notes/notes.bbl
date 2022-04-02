@@ -52,11 +52,14 @@
 {\sc E.~Bueler}, {\em Stable finite volume element schemes for the
   shallow-ice approximation}, J.~Glaciol., 62 (2016), pp.~230--242.
 
+\bibitem{Bueler2021}
+{\sc E.~Bueler}, {\em PETSc for Partial Differential Equations:
+  Numerical Solutions in C and Python}, SIAM Press, 2021.
+
 \bibitem{BBssasliding}
 {\sc E.~Bueler and J.~Brown}, {\em Shallow shelf approximation as a ``sliding
   law'' in a thermodynamically coupled ice sheet model}, J. Geophys. Res., 114
-  (2009).
-\newblock F03008, doi:10.1029/2008JF001179.
+  (2009). F03008, doi:10.1029/2008JF001179.
 
 \bibitem{BBL}
 {\sc E.~Bueler, J.~Brown, and C.~Lingle}, {\em Exact solutions to the
@@ -147,6 +150,11 @@
 \bibitem{Hutter}
 {\sc K.~Hutter}, {\em Theoretical {G}laciology}, D. Reidel, 1983.
 
+\bibitem{Joughinetal2002}
+{\sc I. Joughin, S. Tulaczyk, R. Bindschadler, and S.~F. Price}, {\em Changes
+  in West Antarctic ice stream velocities: observation and analysis},
+  J. Geophys. Res., 107 (2002).
+
 \bibitem{JouvetBueler2012}
 {\sc G.~Jouvet and E.~Bueler}, {\em Steady, shallow ice sheets as obstacle
   problems: well-posedness and finite element approximation}, SIAM J. Appl.
@@ -224,12 +232,12 @@
   subglacial lakes}, J. Geophys. Res., 108 (2003).
 
 \bibitem{MISMIP3d2013}
-{\sc F.~Pattyn, L.~Perichon, G.~Durand, and .~others}, {\em Grounding-line
+{\sc F.~Pattyn, L.~Perichon, G.~Durand, and others}, {\em Grounding-line
   migration in plan-view marine ice-sheet models: results of the ice2sea
   {MISMIP3d} intercomparison}, J. Glaciol., 59 (2013), pp.~410--422.
 
 \bibitem{MISMIP2012}
-{\sc F.~Pattyn, C.~Schoof, L.~Perichon, and .~others}, {\em Results of the
+{\sc F.~Pattyn, C.~Schoof, L.~Perichon, and others}, {\em Results of the
   {M}arine {I}ce {S}heet {M}odel {I}ntercomparison {P}roject, {MISMIP}}, The
   Cryosphere, 6 (2012), pp.~573--588.
 
