@@ -12,7 +12,7 @@ PROJECT X: Recovering surface mass balance from kinematic observations
 
 ADVISOR: Ed Bueler
 
-DESCRIPTION: Remote observations of glacier using visible and radar imaging allow increasingly routine determination of ice surface elevation and ice surface velocity.  On the other hand, surface mass balance rates can be hard to observe remotely, including in ablation areas and/or firn areas with ice lenses (and so on).  The surface kinematical equation is worth understanding in this regard, besides its application to modeling glacier evolution.  We will use the surface kinematical equation to invert time-dependent synthetic observations to extract surface mass balance.  Simplified 1D geometry, a new form of the kinematical equation, and the linear nature of the problem will make this possible in a week-long project.
+DESCRIPTION: Remote observations of glacier using visible and radar imaging allow increasingly-routine determination of ice surface elevation and ice surface velocity.  On the other hand, surface mass balance rates can be hard to observe remotely, for instance in ablation areas and/or firn areas with ice lenses.  The surface kinematical equation is worth understanding in this regard, besides of its application to modeling glacier evolution.  We will use the surface kinematical equation to invert time-dependent synthetic observations to extract surface mass balance, a feat attempted before (e.g. Gudmundsson & Bauder, 1999).  A new form of the kinematical equation makes the topic worth a second look.  Simplified 1D geometry and the linear nature of the problem make it achievable in a week-long project.
 
 SOFTWARE REQUIREMENTS: Matlab or Octave or Python/numpy.
 
