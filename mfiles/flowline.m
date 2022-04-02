@@ -19,9 +19,8 @@ function u = flowline(L,J,gamma,W,alpha,beta,ug)
 % examples (called by): TESTFLOWLINE, CONVANALYSIS, SSAFLOWLINE
 
 dx = L / J;
-rhs = dx^2 * beta(:); % a (J+1) length column vector
-rhs(1) = ug;
-rhs(J+1) = rhs(J+1) - 2 * gamma * dx * W(J+1);
+b = dx^2 * beta(:); % a (J+1) length column vector
+b(1) = ug;  b(J+1) = b(J+1) - 2 * gamma * dx * W(J+1);
 
 A = sparse(J+1,J+1);  % allocates no space yet
 A(1,1) = 1.0;
@@ -36,7 +35,7 @@ A(J+1,J+1) = - (W(J) + W(J+1) + alpha(J+1) * dx^2);
 % scale A by rows; otherwise Matlab says "close to singular or badly scaled."
 scale = full(max(abs(A),[],2));    % column vector of row maximums
 for j=1:J+1,  A(j,:) = A(j,:) ./ scale(j);  end
-rhs = rhs ./ scale;
+b = b ./ scale;
 
 % solve by Matlab/Octave default methods
-u = A \ rhs;
+u = A \ b;
