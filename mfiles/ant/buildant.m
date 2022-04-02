@@ -1,24 +1,24 @@
 function [x,y,lat,lon,prcp,thk,topg,usrf] = buildant(doplot,filename)
 % BUILDANT  Helper function for ANT, to build a Matlab/Octave model state
-% for the Antarctic ice sheet, on a (default) 50km grid, from NetCDF
-% file Ant50km.nc.  (See comments for how this NetCDF file was generated.)
-% Examples:  Plots 3 fields:
+% for the Antarctic ice sheet, on a (default) 50km grid, from a NetCDF file.
+% See comments below for how to generate a suitable NetCDF file.
+% Examples:  Plots 3 fields from default file Ant50km.nc:
 %   >> buildant
 % This example fills the variables, but with no plot:
 %   >> [x,y,lat,lon,prcp,thk,topg,usrf] = buildant(0);
 % This reads from a different NetCDF file:
 %   >> [x,y,lat,lon,prcp,thk,topg,usrf] = buildant(0,'Ant25km.nc');
 % See also:  ANT.
-
-% notes: the preparatory steps to create Ant50km.nc require 
-% the NCO ("NetCDF Operators"; ) and the download of a LARGE file,
-% which is actually ALBMAP:
+%
+% The preparatory steps to create Ant50km.nc require the NCO
+% ("NetCDF Operators") and the download of a 104 Mb file, ALBMAP:
 %   $ wget -nc http://websrv.cs.umt.edu/isis/images/4/4d/Antarctica_5km_dev1.0.nc
 %   $ ncks -v lat,lon,thk,topg,usrf,acca -d x1,,,10 -d y1,,,10 \
 %        Antarctica_5km_dev1.0.nc Ant50km.nc
-% OR: ncks -v lat,lon,thk,topg,usrf,acca -d x1,,,5 -d y1,,,5 \
+% Higher resolution sampling:
+%   $ ncks -v lat,lon,thk,topg,usrf,acca -d x1,,,5 -d y1,,,5 \
 %        Antarctica_5km_dev1.0.nc Ant25km.nc
-% OR: ncks -v lat,lon,thk,topg,usrf,acca -d x1,,,2 -d y1,,,2 \
+%   $ ncks -v lat,lon,thk,topg,usrf,acca -d x1,,,2 -d y1,,,2 \
 %        Antarctica_5km_dev1.0.nc Ant10km.nc
 
 if nargin < 1, doplot = 1; end
@@ -50,4 +50,3 @@ xlabel('x (km)'), ylabel('y (km)'), title('bed elevation "topg"  (m)'), colorbar
 figure(3)
 surf(x/1000,y/1000,prcp), shading('flat'), view(2), axis square
 xlabel('x (km)'), ylabel('y (km)'), title('precipitation "prcp"  (m a-1)'), colorbar
-
