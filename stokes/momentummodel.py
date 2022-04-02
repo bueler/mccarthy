@@ -9,6 +9,7 @@
 import sys
 import numpy as np
 import firedrake as fd
+from firedrake.petsc import PETSc
 
 # public data
 mixFEchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
@@ -93,7 +94,7 @@ class Mass(fd.AuxiliaryOperatorPC):
     def form(self, pc, test, trial):
         # pass in parameters from flow.py
         # FIXME there should be a better way than through the options database?
-        opts = fd.PETSc.Options()
+        opts = PETSc.Options()
         eps = opts.getReal("pcMass_eps")
         Dtyp = opts.getReal("pcMass_Dtyp")
         n_glen = opts.getReal("pcMass_n_glen")

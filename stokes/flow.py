@@ -11,6 +11,7 @@
 import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
 from firedrake import *
+from firedrake.petsc import PETSc
 from domain import Hin, L, bdryids, getdomaindims
 from momentummodel import mixFEchoices, packagechoices, secpera, dayspera, \
                           MomentumModel
@@ -120,7 +121,7 @@ printpar('geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f' \
          %(L,bs,Hin),indent=args.sequence+1)
 if bs < 1.0:
     printpar('slab geometry case ...',indent=args.sequence+2)
-mesh._topology_dm.viewFromOptions('-dm_view')
+mesh.topology_dm.viewFromOptions('-dm_view')
 
 # -osurface is not available in parallel
 assert (mesh.comm.size == 1 or len(args.osurface) == 0)
