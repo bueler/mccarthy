@@ -8,11 +8,11 @@ The point of the project is not to reach a particular destination!  It is to _he
 
 ## description
 
-PROJECT X: Recovering surface mass balance from kinematic observations
+PROJECT 6: Recovering surface mass balance from kinematic observations
 
 ADVISOR: Ed Bueler
 
-DESCRIPTION: Remote observations of glacier using visible and radar imaging allow increasingly-routine determination of ice surface elevation and ice surface velocity.  On the other hand, surface mass balance (SMB) rates can be hard to observe remotely, for instance in ablation areas and/or firn areas with ice lenses.  The surface kinematical equation (SKE) is worth understanding in this regard (in addition to its application to modeling glacier evolution).  We will use the SKE to invert time-dependent synthetic observations to extract SMB, a feat attempted before (e.g. Gudmundsson & Bauder, 1999).  A newly-discovered form of the SKE makes the topic worth a second look.  Simplified 1D geometry and the linear nature of the problem make it achievable in a week-long project.
+DESCRIPTION: Remote observations of glaciers using visible and radar imaging allow increasingly-routine determination of ice surface elevation and ice surface velocity.  On the other hand, surface mass balance (SMB) rates can be hard to observe remotely, for instance in ablation areas and/or firn areas with ice lenses.  The surface kinematical equation (SKE) is worth understanding in this regard, in addition to its application to modeling glacier evolution.  We will use the SKE to invert time-dependent synthetic observations to extract SMB, a feat attempted before (e.g. Gudmundsson & Bauder, 1999).  A newly-discovered form of the SKE makes the topic worth a second look.  Simplified 1D geometry and the linear nature of the problem make it achievable in a week-long project.
 
 SOFTWARE REQUIREMENTS: Matlab or Octave or Python/numpy, _running locally on your machine_.
 
