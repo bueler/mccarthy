@@ -1,12 +1,10 @@
-stokes/
-=======
+# stokes/
 
-Copyright 2018--2020 Ed Bueler
+Copyright 2018--2022 Ed Bueler
 
-The programs in this directory use [Firedrake](https://www.firedrakeproject.org/), [Gmsh](http://gmsh.info/), [PETSc](http://www.mcs.anl.gov/petsc/), and [Paraview](https://www.paraview.org/).  They are more advanced, and more experimental, than the Matlab/Octave programs in [mfiles/](../mfiles/).  The solver is documented in [doc/](doc/).
+The Python programs in this directory use [Firedrake](https://www.firedrakeproject.org/), [Gmsh](http://gmsh.info/), [PETSc](https://petsc.org/release/), and [Paraview](https://www.paraview.org/).  They are more advanced, and more experimental, than the Matlab/Octave programs in [mfiles/](../mfiles/).  The solver is documented in [doc/](doc/).
 
-Installation
-------------
+## Installation
 
   * Install [Gmsh](http://gmsh.info/) and [Paraview](https://www.paraview.org/),
     for instance by installing Debian or OSX packages.
@@ -18,21 +16,20 @@ Installation
   * Most users will only need the PETSc which is installed by Firedrake; no
     separate PETSc installation is needed.
 
-Stokes-only usage
------------------
+## Stokes-only usage
 
 This is the basic mode of solving the momentum conservation problem, that is, the Glen-Stokes system for the velocity and pressure.  The glacier surface is fixed.
 
-Start [Firedrake](https://www.firedrakeproject.org/):
+Start-up the [Firedrake](https://www.firedrakeproject.org/) virtual environment (venv):
 
         $ source ~/firedrake/bin/activate
 
-Generate the domain geometry using [domain.py](domain.py) and then mesh it using [Gmsh](http://gmsh.info/):
+Generate the domain geometry using `domain.py` and then mesh it using [Gmsh](http://gmsh.info/):
 
         (firedrake) $ ./domain.py -o glacier.geo      # create domain outline
         (firedrake) $ gmsh -2 glacier.geo             # writes glacier.msh
 
-Run the solver [flow.py](flow.py) on the mesh, which will write velocity and pressure fields into `glacier.pvd`.
+Run the solver `flow.py` on the mesh, which will write velocity and pressure fields into `glacier.pvd`.
 
         (firedrake) $ ./flow.py -mesh glacier.msh
 
@@ -44,8 +41,7 @@ An alternate visualization plots surface values into an image file:
 
         (firedrake) $ ./flow.py -mesh glacier.msh -osurface surf.png
 
-Slab-on-slope usage
--------------------
+## Slab-on-slope usage
 
 Set the height of the bedrock step to zero when creating the domain geometry:
 
@@ -53,10 +49,9 @@ Set the height of the bedrock step to zero when creating the domain geometry:
         (firedrake) $ gmsh -2 slab.geo
         (firedrake) $ ./flow.py -mesh slab.msh
 
-In this mode the numerical error is displayed because the exact solution is known.  (See [notes/](../notes/) and/or [doc/](doc/) for the slab-on-slope solution.)
+In this mode the numerical error is displayed because the exact solution is known.  (See `notes/` and/or `stokes/doc/` for the slab-on-slope solution.)
 
-Surface evolution usage
------------------------
+## Surface evolution usage
 
 By setting `-deltat` to a positive value, and choosing the number of time steps by `-m`, the surface will evolve according to the surface kinematical equation, in the case of zero mass balance, using explicit time stepping.  The time-stepping is not adaptive and it is up to the user to find time steps which are stable.
 
@@ -70,8 +65,7 @@ This writes variables (velocity,pressure,vertical\_displacement) into `glacier.p
 
 Unstable examples are in the script [study/genunstable.sh](study/genunstable.sh).
 
-Mesh refinement
----------------
+## Mesh refinement
 
 The default `glacier.msh` mesh above has a typical mesh size of 100 m with grid resolution a factor of 4 of two finer near the interior corners created by the bedrock step, giving 25 m resolution at these corners.  Remember you can visualized these mesh files with [Gmsh](http://gmsh.info/): `gmsh glacier.msh`.
 
@@ -104,8 +98,7 @@ There are four refinement methods to get finer resolution:
 
     This is slightly faster than methods 2 and 3, but the result should be the same.  A convergence test using this refinement method and the exact slab-on-a-slope solution is in [study/convergeslab.sh](study/convergeslab.sh).
 
-Coupled steady-state usage
---------------------------
+## Coupled steady-state usage
 
 Using any of methods 1, 2, and 3, one can generate high-quality (i.e. 1 mm/10 day) steady states of the coupled momentum (Stokes) and mass conservation (surface-kinematical) equations:
 
@@ -113,8 +106,7 @@ Using any of methods 1, 2, and 3, one can generate high-quality (i.e. 1 mm/10 da
         (firedrake) $ ./flow.py -mesh fine2.msh -deltat 10.0 -m 100 -s_snes_converged_reason
         (firedrake) $ ./flow.py -mesh start.msh -refine 1 -deltat 10.0 -m 100 -s_snes_converged_reason
 
-Getting help
-------------
+## Getting help
 
 There are several ways to get help, but note that the `-mesh` option may be
 required to get going:
@@ -123,8 +115,7 @@ required to get going:
   * `./flow.py -mesh X.msh -help` lists a large number of PETSc options, and
   * `./flow.py -mesh X.msh -help intro` shows the PETSc version number.
 
-Solver performance information
-------------------------------
+## Solver performance information
 
 [Firedrake](https://www.firedrakeproject.org/) calls [PETSc](http://www.mcs.anl.gov/petsc/) to solve the Glen-Stokes equations.  Because this is a nonlinear problem, the [SNES object](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/SNES/index.html) from [PETSc](http://www.mcs.anl.gov/petsc/) is used.  Also, the solver is referred-to using option prefix `-s_`.  Therefore basic information on solver performance comes, for example, from asking for the number of iterations in each solver, for example
 
@@ -150,8 +141,7 @@ In time-stepping mode there is a second solver which computes the mesh vertical 
 
 For more on [PETSc](http://www.mcs.anl.gov/petsc/) and [Firedrake](https://www.firedrakeproject.org/) solvers see their online documentation, or see my book [_PETSc for PDEs_](https://github.com/bueler/p4pdes).
 
-Info on installing Firedrake
------------------------
+## Info on installing Firedrake
 
   * You may need to `unset PETSC_DIR` and `unset PETSC_ARCH` before running `activate` when starting [Firedrake](https://www.firedrakeproject.org/).
   * Do `python3 firedrake-status` in the `firedrake/bin/` directory, after running `activate`, to see the current configuration of your [Firedrake](https://www.firedrakeproject.org/) installation.
