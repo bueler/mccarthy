@@ -1,7 +1,7 @@
 reading initial mesh from tmptest/lowtest.msh ...
-  mesh has 98 elements (cells) and 69 vertices
+  mesh has 96 elements (cells) and 68 vertices
   geometry [m]: L = 3000.000, bs = 100.000, Hin = 400.000
 solving for velocity and pressure ...
-  flow speed: av =    586.817 m a-1,  max =    906.092 m a-1
-  pressure:   av =     17.464 bar,    max =     40.173 bar
+  flow speed: av =    586.996 m a-1,  max =    906.092 m a-1
+  pressure:   av =     17.466 bar,    max =     40.174 bar
 writing (velocity,pressure,eff.visc.) to tmptest/lowtest.pvd ...

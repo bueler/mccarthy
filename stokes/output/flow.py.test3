@@ -1,13 +1,13 @@
 reading initial mesh from tmptest/lowtest.msh ...
-  mesh has 98 elements (cells) and 69 vertices
+  mesh has 96 elements (cells) and 68 vertices
   geometry [m]: L = 3000.000, bs = 100.000, Hin = 400.000
 writing (velocity,pressure,eff.visc.,vert.disp.) at each time step to tmptest/test3.pvd ...
 solving at step 0: t = 0.000 days ...
-  flow speed: av =    586.817 m a-1,  max =    906.092 m a-1
-  pressure:   av =     17.464 bar,    max =     40.173 bar
-  max. vert. disp. = 8.774 m,  Hout = 401.045 m
+  flow speed: av =    586.996 m a-1,  max =    906.092 m a-1
+  pressure:   av =     17.466 bar,    max =     40.174 bar
+  max. vert. disp. = 8.780 m,  Hout = 401.044 m
 solving at step 1: t = 20.000 days ...
-  flow speed: av =    588.283 m a-1,  max =    906.092 m a-1
-  pressure:   av =     17.544 bar,    max =     40.969 bar
-  max. vert. disp. = 7.021 m,  Hout = 401.452 m
+  flow speed: av =    588.401 m a-1,  max =    906.092 m a-1
+  pressure:   av =     17.545 bar,    max =     40.970 bar
+  max. vert. disp. = 7.024 m,  Hout = 401.450 m
 writing END step (t = 40.000 days) to file tmptest/test3.pvd ...
