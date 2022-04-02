@@ -4,7 +4,7 @@ function [t vol] = ant(filename,doplot,E)
 % Ant50km.nc for metadata.
 % Example: Using Ant50km.nc data for 40 ka run:
 %   >> addpath('../')   % so Matlab/Octave can find other codes
-%   >> ant
+%   >> ant;
 % Using different gridded data and different enhancement factor
 % E=5.0, and saving volume time series for reload:
 %   >> [t vol] = ant('Ant25km.nc',1,5.0);
