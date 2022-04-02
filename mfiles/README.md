@@ -1,7 +1,6 @@
-m-files
--------
+# m-files
 
-Copyright 2009--2018  Ed Bueler
+Copyright 2009--2022  Ed Bueler
 
 The codes in this directory have been tested in Octave and Matlab.  Start
 Matlab
@@ -19,4 +18,3 @@ Such help files show runs with example options:
 To run the codes in the `ant/` subdirectory, do this first:
 
     >> addpath('ant/')
-

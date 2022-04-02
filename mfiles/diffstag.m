@@ -1,6 +1,6 @@
-function [T,dtav] = diffusion(Lx,Ly,J,K,Dup,Ddown,Dright,Dleft,...
+function [T,dtav] = diffstag(Lx,Ly,J,K,Dup,Ddown,Dright,Dleft,...
                               T0,tf,F,b)
-% DIFFUSION  Adaptive explicit method for diffusion equation
+% DIFFSTAG  Adaptive explicit method for diffusion equation
 %   T_t = F + div (D grad (T + b))
 % on rectangle (-Lx,Lx) x (-Ly,Ly) with initial condition T0 and
 % functions F(x,y), D(x,y), b(x,y).  The boundary condition is that
@@ -9,7 +9,7 @@ function [T,dtav] = diffusion(Lx,Ly,J,K,Dup,Ddown,Dright,Dleft,...
 % That is, the boundary condition is a Dirichlet condition from the
 % initial values.
 % Usage:
-%   T = diffusion(Lx,Ly,J,K,Dup,Ddown,Dright,Dleft,T0,tf,F)
+%   T = diffstag(Lx,Ly,J,K,Dup,Ddown,Dright,Dleft,T0,tf,F)
 % where
 %   T     = approximate solution at tf
 %   Lx,Ly = half-widths of rectangular domain
@@ -30,7 +30,7 @@ function [T,dtav] = diffusion(Lx,Ly,J,K,Dup,Ddown,Dright,Dleft,...
 %   >> J = 50;  K = 50;  D = ones(J-1,K-1);
 %   >> [x,y] = ndgrid(-1:2/J:1,-1:2/K:1);
 %   >> T0 = exp(-30*(x.*x + y.*y));
-%   >> T = diffusion(1.0,1.0,J,K,D,D,D,D,T0,0.05);
+%   >> T = diffstag(1.0,1.0,J,K,D,D,D,D,T0,0.05);
 %   >> surf(x,y,T), shading('interp'), xlabel x, ylabel y
 % Called by: SIAFLAT, SIAGENERAL.
 

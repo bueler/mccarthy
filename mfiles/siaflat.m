@@ -11,14 +11,14 @@ function [H,dtlist] = siaflat(Lx,Ly,J,K,H0,deltat,tf)
 %   [H,dtlist] = siaflat(Lx,Ly,J,K,H0,deltat,tf)
 % where
 %   H      = numerical approx of thickness at final time
-%   dtlist = list of time steps used adaptively in diffusion.m
+%   dtlist = list of time steps used adaptively in diffstag.m
 %   Lx,Lx  = half lengths of rectangle in x,y directions
 %   J,K    = number of subintervals in x,y directions
 %   H0     = initial thickness, a (J+1)x(K+1) array
 %   deltat = major time step
 %   tf     = final time
 % Example:  See VERIFYSIA and ROUGHICE.
-% Calls:  DIFFUSION, which does adaptive explicit time-stepping
+% Calls:  DIFFSTAG, which does adaptive explicit time-stepping
 %   within the major time step
 % Called by:  VERIFYSIA, ROUGHICE
 
@@ -48,15 +48,15 @@ for n=1:N
   a2rt = (H(ej,k) - H(j,k)).^2 / dx^2 + ...
          (H(ej,nk) + H(j,nk) - H(ej,sk) - H(j,sk)).^2 / (4*dy)^2;
   a2lt = (H(j,k) - H(wj,k)).^2 / dx^2 + ...
-         (H(wj,nk) + H(j,nk) - H(wj,sk) - H(j,sk)).^2 / (4*dy)^2;     
+         (H(wj,nk) + H(j,nk) - H(wj,sk) - H(j,sk)).^2 / (4*dy)^2;
   % Mahaffy evaluation of staggered grid diffusivity
   %   D = Gamma H^{n+2} |grad h|^{n-1}
   Dup = Gamma * Hup.^5 .* a2up;
   Ddn = Gamma * Hdn.^5 .* a2dn;
   Drt = Gamma * Hrt.^5 .* a2rt;
   Dlt = Gamma * Hlt.^5 .* a2lt;
-  % call *adaptive* diffusion() to time step H
-  [H,dtadapt] = diffusion(Lx,Ly,J,K,Dup,Ddn,Drt,Dlt,H,deltat);
+  % call *adaptive* diffstag() to time step H
+  [H,dtadapt] = diffstag(Lx,Ly,J,K,Dup,Ddn,Drt,Dlt,H,deltat);
   t = t + deltat;
   dtlist = [dtlist dtadapt];
   fprintf('.')

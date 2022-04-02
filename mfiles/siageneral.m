@@ -11,7 +11,7 @@ function [H,h,dtlist] = siageneral(Lx,Ly,J,K,H0,deltat,tf,b,M,A)
 % where
 %   H      = numerical approx of thickness at final time
 %   h      = numerical approx of surface elevation at final time
-%   dtlist = list of time steps used adaptively in diffusion.m
+%   dtlist = list of time steps used adaptively in diffstag.m
 %   Lx,Ly  = half lengths of rectangle in x,y directions
 %   J,K    = number of subintervals in x,y directions
 %   H0     = initial thickness, a (J+1)x(K+1) array
@@ -20,7 +20,7 @@ function [H,h,dtlist] = siageneral(Lx,Ly,J,K,H0,deltat,tf,b,M,A)
 %   b      = bed elevation, a (J+1)x(K+1) array
 %   M      = surface mass balance, a (J+1)x(K+1) array
 %   A      = ice softness
-% Calls: DIFFUSION, which does adaptive explicit time-stepping within the
+% Calls: DIFFSTAG, which does adaptive explicit time-stepping within the
 % major time step deltat.
 % Example: See ANT.
 
@@ -51,14 +51,14 @@ for n=1:N
   a2rt = (h(ej,k) - h(j,k)).^2 / dx^2 + ...
          (h(ej,nk) + h(j,nk) - h(ej,sk) - h(j,sk)).^2 / (4*dy)^2;
   a2lt = (h(j,k) - h(wj,k)).^2 / dx^2 + ...
-         (h(wj,nk) + h(j,nk) - h(wj,sk) - h(j,sk)).^2 / (4*dy)^2;     
+         (h(wj,nk) + h(j,nk) - h(wj,sk) - h(j,sk)).^2 / (4*dy)^2;
   % Mahaffy's staggered grid diffusivity: D = Gamma H^{n+2} |grad h|^{n-1}
   Dup  = Gamma * Hup.^5 .* a2up;
   Ddn  = Gamma * Hdn.^5 .* a2dn;
   Drt  = Gamma * Hrt.^5 .* a2rt;
   Dlt  = Gamma * Hlt.^5 .* a2lt;
-  % call *adaptive* diffusion() to time step H
-  [H,dtadapt] = diffusion(Lx,Ly,J,K,Dup,Ddn,Drt,Dlt,H,deltat,M,b);
+  % call *adaptive* diffstag() to time step H
+  [H,dtadapt] = diffstag(Lx,Ly,J,K,Dup,Ddn,Drt,Dlt,H,deltat,M,b);
   H = max(H,0.0);       % enforce nonnegative thickness (H->0 can occur where M<0)
   calvehere = (b < - f * H);  % floating
   H(calvehere) = 0.0;   % calving occurs anywhere the ice is floating
