@@ -1,6 +1,6 @@
 all: notes.pdf
 
-minputs := heat diffusion siaflat flowline ssaflowline
+minputs := heat diffstag siaflat flowline ssaflowline
 minputs := $(addsuffix .m,$(minputs))
 
 mslim := $(subst .m,.slim.m,$(minputs))
@@ -24,4 +24,3 @@ tmp/%.slim.m: ../mfiles/%.m
 clean:
 	@rm -f *~ *.out *.aux *.log *.blg *.snm *.toc *.nav *.vrb *.synctex.gz *.dvi
 	@rm -rf tmp/
-

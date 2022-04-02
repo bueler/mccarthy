@@ -490,13 +490,13 @@ is an $O(\Delta t + (\Delta x)^2)$ implicit scheme for the 1D heat equation $T_t
 
 Implicit schemes are more difficult to implement because the unknown solution at time step $t_{n+1}$ must be treated as a vector, and a (large) linear or nonlinear system of equations must be formed and solved at each time step.  Though the SIA is a highly-nonlinear diffusion equation, implicit schemes are possible and effective when the right tools are used \cite{Bueler2016}.  However, for these notes, in the tradeoff between the easy implementability of adaptive explicit schemes and the better stability of implicit schemes, we choose the former. 
 
-\subsection*{Numerical solution of generalized diffusion equations}  We are trying to model flowing ice not heat conduction!  In this section, as a step toward an SIA code which works on nonflat beds, \texttt{diffusion.m} below is an implemented numerical scheme for a generalized diffusion equation:
+\subsection*{Numerical solution of generalized diffusion equations}  We are trying to model flowing ice not heat conduction!  In this section, as a step toward an SIA code which works on nonflat beds, \texttt{diffstag.m} below is an implemented numerical scheme for a generalized diffusion equation:
 \begin{equation}
   T_t = F + \Div \left(D \grad (T + b)\right). \label{gendiffusion}
 \end{equation}
 Equation \eqref{gendiffusion} has an extra ``tilt'' $b$ inside the gradient.  The source term $F(x,y)$, diffusivity $D(x,y)$, and tilt $b(x,y)$ may all vary in space.
 
-\minput{diffusion}
+\minput{diffstag}
 
 This function is called for SIA-specific solution schemes, which we build next, using $b(x,y)$ equal to the bedrock elevation.  Its adaptive explicit method is conditionally stable, with the same time step restriction as for the constant diffusivity case, because we evaluate $D(x,y)$ at \emph{staggered} grid points.  That is, we using the approximation
 \begin{align*}
@@ -512,14 +512,14 @@ Here $X=T+b$.  The left part of Figure \ref{fig:diffstencil} shows the stencil. 
 
 The determination of the location of the ice margin, equivalently the determination of the glacier-covered area, is a standard goal when modelling a glacier.  On the other hand, in SIA equation \eqref{sia} we have diffusivity $D = \Gamma H^{n+2} |\grad h|^{n-1}$.  As already noted, $D$ goes to zero, i.e.~the diffusion \emph{degenerates}, when either $H\to 0$ or $\grad h \to 0$.  Such degenerate diffusion equations are automatically free-boundary problems.  To address our free-boundary problem in an explicit time-stepping scheme it suffices to numerically compute new thicknesses and then set them to zero if they come out negative.
 
-For numerical stability and mass conservation we compute $D$ on a staggered grid, as above in \texttt{diffusion.m}.  Various schemes for staggered-grid diffusivity have been proposed, but all involve averaging $H$ and differencing $h$ in a ``balanced'' way onto the staggered grid.  In the code \texttt{siaflat.m} below, which only works for a flat bed and zero surface mass balance, we use the Mahaffy \cite{Mahaffy} method, with the stencil for computing $D$ shown in Figure \ref{fig:diffstencil} (right).  The deficiences of \texttt{siaflat.m} are corrected in an extended code \texttt{siageneral.m} (not shown).
+For numerical stability and mass conservation we compute $D$ on a staggered grid, as above in \texttt{diffstag.m}.  Various schemes for staggered-grid diffusivity have been proposed, but all involve averaging $H$ and differencing $h$ in a ``balanced'' way onto the staggered grid.  In the code \texttt{siaflat.m} below, which only works for a flat bed and zero surface mass balance, we use the Mahaffy \cite{Mahaffy} method, with the stencil for computing $D$ shown in Figure \ref{fig:diffstencil} (right).  The deficiences of \texttt{siaflat.m} are corrected in an extended code \texttt{siageneral.m} (not shown).
 
 \minput{siaflat}
 
 
 \section{Exact solutions and verification} \label{sec:exactsolutions}
 
-Program \texttt{siaflat.m} calls \texttt{diffusion.m}, so we already have a complicated code.  How do we make sure that such an implemented numerical scheme is correct?  Here are three proposed techniques:
+Program \texttt{siaflat.m} calls \texttt{diffstag.m}, so we already have a complicated code.  How do we make sure that such an implemented numerical scheme is correct?  Here are three proposed techniques:
 \begin{enumerate}
   \item don't make any mistakes, or
   \item compare your numerical results with results from other researchers, and hope the outliers are in error, or
@@ -555,7 +555,7 @@ Here the characteristic time $t_0 = (18 \Gamma)^{-1} (7/4)^3 R_0^4 H_0^{-7}$ dep
 
 \subsection*{Using Halfar's solution}  Formula \eqref{halfar} is simple to use for verifying time-dependent SIA models.  The code \texttt{verifysia.m} (not shown) takes as input the number of grid points in each ($x,y$) direction.  It uses the Halfar solution at 200 a as the initial condition, does a numerical run of \texttt{siaflat.m} to a final time 20000 a, and then compares to the Halfar formula at that time.  By ``compares'' we mean it computes the thickness \emph{numerical error}, the absolute difference between the numerical and exact thicknesses at the final time:
 
-FIXME the numbers below are not quite what I get with Octave; to test also with Matlab I need to fix the \texttt{diffusion.m} shadow issue by renaming to \texttt{diffstag.m}
+FIXME the numbers below are not quite what I get with Octave
 
 \small
 \begin{verbatim}
