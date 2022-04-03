@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# (C) 2018--2020 Ed Bueler
+# (C) 2018--2022 Ed Bueler
 
 # Solve glacier Glen-Stokes problem with explicit evolution of the free surface.
 # See README.md for usage.
@@ -257,4 +257,3 @@ if len(args.osurface) > 0:
         surfaceplot(mesh,u,r,args.deltat,args.osurface)
     else:
         surfaceplot(mesh,u,None,args.deltat,args.osurface)
-

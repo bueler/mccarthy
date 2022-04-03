@@ -15,7 +15,7 @@ tmptest/slabtest.msh: tmptest/
 GMSH = gmsh
 
 rungmshversion_1:
-	-@echo "Gmsh version (tested with 4.9.0):"
+	-@echo "Gmsh version (tested with 4.9.0 and 4.9.3):"
 	-@${GMSH} "-version"   # just show gmsh version
 
 rundomain_1: tmptest/
@@ -46,9 +46,8 @@ test: rungmshversion_1 rundomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runfl
 
 .PHONY: clean rungmshversion_1 rundomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7 test
 
-clean:
-	rm -f *~ *.pyc *.pvd *.vtu *.pvtu *.geo *.msh
+clean:    # aggressive clean in current directory; removes many files generated from runs
+	rm -f *~ *.pyc *.pvd *.vtu *.pvtu *.geo *.msh *.png
 	rm -rf __pycache__/ tmptest/
 	(cd doc/; ${MAKE} clean)
 	(cd study/; ${MAKE} clean)
-
