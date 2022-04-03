@@ -1,6 +1,6 @@
 all: lecture.pdf
 
-minputs := heat heatadapt diffusion siaflat flowline ssaflowline
+minputs := heat heatadapt diffstag siaflat flowline ssaflowline
 minputs := $(addsuffix .m,$(minputs))
 
 mslim := $(subst .m,.slim.m,$(minputs))
@@ -29,4 +29,3 @@ anim/halfar-0.png: anim/halfarfigs.tar.gz
 clean:
 	@rm -f *~ *.out *.aux *.log *.bbl *.blg *.snm *.toc *.nav *.vrb *.synctex.gz
 	@rm -rf tmp/ anim/halfar*png
-
