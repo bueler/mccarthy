@@ -8,7 +8,7 @@ The point of the project is not to reach a particular destination!  It is to _he
 
 ## description
 
-PROJECT 6: Recovering surface mass balance from kinematic observations
+PROJECT 10: Recovering surface mass balance from kinematic observations
 
 ADVISOR: Ed Bueler
 

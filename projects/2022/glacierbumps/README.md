@@ -6,7 +6,7 @@ The point of the project is not to reach a particular destination!  It is to _he
 
 ## description
 
-PROJECT 7: Stokes modeling of glacier velocity: the effects of surface bumps
+PROJECT 11: Stokes modeling of glacier velocity: the effects of surface bumps
 
 ADVISOR: Ed Bueler
 
