@@ -305,4 +305,3 @@ class MomentumModel:
         with perr.dat.vec_ro as vperr:
             perrmax = vperr.max()[1]
         return uerrmax,perrmax
-

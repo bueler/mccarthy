@@ -28,7 +28,7 @@ runflow_2: tmptest/slabtest.msh
 	-@./testit.sh flow.py "-mesh tmptest/slabtest.msh -package Direct" 1 2 "slab u,p solve w direct solver"
 
 runflow_3: tmptest/lowtest.msh
-	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -deltat 20.0 -m 2 -o tmptest/test3.pvd" 1 3 "evolving surface u,p,h solve"
+	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -deltat 20.0 -m 2 -o tmptest/test3.pvd" 1 3 "evolving surface u,p,s solve"
 
 runflow_4: tmptest/lowtest.msh
 	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -save_rank -o tmptest/test4.pvd -s_snes_converged_reason" 2 4 "parallel u,p solve"
@@ -46,7 +46,7 @@ test: rungmshversion_1 rundomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runfl
 
 .PHONY: clean rungmshversion_1 rundomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7 test
 
-clean:    # aggressive clean in current directory; removes many files generated from runs
+clean:    # aggressive clean in current directory and doc/ and study/
 	rm -f *~ *.pyc *.pvd *.vtu *.pvtu *.geo *.msh *.png
 	rm -rf __pycache__/ tmptest/
 	(cd doc/; ${MAKE} clean)

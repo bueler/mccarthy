@@ -6,7 +6,6 @@
 
 # TODO 1. find regularization which actually helps with harder surface-evolution
 #         instability cases (e.g. -bs 200 in domain.py)
-#      2. set it up so -sequence k can be used in time-dependent mode too
 
 import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
@@ -114,6 +113,8 @@ printpar('reading initial mesh from %s ...' % args.mesh,indent=args.sequence)
 mesh = Mesh(args.mesh)
 if args.refine + args.sequence > 0:
     hierarchy = MeshHierarchy(mesh, args.refine + args.sequence)
+    if args.refine > 0:
+        printpar('refining mesh %d times ...' % args.refine,indent=args.sequence+1)
     mesh = hierarchy[args.refine]
 describe(mesh,indent=args.sequence+1)
 bs,bmin_initial,Hout_initial = getdomaindims(mesh)
@@ -224,6 +225,7 @@ elif args.sequence > 0:
     for j in range(l):
         numericalerrorsslab(indent=l-j)
         mesh = hierarchy[args.refine+j+1]
+        printpar('transferring to next-refined mesh ...',indent=l-j-1)
         describe(mesh,indent=l-j-1)
         printpar('solving for velocity and pressure ...',indent=l-j-1)
         up = momentumsolve(upcoarse=up,indent=l-j-1)
