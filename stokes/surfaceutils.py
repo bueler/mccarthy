@@ -30,6 +30,15 @@ def getxsurface(mesh,top_id):
     xs = fd.Function(P1).interpolate(x).dat.data_ro[bc.nodes]
     return (xs, bc)
 
+# return nodal values of spatial coordinate z, and top boundary indicator
+# SERIAL
+def getzsurface(mesh,top_id):
+    P1 = fd.FunctionSpace(mesh, 'CG', 1)
+    bc = fd.DirichletBC(P1, 1.0, top_id)
+    _,z = fd.SpatialCoordinate(mesh)
+    zs = fd.Function(P1).interpolate(z).dat.data_ro[bc.nodes]
+    return (zs, bc)
+
 # return linear-interpolated surface vertical displacement function  r = (delta h)(x)
 # SERIAL
 def getsurfacevdispfunction(mesh,top_id,r):
@@ -45,6 +54,26 @@ def getsurfacevelocityfunction(mesh,top_id,u):
     ufcn = interp1d(xs,uP1.dat.data_ro[bc.nodes,0],copy=False)
     wfcn = interp1d(xs,uP1.dat.data_ro[bc.nodes,1],copy=False)
     return (ufcn,wfcn)
+
+# FIXME this is a kludge version which averages u,w to same staggered locations as dsdx
+# return values of  - vecu|_s . n_s = + u_s s_x - w_s  as 1D numpy array
+# with one value for each surface mesh edge; note n_s = <-s_x,1>
+# SERIAL
+def getbalancemotion(mesh,top_id,u):
+    import numpy as np
+    xs,bc = getxsurface(mesh,top_id)
+    if np.min(np.abs(np.diff(xs))) < 0.001:
+        print('WARNING: mesh has |delta x| < 1 mm at surface')
+    zs,_ = getzsurface(mesh,top_id)
+    P1V = fd.VectorFunctionSpace(mesh, 'CG', 1)
+    uP1 = fd.Function(P1V).interpolate(u)
+    us = uP1.dat.data_ro[bc.nodes,0]
+    ws = uP1.dat.data_ro[bc.nodes,1]
+    xsav = (xs[:-1] + xs[1:]) / 2.0
+    dsdx = np.diff(zs) / np.diff(xs)
+    usav = (us[:-1] + us[1:]) / 2.0
+    wsav = (ws[:-1] + ws[1:]) / 2.0
+    return xsav, usav * dsdx - wsav
 
 def removexticks():
     import matplotlib.pyplot as plt
@@ -68,11 +97,11 @@ def surfaceplot(mesh,u,r,deltat,filename):
     ufcn,wfcn = getsurfacevelocityfunction(mesh,bdryids['top'],u)
     plt.figure(figsize=(6.0,8.0))
     if deltat > 0.0:
-        rows = 4
-        print('plotting surface values of (s,u,w,s_t) in file %s ...' % filename)
+        rows = 5
+        print('plotting surface values of (s,u,w,Phi,s_t) in file %s ...' % filename)
     else:
-        rows = 3
-        print('plotting surface values of (s,u,w) in file %s ...' % filename)
+        rows = 4
+        print('plotting surface values of (s,u,w,Phi) in file %s ...' % filename)
     plt.subplot(rows,1,1)
     plt.plot(x,sfcn(x),'g',label='surface elevation')
     plt.ylabel('s  [m]')
@@ -87,13 +116,18 @@ def surfaceplot(mesh,u,r,deltat,filename):
     plt.plot(x,secpera*wfcn(x),label='vertical velocity')
     plt.ylabel('w  [m/a]')
     plt.legend()
+    xs, Phi = getbalancemotion(mesh,bdryids['top'],u)
+    removexticks()
+    plt.subplot(rows,1,4)
+    plt.plot(xs,secpera*Phi,'.',label='balance motion')
+    plt.ylabel('Phi  [m/a]')
+    plt.legend()
     if deltat > 0.0:
         removexticks()
         rfcn = getsurfacevdispfunction(mesh,bdryids['top'],r)
-        plt.subplot(rows,1,4)
+        plt.subplot(rows,1,5)
         plt.plot(x,rfcn(x)/(deltat/dayspera),'r',label='surface elevation rate (last time step)')
         plt.ylabel('s_t  [m/a]')
         plt.legend()
     plt.xlabel('x  [m]')
     plt.savefig(filename,bbox_inches='tight')
-
