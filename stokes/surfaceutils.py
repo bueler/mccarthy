@@ -40,11 +40,20 @@ def getsurfacevdispfunction(mesh,top_id,r):
 # SERIAL
 def getsurfacevelocityfunction(mesh,top_id,u):
     xs,bc = getxsurface(mesh,top_id)
-    P1V = fd.VectorFunctionSpace(mesh, "CG", 1)
+    P1V = fd.VectorFunctionSpace(mesh, 'CG', 1)
     uP1 = fd.Function(P1V).interpolate(u)
     ufcn = interp1d(xs,uP1.dat.data_ro[bc.nodes,0],copy=False)
     wfcn = interp1d(xs,uP1.dat.data_ro[bc.nodes,1],copy=False)
     return (ufcn,wfcn)
+
+def removexticks():
+    import matplotlib.pyplot as plt
+    plt.tick_params(
+        axis='x',          # changes apply to the x-axis
+        which='both',      # both major and minor ticks are affected
+        bottom=False,      # ticks along the bottom edge are off
+        top=False,         # ticks along the top edge are off
+        labelbottom=False) # labels along the bottom edge are off
 
 # generate plot of surface values if desired
 # SERIAL
@@ -68,15 +77,6 @@ def surfaceplot(mesh,u,r,deltat,filename):
     plt.plot(x,sfcn(x),'g',label='surface elevation')
     plt.ylabel('s  [m]')
     plt.legend()
-
-    def removexticks():
-        plt.tick_params(
-            axis='x',          # changes apply to the x-axis
-            which='both',      # both major and minor ticks are affected
-            bottom=False,      # ticks along the bottom edge are off
-            top=False,         # ticks along the top edge are off
-            labelbottom=False) # labels along the bottom edge are off
-
     removexticks()
     plt.subplot(rows,1,2)
     plt.plot(x,secpera*ufcn(x),label='horizontal velocity')
