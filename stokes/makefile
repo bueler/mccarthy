@@ -11,6 +11,10 @@ tmptest/slabtest.msh: tmptest/
 	-@./domain.py -hmesh 150 -bs 0.0 -o tmptest/slabtest.geo > /dev/null
 	-@gmsh -2 tmptest/slabtest.geo > /dev/null
 
+tmptest/margintest.msh: tmptest/
+	-@project11/profile.py -hmesh 300 -o tmptest/margintest.geo > /dev/null
+	-@gmsh -2 tmptest/margintest.geo > /dev/null
+
 # testing
 GMSH = gmsh
 
@@ -42,12 +46,16 @@ runflow_6: tmptest/lowtest.msh
 runflow_7: tmptest/lowtest.msh
 	-@./testit.sh flow.py "-mesh tmptest/lowtest.msh -sequence 1 -s_snes_converged_reason -package SchurGMGMass" 1 7 "Schur+GMG+nuMass: grid-sequence one level"
 
-test: rungmshversion_1 rundomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7
+runflow_8: tmptest/margintest.msh
+	-@./testit.sh flow.py "-mesh tmptest/margintest.msh -alpha 0.0" 1 8 "basic solve for project11 margin shape"
 
-.PHONY: clean rungmshversion_1 rundomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7 test
+test: rungmshversion_1 rundomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7 runflow_8
 
-clean:    # aggressive clean in current directory and doc/ and study/
+.PHONY: clean rungmshversion_1 rundomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7 runflow_8 test
+
+clean:    # aggressive clean in current directory and doc/,study/,project11/
 	rm -f *~ *.pyc *.pvd *.vtu *.pvtu *.geo *.msh *.png
 	rm -rf __pycache__/ tmptest/
 	(cd doc/; ${MAKE} clean)
 	(cd study/; ${MAKE} clean)
+	(cd project11/; ${MAKE} clean)

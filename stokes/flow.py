@@ -120,7 +120,7 @@ describe(mesh,indent=args.sequence+1)
 bs,bmin_initial,Hout_initial = getdomaindims(mesh)
 printpar('geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f' \
          %(L,bs,Hin),indent=args.sequence+1)
-if bs < 1.0:
+if bs < 1.0 and Hout_initial >= 1.0:
     printpar('slab geometry case ...',indent=args.sequence+2)
 if Hout_initial < 1.0:
     printpar('no outflow boundary detected ...',indent=args.sequence+2)
