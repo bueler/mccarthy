@@ -122,6 +122,8 @@ printpar('geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f' \
          %(L,bs,Hin),indent=args.sequence+1)
 if bs < 1.0:
     printpar('slab geometry case ...',indent=args.sequence+2)
+if Hout_initial < 1.0:
+    printpar('no outflow boundary detected ...',indent=args.sequence+2)
 mesh.topology_dm.viewFromOptions('-dm_view')
 
 # -osurface is not available in parallel
@@ -209,7 +211,8 @@ def timestepping():
 
 # in slab-on-slope case, compute numerical errors
 def numericalerrorsslab(indent=0):
-    if bs < 1.0:
+    # make minimal check that we are actually in slab case
+    if bs < 1.0 and Hout_initial >= 1.0:
         uerrmax,perrmax = mm.numerical_errors_slab(mesh)
         printpar('numerical errors: |u-uex|_inf = %.3e m a-1, |p-pex|_inf = %.3e Pa' \
                  % (uerrmax*secpera,perrmax),indent=indent)

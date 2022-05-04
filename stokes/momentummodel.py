@@ -206,12 +206,16 @@ class MomentumModel:
         f_body = fd.Constant((rhog * np.sin(self.alpha), - rhog * np.cos(self.alpha)))
         Bn = self.get_Bn()
 
-        # right side outflow nonhomogeneous Neumann is part of weak form;
-        #    apply hydrostatic normal force with total force from Hin-height slab
-        _,z = fd.SpatialCoordinate(mesh)
-        Cout = (self.Hin/self.Hout)**2
-        outflow_sigma = fd.as_vector([- Cout * rhog * np.cos(self.alpha) * (self.Hout - z),
-                                     Cout * rhog * np.sin(self.alpha) * (self.Hout - z)])
+        if self.Hout >= 1.0:
+            # if there is an outflow boundary then it is Neumann
+            # and thus part of the weak form; here we apply nonhomogeneous:
+            # hydrostatic normal force equivalent to height=Hin slab,
+            # as though there was a down-stream glacier continuation
+            _,z = fd.SpatialCoordinate(mesh)
+            Cout = (self.Hin/self.Hout)**2
+            outflow_sigma = fd.as_vector( \
+                [- Cout * rhog * np.cos(self.alpha) * (self.Hout - z),
+                Cout * rhog * np.sin(self.alpha) * (self.Hout - z)])
 
         # create, use old, or prolong coarse solution as initial iterate
         if upold:
@@ -230,14 +234,14 @@ class MomentumModel:
         v,q = fd.TestFunctions(self._Z)
         if self.n_glen == 1.0:  # Newtonian ice case
             F = ( fd.inner(Bn * D(u), D(v)) - p * fd.div(v) - fd.div(u) * q \
-                  - fd.inner(f_body, v) ) * fd.dx \
-                - fd.inner(outflow_sigma, v) * fd.ds(bdryids['outflow'])
+                  - fd.inner(f_body, v) ) * fd.dx
         else:                   # (usual) non-Newtonian ice case
             Du2 = 0.5 * fd.inner(D(u), D(u)) + (self.eps * self.Dtyp)**2.0
             rr = 1.0/self.n_glen - 1.0
             F = ( fd.inner(Bn * Du2**(rr/2.0) * D(u), D(v)) \
-                  - p * fd.div(v) - fd.div(u) * q - fd.inner(f_body, v) ) * fd.dx \
-                - fd.inner(outflow_sigma, v) * fd.ds(bdryids['outflow'])
+                  - p * fd.div(v) - fd.div(u) * q - fd.inner(f_body, v) ) * fd.dx
+        if self.Hout >= 1.0:
+            F = F - fd.inner(outflow_sigma, v) * fd.ds(bdryids['outflow'])
 
         # Dirichlet boundary conditions
         noslip = fd.Constant((0.0, 0.0))
