@@ -1,6 +1,6 @@
 /*.m
-/__pycache__/
-/tmptest/
+__pycache__/
+tmptest/
 *.geo
 *.msh
 *.png
