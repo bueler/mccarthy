@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 # (C) 2022 Ed Bueler
 
-# Usage:
-#   $ ./profile.py margin.geo
-#   $ gmsh -2 margin.geo
-# which generates margin.msh
+# For usage see README.md.
 
 # computational domain dimensions in meters
 H0 = 400.0       # input (and initial output) thickness (z)
