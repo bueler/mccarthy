@@ -15,6 +15,10 @@ tmptest/margintest.msh: tmptest/
 	-@project11/profile.py -hmesh 300 -o tmptest/margintest.geo > /dev/null
 	-@gmsh -2 tmptest/margintest.geo > /dev/null
 
+tmptest/droptest.msh: tmptest/
+	-@project11/profile.py -L 800 -hmesh 100 -o tmptest/droptest.geo > /dev/null
+	-@gmsh -2 tmptest/droptest.geo > /dev/null
+
 # testing
 GMSH = gmsh
 
@@ -49,9 +53,12 @@ runflow_7: tmptest/lowtest.msh
 runflow_8: tmptest/margintest.msh
 	-@./testit.sh flow.py "-mesh tmptest/margintest.msh -alpha 0.0" 1 8 "basic solve for project11 margin shape"
 
-test: rungmshversion_1 rundomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7 runflow_8
+runflow_9: tmptest/droptest.msh
+	-@./testit.sh flow.py "-mesh tmptest/droptest.msh -alpha 0.0 -s_snes_converged_reason -osurface tmptest/test9.png" 1 9 "fast-flow project11 margin shape"
 
-.PHONY: clean rungmshversion_1 rundomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7 runflow_8 test
+test: rungmshversion_1 rundomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7 runflow_8 runflow_9
+
+.PHONY: clean rungmshversion_1 rundomain_1 runflow_1 runflow_2 runflow_3 runflow_4 runflow_5 runflow_6 runflow_7 runflow_8 runflow_9 test
 
 clean:    # aggressive clean in current directory and doc/,study/,project11/
 	rm -f *~ *.pyc *.pvd *.vtu *.pvtu *.geo *.msh *.png
