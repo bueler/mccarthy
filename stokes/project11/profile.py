@@ -3,10 +3,6 @@
 
 # For usage see README.md.
 
-# computational domain dimensions in meters
-H0 = 400.0       # input (and initial output) thickness (z)
-L = 3000.0       # total along-flow length (x)
-
 # numbering of parts of boundary
 bdryids = {'outflow' : 41,  # not used in this geometry
            'top'     : 42,
@@ -14,10 +10,10 @@ bdryids = {'outflow' : 41,  # not used in this geometry
            'base'    : 44}
 
 # define margin top shape as a parameterized curve for 0 <= t <= 1
-def curve(t):
+def curve(t,H0,L):
     return L * (1.0 - t**1.5), H0 * t
 
-def writegeometry(geo,ds):
+def writegeometry(geo,ds,L,H0):
     assert (ds < L / 3.0)
     import numpy as np
     # points on boundary, with target mesh densities lc
@@ -26,7 +22,7 @@ def writegeometry(geo,ds):
     geo.write('Point(3) = {%f,%f,0,lc};\n' % (L,0.0))
     # points on top defined by arclength scheme
     t, n = 0, 3
-    x, y = curve(t)
+    x, y = curve(t,H0,L)
     C, D = 8.0 * H0**3 / (27.0 * L**2), 9.0 * L**2 / (4.0 * H0**2)
     while x > L / 2.0:
         # from arclength spacing ds compute parameter spacing h
@@ -34,7 +30,7 @@ def writegeometry(geo,ds):
         h = (tmp**(2.0/3.0) - 1.0) / D - t
         # update t, x, y and put point in file
         t = t + h
-        x, y = curve(t)
+        x, y = curve(t,H0,L)
         n = n + 1
         geo.write('Point(%d) = {%f,%f,0,lc};\n' % (n,x,y))
     # remaining points on top, back to y-axis
@@ -74,8 +70,12 @@ def processopts():
     ''')
     parser.add_argument('-o', metavar='FILE.geo', default='margin.geo',
                         help='output file name (ends in .geo; default=margin.geo)')
+    parser.add_argument('-H0', type=float, default=400.0, metavar='X',
+                        help='left side (divide) height (default=400 m)')
     parser.add_argument('-hmesh', type=float, default=80.0, metavar='X',
-                        help='default target mesh spacing (default=80 m)')
+                        help='target mesh spacing (default=80 m)')
+    parser.add_argument('-L', type=float, default=3000.0, metavar='X',
+                        help='flow line length (default=3000 m)')
     parser.add_argument('-testspew', action='store_true',
                         help='write .geo contents, w/o header, to stdout', default=False)  # just for testing
     return parser.parse_args()
@@ -96,11 +96,11 @@ if __name__ == "__main__":
                   % (now,platform.node(),commandline) )
     # set "characteristic lengths" which are used by gmsh to generate triangles
     lc = args.hmesh
-    print('setting target mesh size of %g m' % lc)
-    geo.write('lc = %f;\n' % lc)
+    print('setting target mesh size of %g m' % (1.1*lc))
+    geo.write('lc = %f;\n' % (1.1*lc))
 
     # the rest
-    writegeometry(geo,lc)
+    writegeometry(geo,lc,args.L,args.H0)
     geo.close()
     if args.testspew:
         result = subprocess.run(['cat', args.o], stdout=subprocess.PIPE)

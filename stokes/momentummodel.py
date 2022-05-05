@@ -166,7 +166,7 @@ class MomentumModel:
                  **((self.n_glen-3.0)/self.n_glen) \
                * self._B3**(3.0/self.n_glen)
 
-    # compute slab-on-slope inflow velocity
+    # compute slab-on-slope inflow velocity; note alpha = 0 ==> uin = 0
     def _get_uin(self,mesh):
         _,z = fd.SpatialCoordinate(mesh)
         Bn = self.get_Bn()
