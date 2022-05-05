@@ -15,9 +15,7 @@
 # Main purpose is to solve the Stokes equations on this domain.  See
 # README.md and flow.py.
 
-# computational domain dimensions in meters
-Hin = 400.0      # input (and initial output) thickness (z)
-L = 3000.0       # total along-flow length (x)
+# hard-coded bedrock step dimensions in meters
 Lup = 1500.0     # location of bedrock step up (x)
 Ldown = 2000.0   # location of bedrock step down (x);  Ldown > Lup
 
@@ -27,7 +25,7 @@ bdryids = {'outflow' : 41,
            'inflow'  : 43,
            'base'    : 44}
 
-def writegeometry(geo,bs):
+def writegeometry(geo,bs,L,Hin):
     # points on boundary, with target mesh densities
     Hout = Hin
     Lmid = 0.5 * (Lup + Ldown)
@@ -75,44 +73,60 @@ def writegeometry(geo,bs):
     # ensure all interior elements written ... NEEDED!
     geo.write('Physical Surface(51) = {31};\n')
 
-# dynamically extract geometry making these definitions (tolerance=1cm):
-#   bs      = height of bedrock step     = (min z-coordinate over Lup < x < Ldown)
-#   bmin    = minimum base elevation     = (min z-coordinates)
-#   Hout    = ice thickness at output    = (max z-coordinate at x=L)
-# in parallel no process owns the whole mesh so MPI_Allreduce() is needed
+# dynamically-extract geometry making these definitions (tolerance=1cm):
+#   L       = length along flow line     = (max x-coord)
+#   Hin     = height of x=0 ice          = (max z-coord at x=L)
+#   bs      = height of bedrock step     = (min z-coord over Lup < x < Ldown)
+#   bmin    = minimum base elevation     = (min z-coord)
+#   Hout    = ice thickness at output    = (max z-coord at x=L)
+# note that in parallel no process owns the whole mesh,
+# so MPI_Allreduce() is needed
 def getdomaindims(mesh,tol=0.01):
     from mpi4py import MPI
     # mesh needs to be a Mesh from Firedrake
     xa = mesh.coordinates.dat.data_ro[:,0]  # .data_ro acts like VecGetArrayRead
     za = mesh.coordinates.dat.data_ro[:,1]
+    loc_L = max(xa)
+    L = mesh.comm.allreduce(loc_L, op=MPI.MAX)
+    loc_Hin = 0.0
+    if any(xa < tol):
+        loc_Hin = max(za[xa < tol])
+    Hin = mesh.comm.allreduce(loc_Hin, op=MPI.MAX)
     loc_bs = 9.99e99
     xinmid = (xa > Lup) * (xa < Ldown)
     if any(xinmid):
         loc_bs = min(za[xinmid])
     bs = mesh.comm.allreduce(loc_bs, op=MPI.MIN)
+    if bs > 1.0e5:
+        bs = 0.0
     loc_bmin = min(za)
     bmin = mesh.comm.allreduce(loc_bmin, op=MPI.MIN)
     loc_Hout = 0.0
     if any(xa > L-tol):
         loc_Hout = max(za[xa > L-tol])
     Hout = mesh.comm.allreduce(loc_Hout, op=MPI.MAX)
-    return (bs,bmin,Hout)
+    return (L,Hin,bs,bmin,Hout)
 
 def processopts():
     import argparse
     parser = argparse.ArgumentParser(description=
-    '''Generate .geo geometry-description file, suitable for meshing by Gmsh, for
-    the outline of a glacier flow domain with bedrock steps.  Also generates
-    slab-on-slope geometry with -bs 0.0.
+    '''Generate .geo geometry-description file, suitable for meshing by Gmsh,
+    for the outline of a glacier flow domain with bedrock steps.  Also
+    generates slab-on-slope geometry with -bs 0.0.
     ''')
     parser.add_argument('-o', metavar='FILE.geo', default='glacier.geo',
                         help='output file name (ends in .geo; default=glacier.geo)')
     parser.add_argument('-bs', type=float, default=100.0, metavar='X',
                         help='height of bed step (default=100 m)')
+    parser.add_argument('-coarsen_upperleft',
+                        type=float, default=2.0, metavar='X',
+                        help='coarsen in upperleft by this factor (default=2)')
+    parser.add_argument('-H0', type=float, default=400.0, metavar='X',
+                        help='left side (divide) height (default=400 m)')
     parser.add_argument('-hmesh', type=float, default=80.0, metavar='X',
                         help='default target mesh spacing (default=80 m)')
-    parser.add_argument('-coarsen_upperleft', type=float, default=2.0, metavar='X',
-                        help='coarsen in upperleft by this factor (default=2)')
+    parser.add_argument('-L', type=float, default=3000.0, metavar='X',
+                        help='flow line length (default=3000 m)')
     parser.add_argument('-refine', type=float, default=1.0, metavar='X',
                         help='refine resolution by this factor (default=1)')
     parser.add_argument('-refine_corner', type=float, default=4.0, metavar='X',
@@ -147,9 +161,8 @@ if __name__ == "__main__":
         lc_corner = lc
     geo.write('lc_corner = %f;\n' % lc_corner)
     # the rest
-    writegeometry(geo,args.bs)
+    writegeometry(geo,args.bs,args.L,args.H0)
     geo.close()
     if args.testspew:
         result = subprocess.run(['cat', args.o], stdout=subprocess.PIPE)
         print(result.stdout)
-

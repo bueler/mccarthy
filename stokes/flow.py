@@ -11,7 +11,7 @@ import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
 from firedrake import *
 from firedrake.petsc import PETSc
-from domain import Hin, L, bdryids, getdomaindims
+from domain import bdryids, getdomaindims
 from momentummodel import mixFEchoices, packagechoices, secpera, dayspera, \
                           MomentumModel
 from meshmotion import surfacekinematical, movemesh
@@ -117,7 +117,7 @@ if args.refine + args.sequence > 0:
         printpar('refining mesh %d times ...' % args.refine,indent=args.sequence+1)
     mesh = hierarchy[args.refine]
 describe(mesh,indent=args.sequence+1)
-bs,bmin_initial,Hout_initial = getdomaindims(mesh)
+L,Hin,bs,bmin_initial,Hout_initial = getdomaindims(mesh)
 printpar('geometry [m]: L = %.3f, bs = %.3f, Hin = %.3f' \
          %(L,bs,Hin),indent=args.sequence+1)
 if bs < 1.0 and Hout_initial >= 1.0:
@@ -201,7 +201,7 @@ def timestepping():
             break
         # report on amount of movement
         t_days += args.deltat
-        _,_,Hout = getdomaindims(mesh)
+        _,_,_,_,Hout = getdomaindims(mesh)
         mm.set_Hout(Hout)
         with r.dat.vec_ro as vr:
             absrmax = vr.norm(norm_type=PETSc.NormType.NORM_INFINITY)

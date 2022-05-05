@@ -90,8 +90,9 @@ def surfaceplot(mesh,u,r,deltat,filename):
     import numpy as np
     import matplotlib.pyplot as plt
     from momentummodel import secpera, dayspera
-    from domain import L, bdryids
+    from domain import getdomaindims, bdryids
 
+    L,_,_,_,_ = getdomaindims(mesh)
     x = np.linspace(0.0,L,401)
     sfcn = getboundaryelevation(mesh,bdryids['top'])
     ufcn,wfcn = getsurfacevelocityfunction(mesh,bdryids['top'],u)
