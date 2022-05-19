@@ -9,11 +9,3 @@
 *.synctex.gz
 *.bbl
 *.blg
-slides/lecture.pdf
-slides/printable.pdf
-slides/lecture-nup.pdf
-slides/tmp/
-slides/anim/*.png
-notes/notes.pdf
-notes/tmp/
-
