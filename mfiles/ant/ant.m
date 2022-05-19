@@ -1,7 +1,7 @@
 function [t vol] = ant(filename,doplot,E)
-% ANT  Simulate Antarctic ice sheet flow using BUILDANT to
-% extract data from re-gridded SeaRISE-Antarctic data.  See
-% Ant50km.nc for metadata.
+% ANT  Simulate Antarctic ice sheet flow using BUILDANT to extract
+% data from re-gridded ALBMAP v1 data.  See albmap.bib for a
+% citation and the header in Ant50km.nc for additional metadata.
 % Example: Using Ant50km.nc data for 40 ka run:
 %   >> addpath('../')   % so Matlab/Octave can find other codes
 %   >> ant;

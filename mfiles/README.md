@@ -15,6 +15,6 @@ Such help files show runs with example options:
 
     >> heat(1.0,30,30,0.001,20);
 
-To run the codes in the `ant/` subdirectory, do this first:
+## Antarctica
 
-    >> addpath('ant/')
+To run the codes in the `ant/` subdirectory, see `ant/README.md`.
