@@ -56,6 +56,9 @@
 {\sc E.~Bueler}, {\em PETSc for Partial Differential Equations:
   Numerical Solutions in C and Python}, SIAM Press, 2021.
 
+\bibitem{Bueler2021conservation}
+{\sc E.~Bueler}, {\em Conservation laws for free-boundary fluid layers}, SIAM J.~Appl.~Math., 81 (2021), pp.~2007--2032.
+
 \bibitem{BBssasliding}
 {\sc E.~Bueler and J.~Brown}, {\em Shallow shelf approximation as a ``sliding
   law'' in a thermodynamically coupled ice sheet model}, J. Geophys. Res., 114
