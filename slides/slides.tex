@@ -1,6 +1,8 @@
-% Copyright 2009--2018 Ed Bueler
+% Copyright 2009--2022 Ed Bueler
 
 \documentclass[10pt,hyperref={pdfpagelabels=true}]{beamer}
+
+\usetheme{Boadilla}
 
 \usepackage{times}
 \usepackage{hyperref}
@@ -10,7 +12,7 @@
 \usepackage{color}
 \usepackage{xmpmulti}  % more portable than animate
 \usepackage{graphicx}
-
+\usepackage{tikz}
 
 \newcommand{\ddt}[1]{\ensuremath{\frac{\partial #1}{\partial t}}}
 \newcommand{\ddx}[1]{\ensuremath{\frac{\partial #1}{\partial x}}}
@@ -37,28 +39,35 @@
 
 
 
-\title[Numerical modelling of glaciers]{Numerical modelling of \\ glaciers, ice sheets, and ice shelves}
+\title[Numerical modelling]{Numerical modelling of \\ glaciers, ice sheets, and ice shelves}
 
 \author[Bueler]{Ed Bueler}
 
-\institute
+\institute[UAF]
 {
   Dept of Math \& Stat, University of Alaska Fairbanks \\
   \texttt{elbueler@alaska.edu}
 }
 
-\date{McCarthy, Alaska \\ 2010, 2012, 2014, 2016, 2018, 2022}
+\date[]{{\scriptsize McCarthy, Alaska: 2010, 2012, 2014, 2016, 2018, 2022}}
 
+%\titlegraphic{\vspace{-20mm} \includegraphics[width=0.7\textwidth]{roughfinal}}
 
 \beamertemplatenavigationsymbolsempty
 
 \begin{document}
 \graphicspath{{../figures/}}
 
+{
+% centered background image
+\usebackgroundtemplate{%
+\parbox[c][\paperheight][b]{\paperwidth}{\centering \tikz\node[opacity=0.2] {\includegraphics[width=0.8\paperwidth]{whiteoutroughfinal}};}
+}
 
 \begin{frame}
   \maketitle
 \end{frame}
+}
 
 %\AtBeginSection[]{}
 

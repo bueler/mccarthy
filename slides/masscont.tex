@@ -1,34 +1,6 @@
 
 \section{mass continuity}
 
-
-\begin{frame}{three equations for geometry change}
-
-\begin{itemize}
-\item let $a$ be the climatic (surface) mass balance function
-    \begin{itemize}
-    \item[$\circ$] $a>0$ is accumulation and $a<0$ is ablation
-    \end{itemize}
-\item let $s$ be the basal melt rate (mass balance) function
-    \begin{itemize}
-    \item[$\circ$] $s>0$ is basal melting and $s<0$ is freeze-on
-    \end{itemize}
-\item let $M=a-s$
-    \begin{itemize}
-    \item[$\circ$] ``climatic-basal mass balance function'' in glossary
-    \end{itemize}
-\item define the map-plane flux of ice,
-	$$\bq = \int_{b}^{h} (u,v)\,dz = \overline{\mathbf{U}}\,H$$
-\item the three equations for glacier geometry change:
-\begin{align*}
-&\text{surface kinematical} && h_t = a - u\big|_h h_x - v\big|_h h_y + w\big|_h  \\
-&\text{base kinematical} && b_t = s - u\big|_b b_x - v\big|_b b_y + w\big|_b  \\
-&\text{mass continuity} && H_t = M - \Div \bq
-\end{align*}
-\end{itemize}
-\end{frame}
-
-
 \begin{frame}{the most-basic shallow assumption}
 
 \begin{columns}
@@ -61,10 +33,37 @@
 \includegraphics[width=1.0\textwidth]{serac}
 
 \begin{center}
-\emph{not shallow! or even fluid!}
+\emph{not shallow! not a fluid!}
 \end{center}
 \end{column}
 \end{columns}
+\end{frame}
+
+
+\begin{frame}{three equations for geometry change}
+
+\begin{itemize}
+\item let $a$ be the climatic (surface) mass balance function
+    \begin{itemize}
+    \item[$\circ$] $a>0$ is accumulation and $a<0$ is ablation
+    \end{itemize}
+\item let $s$ be the basal melt rate (mass balance) function
+    \begin{itemize}
+    \item[$\circ$] $s>0$ is basal melting and $s<0$ is freeze-on
+    \end{itemize}
+\item let $M=a-s$
+    \begin{itemize}
+    \item[$\circ$] ``climatic-basal mass balance function'' in glossary
+    \end{itemize}
+\item define the map-plane flux of ice,
+	$$\bq = \int_{b}^{h} (u,v)\,dz = \overline{\mathbf{u}}\,H$$
+\item the three equations for glacier geometry change:
+\begin{align*}
+&\text{surface kinematical} && h_t = a - u\big|_h h_x - v\big|_h h_y + w\big|_h  \\
+&\text{base kinematical} && b_t = s - u\big|_b b_x - v\big|_b b_y + w\big|_b  \\
+&\text{mass continuity} && H_t = M - \Div \bq
+\end{align*}
+\end{itemize}
 \end{frame}
 
 
@@ -72,7 +71,7 @@
 
 \begin{itemize}
 \item[Q:] what does the ``most-basic shallow assumption'' get you?
-\item[A:] any two of these three equations imply the third:
+\item[A:] any two equations imply the third:
 \small
 \begin{align*}
 &\text{surface kinematical} && h_t = a - u\big|_h h_x - v\big|_h h_y + w\big|_h  \\
@@ -82,15 +81,15 @@
 \normalsize
 
 \bigskip
-\item to show the equivalences recall:
+\item to show the equivalences:
   \begin{itemize}
-  \item[$\circ$]  the incompressibility of ice
+  \item[$\circ$]  recall the incompressibility of ice
     $$u_x + v_y + w_z = 0$$
-  \item[$\circ$]  and the Leibniz rule for differentiating integrals
-  \scriptsize
-    $$\frac{d}{dx}\left(\int_{g(x)}^{f(x)} h(x,y)\,dy\right) = f'(x) h(x,f(x)) - g'(x) h(x,g(x)) + \int_{g(x)}^{f(x)} h_x(x,y)\,dy$$
+  \item[$\circ$]  use the Leibniz rule for differentiating integrals
+  {\scriptsize
+    $$\frac{d}{dx}\left(\int_{g(x)}^{f(x)} h(x,y)\,dy\right) = f'(x) h(x,f(x)) - g'(x) h(x,g(x)) + \int_{g(x)}^{f(x)} h_x(x,y)\,dy$$}
+  \item[$\circ$]  it's an exercise
   \end{itemize}
-\item it's an exercise
 \end{itemize}
 \end{frame}
 
@@ -102,7 +101,7 @@
 
 \bigskip
 \item regarding how to think about the \emph{mass continuity equation}
-  $$H_t = M - \nabla \cdot (\mathbf{u} H),$$
+  $$H_t = M - \nabla \cdot (\overline{\mathbf{u}} H),$$
 a summary:
   \begin{itemize}
   \item[$\circ$] its character depends on the stress balance
@@ -126,10 +125,10 @@ a summary:
 \begin{enumerate}
   \item use stress balance to compute velocity
       \begin{itemize}
-      \item[$\circ$] often: first get $(u,v)$, then $w$ from incompressibility
+      \item[$\circ$] often: get $(u,v)$, then compute $w$ from incompressibility
       \end{itemize}
   \item somewhere in here do other processes: thermodynamics, basal melt, calving, \dots
-  \item decide on time-step $\Delta t$ from diffusivity $D$ \hfill (\emph{or: fixed} $\Delta t$)
+  \item decide on time-step $\Delta t$ from diffusivity $D$ \hfill (or: \emph{fixed} $\Delta t$, sadly)
   \item from velocity, surface balance, and base balance do time-step of mass continuity equation to get $H_t$
   \item update surface elevation: $h \gets h+H_t \Delta t$
   \item repeat at 1.
@@ -137,6 +136,9 @@ a summary:
 
 \bigskip
 \begin{itemize}
-\item this paradigm \emph{is} explicit time stepping of the whole model
+\item this paradigm is \alert{explicit time stepping of the whole model}
+  \begin{itemize}
+  \item[$\circ$]  it will always be low-performance
+  \end{itemize}
 \end{itemize}
 \end{frame}

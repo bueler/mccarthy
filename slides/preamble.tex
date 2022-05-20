@@ -3,13 +3,13 @@
 
 slogans: I will
   \begin{itemize}
-  \item \alert{focus on approximating ice flow}
-  \item \alert{provide numerical codes that actually work}
-  \item \alert{always care about the continuum model}
+  \item \alert{approximate ice flow}
+  \item \alert{show codes that actually work}
+  \item \alert{always focus on the continuum model}
   \end{itemize}
 \medskip
 
-scope: I will cover these
+scope:
   \begin{itemize}
   \item models
 
@@ -103,8 +103,10 @@ scope: I will cover these
 \item is it just a collection of particles?
 
 \medskip
-\item<2> its a mathematical abstraction
-\item<2> \dots with equations relating these fields:
+\item<2-3> its a mathematical abstraction
+
+\medskip
+\item<3> \dots with equations relating these fields:
   \begin{itemize}
   \item[$\circ$] a scalar \emph{density}\quad $\rho(t,x,y,z)$
   \item[$\circ$] a scalar \emph{pressure}\quad $p(t,x,y,z)$
@@ -113,7 +115,8 @@ scope: I will cover these
 \end{itemize}
 
 \vspace{-2mm}
-\includegraphics[width=0.4\textwidth]{liquid} \hfill \uncover<2>{\includegraphics[width=0.35\textwidth]{lighterfluidalpha}}
+\includegraphics[width=0.30\textwidth]{liquid} \hfill \uncover<2-3>{\includegraphics[width=0.23\textwidth]{lighterfluidalpha}} \hfill
+\uncover<3>{\includegraphics[width=0.4\textwidth]{polaris}}
 \end{frame}
 
 
@@ -133,13 +136,13 @@ scope: I will cover these
 \begin{align*}
 \nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \\
 \rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) &= -\nabla p + \nabla \cdot \tau_{ij} + \rho \mathbf{g} &&\text{\emph{stress balance}} \\
-2 \nu \mathbf{D}_{ij} &= \tau_{ij} &&\text{\emph{flow law}}
+2 \nu D\mathbf{u}_{ij} &= \tau_{ij} &&\text{\emph{flow law}}
 \end{align*}
 
 \medskip
     \begin{itemize}
     \item[$\circ$] stress balance equation is ``$m a = F$''
-    \item[$\circ$] unclaimed \$1 million prize for showing this is a good model
+    \item[$\circ$] already a subtle model
     \end{itemize}
 \end{itemize}
 \end{frame}
@@ -163,7 +166,7 @@ scope: I will cover these
 \item none of the above list is relevant to ice flow
 \item what could be interesting about the flow of slow, cold, stiff, laminar, inert old ice?
   \begin{itemize}
-  \item[$\circ$] it's \emph{ice dynamics!}
+  \item[$\circ$] \emph{ice dynamics!}
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -188,7 +191,7 @@ scope: I will cover these
 \begin{align*}
 \nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \\
 0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \mathbf{g} &&\text{\emph{stress balance}} \\
-\mathbf{D}_{ij} &= A \tau^{n-1} \tau_{ij} &&\text{\emph{flow law}}
+D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij} &&\text{\emph{flow law}}
 \end{align*}
 
 \end{itemize}
@@ -203,7 +206,7 @@ scope: I will cover these
 \begin{align*}
 \nabla \cdot \mathbf{u} &= 0 \\
 0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \mathbf{g} \\
-\mathbf{D}_{ij} &= A \tau^{n-1} \tau_{ij}
+D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
 \end{align*}
 \normalsize
 \item thus a time-stepping ice sheet code recomputes the full velocity field at every time step
@@ -325,9 +328,9 @@ Velocity profile of the Athabasca Glacier, Canada, derived from inclinometry (Sa
 
 \small
 \begin{itemize}
-\item[Q:] having computed the velocity $u=u(t,x,z)$ \dots so what?
-\item[A:] velocity partly determines the new ice shape through \alert{mass conservation}
-\item suppose our ice has variable thickness $H(t,x)$
+\item[Q:] having computed the velocity $\mathbf{u}$ \dots so what?
+\item[A:] velocity determines changing ice shape through \alert{mass conservation}
+\item suppose flowline ice has variable thickness $H(t,x)$
 \item define the vertical average of velocity:
 	$$\bar U(t,x) = \frac{1}{H}\int_0^{H} u(t,x,z)\,dz \phantom{sdlj asdlbj asldbfj asdlfj}$$
 
@@ -338,7 +341,7 @@ Velocity profile of the Athabasca Glacier, Canada, derived from inclinometry (Sa
 
     \vspace{-2mm}
     \begin{itemize}
-    \item[$\circ$] area $A$ in 2D becomes volume $V$ in 3D
+    \item[$\circ$] area in 2D becomes volume in 3D
     \end{itemize}
 \item assume width $dx=x_2-x_1$ is small, so $A\approx dx\, H$, and divide by $dx$ to get the  \emph{mass continuity (conservation) equation}
    $$H_t = M - \left(\bar U H\right)_x$$
@@ -349,9 +352,9 @@ Velocity profile of the Athabasca Glacier, Canada, derived from inclinometry (Sa
 \begin{frame}{combine equations so far}
 
 \begin{itemize}
-\item from slab-on-slope velocity formula in $u_0=0$ case,
+\item from slab-on-slope velocity formula in $u_0=0$ case, get flux:
 \begin{align*}
-\bar U H &= \int_0^H \frac{1}{2} A (\rho g \sin\alpha)^3  \left(H^4 - (H-z)^4\right)\,dz \\
+q = \bar U H &= \int_0^H \frac{1}{2} A (\rho g \sin\alpha)^3  \left(H^4 - (H-z)^4\right)\,dz \\
 	&= \frac{2}{5} A (\rho g \sin\alpha)^3 H^5
 \end{align*}
 \item note $\sin \alpha \approx \tan\alpha = - h_x$
@@ -361,7 +364,7 @@ Velocity profile of the Athabasca Glacier, Canada, derived from inclinometry (Sa
 \medskip
 \item this is the ``shallow ice approximation'' (SIA)
     \begin{itemize}
-    \item[$\circ$] it's a very rough explanation of it
+    \item[$\circ$] a very rough explanation of it!
     \end{itemize}
 \end{itemize}
 \end{frame}
