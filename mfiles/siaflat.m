@@ -23,17 +23,16 @@ function [H,dtlist] = siaflat(Lx,Ly,J,K,H0,deltat,tf)
 % Called by:  VERIFYSIA, ROUGHICE
 
 % physical constants
-g = 9.81;    rho = 910.0;    secpera = 31556926;
-A = 1.0e-16/secpera;    Gamma  = 2 * A * (rho * g)^3 / 5; % see Bueler et al (2005)
-H = H0;
+g = 9.81;   rho = 910.0;   secpera = 31556926;
+A = 1.0e-16/secpera;   Gamma  = 2 * A * (rho * g)^3 / 5; % see Bueler et al (2005)
 
-dx = 2 * Lx / J;   dy = 2 * Ly / K;
-N = ceil(tf / deltat);    deltat = tf / N;
-j  = 2:J;    k = 2:K;  % interior indices
-nk = 3:K+1;    sk = 1:K-1;    ej = 3:J+1;    wj = 1:J-1; % north,south,east,west
+N = ceil(tf / deltat);   deltat = tf / N;
+dx = 2 * Lx / J;   dy = 2 * Ly / K;   j = 2:J;   k = 2:K;  % interior indices
+nk = 3:K+1;   sk = 1:K-1;   ej = 3:J+1;   wj = 1:J-1; % north,south,east,west
 
 fprintf('solving SIA for 0.0 < t < %.3f a\n',tf/secpera)
 t = 0;   dtlist = [];
+H = H0;
 for n=1:N
   % staggered grid thicknesses
   Hup = 0.5 * ( H(j,nk) + H(j,k) );   % up and down
