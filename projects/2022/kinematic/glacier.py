@@ -57,13 +57,17 @@ def us(t,x):  # vectorized over x
 # the surface mass balance a_balance(t,x) would *be* the SMB if s(t,x)
 # were held at time t; see formula (5.51) in van der Veen (2013)
 # [in fact s(t,x) changes in time; atrue(t,x) is the actual SMB]
+# FIXME check the details again!
 def abalance(t,x):   # vectorized over x
     Gam = 2.0 * A * (rho * g)**n / (n+2.0)
     C = H0(t)**(2.0*n+2.0) * Gam * (2.0 * L(t) * (1.0 - 1.0/n))**(-n)
     y = np.abs(x[np.abs(x)<L(t)]) / L(t)
-    #psi = 
-    #return (_C / L(t)) * psi**(n-1.0) * omega
-    return np.zeros(np.shape(x))
+    psi = np.zeros(np.shape(x))
+    psi[np.abs(x)<L(t)] = y**(1.0/n) + (1.0 - y)**(1.0/n) - 1.0
+    ell = (1.0-n) / n
+    omega = np.zeros(np.shape(x))
+    omega[np.abs(x)<L(t)] = y**ell - (1.0 - y)**ell
+    return (C / L(t)) * psi**(n-1.0) * omega
 
 # the time rate of change of the surface; \partial s / \partial t
 def s_t(t,x):   # vectorized over x
@@ -71,6 +75,7 @@ def s_t(t,x):   # vectorized over x
     return np.zeros(np.shape(x))
 
 # the surface mass balance atrue(t,x) is the actual SMB
+# FIXME extend by ablation I think
 def atrue(t,x):   # vectorized over x
     # FIXME
     return np.zeros(np.shape(x))
