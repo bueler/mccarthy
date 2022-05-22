@@ -1,6 +1,8 @@
 all: syntheticglacier.pdf
 
-syntheticglacier.pdf: syntheticglacier.tex
+syntheticglacier.pdf: syntheticglacier.tex syntheticglacier.bib
+	pdflatex syntheticglacier
+	bibtex syntheticglacier
 	pdflatex syntheticglacier
 	pdflatex syntheticglacier
 

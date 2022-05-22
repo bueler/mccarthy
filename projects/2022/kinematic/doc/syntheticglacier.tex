@@ -67,7 +67,7 @@ urlcolor=black     % only if colorlinks=true
 
 One may fix time $t$ and visualize $z=s(t,x)$ as a curve in $x,z$ space.  Alternatively, $z=s(t,x)$ can be visualized as a surface in $t,x,z$ space.
 
-At the surface of a glacier the ice has a velocity and the climate adds or removes ice.  Let $\bu(t,x,z)=\left<u,w\right>$ denote the ice velocity, with components $u$ in the horizontal and $w$ in the vertical.  Let $\bu|_s(t,x) = \bu(t,x,s(t,x))$ denote the surface value of the ice velocity.  Let $a(t,x)$ be the climatic (surface) mass balance (CMB), the accumulation-ablation function.  In these terms the traditional surface kinematical equation (SKE) is
+At the surface of a glacier the ice has a velocity and the climate adds or removes ice.  Let $\bu(t,x,z)=\left<u,w\right>$ denote the ice velocity, with components $u$ in the horizontal and $w$ in the vertical.  Let $\bu|_s(t,x) = \bu(t,x,s(t,x))$ denote the surface value of the ice velocity.  Let $a(t,x)$ be the climatic (surface) mass balance (CMB), the accumulation-ablation function.  In these terms the traditional \emph{surface kinematical equation} (SKE), also called the ``kinematical boundary condition'' \cite{FowlerNg2021,GreveBlatter2009} is
 \begin{equation}
 \frac{\partial s}{\partial t} - \bu|_s \cdot \bn_s - a = 0  \label{ske}
 \end{equation}
@@ -85,10 +85,38 @@ The new form is only advantageous if we seek to account for changes in the glaci
 
 \section{Synthetic glacier formulas}
 
-The significance of the SKE and KCL should become clearer by the construction of an exactly-specified, but synthetic, example.  This example has surface elevation, ice velocity, and CMB which evolve together in a manner so that the SKE and KCL are both exactly satisfied (where they apply).
+The significance of the SKE and KCL should become clearer by the construction of an exactly-specified, but synthetic, example.  This example has surface elevation, ice velocity, and CMB which evolve together in a manner so that the SKE and KCL are both exactly satisfied.  (For the SKE we would say more accurately that it is ``exactly satisfied in locations where it applies''.)
 
-%\small
-%\bigskip
-%\bibliography{stokes}
-%\bibliographystyle{siam}
+The specific synthetic geometry is based on a steady-state ice sheet profile from section 5.3 of \cite{vanderVeen2013}, called the \emph{Bueler profile} \cite{Bueler2003}.  However, additional time dependence is added through making the center height and length time-varying, so the term $\frac{\partial s}{\partial t}$ is nonzero.
+
+The formulas are based on a few scalar parameters, as in the following table.
+
+\bigskip
+\begin{tabular}{clll}
+variable  & description & units & value \\
+\hline
+    & seconds per year &  & 31556926.0 \\
+$A$ & ice softness in Glen law & $\text{Pa}^{-3}\,\text{s}^{-1}$ & $10^{-16}/31556926.0$ \\
+$g$ & gravity & m s$^{-2}$ & 9.81 \\
+$H_0^{(0)}$ & center height at time zero & m & 3000 \\
+$L^{(0)}$ & glacier half-length at time zero & m & $400 \times 1000.0$ \\
+$n$ & exponent in Glen flow law & & 3 \\
+$\rho$ & density of ice & kg m$^{-3}$ & 910 \\
+$T$ & period of variation & s & $2000 \times 31556926.0$
+\end{tabular}
+\bigskip
+
+Next are the formulas themselves.
+\begin{align}
+H_0(t) &= \\
+L(t) &= \\
+\psi(t,x) &= \\
+s(t,x) &= \\
+\end{align}
+Note that functions $\psi$ and $\phi$ are merely helper functions to simplify other expressions.
+
+\small
+\bigskip
+\bibliography{syntheticglacier}
+\bibliographystyle{siam}
 \end{document}
