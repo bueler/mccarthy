@@ -1,0 +1,94 @@
+\documentclass[letterpaper,final,12pt,reqno]{amsart}
+
+\usepackage[total={6.3in,9.2in},top=1.1in,left=1.1in]{geometry}
+
+\usepackage{bm}
+\usepackage{empheq}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{graphicx}
+\usepackage{verbatim,fancyvrb}
+\usepackage{tikz}
+
+% hyperref should be the last package we load
+\usepackage[pdftex,
+colorlinks=true,
+plainpages=false, % only if colorlinks=true
+linkcolor=blue,   % only if colorlinks=true
+citecolor=Red,   % only if colorlinks=true
+urlcolor=black     % only if colorlinks=true
+]{hyperref}
+
+\renewcommand{\baselinestretch}{1.05}
+
+\newcommand{\ddt}[1]{\ensuremath{\frac{\partial #1}{\partial t}}}
+\newcommand{\ddx}[1]{\ensuremath{\frac{\partial #1}{\partial x}}}
+\newcommand{\ddy}[1]{\ensuremath{\frac{\partial #1}{\partial y}}}
+\newcommand{\pp}[2]{\ensuremath{\frac{\partial #1}{\partial #2}}}
+\renewcommand{\t}[1]{\texttt{#1}}
+\newcommand{\Matlab}{\textsc{Matlab}\xspace}
+\newcommand{\eps}{\epsilon}
+\newcommand{\RR}{\mathbb{R}}
+
+\newcommand{\grad}{\nabla}
+\newcommand{\Div}{\nabla\cdot}
+\newcommand{\trace}{\operatorname{tr}}
+
+
+\newcommand{\hbn}{\hat{\mathbf{n}}}
+
+\newcommand{\bg}{\mathbf{g}}
+\newcommand{\bn}{\mathbf{n}}
+\newcommand{\bu}{\mathbf{u}}
+\newcommand{\bv}{\mathbf{v}}
+\newcommand{\bx}{\mathbf{x}}
+
+\newcommand{\bX}{\mathbf{X}}
+
+
+
+\begin{document}
+%\graphicspath{{figures/}}
+
+\title{A synthetic, time-dependent glacier \\ for testing surface kinematical inversion}
+
+\author{Ed Bueler}
+
+\maketitle
+
+%\vspace{-8mm}
+\begin{center}
+{\footnotesize
+\emph{version: \today}}
+\end{center}
+
+\thispagestyle{empty}
+
+\section{Surface kinematical equations}  We seek to understand how the surface and shape of a glacier evolves, so we consider a flow-line with coordinates $x$ in the horizontal and $z$ in the vertical; there is only one horizontal dimension.  Let $s(t,x)$ be the surface elevation.  For simplicity the bed is flat ($b=0$), so the thickness and surface elevation coincide: $s=h$.  Let $\bn_s(t,x) = \left<-\frac{\partial s}{\partial x},1\right>$ denote the upward normal vector on the ice surface; it is not a unit vector in general.  The scalar slope $\frac{\partial s}{\partial x}$ and the normal vector $\bn_s$ both describe the orientation of the surface.
+
+One may fix time $t$ and visualize $z=s(t,x)$ as a curve in $x,z$ space.  Alternatively, $z=s(t,x)$ can be visualized as a surface in $t,x,z$ space.
+
+At the surface of a glacier the ice has a velocity and the climate adds or removes ice.  Let $\bu(t,x,z)=\left<u,w\right>$ denote the ice velocity, with components $u$ in the horizontal and $w$ in the vertical.  Let $\bu|_s(t,x) = \bu(t,x,s(t,x))$ denote the surface value of the ice velocity.  Let $a(t,x)$ be the climatic (surface) mass balance (CMB), the accumulation-ablation function.  In these terms the traditional surface kinematical equation (SKE) is
+\begin{equation}
+\frac{\partial s}{\partial t} - \bu|_s \cdot \bn_s - a = 0  \label{ske}
+\end{equation}
+This equation says that, at times $t$ and locations $x$ where a glacier is present, i.e.~where $s(t,x)>0$, on the surface of the ice there is a balance between the rate of change of the surface elevation, the motion of the ice, and the CMB.  By expanding the dot product it is equivalent to write ``$\frac{\partial s}{\partial t} + u|_s \frac{\partial s}{\partial x} - w|_s - a = 0$'' or ``$\frac{\partial s}{\partial t} = - u|_s \frac{\partial s}{\partial x} + w|_s + a$''; you might see these forms in textbooks.
+
+The new form, the kinematical conservation law (KCL), is integrated in time and space, and it applies everywhere.  It applies not only on the surface of the ice but on the adjacent ice-free land.  The derivation of this new form is given in the early draft titled \emph{A new kinematical conservation law for glaciers}.  To state it here we can consider a one-dimensional domain $\Omega$ which is merely an interval, $\Omega=[x_0,x_1]$, and an interval of time $[t_0,t_1]$.  In these terms the KCL is
+\begin{align}
+\int_{x_0}^{x_1} h(t_1,x)^2\,dx &= \int_{x_0}^{x_1} h(t_0,x)^2\,dx + 2 \int_{t_0}^{t_1} \int_{x_0}^{x_1} h(t,x)\, \bu|_s(t,x)\cdot \bn_s(t,x) \,dx\,dt \label{kcl} \\
+  &\hspace{34mm} + 2 \int_{t_0}^{t_1} \int_{x_0}^{x_1} h(t,x)\, a\left(t,x\right) \,dx\,dt \notag
+\end{align}
+This form says that the square of the ice thickness is conserved in the sense that at a later time $t_1$ the value is the same as at an earlier time $t_0$, except for the identified total contributions from ice dynamics ($2 \int \int h\, \bu|_s \cdot \bn_s \,dx\,dt$) and CMB ($2 \int \int h\, a \,dx\,dt$).  These contributions are ``weighted'' by the thickness, so thinner ice (small $h$) areas do not contribute much, and ice-free areas do not contribute at all.
+
+The new form is only advantageous if we seek to account for changes in the glacier which occur in locations $x$ where at some times a glacier is present ($h(t,x)>0$) and at other times not ($h(t,x)=0$).  Thus there is no need to track the time-varying region occupied by the glacier, i.e.~the set $R(t) = \{x\,|\,h(t,x)>0\}$.  In particular, we hope to see advantages of the new approach when used in simultaneously inverting for the CMB function $a(t,x)$, the equilibrium line altitude, and the time-dependent glacier outline, from purely kinematical observations of the surface elevation and velocity.
+
+
+\section{Synthetic glacier formulas}
+
+The significance of the SKE and KCL should become clearer by the construction of an exactly-specified, but synthetic, example.  This example has surface elevation, ice velocity, and CMB which evolve together in a manner so that the SKE and KCL are both exactly satisfied (where they apply).
+
+%\small
+%\bigskip
+%\bibliography{stokes}
+%\bibliographystyle{siam}
+\end{document}
