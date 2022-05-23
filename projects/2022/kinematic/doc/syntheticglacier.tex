@@ -20,21 +20,13 @@ urlcolor=black     % only if colorlinks=true
 
 \renewcommand{\baselinestretch}{1.05}
 
-\newcommand{\ddt}[1]{\ensuremath{\frac{\partial #1}{\partial t}}}
-\newcommand{\ddx}[1]{\ensuremath{\frac{\partial #1}{\partial x}}}
-\newcommand{\ddy}[1]{\ensuremath{\frac{\partial #1}{\partial y}}}
-\newcommand{\pp}[2]{\ensuremath{\frac{\partial #1}{\partial #2}}}
-\renewcommand{\t}[1]{\texttt{#1}}
-\newcommand{\Matlab}{\textsc{Matlab}\xspace}
 \newcommand{\eps}{\epsilon}
 \newcommand{\RR}{\mathbb{R}}
 
 \newcommand{\grad}{\nabla}
 \newcommand{\Div}{\nabla\cdot}
+\newcommand{\sgn}{\operatorname{sgn}}
 \newcommand{\trace}{\operatorname{tr}}
-
-
-\newcommand{\hbn}{\hat{\mathbf{n}}}
 
 \newcommand{\bg}{\mathbf{g}}
 \newcommand{\bn}{\mathbf{n}}
@@ -49,7 +41,7 @@ urlcolor=black     % only if colorlinks=true
 \begin{document}
 %\graphicspath{{figures/}}
 
-\title{A synthetic, time-dependent glacier \\ for testing surface kinematical inversion}
+\title[Synthetic, time-dependent glacier]{Synthetic, time-dependent glacier \\ for testing surface kinematical inversion}
 
 \author{Ed Bueler}
 
@@ -67,7 +59,7 @@ urlcolor=black     % only if colorlinks=true
 
 One may fix time $t$ and visualize $z=s(t,x)$ as a curve in $x,z$ space.  Alternatively, $z=s(t,x)$ can be visualized as a surface in $t,x,z$ space.
 
-At the surface of a glacier the ice has a velocity and the climate adds or removes ice.  Let $\bu(t,x,z)=\left<u,w\right>$ denote the ice velocity, with components $u$ in the horizontal and $w$ in the vertical.  Let $\bu|_s(t,x) = \bu(t,x,s(t,x))$ denote the surface value of the ice velocity.  Let $a(t,x)$ be the climatic (surface) mass balance (CMB), the accumulation-ablation function.  In these terms the traditional \emph{surface kinematical equation} (SKE), also called the ``kinematical boundary condition'' \cite{FowlerNg2021,GreveBlatter2009} is
+At the surface of a glacier the ice has a velocity and the climate adds or removes ice.  Let $\bu(t,x,z)=\left<u,w\right>$ denote the ice velocity, with components $u$ in the horizontal and $w$ in the vertical.  Let $\bu|_s(t,x) = \bu(t,x,s(t,x))$ denote the surface value of the ice velocity.  Let $a(t,x)$ be the climatic (surface) mass balance (CMB), the accumulation-ablation function.  In these terms the traditional \emph{surface kinematical equation} (SKE), also called the ``kinematical boundary condition'' \cite{FowlerNg2021,GreveBlatter2009}, is
 \begin{equation}
 \frac{\partial s}{\partial t} - \bu|_s \cdot \bn_s - a = 0  \label{ske}
 \end{equation}
@@ -87,33 +79,68 @@ The new form is only advantageous if we seek to account for changes in the glaci
 
 The significance of the SKE and KCL should become clearer by the construction of an exactly-specified, but synthetic, example.  This example has surface elevation, ice velocity, and CMB which evolve together in a manner so that the SKE and KCL are both exactly satisfied.  (For the SKE we would say more accurately that it is ``exactly satisfied in locations where it applies''.)
 
-The specific synthetic geometry is based on a steady-state ice sheet profile from section 5.3 of \cite{vanderVeen2013}, called the \emph{Bueler profile} \cite{Bueler2003}.  However, additional time dependence is added through making the center height and length time-varying, so the term $\frac{\partial s}{\partial t}$ is nonzero.
+The specific synthetic geometry is based on a steady-state ice sheet profile from section 5.3 of \cite{vanderVeen2013}, called the \emph{Bueler profile} and derived in \cite{Bueler2003}.  However, additional time dependence is added through making the center height and length time-varying, so the term $\frac{\partial s}{\partial t}$ is nonzero.  The formulas are based on a few scalar parameters, as in Table \ref{constantstable}.
 
-The formulas are based on a few scalar parameters, as in the following table.
-
-\bigskip
+\begin{table}
 \begin{tabular}{clll}
 variable  & description & units & value \\
 \hline
     & seconds per year &  & 31556926.0 \\
 $A$ & ice softness in Glen law & $\text{Pa}^{-3}\,\text{s}^{-1}$ & $10^{-16}/31556926.0$ \\
 $g$ & gravity & m s$^{-2}$ & 9.81 \\
-$H_0^{(0)}$ & center height at time zero & m & 3000 \\
+$H_c^{(0)}$ & center height at time zero & m & 3000 \\
 $L^{(0)}$ & glacier half-length at time zero & m & $400 \times 1000.0$ \\
 $n$ & exponent in Glen flow law & & 3 \\
+$q$ & derived (helper) power & & $q = 1+\frac{1}{n} = \frac{4}{3}$ \\
+$r$ & \qquad '' & & $r = \frac{n}{2n+2} = \frac{3}{8}$ \\
 $\rho$ & density of ice & kg m$^{-3}$ & 910 \\
 $T$ & period of variation & s & $2000 \times 31556926.0$
 \end{tabular}
-\bigskip
+\caption{Values of constants.}
+\label{constantstable}
+\end{table}
 
-Next are the formulas themselves.
+The basic formula generates the time-dependent surface elevation $s(t,x)$: 
 \begin{align}
-H_0(t) &= \\
-L(t) &= \\
-\psi(t,x) &= \\
-s(t,x) &= \\
+H_c(t) &= H_c^{(0)} \left(1 - \frac{1}{2} \sin\left(\frac{\pi t}{T}\right)\right) \notag \\
+L(t) &= L^{(0)} \left(1 - \frac{3}{4} \sin\left(\frac{\pi t}{T}\right)\right) \notag\\
+\psi(t,x) &= (n+1) \frac{|x|}{L(t)} - 1 + n \left(1 - \frac{|x|}{L(t)}\right)^q - n \left(\frac{|x|}{L(t)}\right)^q \notag \\
+s(t,x) &= H_c(t) (n-1)^{-r} \psi(t,x)^r \label{sformula}
 \end{align}
-Note that functions $\psi$ and $\phi$ are merely helper functions to simplify other expressions.
+See Figure \ref{surfacesnaps}.  Note that functions $H_c(t)$ and $L(t)$ determine the time dependence of the center height and the glacier half-length.  Function $\psi(t,x)$ is simply a helper which simplifies certain formulas.
+
+The construction of the formula for $s(t,x)$ completely determines the evolution of the geometry of the glacier.  However, we will need to be able to compute all of the terms in the two forms of the kinematical equation, the SKE and the KCL.  For this purpose we need $\frac{\partial s}{\partial t}$, $\frac{\partial s}{\partial x}$, $u|_s$, $w|_s$, and $a$.
+
+We start with the time and space rate of change of $s(t,x)$.  These are simply found by partial differentiation:
+\begin{align}
+H_c'(t) &= - \frac{\pi H_c^{(0)}}{2T} \cos\left(\frac{\pi t}{T}\right) \notag\\
+L'(t) &= - \frac{3 \pi L^{(0)}}{4T} \cos\left(\frac{\pi t}{T}\right) \notag \\
+\phi(t,x) &= \left(1 - \frac{|x|}{L(t)}\right)^{1/n} + \left(\frac{|x|}{L(t)}\right)^{1/n} - 1 \notag \\
+\frac{\partial \psi}{\partial t}(t,x) &= (n+1) \frac{L'(t)}{L(t)} \frac{|x|}{L(t)} \phi(t,x) \notag \\
+\frac{\partial \psi}{\partial x}(t,x) &= - (n+1) \frac{\sgn(x)}{L(t)} \phi(t,x) \notag \\
+\frac{\partial s}{\partial t}(t,x) &= (n-1)^{-r} \left[H_c'(t) \psi(t,x)^r + r H_c(t) \psi(t,x)^{r-1} \frac{\partial \psi}{\partial t}(t,x)\right] \label{dsdtformula} \\
+\frac{\partial s}{\partial x}(t,x) &= r H_c(t) (n-1)^{-r} \psi(t,x)^{r-1} \frac{\partial \psi}{\partial x}(t,x) \label{dsdxformula}
+\end{align}
+
+\begin{figure}[t]
+\includegraphics[width=0.75\textwidth]{surfacesnaps}
+\caption{Surface elevation at five times in $0\le t \le 2000$ a.}
+\label{surfacesnaps}
+\end{figure}
+
+The next step in constructing exact formulas for surface kinematics requires a choice about ice dynamics.  A formula for the surface value of velocity must come from assumptions about ice flow, and we will use the velocity generated from the shallow ice approximation (SIA), which went into the construction of the Bueler profile \cite[section 5.3]{vanderVeen2013}.  On the other hand, once we switch to thinking about inversion for CMB we will be assuming that the surface velocity is observed and its physical source does not really matter.
+
+The central SIA formula gives the horizontal ice velocity as a function of the ice thickness, the surface elevation, and the $z$ coordinate \cite{GreveBlatter2009,vanderVeen2013}; see also equation (24) in my notes.  Here $s=H$ and $n=3$ is an odd integer so we may write:
+\begin{equation}
+u(t,x,z) = - \gamma \left(s(t,x)^{n+1} - (s(t,x)-z)^{n+1}\right) \left(\frac{\partial s}{\partial x}(t,x)\right)^n \label{siaxz}
+\end{equation}
+where $\gamma = 2 A (\rho g)^n / (n+1)$.  The value at the surface is simpler; it arises by substituting $z=s(t,x)$:
+\begin{equation}
+u|_s(t,x) = u(t,x,s(t,x)) = - \gamma s(t,x)^{n+1} \left(\frac{\partial s}{\partial x}(t,x)\right)^n \label{siasurfacex}
+\end{equation}
+Using formulas \eqref{sformula} and \eqref{dsdxformula} completes the computation of the surface value of the horizontal velocity.
+
+Next we need $w|_s$, the surface value of the vertical velocity.  FIXME
 
 \small
 \bigskip
