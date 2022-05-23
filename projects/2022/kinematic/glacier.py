@@ -33,7 +33,7 @@ def dLdt(t):
 
 # following functions of (t,x) are vectorized over x but not t
 
-# helper function psi(t,x) and its time derivative
+# helper function psi(t,x), phi(t,x) and derivatives
 def _psi(t,x):
     icy = (np.abs(x) < L(t))
     y = np.abs(x[icy]) / L(t)
@@ -41,21 +41,25 @@ def _psi(t,x):
     psi[icy] = (n+1.0) * y - 1.0 + n * (1.0 - y)**q - n * y**q
     return psi
 
+def _phi(t,x):
+    icy = (np.abs(x) < L(t))
+    y = np.abs(x[icy]) / L(t)
+    phi = np.zeros(np.shape(x))
+    phi[icy] = (1.0 - y)**(1.0/n) + y**(1.0/n) - 1.0
+    return phi
+
 def _dpsidt(t,x):
     icy = (np.abs(x) < L(t))
     y = np.abs(x[icy]) / L(t)
-    phi = y**(1.0/n) + (1.0 - y)**(1.0/n) - 1.0
     dpsi = np.zeros(np.shape(x))
-    dpsi[icy] = (n+1.0) * y * (dLdt(t) / L(t)) * phi
+    dpsi[icy] = (n+1.0) * y * (dLdt(t) / L(t)) * _phi(t,x[icy])
     return dpsi
 
 def _dpsidx(t,x):
     icy = (np.abs(x) < L(t))
-    y = np.abs(x[icy]) / L(t)
     z = np.sign(x[icy]) / L(t)
     dpsi = np.zeros(np.shape(x))
-    dpsi[icy] = (n+1.0) * z - (n+1.0) * (1.0 - y)**(1.0/n) * z \
-                            - (n+1.0) * y**(1.0/n)  * z
+    dpsi[icy] = - (n+1.0) * z * _phi(t,x[icy])
     return dpsi
 
 # surface elevation s(t,x) from formula (5.50) in van der Veen (2013)
