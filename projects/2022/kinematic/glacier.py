@@ -49,23 +49,28 @@ def _dpsidt(t,x):
     dpsi[icy] = (n+1.0) * y * (dLdt(t) / L(t)) * phi
     return dpsi
 
+def _dpsidx(t,x):
+    icy = (np.abs(x) < L(t))
+    y = np.abs(x[icy]) / L(t)
+    z = np.sign(x[icy]) / L(t)
+    dpsi = np.zeros(np.shape(x))
+    dpsi[icy] = (n+1.0) * z - (n+1.0) * (1.0 - y)**(1.0/n) * z \
+                            - (n+1.0) * y**(1.0/n)  * z
+    return dpsi
+
 # surface elevation s(t,x) from formula (5.50) in van der Veen (2013)
 def s(t,x):
     C = H0(t) / (n - 1.0)**r
     return C * _psi(t,x)**r
 
 # surface slope ds/dx(t,x) = partial s / partial t
+# WARNING: negative power of zero if formula is used where not icy
 def dsdx(t,x):
     icy = (np.abs(x) < L(t))
-    C = r * H0(t) / (n - 1.0)**r
-    gamma = np.zeros(np.shape(x))
-    gamma[icy] = _psi(t,x[icy])**(r-1.0)
-    omega = np.zeros(np.shape(x))
-    y = np.abs(x[icy]) / L(t)
-    z = np.sign(x[icy]) / L(t)
-    omega[icy] = (n+1.0) * z - (n+1.0) * (1.0 - y)**(1.0/n) * z \
-                             - (n+1.0) * y**(1.0/n)  * z
-    return C * gamma * omega
+    ds = np.zeros(np.shape(x))
+    ds[icy] = r * H0(t) / (n - 1.0)**r * _psi(t,x[icy])**(r-1.0) \
+                                       * _dpsidx(t,x[icy])
+    return ds
 
 # horizontal velocity at surface u(t,x) from SIA formula (see notes)
 def us(t,x):
@@ -88,6 +93,7 @@ def abalance(t,x):
     return abal
 
 # the time rate of change of the surface; \partial s / \partial t
+# WARNING: negative power of zero if formula is used where not icy
 def dsdt(t,x):
     C = (n-1.0)**(-r)
     icy = (np.abs(x) < L(t))
@@ -102,20 +108,44 @@ def atrue(t,x):
     # FIXME
     return np.zeros(np.shape(x))
 
+# if this file is executed then it produces plots to illustrate
+# all important fields
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
     print('plotting glacier at t=0, %.0f, %.0f years ...' \
           % (0.25*T/secpera,0.5*T/secpera))
     xx = np.linspace(-1.1*L_0,1.1*L_0,801)
 
-    # figure 1: s, s_x, u
+    # figure 1: s at 0,T/4,T/2,3T/4,T
+    plt.figure()
+    tt = [0.0, 0.25*T, 0.5*T, 0.75*T, T]
+    for j in range(5):
+        plt.subplot(5,1,j+1)
+        plt.plot(xx/1.0e3,s(tt[j],xx),
+                 label='%.0f years' % (tt[j]/secpera))
+        plt.legend(loc='upper right')
+        plt.gca().set_ylim([-200.0,H0_0+200.0])
+        plt.gca().set_yticks([0.0,1500.0,3000.0])
+        if j < 4:
+            plt.tick_params(
+               axis='x',          # changes apply to the x-axis
+               which='both',      # both major and minor ticks are affected
+               bottom=False,      # ticks along the bottom edge are off
+               top=False,         # ticks along the top edge are off
+               labelbottom=False) # labels along the bottom edge are off
+        else:
+            plt.xlabel('x  (km)')
+            plt.ylabel('elevation s  (m)')
+    #plt.savefig('surfacesnaps.png',bbox_inches='tight')
+
+    # figure 2: s, s_x, u
     plt.figure()
     plt.subplot(3,1,1)
     for tt in [0.0, 0.25*T, 0.5*T]:
         plt.plot(xx/1.0e3,s(tt,xx),
                  label='%.0f years' % (tt/secpera))
-    plt.ylabel('elevation s  (m)')
     plt.legend()
+    plt.ylabel('elevation s  (m)')
     plt.subplot(3,1,2)
     for tt in [0.0, 0.25*T, 0.5*T]:
         plt.plot(xx/1.0e3,dsdx(tt,xx),'.',ms=2.0)
@@ -126,7 +156,7 @@ if __name__ == "__main__":
     plt.ylabel('surface velocity u  (m/a)')
     plt.xlabel('x  (km)')
 
-    # figure 2: s_t, abalance, atrue
+    # figure 3: s_t, abalance, atrue
     plt.figure()
     plt.subplot(3,1,1)
     for tt in [0.0, 0.25*T, 0.5*T]:
