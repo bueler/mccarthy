@@ -1,10 +1,10 @@
-all: syntheticglacier.pdf
+all: synglac.pdf
 
-syntheticglacier.pdf: syntheticglacier.tex syntheticglacier.bib
-	pdflatex syntheticglacier
-	bibtex syntheticglacier
-	pdflatex syntheticglacier
-	pdflatex syntheticglacier
+synglac.pdf: synglac.tex synglac.bib
+	pdflatex synglac
+	bibtex synglac
+	pdflatex synglac
+	pdflatex synglac
 
 .PHONY: clean
 

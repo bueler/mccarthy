@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # (C) 2022 Ed Bueler
 
+# Generates synthetic, time-dependent glacier geometry, surface motion, and
+# climatic mass balance.  For documentation of formulas see synglac.pdf.  For
+# instructions for use see README.md.
+
 import numpy as np
 
 # t in seconds, x in meters, s(t,x) = H(t,x) in meters, u(t,x) in m/s
