@@ -93,7 +93,7 @@ where we will call
 \begin{equation}
 \tilde a(t,x) = w|_s(t,x) + a(t,x) \label{surfacerate}
 \end{equation}
-the \emph{vertical surface rate}.
+the \emph{lumped CMB}.
 
 It is desirable to separate the two parts of $\tilde a$, but in initial usage it is easier to keep them together.  Techniques for evaluating $w|_s$, and thus separation of the CMB $a$ itself, are discussed in \cite{GudmundssonBauder1999}.  This topic forms a natural next step for the project.
 
@@ -108,9 +108,9 @@ The details of constructing and using \eqref{kcldiscrete} are the content of the
 
 \section{Synthetic glacier formulas}
 
-The significance of the SKE and KCL, and of the above inversion proposal, will become clearer via construction of an exactly-specified, but synthetic, example.  This example has surface elevation, ice velocity, and CMB which evolve together in a manner so that the SKE and KCL are exactly satisfied.  (The SKE is exactly satisfied in locations where it applies.)
+The significance of the SKE and KCL, and of the above inversion proposal, will become clearer via construction of an exactly-specified, but synthetic, example.  This example has surface elevation, ice velocity, and CMB which evolve together in a manner so that the SKE and KCL are exactly satisfied.  (The SKE is exactly satisfied only in locations where it applies, of course.)
 
-The specific synthetic geometry is based on a steady-state ice sheet profile from section 5.3 of \cite{vanderVeen2013}, called the \emph{Bueler profile} and introduced in \cite{Bueler2003}.  However, time dependence is added through making the center height and length time-varying, so the term $\frac{\partial s}{\partial t}$ is nonzero.  The relevant formulas, next, are based on the scalar parameters in Table \ref{constantstable}.
+The specific synthetic geometry here is based on a steady-state ice sheet profile from section 5.3 of textbook \cite{vanderVeen2013}, called the \emph{Bueler profile} and introduced in \cite{Bueler2003}.  However, time dependence is added through making the center height and length time-varying, so the term $\frac{\partial s}{\partial t}$ is nonzero.  The relevant formulas, given next, use parameters from Table \ref{constantstable}.
 
 \begin{table}
 \begin{tabular}{clll}
@@ -132,18 +132,24 @@ $T$ & period of variation & s & $2000 \times \spy$
 \label{constantstable}
 \end{table}
 
-First we define the time-dependent surface elevation $s(t,x)$:
+\begin{figure}[t]
+\includegraphics[width=0.85\textwidth]{surfacesnaps}
+\caption{Surface elevation at five times in $0\le t \le 2000$ a.}
+\label{surfacesnaps}
+\end{figure}
+
+First we define time-dependent surface elevation $s(t,x)$:
 \begin{align}
 H_c(t) &= H_c^{(0)} \left(1 - \frac{1}{2} \sin\left(\frac{\pi t}{T}\right)\right) \notag \\
 L(t) &= L^{(0)} \left(1 - \frac{3}{4} \sin\left(\frac{\pi t}{T}\right)\right) \notag\\
 \psi(t,x) &= (n+1) \frac{|x|}{L(t)} - 1 + n \left(1 - \frac{|x|}{L(t)}\right)^q - n \left(\frac{|x|}{L(t)}\right)^q \notag \\
 s(t,x) &= H_c(t) (n-1)^{-r} \psi(t,x)^r \label{sformula}
 \end{align}
-See Figure \ref{surfacesnaps}.  The functions $H_c(t)$ and $L(t)$ how the center height and the glacier half-length, respectively, vary in time.  In fact formula \eqref{sformula} is the same as (5.50) in \cite{vanderVeen2013}, but made symmetric ($x \to |x|$), and with time dependence on $H_c$ and $L$.  Function $\psi(t,x)$ is simply a helper which simplifies certain formulas.
+See Figure \ref{surfacesnaps}.  The functions $H_c(t)$ and $L(t)$ determine how the center height and the glacier half-length, respectively, vary in time.  Formula \eqref{sformula} is the same as (5.50) in \cite{vanderVeen2013}, but made symmetric ($x \to |x|$), and with time dependence in $H_c$ and $L$.  Function $\psi(t,x)$ is simply a helper which simplifies certain formulas.  Note that $L(t)\ge \frac{1}{4} L_0 \ge 0$, thus $\psi(t,x)$ remains continuous despite the division in its definition.
 
-The formula for $s(t,x)$ completely determines the evolution of the geometry of the glacier.  However, we need to compute all of the terms in the two forms of the kinematical equation, the SKE and the KCL, in order to relate kinematic observations, of the surface elevation and velocity, to the CMB.  For this purpose we need to compute the functions $\frac{\partial s}{\partial t}$, $\frac{\partial s}{\partial x}$, $u|_s$, and $\tilde a$ which follow from \eqref{sformula}.
+The formula for $s(t,x)$ completely determines the evolution of the geometry of the glacier.  However, we need to compute the terms in equation \eqref{kclforinversion} in order to relate kinematic observations, of the surface elevation and velocity, to the lumped CMB $\tilde a(t,x)$.  For this purpose we will compute functions $\frac{\partial s}{\partial t}$, $\frac{\partial s}{\partial x}$, $u|_s$, and $\tilde a$ from \eqref{sformula}.
 
-We start with the partial derivatives of $s(t,x)$; we get formulas \eqref{dsdtformula}, \eqref{dsdxformula}, and \eqref{ddsformula}:
+We start with the partial derivatives of $s(t,x)$:
 \begin{align}
 H_c'(t) &= - \frac{\pi H_c^{(0)}}{2T} \cos\left(\frac{\pi t}{T}\right) \notag\\
 L'(t) &= - \frac{3 \pi L^{(0)}}{4T} \cos\left(\frac{\pi t}{T}\right) \notag \\
@@ -153,29 +159,31 @@ L'(t) &= - \frac{3 \pi L^{(0)}}{4T} \cos\left(\frac{\pi t}{T}\right) \notag \\
 \frac{\partial s}{\partial t}(t,x) &= (n-1)^{-r} \left[H_c'(t) \psi(t,x)^r + r H_c(t) \psi(t,x)^{r-1} \frac{\partial \psi}{\partial t}(t,x)\right] \label{dsdtformula} \\
 \frac{\partial s}{\partial x}(t,x) &= r H_c(t) (n-1)^{-r} \psi(t,x)^{r-1} \frac{\partial \psi}{\partial x}(t,x) \label{dsdxformula}
 \end{align}
-Again, function $\phi(t,x)$ is merely a helper.  Notice that $\phi(t,0)=0$ and that $\phi(t,x)$ is continuous at $x=0$, and thus both $\frac{\partial \psi}{\partial t}$ and $\frac{\partial \psi}{\partial x}$ are continuous on the icy set $|x|<L(t)$, and they satisfy $\frac{\partial \psi}{\partial t}(t,0)=\frac{\partial \psi}{\partial x}(t,0)=0$.  It follows that $\frac{\partial s}{\partial t}$ and $\frac{\partial s}{\partial x}$ are also continuous on the icy set $|x|<L(t)$.
-
-\begin{figure}[t]
-\includegraphics[width=0.75\textwidth]{surfacesnaps}
-\caption{Surface elevation at five times in $0\le t \le 2000$ a.}
-\label{surfacesnaps}
-\end{figure}
+Again, function $\phi(t,x)$ is merely a helper.  Notice that $\phi(t,0)=0$ and that $\phi(t,x)$ is continuous at $x=0$, and thus both $\frac{\partial \psi}{\partial t}$ and $\frac{\partial \psi}{\partial x}$ are continuous on the icy set $R = \{|x|<L(t)\}$.  (Specifically, $\frac{\partial \psi}{\partial t}(t,0)=\frac{\partial \psi}{\partial x}(t,0)=0$.)  It follows that $\frac{\partial s}{\partial t}$ and $\frac{\partial s}{\partial x}$ are also continuous on the icy set $R$.
 
 The next step is a formula for the surface value of velocity.  This must come from assumptions about ice flow; it requires a choice of dynamics.  We will use the velocity generated from the shallow ice approximation (SIA), which also went into the construction of the original profile \cite[section 5.3]{vanderVeen2013}.  However, once we switch to inverting for CMB we will treat the surface velocity as observed, and its physical source will not matter.
 
-An essential SIA formula gives the horizontal ice velocity as a function of the ice thickness, the surface elevation, and the $z$ coordinate \cite{GreveBlatter2009,vanderVeen2013}; see also equation (24) in my notes.  Here the surface elevation and thickness are the same ($s=h$) so we may write:
+An SIA formula gives the horizontal ice velocity as a function of the ice thickness, the surface elevation, and the $z$ coordinate.  (See \cite{GreveBlatter2009,vanderVeen2013} or equation (24) in my notes.)  Here the surface elevation and thickness are the same ($s=h$) so we may write:
 \begin{equation}
 u(t,x,z) = - \gamma \left(s(t,x)^{n+1} - (s(t,x)-z)^{n+1}\right) \left(\frac{\partial s}{\partial x}(t,x)\right)^n \label{siaxz}
 \end{equation}
-where $\gamma = 2 A (\rho g)^n / (n+1)$.  (Formula \eqref{siaxz} is valid if $n$ is an odd integer, but we will use $n=3$ only.)  The value at the surface comes from substituting $z=s(t,x)$:
+where $\gamma = 2 A (\rho g)^n / (n+1)$.  (Formula \eqref{siaxz}, without absolute values, is valid because $n$ is an odd integer.  We will only use $n=3$.)  The value at the surface comes from substituting $z=s(t,x)$:
 \begin{equation}
-u|_s(t,x) = u(t,x,s(t,x)) = - \gamma s(t,x)^{n+1} \left(\frac{\partial s}{\partial x}(t,x)\right)^n \label{siasurfacex}
+u|_s(t,x) = - \gamma\, s(t,x)^{n+1} \left(\frac{\partial s}{\partial x}(t,x)\right)^n \label{siasurfacex}
 \end{equation}
-Using formulas \eqref{sformula} and \eqref{dsdxformula} in evaluating $u|_s(t,x)$ by \eqref{siasurfacex} now completes the computation of the surface value of the horizontal velocity.
+Using formulas \eqref{sformula} and \eqref{dsdxformula} allows the concrete computation of $u|_s(t,x)$.
 
-Finally we may compute the (lumped) vertical surface rate $\tilde a(t,x) = w|_s(t,x) + a(t,x)$ by satisfying the SKE \eqref{ske}:
+Finally we may compute the lumped CMB $\tilde a(t,x) = w|_s(t,x) + a(t,x)$ by satisfying the SKE \eqref{ske}:
+\begin{equation}
+\tilde a(t,x) = \frac{\partial s}{\partial t}(t,x) + u|_s(t,x) \frac{\partial s}{\partial x}(t,x) \label{atildeformula}
+\end{equation}
+Applying formulas \eqref{sformula}, \eqref{dsdxformula}, and \eqref{siasurfacex} completes the concrete calculation.  Also observe that we could write
+\begin{equation}
+\tilde a(t,x) = \frac{\partial s}{\partial t}(t,x) - \gamma\, s(t,x)^{n+1} \left(\frac{\partial s}{\partial x}(t,x)\right)^{n+1} \label{atildefroms}
+\end{equation}
+That is, $\tilde a$ can be defined entirely in terms of the surface elevation $s$ and its derivatives.  Furthermore, when $n+1$ is an even integer, e.g.~since $n=3$, it follows that $\tilde a \le \frac{\partial s}{\partial t}$ on the ice surface.
 
-  FIXME
+The script \texttt{glacier.py} implements all of the above formulas.  See the \texttt{README.md} for documentation of usage in practice.
 
 \small
 \bigskip
