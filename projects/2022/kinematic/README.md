@@ -18,11 +18,11 @@ REQUIRED STUDENT BACKGROUND: Exposure to differential equations and linear algeb
 
 ## references and reading
 
-This reference paper is available in the current directory:
+Three reference PDFs are available in the current directory:
 
-  * Gudmundsson, G. H., & Bauder, A. (1999). _Towards an indirect determination of the mass‐balance distribution of glaciers using the kinematic boundary condition._ Geografiska Annaler: Series A, Physical Geography, 81(4), 575-583.
-
-FIXME:  I will also put in a draft of a paper I am writing, _A new kinematical conservation law for glaciers_.
+  * E. Bueler (2022a). *A synthetic, time-dependent glacier for testing surface kinematical inversion*, unpublished.  _This is the `synglac.pdf` note mentioned below._
+  * FIXME: I WILL PUT IT IN. E. Bueler (2022b). *A new kinematical conservation law for glaciers*, unpublished.   _A draft of a paper I am writing._
+  * G. H. Gudmundsson & A. Bauder (1999). *Towards an indirect determination of the mass‐balance distribution of glaciers using the kinematic boundary condition*, Geografiska Annaler: Series A, Physical Geography, 81(4), 575-583.  _Shows inversion of the SKE, and addresses how to recover the vertical surface velocity $w|_s$._
 
 ## getting started
 
@@ -30,10 +30,24 @@ The Python script `glacier.py` computes all the relevant surface fields of a syn
 
 My suggestion for Project 10 is that you use `glacier.py` to generate an initial test of the inversion of the kinematic conservation law (KCL), a new form of the surface kinematical equation (SKE).  The following paragraphs are documentation to help you do that.
 
+### discretizing space-time
+
+The brief sketch in `synglac.pdf` shows that the KCL gives an integral equation with the unknown lumped CMB $\tilde a(t,x)$ on the left; see equation (3).
+
+This integral equation becomes a linear system if we discretize.  In particular, suppose the time-space rectangle $[t_0,t_1]\times[x_0,x_1]$ is divided by grid spaces $\Delta t$ and $\Delta x$, giving $J$ intervals in time and $K$ intervals in space.  Suppose we represent the unknown field $\tilde a$ by its $n = JK$ values at the centers of the cells which have dimensions $\Delta t \times \Delta x$
+
+### evaluating formulas from the synthetic glacier code
+
 ### overdetermined systems, least squares, and using the SVD
 
-FIXME
+Following the brief sketch in `synglac.pdf`, I propose that you build an overdetermined linear system from discretizing $t,x$ as described above.
 
-### discretizing space-time to generate a linear system
+An overdetermined system has $m$ equations and $n$ unknowns where $m>n$.  For example, if the equation is
 
-FIXME
+$$A x = b$$
+
+then $x$ is a column vector with $n$ entries and $b$ is a column vector with $m$ entries, and $A$ is a matrix with $m$ rows and $n$ columns.  The equation "$Ax=b$" should really be in quotes because we don't expect an exact solution.  Instead we want the least-squares solution where we find $x$ so that $Ax$ and $b$ are as close to being the same vector as possible, that is, so that the norm of the difference $\|Ax-b\|$ is small.  Since norms are usually computed by summing the squares of the entries, followed by square root, this is the least-squares idea.
+
+The script `demos/lstsq_demo.py` sets up a system of $m=3$ equations and $n=2$ unknowns and it solves it by using the `lstsq()` function in `scipy.linalg`.  Please understand this example before proceeding.
+
+Optionally you may want to understand the singular value decomposition (SVD), which is one way to handle least-squares problems.  See `demos/svd_demo.py`.
