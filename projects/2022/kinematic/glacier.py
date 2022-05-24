@@ -159,12 +159,12 @@ if __name__ == "__main__":
     for tt in [0.0, 0.25*T, 0.5*T]:
         plt.plot(xx/1.0e3,dsdt(tt,xx)*secpera,'.',ms=2.0,
                  label='%.0f years' % (tt/secpera))
-    plt.ylabel('surface rate s_t  (m/a)')
+    plt.ylabel(r'surface rate $\frac{\partial s}{\partial t}$  (m/a)')
     plt.gca().set_ylim([-20.0,2.0])    # compare range for atilde
     plt.subplot(3,1,3)
     for tt in [0.0, 0.25*T, 0.5*T]:
         plt.plot(xx/1.0e3,dsdx(tt,xx),'.',ms=2.0)
-    plt.ylabel('surface slope s_x')
+    plt.ylabel(r'surface slope $\frac{\partial s}{\partial x}$')
     plt.xlabel('x  (km)')
 
     # figure 3: us and us*s_x in one figure
@@ -174,11 +174,11 @@ if __name__ == "__main__":
         plt.plot(xx/1.0e3,us(tt,xx)*secpera,
                  label='%.0f years' % (tt/secpera))
     plt.legend(loc='lower right')
-    plt.ylabel('surface velocity u_s  (m/a)')
+    plt.ylabel(r'surface velocity $u|_s$  (m/a)')
     plt.subplot(2,1,2)
     for tt in [0.0, 0.25*T, 0.5*T]:
         plt.plot(xx/1.0e3,us(tt,xx)*dsdx(tt,xx)*secpera,'.',ms=2.0)
-    plt.ylabel('product u_s * s_x  (m/a)')
+    plt.ylabel(r'product $u|_s \frac{\partial s}{\partial x}$  (m/a)')
     plt.xlabel('x  (km)')
 
     # figure 4: atilde, abalance
@@ -188,7 +188,7 @@ if __name__ == "__main__":
         plt.plot(xx/1.0e3,atilde(tt,xx)*secpera,'.',ms=2.0,
                  label='%.0f years' % (tt/secpera))
     plt.legend(loc='lower right')
-    plt.ylabel('atilde  (m/a)')
+    plt.ylabel(r'$\tilde a$  (m/a)')
     plt.gca().set_ylim([-20.0,2.0])    # compare range for dsdt
     plt.subplot(2,1,2)
     for tt in [0.0, 0.25*T, 0.5*T]:
