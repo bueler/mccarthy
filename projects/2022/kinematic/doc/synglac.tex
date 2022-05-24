@@ -28,6 +28,7 @@ urlcolor=black     % only if colorlinks=true
 \newcommand{\grad}{\nabla}
 \newcommand{\Div}{\nabla\cdot}
 \newcommand{\sgn}{\operatorname{sgn}}
+\newcommand{\spy}{\operatorname{spy}}
 \newcommand{\trace}{\operatorname{tr}}
 
 \newcommand{\bd}{\mathbf{d}}
@@ -58,34 +59,32 @@ urlcolor=black     % only if colorlinks=true
 
 \thispagestyle{empty}
 
-\section{Surface kinematical equations}  This document describes how the shape, surface motion, and surface mass balance of a synthetic glacier (or ice sheet) evolves.
+\section{Surface kinematical equations}  This document describes in detail how the surface elevation, surface velocity, and surface mass balance of a synthetic glacier (or ice sheet) evolves.
 
-We consider a flow-line with coordinates $x$ in the horizontal---there is only one horizontal dimension---and $z$ in the vertical.  Let $s(t,x)$ be the surface elevation.  One may fix time $t$ and visualize $z=s(t,x)$ as a curve in $x,z$ space.  Alternatively, $z=s(t,x)$ can be visualized as a surface in $t,x,z$ space.
+We consider a flow-line with coordinates $x$ in the horizontal---there is only one horizontal dimension---and $z$ in the vertical.  Let $s(t,x)$ be the surface elevation.  (One may fix time $t$ and visualize $z=s(t,x)$ as a curve in the $x,z$ plane, or $z=s(t,x)$ can be visualized as a surface in $t,x,z$ space.)  Let $\bn_s(t,x) = \left<-\frac{\partial s}{\partial x},1\right>$ denote the upward normal vector on the ice surface; note that it is not a unit vector.  For simplicity the bed is flat ($b=0$), so the thickness and surface elevation coincide: $h=s$.
 
-Let $\bn_s(t,x) = \left<-\frac{\partial s}{\partial x},1\right>$ denote the upward normal vector on the ice surface; note that it is not a unit vector.  The scalar slope $\frac{\partial s}{\partial x}$ and the normal vector $\bn_s$ each describe the orientation of the surface.  For simplicity the bed is flat ($b=0$), so the thickness and surface elevation coincide: $h=s$.
-
-At the upper surface the ice has a velocity and the climate adds or removes ice.  Let $\bu(t,x,z)=\left<u,w\right>$ denote the ice velocity, with components $u$ in the horizontal and $w$ in the vertical.  Let $\bu|_s(t,x) = \bu(t,x,s(t,x))$ denote the surface value of the ice velocity.  Let $a(t,x)$ be the climatic (surface) mass balance (CMB), also known as the accumulation-ablation function.
+At the upper surface the ice has a velocity and the climate adds or removes ice.  Let $\bu(t,x,z)=\left<u,w\right>$ denote the ice velocity, with components $u$ in the horizontal and $w$ in the vertical.  Let $\bu|_s(t,x) = \bu(t,x,s(t,x)) = \left<u|_s,w|_s\right>$ denote the surface value of the ice velocity.  Let $a(t,x)$ be the climatic (surface) mass balance (CMB), also known as the accumulation-ablation function.
 
 In these terms the traditional \emph{surface kinematical equation} (SKE), also called the ``kinematical boundary condition'' \cite{FowlerNg2021,GreveBlatter2009}, is
 \begin{equation}
 \frac{\partial s}{\partial t} - \bu|_s \cdot \bn_s - a = 0  \label{ske}
 \end{equation}
-This equation says that, at times $t$ and locations $x$ where ice is present, i.e.~$s(t,x)>0$, on the surface of the ice there is a balance between the rate of change of the surface elevation, the motion of the ice, and the CMB.  By expanding the dot product it is equivalent to write ``$\frac{\partial s}{\partial t} + u|_s \frac{\partial s}{\partial x} - w|_s - a = 0$'' or similar; such forms are seen in textbooks.
+This equation says that, at times $t$ and locations $x$ where ice is present, i.e.~$s(t,x)>0$, at the surface of the ice there is a balance between the rate of change of the surface elevation, the flow of the ice, and the CMB.  By expanding the dot product it is equivalent to write ``$\frac{\partial s}{\partial t} + u|_s \frac{\partial s}{\partial x} - w|_s - a = 0$'' or similar; such forms are seen in textbooks.
 
-A new form of the same idea, the \emph{kinematical conservation law} (KCL), is integrated in time and space, and it applies everywhere.  That is, it applies not only on the surface of the ice but on the adjacent ice-free land.  The statement and derivation of this new form is in the early draft \cite{Bueler2022}.  Here we state it on a one-dimensional domain which is an interval, $\Omega=[x_0,x_1]$, and on an interval of time $[t_0,t_1]$:
+A new form of the same idea, the \emph{kinematical conservation law} (KCL), is integrated in time and space, and it applies everywhere.  That is, it applies not only on the surface of the ice but on the adjacent ice-free land.  The statement and derivation of this new form is in the early draft \cite{Bueler2022}.  Here we state it on a one-dimensional interval, $\Omega=[x_0,x_1]$, and an interval of time $[t_0,t_1]$:
 \begin{align}
-\frac{1}{2} \int_{x_0}^{x_1} h(t_1,x)^2\,dx &= \frac{1}{2} \int_{x_0}^{x_1} h(t_0,x)^2\,dx + \int_{t_0}^{t_1} \int_{x_0}^{x_1} h(t,x)\, \bu|_s(t,x)\cdot \bn_s(t,x) \,dx\,dt \label{kcl} \\
-  &\hspace{34mm} + \int_{t_0}^{t_1} \int_{x_0}^{x_1} h(t,x)\, a(t,x) \,dx\,dt \notag
+\frac{1}{2} \int_{x_0}^{x_1} h(t_1,x)^2\,dx &= \frac{1}{2} \int_{x_0}^{x_1} h(t_0,x)^2\,dx + \int_{t_0}^{t_1} \int_{x_0}^{x_1} \bu|_s(t,x)\cdot \bn_s(t,x)\,h(t,x) \,dx\,dt \label{kcl} \\
+  &\hspace{34mm} + \int_{t_0}^{t_1} \int_{x_0}^{x_1} a(t,x)\,h(t,x) \,dx\,dt \notag
 \end{align}
-Equation \eqref{kcl} says that the square of the ice thickness, $h^2$, is conserved.  At a later time $t_1$ the total amount of $h^2$ is the same as at an earlier time $t_0$, except for identified and integrated contributions from ice dynamics ($=\int \int h\, \bu|_s \cdot \bn_s \,dx\,dt$) and CMB ($=\int \int h\, a \,dx\,dt$).  These contributions are ``weighted'' by the thickness, so thinner ice (small $h$) areas do not contribute much, and ice-free areas do not contribute at all.
+Equation \eqref{kcl} says that the square of the ice thickness, $h^2$, is conserved.  At a later time $t_1$ the total amount of $h^2$ is the same as at an earlier time $t_0$, except for identified and integrated contributions from ice dynamics ($=\int \int \bu|_s \cdot \bn_s\,h \,dx\,dt$) and CMB ($=\int \int a\,h \,dx\,dt$).  These contributions are ``weighted'' by the thickness, so thinner ice (small $h$) areas do not contribute much, and ice-free areas do not contribute at all.
 
-The new form may be advantageous when we seek to account for glacier changes in locations $x$ where the glacier is present at certain times ($h(t,x)>0$) and not at others ($h(t,x)=0$).  With the KCL there is no need to track the time-varying region occupied by the glacier, i.e.~the set $R(t) = \{x\,|\,h(t,x)>0\}$.  Equivalently, there is no need to know time-dependent glacier outlines.
+The new form may be advantageous when we try to account for glacier changes in locations $x$ where the glacier is present at certain times ($h(t,x)>0$) and not at others ($h(t,x)=0$).  With the KCL there is no need to track the time-varying region occupied by the glacier, i.e.~the set $R(t) = \{x\,|\,h(t,x)>0\}$.  Equivalently, there is no need to know time-dependent glacier outlines.
 
-We hope this new approach has advantages when inverting for the CMB function $a(t,x)$.  One should be able to simultaneously invert for the CMB, the equilibrium line altitude, and the time-dependent glacier outline from purely kinematical observations, namely of the surface elevation and the surface velocity (in our flat-bed case).  However, this kind of inversion requires separating-out the vertical velocity at the surface $w|_s$, so in initial KCL inversion usage we will assume that we know surface elevation, slope, and horizontal velocity, supplemented by the $s=h$.
+We hope this new approach has advantages when inverting for the CMB function $a(t,x)$.  One should be able to simultaneously invert for the CMB, the equilibrium line altitude, and the time-dependent glacier outline from purely kinematical observations, namely of the surface elevation and the surface velocity.  (The ice thickness is also needed.)  However, this kind of inversion requires separating-out the vertical velocity at the surface $w|_s$.  In initial KCL inversion usage we will lump $w|_s$ with $a$, and we assume that we know surface elevation, slope, and horizontal velocity, supplemented by the $s=h$.
 
 \begin{assumptions}  Fields $s(t,x)$, $\frac{\partial s}{\partial x}(t,x)$, and $u|_s(t,x)$ are observed at all points in $[t_0,t_1] \times [x_0,x_1]$.  The bed elevation is zero ($b=0$), and $s = \frac{\partial s}{\partial x} = u|_s =0$ at ice-free locations. \end{assumptions}
 
-Putting the observed fields on the right, and using $s=h$, we rewrite \eqref{kcl} as follows:
+Putting the observed fields on the right and using $s=h$, we rewrite \eqref{kcl} as follows:
 \begin{align}
 \int_{t_0}^{t_1} \int_{x_0}^{x_1} s(t,x)\, \tilde a(t,x) \,dx\,dt &= \frac{1}{2} \int_{x_0}^{x_1} s(t_1,x)^2 - s(t_0,x)^2\,dx  \label{kclforinversion} \\
     &\quad + \int_{t_0}^{t_1} \int_{x_0}^{x_1} s(t,x)\, u|_s(t,x) \frac{\partial s}{\partial x}(t,x) \,dx\,dt \notag
@@ -96,20 +95,20 @@ where we will call
 \end{equation}
 the \emph{vertical surface rate}.
 
-It is desirable to separate the two parts of $\tilde a$, but initial usage it is easier to keep them together.  Techniques for evaluation of $w|_s$, and thus separation of the CMB $a$ itself, are discussed in \cite{GudmundssonBauder1999}.  This topic forms a natural next step for the project.
+It is desirable to separate the two parts of $\tilde a$, but in initial usage it is easier to keep them together.  Techniques for evaluating $w|_s$, and thus separation of the CMB $a$ itself, are discussed in \cite{GudmundssonBauder1999}.  This topic forms a natural next step for the project.
 
 Equation \eqref{kclforinversion} needs to be discretized into a linear matrix equation
 \begin{equation}
 M \bv = \bd \label{kcldiscrete}
 \end{equation}
-where $\bv$ is a vector of values of $\tilde a$ on a space-time grid, and where $M$ and $\bd$ are formed by choosing time-interval and space-intervals over which to apply \eqref{kclforinversion}.  It is assumed that \eqref{kcldiscrete} will be an underdetermined equation and that an SVD (or similar) method will be used to solve for it, and glacier outlines.  The null space of the matrix $M$ will represent the ice-free areas.
+where $\bv$ is a vector of values of $\tilde a$ on a space-time grid.  Here $M$ and $\bd$ are formed by choosing time and space intervals over which to apply \eqref{kclforinversion}.  It is assumed that \eqref{kcldiscrete} will be an over-determined equation with $\bv\in\RR^n$, $\bd\in\RR^m$, and $m>n$.  This allows a least-squares solution which reduces sensitivity to noise in the observed fields.  Then a QR or SVD method will be used to solve for $\bv$, thus $\tilde a$.  The null space of the matrix $M$ represents the ice-free areas.  The glacier outline will arise from graphing $\tilde a$.
 
 The details of constructing and using \eqref{kcldiscrete} are the content of the project.
 
 
 \section{Synthetic glacier formulas}
 
-The significance of the SKE and KCL, and the above inversion proposal, will become clearer via the construction of an exactly-specified, but synthetic, example.  This example has surface elevation, ice velocity, and CMB which evolve together in a manner so that the SKE and KCL are exactly satisfied.  (The SKE is exactly satisfied in locations where it applies.)
+The significance of the SKE and KCL, and of the above inversion proposal, will become clearer via construction of an exactly-specified, but synthetic, example.  This example has surface elevation, ice velocity, and CMB which evolve together in a manner so that the SKE and KCL are exactly satisfied.  (The SKE is exactly satisfied in locations where it applies.)
 
 The specific synthetic geometry is based on a steady-state ice sheet profile from section 5.3 of \cite{vanderVeen2013}, called the \emph{Bueler profile} and introduced in \cite{Bueler2003}.  However, time dependence is added through making the center height and length time-varying, so the term $\frac{\partial s}{\partial t}$ is nonzero.  The relevant formulas, next, are based on the scalar parameters in Table \ref{constantstable}.
 
@@ -117,8 +116,8 @@ The specific synthetic geometry is based on a steady-state ice sheet profile fro
 \begin{tabular}{clll}
 variable  & description & units & value \\
 \hline
-    & seconds per year &  & 31556926.0 \\
-$A$ & ice softness in Glen law & $\text{Pa}^{-3}\,\text{s}^{-1}$ & $10^{-16}/31556926.0$ \\
+$\spy$ & seconds per year &  & 31556926.0 \\
+$A$ & ice softness in Glen law & $\text{Pa}^{-3}\,\text{s}^{-1}$ & $10^{-16}/\spy$ \\
 $g$ & gravity & m s$^{-2}$ & 9.81 \\
 $H_c^{(0)}$ & center height at time zero & m & 3000 \\
 $L^{(0)}$ & glacier half-length at time zero & m & $400 \times 1000.0$ \\
@@ -126,8 +125,9 @@ $n$ & exponent in Glen flow law & & 3 \\
 $q$ & derived (helper) power & & $q = 1+\frac{1}{n} = \frac{4}{3}$ \\
 $r$ & \qquad '' & & $r = \frac{n}{2n+2} = \frac{3}{8}$ \\
 $\rho$ & density of ice & kg m$^{-3}$ & 910 \\
-$T$ & period of variation & s & $2000 \times 31556926.0$
+$T$ & period of variation & s & $2000 \times \spy$
 \end{tabular}
+\bigskip
 \caption{Values of constants.}
 \label{constantstable}
 \end{table}
