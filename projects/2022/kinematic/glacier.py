@@ -21,6 +21,9 @@ L_0 = 400.0 * 1.0e3    # 400 km
 q = 1.0 + 1.0 / n
 r = n / (2.0 * n + 2.0)
 
+# tolerance
+icytol = 1.0           # 1.0 m in horizontal
+
 # time-dependent center surface elevation (thickness), and its derivative
 def Hc(t):
     return Hc_0 * (1.0 - 0.5 * np.sin(np.pi * t / T))
@@ -39,7 +42,7 @@ def dLdt(t):
 
 # helper functions
 def _geticyy(t,x):
-    icy = (np.abs(x) < L(t))
+    icy = (np.abs(x) < L(t) - icytol)
     return icy, (np.abs(x[icy]) / L(t))
 
 def _psi(t,x):
@@ -87,7 +90,9 @@ def dsdx(t,x):
     C = (n - 1.0)**(-r)
     icy, _ = _geticyy(t,x)
     ds = np.zeros(np.shape(x))
-    ds[icy] = r * Hc(t) * C * _psi(t,x[icy])**(r-1.0) * _dpsidx(t,x[icy])
+    psi = _psi(t,x[icy])
+    assert (psi > 0.0).all(), f'psi supposed to be positive but\n  psi = {psi}'
+    ds[icy] = r * Hc(t) * C * psi**(r-1.0) * _dpsidx(t,x[icy])
     return ds
 
 # horizontal velocity at surface u(t,x) from SIA formula (see notes)
@@ -96,10 +101,15 @@ def us(t,x):
     return - gam * s(t,x)**(n+1.0) * dsdx(t,x)**n   # assumes n odd integer
 
 # the vertical surface rate atilde(t,x) is the actual SMB a(t,x) lumped
-# with the vertical velocity at the surface w|_s(t,x)
-# FIXME extend by ablation I think
+# with the vertical velocity at the surface w|_s(t,x), extended by Inf
 def atilde(t,x):
-    return dsdt(t,x) + us(t,x) * dsdx(t,x)
+    icy, _ = _geticyy(t,x)
+    aa = np.zeros(np.shape(x))
+    aa[icy] = dsdt(t,x[icy]) + us(t,x[icy]) * dsdx(t,x[icy])
+    # np.NaN would be better missing value but matplotlib mis-handles it
+    # (e.g. pcolormesh())
+    aa[np.logical_not(icy)] = np.Inf
+    return aa
 
 # abalance(t,x) below would *be* the SMB if s(t,x)
 # were held at time t; see formula (5.51) in van der Veen (2013)
