@@ -21,7 +21,7 @@ REQUIRED STUDENT BACKGROUND: Exposure to differential equations and linear algeb
 Three reference PDFs are available in the current directory:
 
   * E. Bueler (2022a). **A synthetic, time-dependent glacier for testing surface kinematical inversion**, unpublished.  _This is_ `synglac.pdf` _mentioned below._
-  * FIXME: I WILL PUT IT HERE. E. Bueler (2022b). **A new kinematical conservation law for glaciers**, unpublished.   _A draft of a paper I am writing._
+  * E. Bueler (2022b). **A new kinematical conservation law for glaciers**, unpublished.   _This is_ `newlaw.pdf`. _An early draft only._
   * G. H. Gudmundsson & A. Bauder (1999). **Towards an indirect determination of the mass‐balance distribution of glaciers using the kinematic boundary condition**, Geografiska Annaler: Series A, Physical Geography, 81(4), 575-583.  _Shows inversion of the SKE, and addresses how to recover the vertical surface velocity._
 
 ## a possible project procedure
