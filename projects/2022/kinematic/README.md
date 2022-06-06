@@ -57,17 +57,19 @@ However, the right thing to do for the project is to import and use the function
         >> plt.plot(x,s(T/2,x))
         >> plt.show()
 
-If you import functions this way from `glacier.py` then you can build a gridded (discretized) version of the integrals on the left and right sides of (3), and set up an overdetermined linear system which you can solve by least squares.
+And so on to plot the functions `s(t,x)` as desired.
+
+If you import functions this way from `glacier.py` then you can build a gridded (discretized) version of the integrals on the left and right sides of (3), and set up an overdetermined linear system which you can solve by least squares.  To start with I would suggest doing all integrals on a grid by using the midpoint rule, which is both very easy to implement and just as accurate as the trapezoid rule.
 
 ### overdetermined systems and least squares
 
-Following the brief sketch in `synglac.pdf`, I propose that you build an overdetermined linear system from discretizing $t,x$ as described above.
+Following the brief sketch in `synglac.pdf`, I propose that you build an overdetermined linear system from discretizing $t,x$ as sketched above.  Much more detail on the process is in the draft preprint `newlaw.pdf`.
 
 An overdetermined system has $m$ equations and $n$ unknowns where $m>n$.  For example, if the equation is
 
-$$A x = b$$
+$$M \mathbf{v} = \mathbf{d}$$
 
-then $x$ is a column vector with $n$ entries and $b$ is a column vector with $m$ entries, and $A$ is a matrix with $m$ rows and $n$ columns.  The equation "$Ax=b$" should really be in quotes because we don't expect an exact solution.  Instead we want the least-squares solution where we find $x$ so that $Ax$ and $b$ are as close to being the same vector as possible, that is, so that the norm of the difference $\|Ax-b\|$ is small.  Since norms are usually computed by summing the squares of the entries, followed by square root, this is the least-squares idea.
+then $\mathbf{v}$ is a column vector with $n$ entries and $\mathbf{d}$ is a column vector with $m$ entries, and $M$ is a matrix with $m$ rows and $n$ columns.  The equation "$M \mathbf{v} = \mathbf{d}$" should really be in quotes because we don't expect an exact solution.  Instead we want the least-squares solution where we find $\mathbf{v}$ so that $M \mathbf{v}$ and $\mathbf{d}$ are as close to being the same vector as possible, that is, so that the norm of the difference $\|M \mathbf{v} - \mathbf{d}\|$ is small.  Here the norm is computed by summing the squares of the entries, followed by square root, so this is the least-squares idea.
 
 The script `demos/lstsq_demo.py` sets up a system of $m=3$ equations and $n=2$ unknowns and it solves it by using the `lstsq()` function in `scipy.linalg`.  Please understand this example before proceeding.
 
