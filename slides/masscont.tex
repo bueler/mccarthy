@@ -16,7 +16,7 @@
     \begin{itemize}
     \item[$\circ$] namely $z=h(t,x,y)$ and $z=b(t,x,y)$
     \item[$\circ$] surface overhang is not allowed
-    \item[$\circ$] most Stokes models make this assumption too
+    \item[$\circ$] most numerical Stokes models in glaciology also make this assumption
     \end{itemize}
 \end{itemize}
 \end{column}
@@ -33,7 +33,7 @@
 \includegraphics[width=1.0\textwidth]{serac}
 
 \begin{center}
-\emph{not shallow! not a fluid!}
+\emph{not shallow! not even a fluid!}
 \end{center}
 \end{column}
 \end{columns}
@@ -43,11 +43,11 @@
 \begin{frame}{three equations for geometry change}
 
 \begin{itemize}
-\item let $a$ be the climatic (surface) mass balance function
+\item let $a$ be the surface (climatic) mass balance function
     \begin{itemize}
     \item[$\circ$] $a>0$ is accumulation and $a<0$ is ablation
     \end{itemize}
-\item let $s$ be the basal melt rate (mass balance) function
+\item let $s$ be the basal mass balance function (basal melt rate)
     \begin{itemize}
     \item[$\circ$] $s>0$ is basal melting and $s<0$ is freeze-on
     \end{itemize}
@@ -71,7 +71,7 @@
 
 \begin{itemize}
 \item[Q:] what does the ``most-basic shallow assumption'' get you?
-\item[A:] any two equations imply the third:
+\item[A:] for incompressible ice, any two equations imply the third:
 \small
 \begin{align*}
 &\text{surface kinematical} && h_t = a - u\big|_h h_x - v\big|_h h_y + w\big|_h  \\
@@ -127,7 +127,7 @@ a summary:
       \begin{itemize}
       \item[$\circ$] often: get $(u,v)$, then compute $w$ from incompressibility
       \end{itemize}
-  \item somewhere in here do other processes: thermodynamics, basal melt, calving, \dots
+  \item do other processes: thermodynamics, basal melt, calving, \dots
   \item decide on time-step $\Delta t$ from diffusivity $D$ \hfill (or: \emph{fixed} $\Delta t$, sadly)
   \item from velocity, surface balance, and base balance do time-step of mass continuity equation to get $H_t$
   \item update surface elevation: $h \gets h+H_t \Delta t$

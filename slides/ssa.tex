@@ -382,9 +382,9 @@ convergence analysis of \texttt{ssaflowline.m}:
   \item[$\circ$] at each iteration a sparse matrix ``inner'' problem is solved
   \item[$\circ$] give it to a linear algebra package; don't write it yourself
   \end{itemize}
-\item when geometry and boundary stresses are \emph{known}, many modern stress balance solvers do well
+\item when geometry and boundary stresses are \emph{actually known}, many modern stress balance solvers do well
   \begin{itemize}
-  \item[$\circ$] e.g.~ice shelves
+  \item[$\circ$] including ice shelves
   \item[$\circ$] model shallowness often is \emph{not} the issue
   \item[$\circ$] see: Aschwanden et al.~(2016), \emph{Complex Greenland outlet glacier flow captured}
   \end{itemize}
@@ -425,11 +425,9 @@ convergence analysis of \texttt{ssaflowline.m}:
 \includegraphics[width=0.5\textwidth]{computer}
 \end{center}
 \alert{does not know what you \emph{intend}}, namely your science/modelling goals
-   \begin{itemize}
-   \item[$\circ$] it does ``know'' your discrete equations, the program you wrote
-   \end{itemize}
 
 \bigskip
+\item it does ``know'' your discrete equations, the program you wrote
 \item you \emph{can} aspire for your computer to ``know'' your continuum model, the one that you write as PDEs
    \begin{itemize}
    \item[$\circ$] achieve this through verification with exact solutions

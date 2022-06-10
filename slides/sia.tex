@@ -146,6 +146,9 @@ numerically solve (1) and you have a usable model for boring ice sheets
 
 \begin{itemize}
 \item general 2D heat eqn: \quad $T_t = F + \Div (D\, \grad T)$
+  \begin{itemize}
+  \item[$\circ$] $F(t,x,y)$ is heat source function and $D>0$ is diffusivity
+  \end{itemize}
 \item side-by-side comparison:
 
 \medskip
@@ -172,7 +175,7 @@ numerically solve (1) and you have a usable model for boring ice sheets
 
 \begin{itemize}
 \item numerical schemes for heat equation are good start for SIA
-\item only consider \emph{finite difference} (FD) schemes in these slides
+\item these slides only consider \emph{finite difference} (FD) schemes
 
 \bigskip
 \item first, for differentiable $f(x)$ \emph{Taylor's theorem} says
@@ -231,11 +234,11 @@ u_{xx}(t,x) &= \frac{u(t,x+\Delta x) - 2 u(t,x) + u(t,x-\Delta x)}{\Delta x^2} +
     \item[$\circ$] $(t_n,x_j)$ is a point in the time-space grid
     \item[$\circ$] $T_j^n \approx T(t_n,x_j)$  \only<2>{\hfill \alert{$\gets \quad T_j^n$ from the scheme, $T(t_n,x_j)$ generally unknown}}
     \end{itemize} 
-\item let $\mu = D \Delta t / (\Delta x)^2$, so ``explicit'' scheme is
+\item let $\mu = D \Delta t / (\Delta x)^2$, so this scheme is
 \small
 	$$T_j^{n+1} = \mu T_{j+1}^n + (1 - 2 \mu) T_j^n + \mu T_{j-1}^n \phantom{sdfkj sdkfj asdlfj asldkfj asdflkj}$$
 \normalsize
-\item ``stencil'' at right \large $\to$ \normalsize
+\item \emph{stencil} of this \emph{explicit} scheme at right \large $\to$ \normalsize
 \end{itemize}
 
 \vspace{-15mm}
@@ -246,10 +249,10 @@ u_{xx}(t,x) &= \frac{u(t,x+\Delta x) - 2 u(t,x) + u(t,x-\Delta x)}{\Delta x^2} +
 \begin{frame}{explicit scheme in 2D}
 
 \begin{itemize}
-\item recall heat equation two spatial variables (2D):
+\item recall 2D heat equation:
     $$T_t = D(T_{xx} + T_{yy})$$
 \item again: $T_{jk}^n \approx T(t_n,x_j,y_k)$
-\item the 2D explicit scheme is
+\item the explicit scheme is
 \small
 	$$\frac{T_{jk}^{n+1} - T_{jk}^n}{\Delta t} = D\,\left(\frac{T_{j+1,k}^n - 2 T_{jk}^n + T_{j-1,k}^n}{\Delta x^2} + \frac{T_{j,k+1}^n - 2 T_{jk}^n + T_{j,k-1}^n}{\Delta y^2}\right)$$
 \normalsize
@@ -285,7 +288,7 @@ where $\mu_x=D\Delta t/\Delta x^2$ and $\mu_y = D\Delta t/\Delta y^2$
 \begin{frame}{the look of success}
 
 \begin{itemize}
-\item \texttt{>>  heat(1.0,30,30,0.001,20)}
+\item[] \texttt{>>  heat(1.0,30,30,0.001,20)}
 
 \medskip
 solves $T_t = D(T_{xx} + T_{yy})$ for $T(t,x,y)$ with $D=1$, $30\times 30$ grid, $\Delta t = 0.001$, and $N=20$ time steps
@@ -343,7 +346,7 @@ results from solving $T_t = D(T_{xx} + T_{yy})$ on the \emph{same} space grid an
 \begin{itemize}
 \item recall 1D explicit scheme had the form 
 	$$T_j^{n+1} = \mu T_{j+1}^n + (1 - 2 \mu) T_j^n + \mu T_{j-1}^n$$
-\item thus the new value $u_j^{n+1}$ is an \emph{average} of the old values, \emph{if the middle coefficient is positive}:
+\item thus the new value $u_j^{n+1}$ is an \emph{average} of the old values \emph{if the middle coefficient is positive}:
 	$$1 - 2 \mu \ge 0 \quad \iff \quad  \frac{D\Delta t}{\Delta x^2} \le \frac{1}{2} \quad \iff \quad \Delta t \le \frac{\Delta x^2}{2 D}$$
     \begin{itemize}
     \item[$\circ$] averaging is stable because averaged wiggles are smaller than wiggles
@@ -392,9 +395,9 @@ results from solving $T_t = D(T_{xx} + T_{yy})$ on the \emph{same} space grid an
 \end{center}
 
     \begin{itemize}
-    \item[$\circ$] we will use an explicit adaptive scheme
+    \item[$\circ$] these slides use an explicit adaptive scheme for the SIA
     \item[$\circ$] most ice sheet models are explicit
-    \item[$\circ$] Bueler (2016) is an exception; fully-implicit 
+    \item[$\circ$] Bueler (2016) is an exception: fully-implicit 
     \end{itemize}
 \end{itemize}
 \end{frame}
@@ -499,7 +502,7 @@ where $X=T+b$
 \item recall heat equation in 1D with constant diffusivity $D>0$:
 	$$T_t = D T_{xx}$$
 \item many exact solutions are known!
-\item Green's function solution shown below
+\item \emph{time-dependent Green's function} solution shown below
   \begin{itemize}
   \item[$\circ$] a.k.a.~``fundamental solution'' or ``heat kernel''
   \item[$\circ$] starts at time $t=0$ with a ``delta function'' $T(0,x)=\delta_0(x)$
@@ -515,7 +518,7 @@ where $X=T+b$
 \end{frame}
 
 
-\begin{frame}{the Green's function of the heat equation \quad 2}
+\begin{frame}{the Green's function of the heat equation, cont.}
 
 \begin{itemize}
 \item the Green's function can be found by a method which generalizes to the SIA: the solution is ``self-similar'' over time
@@ -545,7 +548,9 @@ where $X=T+b$
 
 \bigskip
 \item \begin{minipage}[t]{0.55\textwidth}
-\noindent \emph{a tangent?}: Einstein (1905) discovered that the average distance traveled by particles in thermal motion scales like $\sqrt{t}$, so $s = t^{-1/2}x$ is an invariant
+\noindent \emph{a tangent?}: Einstein (1905) discovered that the average distance traveled by particles in thermal motion scales like $\sqrt{t}$, so:
+
+\centerline{$s = t^{-1/2}x$ is an invariant}
 \end{minipage}
 \end{itemize}
 
@@ -557,7 +562,7 @@ where $X=T+b$
 \begin{frame}{similarity solution to SIA}
 
 \begin{itemize}
-\item \emph{1981}:  Peter Halfar discovers the similarity solution of the SIA in the case of flat bed and no surface mass balance
+\item \emph{1981}:  Peter Halfar discovers the similarity solution of the SIA in the case of flat bed and zero surface mass balance
   \begin{itemize}
   \item[$\circ$] for 20 years, almost no one cares
   \end{itemize}
@@ -694,7 +699,7 @@ maximum thickness error  = 104.605
   \item[$\circ$] allow non-flat bed (so $H\ne h$),
   \item[$\circ$] calve any ice that is floating
   \end{itemize}
-\item makes a good exercise \dots only add 10 new lines of code
+\item only adds 10 new lines of code!  \quad  (makes a good exercise)
 \item results from this \emph{toy} Antarctic flow model, a 2000 model year run on a $\Delta x=50$ km grid; runtime a few seconds
 \end{itemize}
 

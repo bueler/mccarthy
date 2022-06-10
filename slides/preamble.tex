@@ -15,7 +15,7 @@ scope:
 
     \begin{itemize}
     \item[$\circ$] shallow ice approximation (SIA) in 2D
-    \item[$\circ$] shallow shelf approximation (SSA) in 1D
+    \item[$\circ$] shallow shelf approximation (SSA) in 1D \only<2>{\alert{X}}
     \item[$\circ$] mass continuity \& surface kinematical equations
     \end{itemize}
 
@@ -209,9 +209,9 @@ D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij} &&\text{\emph{flow law}}
 D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
 \end{align*}
 \normalsize
-\item thus a time-stepping ice sheet code recomputes the full velocity field at every time step
+\item thus a time-stepping ice sheet code can/must recompute the full velocity field at every time step
   \begin{itemize}
-  \item[$\circ$] it does not require velocity from the previous time step\footnote{you don't need \dots to know which way the wind blows}
+  \item[$\circ$] which does not require velocity from the previous time step
   \end{itemize}
 \item velocity is a ``diagnostic'' output not needed for starting or restarting the model
 \end{itemize}
@@ -221,8 +221,11 @@ D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
 \begin{frame}{plane flow Stokes}
 
 \begin{itemize}
-\item suppose we work in a $x,z$ plane, such as the centerline of a glacier, or a cross-flow plane
-\item now the $n=3$ Stokes equations say
+\item suppose we work in a $x,z$ plane
+    \begin{itemize}
+    \item[$\circ$] e.g.~glacier centerline or a cross-flow plane
+    \end{itemize}
+\item $n=3$ Stokes equations say:
 \begin{empheq}[]{align}
 u_x + w_z &= 0 &&\text{\emph{incompressibility}}\notag \\
 p_x &= \tau_{11,x} + \tau_{13,z} &&\text{\emph{stress balance} ($x$)} \notag \\
@@ -250,13 +253,13 @@ u_z + w _x &= 2 A \tau^2 \tau_{13} &&\text{\emph{flow law (off-diagonal)}} \nota
 \item suppose constant thickness
 \item tilt bedrock by angle $\alpha$
 \item rotate the coordinates
-\item get these new expressions:
+\item get replacement expressions:
 \begin{align*}
 \mathbf{g} &= g \sin\alpha\, \hat x - g \cos \alpha \,\hat z \phantom{dslfkj sdkfjlskdjf  sdlfj}\\
 p_x &= \tau_{11,x} + \tau_{13,z} + \rho g \sin\alpha \\
 p_z &= \tau_{13,x} - \tau_{11,z} - \rho g \cos\alpha
 \end{align*}
-\item for this \alert{slab-on-a-slope} there is \emph{no variation in} $x$: $\partial/\partial x = 0$
+\item for \alert{slab-on-a-slope} there is \emph{no variation in} $x$:\quad $\partial/\partial x = 0$
 \item the equations simplify:
 \small
 \begin{empheq}[box=\fbox]{align}
