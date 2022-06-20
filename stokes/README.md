@@ -133,6 +133,16 @@ Using any of methods 1, 2, and 3, one can generate high-quality (i.e. 1 mm/10 da
         (firedrake) $ ./flow.py -mesh fine2.msh -deltat 10.0 -m 100 -s_snes_converged_reason
         (firedrake) $ ./flow.py -mesh start.msh -refine 1 -deltat 10.0 -m 100 -s_snes_converged_reason
 
+## Visualizing surface-perturbation Green's functions
+
+The following visualization may help understand how the surface of a glacier is influenced by surface bumps:
+
+        (firedrake) $ ./domain.py -L 7000.0 -hmesh 40.0 -o long.geo
+        (firedrake) $ gmsh -2 long.geo
+        (firedrake) $ ./flow.py -mesh long.msh -green -greenx 4000.0 -osurface long.png
+
+View `green-long.png` and the "Green's function velocity" field in `long.pvd`.
+
 ## Getting help
 
 There are several ways to get help:

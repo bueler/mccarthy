@@ -8,6 +8,7 @@
 #         instability cases (e.g. -bs 200 in domain.py)
 
 import sys
+import numpy as np
 from argparse import ArgumentParser, RawTextHelpFormatter
 from firedrake import *
 from firedrake.petsc import PETSc
@@ -15,7 +16,7 @@ from domain import bdryids, getdomaindims
 from momentummodel import mixFEchoices, packagechoices, secpera, dayspera, \
                           MomentumModel
 from meshmotion import surfacekinematical, movemesh
-from surfaceutils import surfaceplot
+from surfaceutils import surfaceplot, surfaceplotgreen
 
 # needed for useful error messages
 PETSc.Sys.popErrorHandler()
@@ -39,6 +40,10 @@ parser.add_argument('-eps', type=float, default=0.01, metavar='X',
                     help='regularize viscosity using "+(eps Dtyp)^2" (default=0.01)')
 parser.add_argument('-flowhelp', action='store_true', default=False,
                     help='print help for flow.py options and stop')
+parser.add_argument('-green', action='store_true', default=False,
+                    help="compute velocity Green's function from 10 m surface bump")
+parser.add_argument('-greenx', type=float, default=0.0, metavar='X',
+                    help="x-coordinate of surface bump for Green's function")
 parser.add_argument('-m', type=int, default=0, metavar='X',
                     help='number of time steps of deltat days of surface evolution\n(default=0)')
 parser.add_argument('-mesh', metavar='MESH', type=str, default='',
@@ -80,6 +85,11 @@ if args.m > 0:
     assert (args.deltat > 0.0)
 if args.deltat > 0.0:
     assert (args.m > 0)
+    assert (args.sequence == 0)
+
+# Green's function generation not allowed for time-stepping, grid-sequencing
+if args.green:
+    assert (args.deltat == 0.0)
     assert (args.sequence == 0)
 
 # output file name: strip .msh and replace with .pvd
@@ -235,6 +245,17 @@ elif args.sequence > 0:
 else:
     printpar('solving for velocity and pressure ...')
     up = momentumsolve()
+    if args.green:
+        printpar("Green's function: re-solving from surface bump geometry ...")
+        # find node index of closest surface point to args.greenx
+        P1 = FunctionSpace(mesh, 'CG', 1)
+        bc = DirichletBC(P1, 1.0, bdryids['top'])
+        greeni = np.argmin(np.abs(mesh.coordinates.dat.data[bc.nodes,0] \
+                                  - args.greenx))
+        # move up by 10.0 m, resolve, move back
+        mesh.coordinates.dat.data[bc.nodes[greeni],1] += 10.0
+        upgreen = momentumsolve()
+        mesh.coordinates.dat.data[bc.nodes[greeni],1] -= 10.0
 numericalerrorsslab()
 u,p = up.split()
 
@@ -254,7 +275,13 @@ else:
         printpar('  writing (element_rank,vertex_rank) ...')
         outfile.write(u,p,nu,element_rank,vertex_rank)
     else:
-        outfile.write(u,p,nu)
+        if args.green:
+            ugreen,_ = upgreen.split()
+            ugreen.dat.data[:] -= u.dat.data_ro[:]
+            ugreen.rename("Green's function velocity")
+            outfile.write(u,p,nu,ugreen)
+        else:
+            outfile.write(u,p,nu)
 
 # generate image file with plot of surface values if desired
 if len(args.osurface) > 0:
@@ -262,3 +289,5 @@ if len(args.osurface) > 0:
         surfaceplot(mesh,u,r,args.deltat,args.osurface)
     else:
         surfaceplot(mesh,u,None,args.deltat,args.osurface)
+    if args.green:
+        surfaceplotgreen(mesh,ugreen,args.greenx,"green-" + args.osurface)

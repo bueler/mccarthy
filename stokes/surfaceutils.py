@@ -134,3 +134,37 @@ def surfaceplot(mesh,u,r,deltat,filename):
         plt.legend()
     plt.xlabel('x  [m]')
     plt.savefig(filename,bbox_inches='tight')
+
+def surfaceplotgreen(mesh,ugreen,greenx,filename):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from momentummodel import secpera, dayspera
+    from domain import getdomaindims, bdryids
+
+    L,_,_,_,_ = getdomaindims(mesh)
+    dxdrop = 20.0
+    assert (greenx > dxdrop)
+    assert (greenx < L - dxdrop)
+    xleft = np.linspace(0.0,greenx - dxdrop,401)
+    xright = np.linspace(greenx + dxdrop,L,401)
+    sfcn = getboundaryelevation(mesh,bdryids['top'])
+    ufcn,wfcn = getsurfacevelocityfunction(mesh,bdryids['top'],ugreen)
+    plt.figure(figsize=(6.0,5.0))
+    print("plotting Green's function surface values of (u,w) in file %s ..." % filename)
+    plt.subplot(2,1,1)
+    plt.plot(greenx,0.0,'k.',ms=8.0)
+    plt.plot([0.0,L],[0.0,0.0],'k--',lw=0.5)
+    plt.plot(xleft,secpera*ufcn(xleft),'g',label='horizontal velocity')
+    plt.plot(xright,secpera*ufcn(xright),'g')
+    plt.ylabel('u  [m/a]')
+    plt.legend()
+    removexticks()
+    plt.subplot(2,1,2)
+    plt.plot(greenx,0.0,'k.',ms=8.0)
+    plt.plot([0.0,L],[0.0,0.0],'k--',lw=0.5)
+    plt.plot(xleft,secpera*wfcn(xleft),'g',label='vertical velocity')
+    plt.plot(xright,secpera*wfcn(xright),'g')
+    plt.ylabel('w  [m/a]')
+    plt.legend()
+    plt.xlabel('x  [m]')
+    plt.savefig(filename,bbox_inches='tight')
