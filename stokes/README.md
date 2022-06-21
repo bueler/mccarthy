@@ -141,7 +141,7 @@ The following visualization may help understand how the surface of a glacier is 
         (firedrake) $ gmsh -2 long.geo
         (firedrake) $ ./flow.py -mesh long.msh -green -greenx 4000.0 -osurface long.png
 
-View `green-long.png` and the "Green's function velocity" field in `long.pvd`.
+View `green-long.png` and the "Green's function velocity" field in `long.pvd`.  Note that option `-greenheight` (default 10.0) is also available, to set the bump height in meters.
 
 ## Getting help
 

@@ -44,6 +44,8 @@ parser.add_argument('-green', action='store_true', default=False,
                     help="compute velocity Green's function from 10 m surface bump")
 parser.add_argument('-greenx', type=float, default=0.0, metavar='X',
                     help="x-coordinate of surface bump for Green's function")
+parser.add_argument('-greenheight', type=float, default=10.0, metavar='H',
+                    help="height of surface bump for Green's function")
 parser.add_argument('-m', type=int, default=0, metavar='X',
                     help='number of time steps of deltat days of surface evolution\n(default=0)')
 parser.add_argument('-mesh', metavar='MESH', type=str, default='',
@@ -253,9 +255,9 @@ else:
         greeni = np.argmin(np.abs(mesh.coordinates.dat.data[bc.nodes,0] \
                                   - args.greenx))
         # move up by 10.0 m, resolve, move back
-        mesh.coordinates.dat.data[bc.nodes[greeni],1] += 10.0
+        mesh.coordinates.dat.data[bc.nodes[greeni],1] += args.greenheight
         upgreen = momentumsolve()
-        mesh.coordinates.dat.data[bc.nodes[greeni],1] -= 10.0
+        mesh.coordinates.dat.data[bc.nodes[greeni],1] -= args.greenheight
 numericalerrorsslab()
 u,p = up.split()
 
