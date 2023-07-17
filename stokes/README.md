@@ -9,7 +9,7 @@ The Python programs in this directory are more advanced, and more experimental, 
   * [Gmsh](http://gmsh.info/), a mesher
   * [Paraview](https://www.paraview.org/), for visualization of mesh functions
 
-They are documented by `doc/stokes.pdf`, which is Appendix A to the main notes, and the current README.
+They are documented by the current README and by `doc/stokes.pdf` which is Appendix A to the main notes.
 
 ## Installation
 
@@ -39,7 +39,7 @@ Then do in current directory (`mccarthy/stokes/`):
 
 You should see `PASS` on all the tests.  If not, consider trying to run any of the examples below, and look at the error messages.  Then consider contacting the author at [elbueler@alaska.edu](mailto:elbueler@alaska.edu), including the error transcript.  See also the Firedrake documentation for basic examples.
 
-## Stokes-only usage
+## Stress-balance only usage
 
 This is the basic mode of solving only the stress-balance problem, that is, the Glen-Stokes system for the velocity and pressure.  The glacier surface is fixed.
 

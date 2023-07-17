@@ -41,7 +41,7 @@ parser.add_argument('-eps', type=float, default=0.01, metavar='X',
 parser.add_argument('-flowhelp', action='store_true', default=False,
                     help='print help for flow.py options and stop')
 parser.add_argument('-green', action='store_true', default=False,
-                    help="compute velocity Green's function from 10 m surface bump")
+                    help="compute velocity Green's function from surface bump")
 parser.add_argument('-greenx', type=float, default=0.0, metavar='X',
                     help="x-coordinate of surface bump for Green's function")
 parser.add_argument('-greenheight', type=float, default=10.0, metavar='H',
@@ -252,9 +252,8 @@ else:
         # find node index of closest surface point to args.greenx
         P1 = FunctionSpace(mesh, 'CG', 1)
         bc = DirichletBC(P1, 1.0, bdryids['top'])
-        greeni = np.argmin(np.abs(mesh.coordinates.dat.data[bc.nodes,0] \
-                                  - args.greenx))
-        # move up by 10.0 m, resolve, move back
+        greeni = np.argmin(np.abs(mesh.coordinates.dat.data[bc.nodes,0] - args.greenx))
+        # move up by args.greenheight, re-solve, and move back
         mesh.coordinates.dat.data[bc.nodes[greeni],1] += args.greenheight
         upgreen = momentumsolve()
         mesh.coordinates.dat.data[bc.nodes[greeni],1] -= args.greenheight
