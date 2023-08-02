@@ -1,6 +1,14 @@
 # stokes/
 
-Copyright 2018--2022 Ed Bueler
+Copyright 2018--2023 Ed Bueler
+
+## NOTICE
+
+These notes may well be useful, but I have written a better-maintained set of notes and programs for introducing the Stokes equations using Firedrake.  See
+
+[stokes-ice-tutorial](https://github.com/bueler/stokes-ice-tutorial)
+
+## Introduction
 
 The Python programs in this directory are more advanced, and more experimental, than the Matlab/Octave programs in the `mfiles/` directory.  They use advanced, open-source libraries and tools:
 
