@@ -18,6 +18,10 @@ REQUIRED STUDENT BACKGROUND: Exposure to linear algebra, numerical methods, part
 
 ## getting started
 
-As the zeroth step, clone [this McCarthy repo](https://github.com/bueler/mccarthy) and go to the `stokes/` directory and make sure you can run all the steps documented in `stokes/README.md`.  That document describes how to use my Firedrake-based Python Stokes solver, with pre/post-processing using Gmsh and Paraview.  Also get started on reading the documentation `stokes/stokes.pdf` for the solver.  Some of these steps may be quite new to you, in which case the project has already been worthwhile!
+As the first step, clone the current [McCarthy repo](https://github.com/bueler/mccarthy):
+
+    $ git clone --depth=1 https://github.com/bueler/mccarthy.git
+
+Go to the `stokes/` directory and try all the steps documented in `stokes/README.md`.  You will learn how to use my Firedrake-based Python Stokes solver, with pre- and post-processing using Gmsh and Paraview.  Please also get started on reading the documentation `stokes/stokes.pdf` for the solver.  Some of these steps may be quite new to you, in which case the project has already been worthwhile!
 
 My suggested goal of this project is to **FIXME**
