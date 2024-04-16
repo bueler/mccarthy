@@ -1,12 +1,10 @@
-# stokes/
+# stokes/exper/
 
-Copyright 2018--2024 Ed Bueler
+Copyright 2018--2023 Ed Bueler
 
-## TODO: TOTAL REWRITE PLANNED
+## NOTICE
 
-I plan to strip out all multigrid ideas and all surface evolution ideas, and thus build a simpler base code for both projects in the 2024 school.  Also compare
-
-[stokes-ice-tutorial](https://github.com/bueler/stokes-ice-tutorial)
+These notes both represent a snapshot of the old (2022) state of the `stokes/` code, and they save a variety of ideas about scalable solvers and surface evolution.  Such ideas I either plan to redo, or abandon.
 
 ## Introduction
 
