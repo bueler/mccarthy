@@ -1,9 +1,15 @@
 mccarthy
 ========
 
-Copyright 2010--2023  Ed Bueler
+Copyright 2010--2024  Ed Bueler
 
-This repository contains slides, notes, and computer programs about numerical glacier and ice sheet modeling.  They have been used for the [International Summer School in Glaciology](http://glaciers.gi.alaska.edu/courses/summerschool), McCarthy, AK in years 2010, 2012, 2014, 2016, 2018, and 2022.  The PDF notes (the `.pdf` in [notes/](notes/)) plus their exercises plus the Matlab/Octave programs form a self-contained course.  The PDF slides (the `.pdf` in [slides/](slides/)) cover the same material in a more informal style.
+This repository contains slides, notes, and computer programs about numerical glacier and ice sheet modeling.  They have been used for the [International Summer School in Glaciology](http://glaciers.gi.alaska.edu/courses/summerschool), McCarthy, AK in years 2010, 2012, 2014, 2016, 2018, and 2022.  The PDF notes (`.pdf` in [notes/](notes/)) plus their exercises plus the Matlab/Octave programs form a self-contained course.  The PDF slides (`.pdf` in [slides/](slides/)) cover the same material in a more informal style.
+
+
+NOTICE
+------
+
+This content will be completely revised for the June 2024 school.  The current state is, at best, of historical interest.
 
 
 download Matlab/Octave programs
