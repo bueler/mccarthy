@@ -10,18 +10,23 @@ PROJECT 10: Cliffs, overhangs, damage
 
 ADVISOR: Ed Bueler
 
-DESCRIPTION: **FIXME** How does the velocity field of a glacier change if you put a pile of ice somewhere on its surface, or if you dig a pit somewhere?  The change in the velocity field reveals the boundary Green's functions of the Stokes problem for glaciers.  The goal of this project is to build new understanding of these Green's functions.  How do they depend on glacier thickness or sliding?  How do they depend on nearness to margins or bed topography?  How can they be exploited to build faster numerical models?  Students will use a modern finite-element framework for solving the Glen-Stokes equations, in a flowline plane, for student-chosen glacier geometries, as we explore.
+DESCRIPTION:  At the surface of a glacier, and especially on steep margins, our viscous-fluid understanding of glaciers can break down.  Near cliffs and overhangs, stresses within the ice may turn into fractures and crevasses.  A numerical Stokes model can address how fractures appear via a model of damage, that is, of the deterioration of polycrystalline structure.  We will try to model the initial damage, starting from a good base in the literature and an already-written, and brief, finite-element solver of the 2D (planar) Glen-Stokes equations.  Applying the solver will connect ice geometry and surface stresses to stresses within the ice.  These stresses can then be expressed as rates of change of damage.  We will explore different geometries, evolution models, and questions as they arise.
 
-SOFTWARE REQUIREMENTS: Python _running locally on your machine_.  Please try to build/install: Firedrake, Gmsh, Paraview.  (As backup, I'll bring an extra laptop, pre-loaded.)
+SOFTWARE REQUIREMENTS: You will need a recent version of Python _running locally on your machine_.  Please try to build/install the following: Firedrake, Gmsh, Paraview.  (As backup, I'll bring an extra laptop, pre-loaded.)
 
-REQUIRED STUDENT BACKGROUND: Exposure to linear algebra, numerical methods, partial differential equations, and (perhaps) the finite element method.
+STUDENT BACKGROUND: Linear algebra and some differential equations are required.  Optionally, perhaps a bit of numerical methods or the finite element method?
 
 ## getting started
 
-As the first step, clone the current [McCarthy repo](https://github.com/bueler/mccarthy):
+As the first step, if you have not done it already, please clone my whole [McCarthy repo](https://github.com/bueler/mccarthy):
 
     $ git clone --depth=1 https://github.com/bueler/mccarthy.git
 
-Go to the `stokes/` directory and try all the steps documented in `stokes/README.md`.  You will learn how to use my Firedrake-based Python Stokes solver, with pre- and post-processing using Gmsh and Paraview.  Please also get started on reading the documentation `stokes/stokes.pdf` for the solver.  Some of these steps may be quite new to you, in which case the project has already been worthwhile!
+Now go to the `stokes/` directory and try all the steps documented in `stokes/README.md`.  You will learn how to use my Firedrake-based Python Stokes solver, with pre- and post-processing using Gmsh and Paraview.  Some of these "first step" steps may involve some learning, in which case the project has already been worthwhile!
+
+As a second step, collect and browse the following documents.  I will provide these on paper in McCarthy, but they are also available electronically:
+
+  * `stokes/doc/stokes.pdf`:  This can be built using LaTeX.  It documents how the Firedrake Stokes solver works.
+  * `projects/2024/cliffdamage/PralongFunkLuthi2003.pdf`:  This paper contains some key ideas relating the stresses which are modeled in a Stokes solver to the evolution of damage.  We will start with a focus on formula (8), but you should read from the beginning.
 
 My suggested goal of this project is to **FIXME**
