@@ -1,4 +1,4 @@
-# FIXME
+# Drag from waves in the bed
 
 ## reassurance
 
@@ -6,11 +6,11 @@ The point of the project is not to reach a particular destination!  It is to _he
 
 ## description
 
-PROJECT 11: FIXME
+PROJECT 11: Drag from waves in the bed
 
 ADVISOR: Ed Bueler
 
-DESCRIPTION:  FIXME At the surface of a glacier, and especially on steep margins, our viscous-fluid understanding of glaciers can break down.  Near cliffs and overhangs, stresses within the ice may turn into fractures and crevasses.  A numerical Stokes model can address how fractures appear via a model of damage, that is, of the deterioration of polycrystalline structure.  We will try to model the initial damage, starting from a good base in the literature and an already-written, and brief, finite-element solver of the 2D (planar) Glen-Stokes equations.  Applying the solver will connect ice geometry and surface stresses to stresses within the ice.  These stresses can then be expressed as rates of change of damage.  We will explore different geometries, evolution models, and questions as they arise.
+DESCRIPTION:  How much drag is caused by waves in the bed topography of a glacier?  How does this depend on wavelength and magnitude?  Does sliding make the effect larger or smaller?  These questions can be explored using a numerical Stokes model.  We will compare slab-on-slope solutions to cases where the base has added topography or sliding, and measure the modeled velocity change.  Because these questions have been addressed by analytical/expansion techniques in earlier literature, we can also use the model results to assess those conclusions.  Students will gain experience and understanding as they modify an already-written finite-element solver of the 2D (planar) Glen-Stokes equations.
 
 SOFTWARE REQUIREMENTS: You will need a recent version of Python _running locally on your machine_.  Please try to build/install the following: Firedrake, Gmsh, Paraview.  (As backup, I'll bring an extra laptop, pre-loaded.)
 
