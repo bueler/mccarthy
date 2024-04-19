@@ -6,7 +6,7 @@ The point of the project is not to reach a particular destination!  It is to _he
 
 ## description
 
-PROJECT 11: Drag from waves in the glacier bed
+PROJECT 13: Drag from waves in the glacier bed
 
 ADVISOR: Ed Bueler
 

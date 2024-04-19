@@ -6,11 +6,11 @@ The point of the project is not to reach a particular destination!  It is to _he
 
 ## description
 
-PROJECT 10: Cliffs, overhangs, damage
+PROJECT 14: Cliffs, overhangs, damage
 
 ADVISOR: Ed Bueler
 
-DESCRIPTION:  At the surface of a glacier, and especially on steep margins, our viscous-fluid understanding of glaciers can break down.  Near cliffs and overhangs, stresses within the ice can turn into fractures and crevasses.  A numerical Stokes model can address where fractures appear, via a model of damage, that is, of how stresses cause the deterioration of polycrystalline structure.  We will try to model the initial damage, starting from some of the literature on damage, and using an already-written finite-element solver of the 2D (planar) Glen-Stokes equations.  The solver will connect ice geometry and surface stresses to stresses within the ice, and these stresses can be evaluated as rates of change of damage.  By modifying the solver we will explore different geometries, evolution models, and questions as they arise.
+DESCRIPTION:  At the surface of a glacier, and especially on steep margins, our viscous-fluid understanding of glaciers can break down.  Near cliffs and overhangs, stresses within the ice can turn into fractures and crevasses.  A numerical Stokes model can address where fractures appear, via a model of damage, that is, a model of how stresses cause the deterioration of polycrystalline structure.  We will try to model the initial damage, starting from some of the relevant literature, using an already-written finite-element solver of the 2D (planar) Glen-Stokes equations.  The solver will connect ice geometry and surface stresses to stresses within the ice, and these stresses can be evaluated as rates of change of damage.  By modifying the solver we will explore different geometries, evolution models, and questions as they arise.
 
 SOFTWARE REQUIREMENTS: You will need a recent version of Python _running locally on your machine_.  Please try to build/install the following: Firedrake, Gmsh, Paraview.  (As backup, I'll bring an extra laptop, pre-loaded.)
 
