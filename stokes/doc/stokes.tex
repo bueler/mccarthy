@@ -49,7 +49,7 @@ urlcolor=black     % only if colorlinks=true
 \begin{document}
 \graphicspath{{figures/}}
 
-\title[Appendix A]{Appendix A: A finite element Stokes solver \\ for glacier flow}
+\title[FE Stokes solver for glacier flow]{A finite element Stokes solver \\ for glacier flow}
 
 \author{Ed Bueler}
 
@@ -58,46 +58,41 @@ urlcolor=black     % only if colorlinks=true
 \vspace{-8mm}
 \begin{center}
 \footnotesize
-\emph{version: \today~for McCarthy 2022}
+\emph{version: \today~for McCarthy 2024}
 \end{center}
 
 \thispagestyle{empty}
 \bigskip
 
-\renewcommand{\thefigure}{A\arabic{figure}}
-\renewcommand{\theequation}{A\arabic{equation}}
-\renewcommand{\thesection}{A.\arabic{section}}
+%\renewcommand{\thefigure}{A\arabic{figure}}
+%\renewcommand{\theequation}{A\arabic{equation}}
+%\renewcommand{\thesection}{A.\arabic{section}}
 
-This is an appendix to my notes \emph{Numerical modelling of glaciers, ice sheets, and ice shelves}---here called ``the notes''---for the International Summer School in Glaciology in McCarthy, Alaska.
-
-First we state the Stokes model for ice flow, with glacier-suitable boundary conditions, for example as in Figure \ref{fig:glacier}, including the slab-on-a-slope case.  (The slab exact solution is useful both for verification purposes and as a source of boundary conditions for general cases.)  We then derive the \emph{weak form} of the Stokes problem.  A brief overview of \emph{finite element} (FE) methods, based on such weak forms, follows.  Our particular FE method uses an unstructured mesh of triangular elements, on any planar region, to solve the Glen-Stokes problem by a stable \emph{mixed element} method with distinct approximating spaces for velocity and pressure.  We demonstrate a numerical solution for the instantaneous velocity and pressure.  Then we describe a moving-mesh scheme to solve the surface kinematical equation, and demonstrate an evolving glacier shape.
-
-\begin{figure}[h]
-\includegraphics[width=\textwidth,angle=-5.7296]{stepflowlin}  % 0.1 radian = 5.7296 degrees
-\caption{A 2D glacier flowing over a bedrock step.  Arrows show velocity $\bu$ and shading is by pressure $p$.}
-\label{fig:glacier}
-\end{figure}
-
-Our numerical model is in short Python codes, documented at the end, which exploit four advanced open source tools and libraries:
+This document is an appendix to my notes for the International Summer School in Glaciology in McCarthy, Alaska.  It documents a Stokes numerical model, written in short Python codes, exploiting these open source tools and libraries:
 \begin{itemize}
-\item Firedrake, an FE library \hfill \url{https://www.firedrakeproject.org/}
-    \begin{itemize}
-    \item[$\circ$] inside Firedrake is PETSc, a solver library \hfill \url{https://petsc.org/}
-    \end{itemize}
+\item Firedrake, a finite element library \hfill \url{https://www.firedrakeproject.org/}
 \item Gmsh, a mesh generator \hfill \url{http://gmsh.info/}
 \item Paraview, a visualization tool \hfill \url{https://www.paraview.org/}
 \end{itemize}
 
+\begin{figure}[h]
+\includegraphics[width=\textwidth,angle=-5.7296]{stepflowlin}  % 0.1 radian = 5.7296 degrees
+\caption{(FIXME: PUT NEW CODE RESULT)  A 2D glacier flowing over a bedrock step.  Arrows show velocity $\bu$ and shading is by pressure $p$.}
+\label{fig:glacier:bedstep}
+\end{figure}
+
+To start the presentation we state the Stokes model for 2D ice flow, with glacier-suitable boundary conditions, for example as in Figure \ref{fig:glacier:bedstep}.  The solver works for any reasonable ice geometry, for example with a bedrock step (rise) as shown.  However, because the slab-on-a-slope case has an exact solution, which is useful for understanding, verification purposes, and as a source of boundary conditions for other cases, we address that special case first.  We then derive the weak form of the Stokes problem and give a brief overview of finite element (FE) methods.  Our particular FE method uses an unstructured mesh of triangular or quadrilateral elements, optionally using an extruded mesh, to solve the Glen-Stokes problem by a stable ``mixed'' method with distinct approximating spaces for velocity and pressure.  Finally, we demonstrate numerical solutions and give a brief guide to usage.
+
 
 \section{Glen-Stokes model} \label{sec:stokes}
 
-Recall the Glen-Stokes model in equations (3)--(5) from the notes.  This model, also described in \cite{GreveBlatter2009,JouvetRappaz2011}, applies on a 2D or 3D domain $\Omega$ which must have a piecewise smooth boundary (so that we may apply boundary conditions).  Allowing any Glen exponent $n\ge 1$, the equations are:
+Let us start from the Glen-Stokes model stated in the notes.  This model, also described in \cite{GreveBlatter2009,JouvetRappaz2011}, applies on any 2D or 3D domain $\Omega$ which has a piecewise smooth boundary.  Allowing any Glen exponent $n\ge 1$, the equations are:
 \begin{align}
 - \nabla \cdot \tau + \nabla p &= \rho \bg &&\text{\emph{stress balance}} \label{forcebalance} \\
 \nabla \cdot \bu &= 0 &&\text{\emph{incompressibility}} \label{incompressible} \\
 D\bu &= A_n |\tau|^{n-1} \tau &&\text{\emph{Glen flow law}} \label{flowlaw}
 \end{align}
-The notation here generally follows Table 1 in the notes, including velocity $\bu$, pressure $p$, ice density $\rho$, acceleration of gravity $\bg$, deviatoric stress tensor $\tau$ and strain rate tensor $D\bu$.  Tensors $D\bu$ and $\tau$ are symmetric and have trace zero.  Recall that $D\bu$ is the symmetric part of the tensor velocity derivative $\grad \bu$:
+The notation here generally follows the notes, including velocity $\bu$, pressure $p$, ice density $\rho$, acceleration of gravity $\bg$, deviatoric stress tensor $\tau$, strain rate tensor $D\bu$, and ice softness $A_n$.  A key idea is that tensors $D\bu$ and $\tau$ are symmetric (conservation of angular momentum) and have trace zero (incompressibility).  Note that $D\bu$ is the symmetric part of the tensor velocity derivative $\grad \bu$:
 \begin{equation}
 (D\bu)_{ij} = \frac{1}{2} \left(\grad\bu + \grad\bu^\top\right) = \frac{1}{2} \left((u_i)_{x_j} + (u_j)_{x_i}\right) \label{strainrate}
 \end{equation}
@@ -105,9 +100,9 @@ The full (Cauchy) stress tensor $\sigma$ is the deviatoric stress tensor $\tau$ 
 \begin{equation}
     \sigma = \tau - p\,I,  \label{cauchystress}
 \end{equation}
-so equation \eqref{forcebalance} simply says $-\Div \sigma = \rho \bg$.  One may derive from \eqref{cauchystress} that $p = -\frac{1}{3} \trace(\sigma)$ (in 3D), thus the pressure is the negative of the average normal stress.  By definition $\Div\tau$ in \eqref{forcebalance} is a vector with components which are the divergences of the rows:
+so equation \eqref{forcebalance} simply says $-\Div \sigma = \rho \bg$.  One may derive from \eqref{cauchystress} that $p = -\frac{1}{2} \trace(\sigma)$, in 2D anyway, thus the pressure is the negative of the average normal stress.  By definition $\Div\tau$ in \eqref{forcebalance} is a vector with components which are the divergences of the columns:
 \begin{equation}
-    \left(\nabla \cdot \tau\right)_i = \left(\tau_{i1}\right)_{x_1} + \left(\tau_{i2}\right)_{x_2} + \left(\tau_{i3}\right)_{x_3}  \label{divtaudefn}
+    \left(\nabla \cdot \tau\right)_i = \left(\tau_{1i}\right)_{x_1} + \left(\tau_{2i}\right)_{x_2}  \label{divtaudefn}
 \end{equation}
 Note $\nabla\cdot \tau$, $\nabla p$, and $\bg$ are regarded as column vectors.
 
@@ -115,7 +110,7 @@ The viscosity form of \eqref{flowlaw} can also be found in the notes:
 \begin{equation}
 \tau = 2\nu D\bu = B_n |D\bu|^{\frac{1}{n} - 1} D\bu  \label{viscflowlaw}
 \end{equation}
-Here $B_n = (A_n)^{-1/n}$ is the $n$-dependent ice hardness in units $\text{Pa}\,\text{s}^{1/n}$.  The tensor norm notation used in \eqref{flowlaw}  and \eqref{viscflowlaw} is defined as follows, with the summation convention:
+Here $B_n = (A_n)^{-1/n}$ is the ice hardness in units $\text{Pa}\,\text{s}^{1/n}$.  The tensor norm notation used in \eqref{flowlaw}  and \eqref{viscflowlaw} is defined as follows, with the summation convention:
 \begin{align*}
 |\tau|^2 = \frac{1}{2} \trace\left(\tau^2\right) = \frac{1}{2} \tau_{ij} \tau_{ij}, \qquad |D\bu|^2 = \frac{1}{2} \trace\left((D\bu)^2\right) = \frac{1}{2} (D\bu)_{ij} (D\bu)_{ij}
 \end{align*}
@@ -125,27 +120,25 @@ Using \eqref{viscflowlaw} we can eliminate $\tau$ from equation \eqref{forcebala
 - \nabla \cdot \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu\right) + \nabla p &= \rho \mathbf{g} \label{stokes} \\
 \Div \bu &= 0 \label{incompagain}
 \end{align}
-This system is the preferred Glen-Stokes model.  A solution is a pair $(\bu,p)$.
+Also, from now on we denote the points of the 2D region $\Omega$ by $(x,z)$, and we add an angle parameter: gravity is at an angle $\alpha$ with the $z$-direction, so that $\bg = \left<g\sin\alpha,-g\cos\alpha\right>$ where $g>0$.  The numerical model in these notes solves system \eqref{stokes}, \eqref{incompagain} with a body force given by this $\rho \bg$.  A solution of the problem is a pair $(\bu,p)$.
 
-From now on we suppose the domain $\Omega$ is 2D, so points are denoted $(x,z)$.  (Relative to 3D: $y=0$, $\partial/\partial y=0$, $v=0$, and $\bu=\left<u,w\right>$.)  Also we will assume the force of gravity is at an angle $\alpha$ with the $z$-direction so $\bg = \left<g\sin\alpha,-g\cos\alpha\right>$ where $g=|\bg|$.
-
-Certain glacier-suitable velocity and stress boundary conditions will be used here.  We assume that the base, top, inflow, and outflow boundaries can all be identified.  On the base we require no slip:
+Certain glacier-suitable velocity and stress boundary conditions will be used here.  We assume that base, top, inflow, and outflow boundaries can all be identified.  On the base we require no slip:
 \begin{align}
 \bu &= 0  &&\text{\emph{base}} \label{basebc} \\
-\intertext{On the top we set a condition of zero applied stress, i.e.~$\sigma\hbn=0$:}
+\intertext{(although this can be modified if the user desires).  On the top we set a condition of zero applied stress, $\sigma\hbn=0$:}
 \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= 0  &&\text{\emph{top}} \label{topbc} \\
-\intertext{The left-side inflow boundary has outward normal $\hbn=\left<-1,0\right>$ in our case, and on this surface we set a nonzero inflow velocity:}
+\intertext{The inflow boundary is the left side, which has outward normal $\hbn=\left<-1,0\right>$, and here we set a nonzero inflow velocity:}
 \bu &= \left<f(z),0\right>  &&\text{\emph{inflow}} \label{inflowbc} \\
-\intertext{(The function $f(z)$ will satisfy the slab-on-slope equations for a specific thickness $H_{\text{in}}$ at the inflow; see below.)  On an outflow boundary, where $\hbn=\left<1,0\right>$, we set a nonzero hydrostatic normal stress using the (varying) ice thickness $H_{\text{out}}$ at the outflow:}
+\intertext{The implemented function $f(z)$ satisfies the slab-on-slope equations for a given thickness $H_{\text{in}}$; see below.  On an outflow boundary, which is the right side and has $\hbn=\left<1,0\right>$ in the implemented form, we set a nonzero hydrostatic normal stress using the ice thickness $H_{\text{out}}$ at that location:}
 \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= C_{\text{out}} \big<- \rho g \cos\alpha (H_{\text{out}}-z),  \notag && \\
     &\qquad\qquad \rho g\sin\alpha (H_{\text{out}}-z)\big> && \text{\emph{outflow}} \label{outflowbc}
 \end{align}
-The constant $C_{\text{out}} $ is adjusted so that the total applied stress is equal to its value for the input ice thickness $H_{\text{in}}$, thus $C_{\text{out}} = (H_{\text{in}}/H_{\text{out}})^2$.
+The implemented constant $C_{\text{out}} $ is set so that the applied stress on the outflow equals what the applied stress on the inflow would be, thus $C_{\text{out}} = (H_{\text{in}}/H_{\text{out}})^2$.
 
 
 \section{Slab-on-slope solutions}  \label{sec:slab}
 
-Testing a numerical model requires verification tools, namely exact solutions, so here we recapitulate the slab-on-slope construction given in the notes.  This time we allow any Glen exponent $n$.  We will construct inflow and outflow boundary conditions, for use when solving for more general flows, from this case.
+Testing a numerical model requires verification tools, namely exact solutions.  Such solutions are in short supply for the Glen-Stokes model, so now we recapitulate the slab-on-slope construction given in the notes, allowing any Glen exponent $n$.  This also generates inflow and outflow boundary conditions which can be used for more general flows.
 
 Using component notation for 2D, equations \eqref{stokes}, \eqref{incompagain} become the following Glen-Stokes model in coordinates $(x,z)$ and velocity components $\bu=\left<u,w\right>$:
 \begin{align}
@@ -158,20 +151,20 @@ The strain-rate norm expands to
     |D\bu|^2 = \frac{1}{2} \left(u_x^2 + \frac{1}{2}(u_z+w_x)^2 + w_z^2\right)  \label{planeDnorm}
 \end{equation}
 
-Consider a slab with fixed ($x$-independent) values of the bed elevation $b$ and the surface elevation $h$, so the domain is $\Omega = \{(x,z)\,|\,b < z < h\}$.  (This describes either an infinitely-long or a periodic slab flow.)  Assume that the boundary stresses are also $x$-independent.  Then there is no variation in $x$, i.e.~$\partial/\partial x=0$, so the system simplifies:
+Consider either an infinitely-long or a periodic slab flow.  It has fixed ($x$-independent) values of the bed elevation $b$ and the surface elevation $h$, so the domain is $\Omega = \{(x,z)\,|\,b < z < h\}$.  Assume that the boundary stresses are also $x$-independent.  Then there is no variation in $x$, i.e.~$\partial/\partial x=0$, so the system simplifies:
 \begin{align}
 - \left(\frac{1}{2}B_n |D\bu|^{\frac{1}{n}-1} u_z\right)_z &= \rho g\sin\alpha \label{slabstresses} \\
 p_z &= -\rho g\cos\alpha \notag \\
 w_z &= 0 \notag
 \end{align}
-The strain-rate norm simplifies to $|D\bu| = \frac{1}{2} |u_z|$.  If we further assume that there is no melt or freeze at the base then $w=0$ identically; the ice velocity is surface parallel.  Then an integration with respect to $z$, and assumption of zero pressure at the surface, yields hydrostatic pressure:
+Also, the strain-rate norm simplifies to $|D\bu| = \frac{1}{2} |u_z|$.  If we further assume that there is no melt or freeze at the base then $w=0$ identically; the ice velocity is bed and surface parallel.  Then an integration with respect to $z$, and assumption of zero pressure at the surface, yields hydrostatic pressure:
 \begin{equation}
 p(z) = \rho g\cos\alpha (h-z)  \label{pslab}
 \end{equation}
 
 Now \eqref{slabstresses} yields a single nontrivial equation for the horizontal velocity:
     $$- \left(\frac{B_n}{2^{1/n}} |u_z|^{\frac{1}{n}-1} u_z\right)_z = \rho g\sin\alpha$$
-As we expect $u_z>0$, with rearrangement the equation is
+As we expect $u_z>0$, rearrangement gives
     $$\left((u_z)^{1/n} \right)_z = - \frac{2^{1/n} \rho g\sin\alpha}{B_n}$$
 This can be vertically-integrated downward from the surface $z=h$, using the no-stress condition, which simplifies to $u_z=0$, to give
 \begin{equation}
@@ -182,77 +175,74 @@ Integrating vertically again, upward from the base $z=b$ where $u=0$, gives
 u(z) = \frac{2}{n+1} \left(\frac{\rho g\sin\alpha}{B_n}\right)^n \left((h-b)^{n+1} - (h-z)^{n+1}\right)  \label{uslab}
 \end{equation}
 
-Formulas \eqref{pslab} and \eqref{uslab} exactly solve the Stokes equations, and they will be used for verifying the numerical solver.  Additionally they allow us to set boundary conditions which lead to glaciologically-reasonable solutions for more general shapes like that shown in Figure \ref{fig:glacier}.  In our set-up the inflow side will have \eqref{uslab} applied as a Dirichlet condition---see equation \eqref{inflowbc}.  On the outflow side we apply a normal stress also computed from the slab-on-slope solution.  In fact, from \eqref{uzslab} above, and the facts that $w=0$, $u_x=0$, and $|D\bu| = \frac{1}{2} u_z$, we find that because $\hbn=\left<1,0\right>$ is the outflow outward normal,
+Formulas \eqref{pslab} and \eqref{uslab} exactly solve the Stokes equations and the described boundary conditions.  They will be used for verifying the numerical solver.
+
+Additionally these slab-on-slope formulas allow us to set boundary conditions which lead to glaciologically-reasonable solutions for more general shapes like that shown in Figure \ref{fig:glacier:bedstep}.  In the implemented cases, the inflow side has \eqref{uslab} applied as a Dirichlet condition, as in \eqref{inflowbc}.  On the outflow side we apply a normal stress derived from \eqref{uzslab}.  That is, using the facts that $w=0$, $u_x=0$, $|D\bu| = \frac{1}{2} u_z$, and $\hbn=\left<1,0\right>$, we have
 \begin{align*}
 \sigma \hbn &= \left(B_n |D\bu|^{\frac{1}{n}-1} D\bu - pI\right)\hbn = \left(B_n |D\bu|^{\frac{1}{n}-1} \begin{pmatrix} u_x & \frac{1}{2}(u_z+w_x) \\ \frac{1}{2}(u_z+w_x) & w_z \end{pmatrix} - pI\right)\hbn \\
     &= B_n \left(\frac{1}{2} u_z\right)^{\frac{1}{n}-1} \begin{pmatrix} 0 \\ \frac{1}{2} u_z \end{pmatrix} - \begin{pmatrix} p \\ 0 \end{pmatrix} = \begin{pmatrix} - p \\ \frac{B_n}{2^{1/n}} (u_z)^{1/n} \end{pmatrix} = \begin{pmatrix} - \rho g\cos\alpha (h-z) \\ \rho g\sin\alpha (h-z) \end{pmatrix}
 \end{align*}
 This justifies formula \eqref{outflowbc}.
 
-Different Glen exponents $n$ will generate different solutions, but we can determine the ice hardness $B_n$ so that these solutions at least have the same surface velocity.  This allows us to create comparable solutions for any $n\ge 1$, with glaciologically-reasonable ice velocities, based on the $n=3$ case \cite{GreveBlatter2009}.  From the ice softness value $A_3 = 3.1689 \times 10^{-24} \,\text{Pa}^{-3}\,\text{s}^{-1}$ we get $B_3 = (A_3)^{-1/3}$ in $\text{Pa}\,\text{s}^{1/3}$.  We now compute $B_n$ so that the surface velocity $u(h)$ from \eqref{uslab} matches the $n=3$ value:
-\begin{equation}
-B_n = \left(\frac{4}{n+1}\right)^{1/n} \Big(\rho g \sin\alpha (h-b)\Big)^{(n-3)/n} {B_3\,}^{3/n}  \label{Bnfromsurface}
-\end{equation}
-
-For example, if $h-b=400$ m and $\alpha=0.1$ radians (about $5.7$ degrees) then $B_n$ from \eqref{Bnfromsurface} gives a surface velocity of $u(h)=906.092 \,\text{m}\,\text{a}^{-1}$ from \eqref{uslab}, independent of $n\ge 1$.  Considering the glaciologically-relevant end-cases $n=1,4$ \cite{GoldsbyKohlstedt2001}, from \eqref{Bnfromsurface} we find $B_1=4.9663\times 10^{12}\,\text{Pa}\,\text{s}$ and $B_4=1.7320\times 10^{7}\,\text{Pa}\,\text{s}^{1/4}$.  According to wikipedia the Newtonian viscosity $\nu=B_1/2$ is about $10^{16}$ times more viscous than liquid water but about $10^7$ times less viscous than granite.
-
 
 \section{Weak form} \label{sec:weakform}
 
-Equations \eqref{stokes} and \eqref{incompagain} are called the \emph{strong form} of the model.  An integral equation form of the same model, the \emph{weak form}, is needed when building a numerical finite element (FE) method \cite{Elmanetal2014}.  This new form is derived by multiplying the strong form equations by \emph{test functions} and then integrating over $\Omega$ so as to define a scalar-valued nonlinear functional $F$.  The weak form then says that $F$ must be zero when acting on test functions.
-
-The significance of the weak form is two-fold:
+Equations \eqref{stokes} and \eqref{incompagain} are called the \emph{strong form} of the model.  An integral equation form of the same equations, the \emph{weak form}, is needed when building a numerical finite element (FE) method \cite{Elmanetal2014}.  This new form is derived by multiplying the strong form equations by test functions and then integrating over $\Omega$.  This defines a nonlinear functional $F$, that is, a function which takes functions as input and returns scalars.  The weak form says that $F$ is zero when acting on test functions.  The significance of the weak form can be stated in several ways:
 \begin{itemize}
-\item It has a larger space of potential solutions and thus it is more flexible with respect to discontinuities in the data.  It is well-posed in the sense of always having a unique solution  for glaciologically-relevant boundary values \cite{JouvetRappaz2011}.
-\item The FE method creates test functions via local constructions which work on a mesh of triangles or quadrilaterals.  Such meshes are more flexible with respect to problem geometry than are finite difference methods based on the strong form.
+\item It is well-posed in the sense of always having a unique solution  for glaciologically-relevant boundary values \cite{JouvetRappaz2011}.
+\item It has a larger space of potential solutions than the strong form, for instance it is more flexible with respect to discontinuities in the data.
+\item An FE method can create test functions, via local constructions which work on a mesh of triangles or quadrilaterals, and these go into the weak form.  This framework is more flexible with respect to problem geometry than are, for example, finite difference methods based on the strong form.
 \end{itemize}
-The latter point is of greater practical importance.
 
-The solution to the weak form is a pair $(\bu,p)$ with each function living in a certain function space, thus we write $\bu\in V_D$ and $p \in Q$.  (The Sobolev spaces $V_D$ and $Q$ are precisely-identified in \cite{JouvetRappaz2011}, but we ignore such advanced mathematics in these notes.)  Test functions $\bv\in V_0$ and $q\in Q$ come from nearly the same spaces.  The difference between $V_D$ and $V_0$ relates to the Dirichlet boundary conditions: $\bu\in V_D$ satisfies a nonhomogeneous inflow boundary condition \eqref{inflowbc} while $\bv\in V_0$ is zero there.
+A solution to the weak form stated below is a pair $(\bu,p)$ wherein each function lives in a certain function space.  We write $\bu\in V_D$ and $p \in Q$ here, but the Sobolev spaces $V_D$ and $Q$ are precisely-identified in \cite{JouvetRappaz2011}.  Test functions $\bv\in V_0$ and $q\in Q$ come from nearly the same spaces, with $V_D$ and $V_0$ differing only by the value on the Dirichlet boundary: $\bu\in V_D$ satisfies a nonhomogeneous inflow condition \eqref{inflowbc} while $\bv\in V_0$ is zero there.
 
 To give an initial definition of $F$ we multiply \eqref{stokes} by $\bv\in V_0$ and \eqref{incompagain} by $q\in Q$, then add and integrate:
 \begin{equation}
 F(\bu,p;\bv,q) = \int_\Omega - \left(\nabla \cdot \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu\right)\right)\cdot \bv + \nabla p \cdot \bv - \rho \mathbf{g} \cdot \bv - \left(\nabla \cdot \bu\right) q \label{nonfuncone}
 \end{equation}
-However, the desired definition of $F$ balances the number of derivatives on $(\bv,q)$ versus $(\bu,p)$, so we need integration-by-parts.  For this step, recall the product rule $\nabla \cdot(f\bX) = \grad f\cdot \bX + f \nabla \cdot \bX$ and the divergence theorem $\int_\Omega \nabla \cdot \bX = \int_{\partial \Omega} \bX \cdot \hbn$.  Denoting $\tau = B_n |D\bu|^{\frac{1}{n} - 1} D\bu$ for typographical convenience we have
+However, the desired definition of $F$ balances the number of derivatives on $(\bv,q)$ versus $(\bu,p)$, that is, it has only first derivatives on $\bu,\bv$, and no derivative on $p,q$.  To make this change we need integration-by-parts.
+
+Recall the product rule $\nabla \cdot(f\bX) = \grad f\cdot \bX + f \nabla \cdot \bX$ and the divergence theorem $\int_\Omega \nabla \cdot (f\bX) = \int_{\partial \Omega} f\bX \cdot \hbn$.  Denoting $\tau = B_n |D\bu|^{\frac{1}{n} - 1} D\bu$ for convenience we have
 \begin{align*}
-\int_\Omega \left(\nabla \cdot \tau\right)\cdot \bv &= \sum_{j=1}^3 \int_\Omega \nabla \cdot (\tau_{j\circ})\, v_j = \sum_{j=1}^3 \int_\Omega \nabla \cdot (\tau_{j\circ} v_j) - \tau_{j\circ} \nabla v_j \\
-  &= \sum_{j=1}^3 \int_{\partial \Omega} (\tau_{j\circ} v_j) \cdot \hbn - \int_\Omega \tau_{j\circ} \cdot \nabla v_j = \int_{\partial \Omega} (\tau \hbn)\cdot \bv - \int_\Omega \trace(\tau \nabla \bv)
+\int_\Omega \left(\nabla \cdot \tau\right)\cdot \bv &= \sum_{j=1}^2 \int_\Omega \nabla \cdot (\tau_{j\circ})\, v_j = \sum_{j=1}^2 \int_\Omega \nabla \cdot (\tau_{j\circ} v_j) - \tau_{j\circ} \nabla v_j \\
+  &= \sum_{j=1}^2 \int_{\partial \Omega} (\tau_{j\circ} v_j) \cdot \hbn - \int_\Omega \tau_{j\circ} \cdot \nabla v_j = \int_{\partial \Omega} (\tau \hbn)\cdot \bv - \int_\Omega \trace(\tau \nabla \bv)
 \end{align*}
-where $\circ$ denotes a vector entry index and $\tau_{j\circ}$ denotes the $j$th row of $\tau$.  Here $\grad\bv$ defines a $3\times 3$ matrix,
+where $\circ$ denotes a vector entry index and $\tau_{j\circ}$ denotes the $j$th row of $\tau$.  Here $\grad\bv$ defines a $2\times 2$ matrix,
+\newcommand{\treftwo}[2]{\left[\begin{array}{c|c} & \\ #1 & #2 \\ & \end{array}\right]}
 \newcommand{\trefthree}[3]{\left[\begin{array}{c|c|c} & & \\ #1 & #2 & #3 \\ & & \end{array}\right]}
-    $$\grad \bv = \trefthree{\grad v_1}{\grad v_2}{\grad v_3} = \begin{bmatrix}
-    (v_1)_{x_1} & (v_2)_{x_1} & (v_3)_{x_1} \\
-    (v_1)_{x_2} & (v_2)_{x_2} & (v_3)_{x_2} \\
-    (v_1)_{x_3} & (v_2)_{x_3} & (v_3)_{x_3}
+    $$\grad \bv = \treftwo{\grad v_1}{\grad v_2} = \begin{bmatrix}
+    (v_1)_{x_1} & (v_2)_{x_1} \\
+    (v_1)_{x_2} & (v_2)_{x_2}
     \end{bmatrix}$$
 and so
     $$\trace(\tau \grad \bv) = \sum_{j=1}^3 \tau_{j\circ} \cdot \grad v_j = \sum_{i,j=1}^3 \tau_{ji} (v_j)_{x_i}$$
 (Some sources write $A:B$ for $\trace(AB)$ \cite{JouvetRappaz2011}.)  Note $\trace(\tau \grad \bv) = \trace(\tau D\bv)$ because $\trace(AB)=0$ if $A$ is symmetric and $B$ is antisymmetric.  (To show this take $A=\tau$ and $B=\grad\bv-D\bv$.)  Finally we do a straightforward integration-by-parts on the pressure part of $F$:
     $$\int_\Omega \nabla p \cdot \bv = \int_\Omega \nabla\cdot (p\,\bv) - p (\nabla \cdot \bv) = \int_{\partial \Omega} p\hbn \cdot \bv - \int_\Omega p (\nabla \cdot \bv)$$
+
 The above facts allow us to rewrite \eqref{nonfuncone} with a normal stress boundary integral:
 \begin{equation}
-F(\bu,p;\bv,q) = -\int_{\partial\Omega} (\sigma \hbn)\cdot \bv + \int_\Omega \trace(\tau D\bv) - p (\nabla \cdot \bv) - \left(\nabla \cdot \bu\right) q - \rho \mathbf{g} \cdot \bv \label{nonfunctwo}
+F(\bu,p;\bv,q) =  \int_\Omega \left[\trace(\tau D\bv) - p (\nabla \cdot \bv) - \left(\nabla \cdot \bu\right) q - \rho \mathbf{g} \cdot \bv\right] - \int_{\partial\Omega} (\sigma \hbn)\cdot \bv \label{nonfunctwo}
 \end{equation}
-(We have denoted $\sigma=\tau-pI$ for brevity.)  Now $\bu,\bv$ appear with at most first derivatives and $p,q$ appear without derivatives.  Next recall that $\bv\in V_0$ satisfies $\bv=0$ along the base and inflow surfaces.  Thus these parts of the integral over $\partial\Omega$ in \eqref{nonfunctwo} are zero.  Conditions \eqref{topbc}, \eqref{outflowbc} now completely eliminate the unknown solution $\bu,p$ from the boundary integral.
+(We have denoted $\sigma=\tau-pI$ for brevity.)  Note $\bu,\bv$ appear with first derivatives and $p,q$ have no derivatives.
 
-The above computations yield our final formula for the nonlinear functional:
+Next recall that $\bv\in V_0$ satisfies $\bv=0$ along the base and inflow surfaces.  Thus these parts of the integral over $\partial\Omega$ in \eqref{nonfunctwo} are zero.  Conditions \eqref{topbc}, \eqref{outflowbc} now completely eliminate the unknown solution $\bu,p$ from the boundary integral.  The above computations yield our final formula for the nonlinear functional:
 \begin{align}
 F(\bu,p;\bv,q) &= \int_\Omega B_n |D\bu|^{\frac{1}{n} - 1} \trace(D\bu D\bv) - p (\nabla \cdot \bv) - \left(\nabla \cdot \bu\right) q \label{defineF} \\
     &\qquad  - \int_\Omega \rho \mathbf{g} \cdot \bv - \int_{\{\text{outflow}\}} C_{\text{out}} \rho g \cos\alpha (h-z) v  \notag
 \end{align}
-The last two integrals can be regarded as source terms.  For example, if the inflow velocity is zero and if we replace the source terms by zero---no gravity or outflow stress---then the unique solution is $\bu=0$ and $p=0$.
 
-In conclusion the weak form of the Glen-Stokes model is the statement that, at the solution $\bu\in V_D$ and $p\in Q$, functional $F$ in \eqref{defineF} is zero in all test function directions:
+The weak form of the Glen-Stokes model is the statement that, at the solution $\bu\in V_D$ and $p\in Q$, functional $F$ in \eqref{defineF} is zero in all test function directions:
 \begin{equation}
 F(\bu,p;\bv,q) = 0 \qquad \text{ for all } \bv\in V_0 \text{ and } q\in Q  \label{weak}
 \end{equation}
-This weak formulation is proven in \cite[Theorem 3.8]{JouvetRappaz2011} to be well-posed under reasonable assumptions about the domain $\Omega$ and the boundary data.  (These assumptions are satisfied in the cases we consider.)  Now our goal is to accurately-approximate $(\bu,p)$ using an FE method.
+This weak formulation is proven in \cite[Theorem 3.8]{JouvetRappaz2011} to be well-posed, so that a unique solution exists.  The well-posedness theorem makes reasonable assumptions about the domain $\Omega$ and the boundary data, and these are satisfied in the cases we consider.  Noting that the last two integrals in \eqref{defineF} can be regarded as source terms for stress, if the inflow velocity is zero and if we replace the source terms by zero---we remove gravity and outflow stresses---then the unique solution to \eqref{weak} is $\bu=0$ and $p=0$.
+
+Now our goal is to accurately approximate the solution $(\bu,p)$ of \eqref{weak} using an FE method.
 
 
 \section{Finite element method} \label{sec:femethod}
 
-This section gives a very abbreviated summary of our method to solve the Stokes equations.  Better coverage of FE methods is in the references \cite{Braess2007,Bueler2021,Elmanetal2014}.  The method here is actually applied through calls to Firedrake \cite{Rathgeberetal2016}, so we do not implement most of the following techniques ourselves.
+FIXME FROM HERE This section gives a very abbreviated summary of our method to solve the Stokes equations.  Better coverage of FE methods is in the references \cite{Braess2007,Bueler2021,Elmanetal2014}.  The method here is actually applied through calls to Firedrake \cite{Rathgeberetal2016}, so we do not implement most of the following techniques ourselves.
 
 The fundamental FE idea is to replace the infinite-dimensional function spaces appearing in the weak form \eqref{weak} with finite-dimensional subspaces constructed locally from triangles in the mesh.  The approximate solution $(\bu,p)$ is sought from these subspaces, and functional $F$ in \eqref{defineF} is computed on test functions $(\bv,q)$ from these subspaces.
 
@@ -326,78 +316,11 @@ Nonlinear system \eqref{feweak} is solved by Newton's method \cite{Bueler2021,Ke
 Our Python codes define the nonlinear residual function $F$ in \eqref{defineF} using the Firedrake/FEniCs domain-specific language for describing such weak forms \cite{Alnaesetal2014}.  Then we call the Firedrake method \texttt{solve()} on \eqref{feweak} \cite{Rathgeberetal2016}.  A practical view of our codes, including the sequence in which they are used in practice, and how they are divided into modules, is in the final section of these notes.
 
 
-\section{Surface kinematical equation} \label{sec:kinematical}
+\section{Implementation in Python} \label{sec:implementation}
 
-A glacier will change shape as it flows, and as its surface simultaneously interacts with the climate (precipitation and melting).  We also want a model which includes this action!  So now suppose that the domain on which the Stokes equations apply is time-dependent:
-\begin{equation}
-\Omega^t = \left\{(x,z)\,\big|\, b(x) < z < s(x,t)\right\}  \label{Omegat}
-\end{equation}
-Here $z=b(x)$ is the base elevation and $z=s(x,t)$ is the ice surface elevation.
+We implement the above numerical solution method in Python using the Firedrake FE \cite{Rathgeberetal2016}.  The PETSc solver library \cite{Balayetal2018,Bueler2021} is called by Firedrake on the FE discretized nonlinear equations.
 
-The time-dependent surface $z=s(x,t)$ evolves according to the surface kinematical equation, (41) in the notes, using ice velocity $\bu=\left<u(x,z,t),w(x,z,t)\right>$:
-\begin{equation}
-s_t = a(x,t) - u(x,s,t) s_x + w(x,s,t) \label{surfacekinematical}
-\end{equation}
-Here $a(x,t)$ is the climatic mass balance in units of ice-equivalent $\text{m}\,\text{s}^{-1}$.  Informally, \eqref{surfacekinematical} determines the change in surface elevation $\Delta s \approx s_t\,\Delta t$ from the climatically added/removed ice $a\,\Delta t$, \emph{plus} the component of the ice motion in the outward (upward) normal direction $\bn = \left<-s_x,1\right>$.  Thus $\Delta s \approx \left(a + \bn\cdot \bu|_{z=s}\right) \Delta t$.
-
-Equation \eqref{surfacekinematical} applies on the time-dependent ice surface $\Gamma^t = \left\{(x,z) \,\big|\, z = s(x,t)\right\}$.  The surface $\Gamma^t$ is also the zero level surface of the function
-    $$\Psi(x,z,t) = z - s(x,t)$$
-\cite[pp.~65--66]{GreveBlatter2009}; we must regard $\Psi$ as being defined on the closure of $\Omega^t$, including the surface $\Gamma^t$.  Since the spatial gradient $\grad \Psi = \left<-s_x,1\right> = \bn$ is the same outward normal along $\Gamma^t$, we have
-\begin{equation}
-s_t = a + \bu|_{\Gamma^t} \cdot (\grad \Phi)|_{\Gamma^t}  \label{surfacekinematicalwithPhi}
-\end{equation}
-In Firedrake the advantage of using \eqref{surfacekinematicalwithPhi}, over \eqref{surfacekinematical}, is that it is easier to compute the gradient of the 2D scalar field $\Psi(x,z,t_n)$, and evaluate it along the boundary, than it is to differentiate the surface elevation function $s(x,t_n)$.
-
-In our examples below, because we are studying ice fluid dynamics in isolation, we set $a=0$.  Scientific questions generally require nontrivial models for $a$.  Given such a model, implementation of nonzero values for $a(x,t)$ is straightforward if applied in an explicit (time-split) manner, which is what we do here.
-
-Regarding the base, in our simplified model the elevation $b(x)$ is time-independent, and the base does not slide, nor does it melt/refreeze liquid water, and thus the base kinematical equation, (42) in the notes, reduces to ``$0=0$.''  Modifying our scheme to apply a nontrivial basal mass balance would not be difficult in our explicit time-stepping paradigm.
-
-We can now describe our explicit time-stepping strategy for moving the surface of a glacier.  Namely, we take a time step of the surface kinematical equation \eqref{surfacekinematicalwithPhi} by smoothly displacing the mesh in the vertical direction only.  The mesh geometry is given by scalar coordinate fields $(x,z)$, defined on the nodes of the mesh.  At time $t_n$ the ice surface elevation $s^n(x) \approx s(x,t_n)$ equals the value of the coordinate field $z$ on the top boundary of the time $t_n$ mesh $\Omega^n$.  We determine the boundary value of a Laplace equation problem, for the vertical displacement $r^n$ of every node in the mesh, from \eqref{surfacekinematicalwithPhi}.
-
-Given the current ($t_n$) geometry of the ice and a time step $\Delta t_n > 0$, apply this sequence:
-
-\medskip
-\renewcommand{\labelenumi}{\emph{\arabic{enumi}.}}
-\begin{enumerate}
-\item Solve the weak-form Stokes equation \eqref{weak} on the current mesh $\Omega^n$ to compute current velocity and pressure values $(\bu^n,p^n)$.
-\item From $\Omega^n$ also generate the piecewise-linear surface elevation function $s^n(x)$.  Then evaluate $\Phi^n(x,z) = z - s^n(x)$ on $\Omega^n$ and compute:
-\begin{equation}
-\Delta s^n(x,z) =  \left(a(x,t_n) + \grad \Phi^n(x,z)\cdot \bu^n(x,z)\right)\Delta t_n \label{deltahfield}
-\end{equation}
-Note $\Delta s^n$ is defined on all of $\Omega^n$, not just the glacier surface.
-\item Solve a Laplace equation problem for the vertical displacement field $r^n$:
-\begin{align}
-- \grad^2 r^n &= 0 & &\text{on } \Omega^n \label{vdisplacementpoisson} \\
-          r^n &= \Delta s^n & &\text{(Dirichlet) on the top boundary } \Gamma^n \notag \\
-          r^n &= 0 & &\text{(Dirichlet) on inflow and base of } \partial \Omega^n \notag \\
-\grad r^n\cdot \bn &= 0 & &\text{(Neumann) on outflow of } \partial \Omega^n \notag
-\end{align}
-This linear problem is solved in weak form: $\int_{\Omega^n} \grad r^n\cdot \grad q = 0$ for all test functions $q$ with zero values on the Dirichlet part of the boundary $\partial \Omega^n$.
-\item Update the mesh coordinates using vertical-only displacement by $r^n$:
-\begin{equation}
-  x^{n+1} = x^n, \quad z^{n+1} = z^n + r^n \label{updatemesh}
-\end{equation}
-\end{enumerate}
-
-\medskip
-At the end of this sequence the new top boundary $\Gamma^{n+1}$ is the updated surface $z=s^{n+1}(x)$.  By \eqref{deltahfield} the sequence has done an explicit step of \eqref{surfacekinematical}:
-    $$s^{n+1}(x) = s^n(x) + \Delta t_n\,\left(a(x,t_n) - u(x,s^n,t_n) s_x^n + w(x,s^n,t_n)\right)$$
-
-The significance of Dirichlet problem \eqref{vdisplacementpoisson} is that the entire mesh is \emph{smoothly} displaced, in the vertical direction only by \eqref{updatemesh}, because solutions of the Laplace equation are smooth.  Note $r^n$ minimizes $\int |\grad r^n|^2$ over functions with the given boundary values.  This way of displacing the mesh avoids shearing the mesh above sharp discontinuities in base topography, for example.
-
-Our scheme uses fixed time step $\Delta t > 0$ and is explicit.  At best it can be conditionally stable, and in practice that \emph{is} what is observed, but no quantiative time step restriction is known; an \emph{a priori} method for setting the time step is not known.  For an SIA solver a sufficient condition like ``$D\Delta t / \Delta x^2 < 1$'' applies, where $\Delta x$ is a representative mesh spacing and $D$ is some diffusivity parameter.  However, there is no literature which connects the $D$ from the SIA (see the notes) with Stokes time-stepping, or otherwise supplies a stability restriction for surface-evolving Stokes models.
-
-Two methods of addressing this numerical modeling weakness have, I think, barely been started by the glacier modeling community:
-\renewcommand{\labelenumi}{(\roman{enumi})}
-\begin{enumerate}
-\item Extensively test various configurations to develop an empirical time-step restriction, depending on size and aspect-ratio of elements in some complicated way.
-\item Solve the Stokes and surface kinematical equations in implicit-step form, as a coupled system.
-\end{enumerate}
-I am working on the latter!
-
-\section{Implementation in Python codes} \label{sec:implementation}
-
-We implement the above numerical solution method in Python codes.  These codes use the Firedrake FE \cite{Rathgeberetal2016} and PETSc solver libraries \cite{Balayetal2018,Bueler2021}.  Here is a simple example solving a time-independent Stokes problem:
+Here is a simple example solving the default Stokes problem:
 
 \medskip
 \begin{Verbatim}
@@ -410,29 +333,16 @@ $ source ~/firedrake/bin/activate              # start Firedrake
 %$
 
 \medskip
-\noindent In a time-stepping run one supplies the time step in days (\texttt{-deltat}) and the number of steps (\texttt{-m}).  For example, the following run generates the result shown in Figure \ref{fig:glacier}:
+\noindent The \verb|README.md| file documents usage and regression testing more thoroughly.
 
 \medskip
-\begin{Verbatim}
-(firedrake) $ ./flow.py -mesh glacier.msh -deltat 20.0 -m 100
-\end{Verbatim}
-%$
-
-\medskip
-\noindent The \verb|README.md| file documents usage more thoroughly.
-
-\medskip
-As shown in Figure \ref{fig:blockdiagram} there are a total of five Python codes:
+As shown in Figure \ref{fig:blockdiagram} there are three major Python components:
 \begin{itemize}
-\item \texttt{domain.py}: \quad  This writes an outline of the initial domain $\Omega^0$ into an ASCII file (\texttt{.geo} extension) using the Gmsh \cite{GeuzaineRemacle2009} geometry description language.  Note Gmsh can be used to examine and mesh this domain interactively or at the command-line, as above.  Portions of the boundary are marked with integer tags; see the Python dictionary \texttt{bdryids}.  This module also exports a function \texttt{getdomaindims()} which dynamically-extracts dimensions from a changing mesh.
+\item \texttt{domain.py}: \quad  This writes an outline of the domain $\Omega$ into an ASCII file (\texttt{.geo} extension) using the Gmsh \cite{GeuzaineRemacle2009} geometry description language.  Note Gmsh can be used to examine and mesh this domain interactively, or at the command-line as above.  Portions of the boundary are marked with integer tags; see the Python dictionary \texttt{bdryids}.
 
-\item \texttt{flow.py}: \quad  This driver reads user options, reads the mesh from a Gmsh \texttt{.msh} file, uses a \texttt{MomentumModel} object to solve the Stokes problem, optionally calls \texttt{meshmotion.py} to do the above time-stepping strategy, and writes the solution into a Paraview-readable \texttt{.pvd} file.
+\item \texttt{momentummodel.py}: \quad  Implements \texttt{class MomentumModel}.  Most actual ice physics is isolated here, including physical constants and the Stokes problem weak form \eqref{defineF}.  The \texttt{solve()} method assembles and solves the nonlinear Glen-Stokes problem \eqref{weak} using Firedrake's \texttt{solve()} command.  This solver has option prefix \texttt{s\_}.
 
-\item \texttt{meshmotion.py}: \quad  This module assembles and solves linear Dirichlet problem \eqref{vdisplacementpoisson} for vertical mesh displacement using Firedrake's \texttt{solve()}, and it updates the mesh coordinates as described.  This solver has option prefix \texttt{vd\_}.
-
-\item \texttt{momentummodel.py}: \quad  Implements \texttt{class MomentumModel}.  Most actual ice physics is isolated here, including physical constants and the Stokes problem weak form \eqref{defineF}.  The \texttt{solve()} method of this class assembles and solves the nonlinear Glen-Stokes problem \eqref{weak} using Firedrake's \texttt{solve()} command.  This solver has option prefix \texttt{s\_}.
-
-\item \texttt{surfaceutils.py}: \quad  Provides functions which extract boundary values of solution fields and mesh coordinates.  Note that the surface values of the solution can be visualized in a separate image file (e.g.~\texttt{.png}) using option \texttt{-osurface}.
+\item \texttt{flow.py}: \quad  This driver reads user options, loads the mesh from a Gmsh \texttt{.msh} file, uses a \texttt{MomentumModel} object to solve the Stokes problem, and writes the solution into a Paraview-readable \texttt{.pvd} file.
 \end{itemize}
 
 \begin{figure}[h]
@@ -445,21 +355,15 @@ As shown in Figure \ref{fig:blockdiagram} there are a total of five Python codes
     \node [other]  (gmsh)[right of= domain] {Gmsh};
     \node [tool]   (flow)[right of=gmsh] {\texttt{flow.py}};
     \node [other]  (paraview)[right of=flow] {Paraview};
-    \node [module] (momentummodel)[above left of=flow, xshift=-2.1cm] {\begin{minipage}{4.0cm} \texttt{momentummodel.py} \footnotesize (\texttt{class MomentumModule}) \end{minipage}};
-    \node [module] (meshmotion)[above right of=flow, xshift=-3cm] {\texttt{meshmotion.py}};
-    \node [module] (surfaceutils)[right of=meshmotion, xshift=0.3cm] {\texttt{surfaceutils.py}};
+    \node [module] (momentummodel)[above left of=flow] {\begin{minipage}{4.0cm} \texttt{momentummodel.py} \footnotesize (\texttt{class MomentumModule}) \end{minipage}};
     \path[->] (domain) edge node[below] {\texttt{.geo}} (gmsh) ;
     \path[->] (gmsh) edge node[below] {\texttt{.msh}} (flow) ;
     \path[->] (flow) edge node[below] {\texttt{.pvd}} (paraview) ;
-    \path[->] (domain) edge[dashed, bend left] node {} (flow) ;
     \path[->] (momentummodel) edge[dashed] node {} ([xshift=-0.2cm]flow.north) ;
-    \path[->] (meshmotion) edge[dashed] node {} (flow) ;
-    \path[->] (surfaceutils) edge[dashed] node {} (flow) ;
-    \path[->] (surfaceutils) edge[dashed, bend right] node {} (meshmotion) ;
 \end{tikzpicture}
 
 \medskip
-\caption{Users interact with tools (solid outlines) in the given order.}
+\caption{Users interact with the solid-outline tools in the given order.}
 \label{fig:blockdiagram}
 \end{figure}
 
