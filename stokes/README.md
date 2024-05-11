@@ -4,13 +4,11 @@ Copyright 2018--2024 Ed Bueler
 
 ## TODO: TOTAL REWRITE PLANNED
 
-I plan to strip out all multigrid ideas and all surface evolution ideas, and thus build a simpler base code for both projects in the 2024 school.  Also compare
-
-[stokes-ice-tutorial](https://github.com/bueler/stokes-ice-tutorial)
+Strip out all multigrid ideas.  Strip out all surface evolution ideas.  Add pytest tests.  Also compare, and avoid unnecessary duplication with, [stokes-ice-tutorial](https://github.com/bueler/stokes-ice-tutorial)
 
 ## Introduction
 
-The Python programs in this directory are more advanced, and more experimental, than the Matlab/Octave programs in the `mfiles/` directory.  They use advanced, open-source libraries and tools:
+FIXME The Python programs in this directory are more advanced, and more experimental, than the Matlab/Octave programs in the `mfiles/` directory.  They use advanced, open-source libraries and tools:
 
   * [Firedrake](https://www.firedrakeproject.org/), a Python finite element library
      * [PETSc](https://petsc.org/release/), a solver library typically installed by Firedrake
@@ -23,35 +21,17 @@ They are documented by the current README and by `doc/stokes.pdf` which is Appen
 
   * Install [Gmsh](http://gmsh.info/) and [Paraview](https://www.paraview.org/),
     for instance by installing Debian or OSX packages.
-  * Install [scipy](https://www.scipy.org/), which we need for interpolation
-    at the ice surface.  (I used `pip3 -install scipy`.)
   * Follow the instructions at the
     [Firedrake download page](https://www.firedrakeproject.org/download.html)
     to install Firedrake.
-  * Most users will only use the PETSc which is installed by default during the Firedrake installation.  If a separate PETSc installation is needed then consult the Firedrake documentation.
 
 More info on installing Firedrake:
 
-  * You may need to `unset PETSC_DIR` and `unset PETSC_ARCH` before running `activate` when starting [Firedrake](https://www.firedrakeproject.org/).
   * Do `python3 firedrake-status` in the `firedrake/bin/` directory, after running `activate`, to see the current configuration of your [Firedrake](https://www.firedrakeproject.org/) installation.
 
-#### Testing your installation
+#### Usage
 
 Activate your [Firedrake](https://www.firedrakeproject.org/) virtual environment (venv) first:
-
-        $ source ~/firedrake/bin/activate
-
-Then do in current directory (`mccarthy/stokes/`):
-
-        $ make test
-
-You should see `PASS` on all the tests.  If not, consider trying to run any of the examples below, and look at the error messages.  Then consider contacting the author at [elbueler@alaska.edu](mailto:elbueler@alaska.edu), including the error transcript.  See also the Firedrake documentation for basic examples.
-
-## Stress-balance only usage
-
-This is the basic mode of solving only the stress-balance problem, that is, the Glen-Stokes system for the velocity and pressure.  The glacier surface is fixed.
-
-Start-up the [Firedrake](https://www.firedrakeproject.org/) virtual environment (venv):
 
         $ source ~/firedrake/bin/activate
 
@@ -86,20 +66,6 @@ Set the height of the bedrock step to zero when creating the domain geometry:
 
 In this mode the numerical error is displayed because the exact solution is known.  (See the notes or `stokes/doc/stokes.pdf` for the slab-on-slope solution.)
 
-## Surface evolution usage
-
-By setting `-deltat` to a positive value, in days, and choosing the number of time steps by `-m`, the surface will evolve according to the surface kinematical equation, in the case of zero mass balance, using explicit time stepping.  The time-stepping is _not_ adaptive, and the user must address the non-trivial task of finding time steps which are stable.
-
-For a stable example,
-
-        (firedrake) $ ./flow.py -mesh glacier.msh -deltat 10.0 -m 60
-
-This writes variables (velocity,pressure,vertical\_displacement) into `glacier.pvd` at each time step, and [Paraview](https://www.paraview.org/) can show an animation.  Unstable examples are in the script [study/genunstable.sh](study/genunstable.sh).  Experimentation will show that instability is not hard to find!
-
-An alternate visualization will plot final-time-only surface values of (s,u,w,s_t) into the image file:
-
-        (firedrake) $ ./flow.py -mesh glacier.msh -deltat 10.0 -m 60 -osurface final.png
-
 ## Mesh refinement
 
 The default mesh above (`glacier.msh`) has a typical mesh size of 100 m with grid resolution a factor of 4 finer near the interior corners created by the bedrock step, giving 25 m resolution at these corners.
@@ -133,24 +99,6 @@ There are four refinement methods to get finer resolution:
 
     This is slightly faster than methods 2 and 3, but the result should be the same.  A convergence test using this refinement method and the exact slab-on-a-slope solution is in [study/convergeslab.sh](study/convergeslab.sh).
 
-## Coupled steady-state usage
-
-Using any of methods 1, 2, and 3, one can generate high-quality (i.e. 1 mm/10 day) steady states of the coupled momentum (Stokes) and mass conservation (surface-kinematical) equations:
-
-        (firedrake) $ ./flow.py -mesh fine1.msh -deltat 10.0 -m 100 -s_snes_converged_reason
-        (firedrake) $ ./flow.py -mesh fine2.msh -deltat 10.0 -m 100 -s_snes_converged_reason
-        (firedrake) $ ./flow.py -mesh start.msh -refine 1 -deltat 10.0 -m 100 -s_snes_converged_reason
-
-## Visualizing surface-perturbation Green's functions
-
-The following visualization may help understand how the surface of a glacier is influenced by surface bumps:
-
-        (firedrake) $ ./domain.py -L 7000.0 -hmesh 40.0 -o long.geo
-        (firedrake) $ gmsh -2 long.geo
-        (firedrake) $ ./flow.py -mesh long.msh -green -greenx 4000.0 -osurface long.png
-
-View `green-long.png` and the "Green's function velocity" field in `long.pvd`.  Note that option `-greenheight` (default 10.0) is also available, to set the bump height in meters.
-
 ## Getting help
 
 There are several ways to get help:
@@ -160,6 +108,12 @@ There are several ways to get help:
   * `./flow.py -mesh glacier.msh -help intro` shows the PETSc version number
 
 Note that in the latter two usages the `-mesh` option is required in order to advance the program state until a point where a PETSc solver exists.
+
+## Testing
+
+Do this in the current directory (`mccarthy/stokes/`):
+
+        $ pytest .
 
 ## Solver performance information
 
@@ -183,4 +137,4 @@ See the [PETSc](http://www.mcs.anl.gov/petsc/) solver options in [momentummodel.
 
 In time-stepping mode there is a second solver which computes the mesh vertical displacement field by solving Laplace's equation.  It has option prefix `-vd_` and it is defined, with default options, in [meshmotion.py](meshmotion.py).
 
-For more on [Firedrake](https://www.firedrakeproject.org/) and [PETSc](http://www.mcs.anl.gov/petsc/) solvers see their respective online documentation.  (Or see my book [_PETSc for PDEs_](https://github.com/bueler/p4pdes).)
+For more on [Firedrake](https://www.firedrakeproject.org/) and [PETSc](http://www.mcs.anl.gov/petsc/) solvers see their respective online documentation.  Or see my book!

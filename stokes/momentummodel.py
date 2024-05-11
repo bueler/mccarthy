@@ -2,9 +2,12 @@
 
 # design principles for this class:
 #   1. it owns the velocity, pressure, and mixed spaces
-#   2. it does not interact with options, stdout
-#   3. it does not know about time stepping or surface kinematical
+#   2. it does not interact with options or stdout
+#   3. it does not know about time stepping or surface kinematical equation
 #   4. it does not interact with files
+
+# TODO: strip multigrid stuff; leave only mumps based direct solver
+#       only do P2-P1 Taylor-Hood
 
 import sys
 import numpy as np
@@ -251,9 +254,8 @@ class MomentumModel:
 
         # solve
         params = packagelist[packagechoices.index(package)]
-        # note: Sometime in 2020, Firedrake decided to override the default
-        #       PETSc linesearch of 'bt' and replace it with 'basic', i.e. NO
-        #       linesearch.  We need linesearch for n = 3 etc.
+        # note: the Firedrake default is 'basic', i.e. no linesearch
+        #       we need 'bt' linesearch for n = 3
         params['snes_linesearch_type'] = 'bt'
         fd.solve(F == 0, up, bcs=bcs, options_prefix='s',
                  solver_parameters=params)
