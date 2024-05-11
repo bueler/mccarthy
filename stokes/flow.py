@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-# (C) 2018--2022 Ed Bueler
+# (C) 2018--2024 Ed Bueler
 
-# Solve glacier Glen-Stokes problem with explicit evolution of the free surface.
-# See README.md for usage.
+# Solves glacier Glen-Stokes problem.  See README.md for usage.
 
-# TODO 1. find regularization which actually helps with harder surface-evolution
-#         instability cases (e.g. -bs 200 in domain.py)
+# TODO remove free surface evolution stuff
 
 import sys
 import numpy as np
@@ -15,8 +13,7 @@ from firedrake.petsc import PETSc
 from domain import bdryids, getdomaindims
 from momentummodel import mixFEchoices, packagechoices, secpera, dayspera, \
                           MomentumModel
-from meshmotion import surfacekinematical, movemesh
-from surfaceutils import surfaceplot, surfaceplotgreen
+from surfaceutils import surfaceplot
 
 # needed for useful error messages
 PETSc.Sys.popErrorHandler()
@@ -40,12 +37,6 @@ parser.add_argument('-eps', type=float, default=0.01, metavar='X',
                     help='regularize viscosity using "+(eps Dtyp)^2" (default=0.01)')
 parser.add_argument('-flowhelp', action='store_true', default=False,
                     help='print help for flow.py options and stop')
-parser.add_argument('-green', action='store_true', default=False,
-                    help="compute velocity Green's function from surface bump")
-parser.add_argument('-greenx', type=float, default=0.0, metavar='X',
-                    help="x-coordinate of surface bump for Green's function")
-parser.add_argument('-greenheight', type=float, default=10.0, metavar='H',
-                    help="height of surface bump for Green's function")
 parser.add_argument('-m', type=int, default=0, metavar='X',
                     help='number of time steps of deltat days of surface evolution\n(default=0)')
 parser.add_argument('-mesh', metavar='MESH', type=str, default='',
@@ -87,11 +78,6 @@ if args.m > 0:
     assert (args.deltat > 0.0)
 if args.deltat > 0.0:
     assert (args.m > 0)
-    assert (args.sequence == 0)
-
-# Green's function generation not allowed for time-stepping, grid-sequencing
-if args.green:
-    assert (args.deltat == 0.0)
     assert (args.sequence == 0)
 
 # output file name: strip .msh and replace with .pvd
@@ -247,16 +233,6 @@ elif args.sequence > 0:
 else:
     printpar('solving for velocity and pressure ...')
     up = momentumsolve()
-    if args.green:
-        printpar("Green's function: re-solving from surface bump geometry ...")
-        # find node index of closest surface point to args.greenx
-        P1 = FunctionSpace(mesh, 'CG', 1)
-        bc = DirichletBC(P1, 1.0, bdryids['top'])
-        greeni = np.argmin(np.abs(mesh.coordinates.dat.data[bc.nodes,0] - args.greenx))
-        # move up by args.greenheight, re-solve, and move back
-        mesh.coordinates.dat.data[bc.nodes[greeni],1] += args.greenheight
-        upgreen = momentumsolve()
-        mesh.coordinates.dat.data[bc.nodes[greeni],1] -= args.greenheight
 numericalerrorsslab()
 u,p = up.split()
 
@@ -276,13 +252,7 @@ else:
         printpar('  writing (element_rank,vertex_rank) ...')
         outfile.write(u,p,nu,element_rank,vertex_rank)
     else:
-        if args.green:
-            ugreen,_ = upgreen.split()
-            ugreen.dat.data[:] -= u.dat.data_ro[:]
-            ugreen.rename("Green's function velocity")
-            outfile.write(u,p,nu,ugreen)
-        else:
-            outfile.write(u,p,nu)
+        outfile.write(u,p,nu)
 
 # generate image file with plot of surface values if desired
 if len(args.osurface) > 0:
@@ -290,5 +260,3 @@ if len(args.osurface) > 0:
         surfaceplot(mesh,u,r,args.deltat,args.osurface)
     else:
         surfaceplot(mesh,u,None,args.deltat,args.osurface)
-    if args.green:
-        surfaceplotgreen(mesh,ugreen,args.greenx,"green-" + args.osurface)
