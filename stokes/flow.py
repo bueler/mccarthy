@@ -129,6 +129,7 @@ assert (mesh.comm.size == 1 or len(args.osurface) == 0)
 
 # initialize momentum model
 mm = MomentumModel()
+mm.set_B3() # FIXME silly
 mm.set_n_glen(args.n_glen)
 mm.set_eps(args.eps)
 mm.set_alpha(args.alpha)
@@ -141,7 +142,7 @@ opts = PETSc.Options()
 opts.setValue("pcMass_eps", mm.get_eps())
 opts.setValue("pcMass_Dtyp", mm.get_Dtyp())
 opts.setValue("pcMass_n_glen", mm.get_n_glen())
-opts.setValue("pcMass_Bn", mm.get_Bn())
+opts.setValue("pcMass_B3", mm.get_B3())
 opts.setValue("pcMass_mass_more_reg", args.mass_more_reg)
 
 outfile = File(outname)

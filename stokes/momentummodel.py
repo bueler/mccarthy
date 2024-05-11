@@ -101,7 +101,7 @@ class Mass(fd.AuxiliaryOperatorPC):
         eps = opts.getReal("pcMass_eps")
         Dtyp = opts.getReal("pcMass_Dtyp")
         n_glen = opts.getReal("pcMass_n_glen")
-        Bn = opts.getReal("pcMass_Bn")
+        B3 = opts.getReal("pcMass_B3")
         more = opts.getReal("pcMass_mass_more_reg")
 
         # this approach seems to be slightly faster than either keeping u from
@@ -115,7 +115,7 @@ class Mass(fd.AuxiliaryOperatorPC):
 
         # define weak form of viscosity-weighted mass matrix
         mrr = 1.0 - 1.0/n_glen  # positive power if n_glen > 1
-        coeff = Du2**(mrr/2.0) / Bn
+        coeff = Du2**(mrr/2.0) / B3
         a = coeff * fd.inner(test, trial) * fd.dx
         bcs = None
         return (a, bcs)
@@ -133,6 +133,12 @@ class MomentumModel:
 
     def __init__(self):
         pass
+
+    def set_B3(self):
+        self.B3 = _B3
+
+    def get_B3(self):
+        return self.B3
 
     def set_n_glen(self, n_glen):
         self.n_glen = n_glen
@@ -161,20 +167,11 @@ class MomentumModel:
     def set_Hout(self, Hout):
         self.Hout = Hout
 
-    # determine B_n so that slab-on-slope solutions have surface velocity
-    #   which is n-independent
-    def get_Bn(self):
-        return (4.0/(self.n_glen+1.0))**(1.0/self.n_glen) \
-               * (self._rho*self._g*np.sin(self.alpha)*self.Hin)\
-                 **((self.n_glen-3.0)/self.n_glen) \
-               * self._B3**(3.0/self.n_glen)
-
     # compute slab-on-slope inflow velocity; note alpha = 0 ==> uin = 0
     def _get_uin(self,mesh):
         _,z = fd.SpatialCoordinate(mesh)
-        Bn = self.get_Bn()
         C = (2.0 / (self.n_glen + 1.0)) \
-            * (self._rho * self._g * np.sin(self.alpha) / Bn)**self.n_glen
+            * (self._rho * self._g * np.sin(self.alpha) / self.B3)**self.n_glen
         uin = fd.as_vector([C * (self.Hin**(self.n_glen+1.0) \
                                 - (self.Hin - z)**(self.n_glen+1.0)),
                             0.0])
@@ -207,7 +204,7 @@ class MomentumModel:
         # define body force and ice hardness
         rhog = self._rho * self._g
         f_body = fd.Constant((rhog * np.sin(self.alpha), - rhog * np.cos(self.alpha)))
-        Bn = self.get_Bn()
+        B3 = self.get_B3()
 
         if self.Hout >= 1.0:
             # if there is an outflow boundary then it is Neumann
@@ -236,12 +233,12 @@ class MomentumModel:
         # define the nonlinear weak form F(u,p;v,q)
         v,q = fd.TestFunctions(self._Z)
         if self.n_glen == 1.0:  # Newtonian ice case
-            F = ( fd.inner(Bn * D(u), D(v)) - p * fd.div(v) - fd.div(u) * q \
+            F = ( fd.inner(B3 * D(u), D(v)) - p * fd.div(v) - fd.div(u) * q \
                   - fd.inner(f_body, v) ) * fd.dx
         else:                   # (usual) non-Newtonian ice case
             Du2 = 0.5 * fd.inner(D(u), D(u)) + (self.eps * self.Dtyp)**2.0
             rr = 1.0/self.n_glen - 1.0
-            F = ( fd.inner(Bn * Du2**(rr/2.0) * D(u), D(v)) \
+            F = ( fd.inner(B3 * Du2**(rr/2.0) * D(u), D(v)) \
                   - p * fd.div(v) - fd.div(u) * q - fd.inner(f_body, v) ) * fd.dx
         if self.Hout >= 1.0:
             F = F - fd.inner(outflow_sigma, v) * fd.ds(bdryids['outflow'])
@@ -287,8 +284,8 @@ class MomentumModel:
         P1 = fd.FunctionSpace(mesh, 'CG', 1)
         Du2 = 0.5 * fd.inner(D(self.u), D(self.u)) + (self.eps * self.Dtyp)**2.0
         rr = 1.0/self.n_glen - 1.0
-        Bn = self.get_Bn()
-        nu = fd.interpolate(0.5 * Bn * Du2**(rr/2.0), P1)
+        B3 = self.get_B3()
+        nu = fd.interpolate(0.5 * B3 * Du2**(rr/2.0), P1)
         nu.rename('effective viscosity')
         return nu
 
