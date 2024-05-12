@@ -6,8 +6,7 @@
 #   3. it does not know about time stepping or surface kinematical equation
 #   4. it does not interact with files
 
-# TODO: strip multigrid stuff; leave only mumps based direct solver
-#       only do P2-P1 Taylor-Hood
+# TODO: ADDRESS Hin and Hout
 
 import sys
 import numpy as np
@@ -15,110 +14,31 @@ import firedrake as fd
 from firedrake.petsc import PETSc
 
 # public data
-mixFEchoices = ['P2P1','P3P2','P2P0','CRP0','P1P0']
-packagechoices = ['SchurDirect','Direct','SchurGMGSelfp','SchurGMGMass','SchurGMGMassFull']
 secpera = 31556926.0    # seconds per year
 dayspera = 365.2422     # days per year
 
 # solver packages
 # notes on FGMRES:  1. needed if fieldsplit_0,1_ksp_type is *not* preonly
 #                   2. always applies PC on right (-s_ksp_pc_side right)
-_SchurDirect = {"ksp_type": "fgmres",  # or "gmres" or "minres"
+_SchurDirect = {"ksp_type": "fgmres",
           "pc_type": "fieldsplit",
           "pc_fieldsplit_type": "schur",
           "pc_fieldsplit_schur_factorization_type": "full",  # or "diag"
           "pc_fieldsplit_schur_precondition": "a11",  # the default
           "fieldsplit_0_ksp_type": "preonly",
-          "fieldsplit_0_pc_type": "lu",  # uses mumps in parallel
+          "fieldsplit_0_pc_type": "lu",
+          "fieldsplit_0_pc_factor_mat_solver_type": "mumps",
           "fieldsplit_1_ksp_rtol": 1.0e-3,
           "fieldsplit_1_ksp_type": "gmres",
           "fieldsplit_1_pc_type": "none"}
 _Direct = {"mat_type": "aij",
           "ksp_type": "preonly",
           "pc_type": "lu",
-          "pc_factor_shift_type": "inblocks"}
-_SchurGMGSelfp = {"ksp_type": "fgmres",
-          "pc_type": "fieldsplit",
-          "pc_fieldsplit_type": "schur",
-          "pc_fieldsplit_schur_factorization_type": "full",
-          "pc_fieldsplit_schur_precondition": "selfp",
-          "fieldsplit_0_ksp_type": "preonly",
-          "fieldsplit_0_pc_type": "mg",
-          "fieldsplit_0_mg_levels_ksp_type": "richardson",
-          "fieldsplit_0_mg_levels_pc_type": "sor",  # the default
-          "fieldsplit_1_ksp_rtol": 1.0e-3,
-          "fieldsplit_1_ksp_type": "gmres",
-          "fieldsplit_1_pc_type": "jacobi",
-          "fieldsplit_1_pc_jacobi_type": "diagonal"}
-# notes on following package:
-#   1. right+upper faster than left+lower; not sure why
-#   2. -fieldsplit_1_aux_pc_type ilu in serial is implied, but
-#      -fieldsplit_1_aux_pc_type bjacobi -fieldsplit_1_aux_sub_pc_type ilu
-#      is implied in parallel
-#   3. seems to be more robust, but slower, with -fieldsplit_1_aux_pc_type jacobi
-#      -fieldsplit_1_aux_pc_jacobi_type rowsum, instead of default ILU
-_SchurGMGMass = {"ksp_type": "gmres",
-          "ksp_pc_side": "right",
-          "pc_type": "fieldsplit",
-          "pc_fieldsplit_type": "schur",
-          "pc_fieldsplit_schur_factorization_type": "upper",
-          "pc_fieldsplit_schur_precondition": "a11",
-          "fieldsplit_0_ksp_type": "preonly",
-          "fieldsplit_0_pc_type": "mg",
-          "fieldsplit_0_mg_levels_ksp_type": "richardson",
-          "fieldsplit_0_mg_levels_pc_type": "sor",  # the default
-          "fieldsplit_1_ksp_type": "preonly",
-          "fieldsplit_1_pc_type": "python",
-          "fieldsplit_1_pc_python_type": "momentummodel.Mass"}
-          #"fieldsplit_1_aux_pc_type": "jacobi",
-          #"fieldsplit_1_aux_pc_jacobi_type": "rowsum"}
-_SchurGMGMassFull = {"ksp_type": "fgmres",
-          "ksp_pc_side": "right",
-          "pc_type": "fieldsplit",
-          "pc_fieldsplit_type": "schur",
-          "pc_fieldsplit_schur_factorization_type": "full",
-          "pc_fieldsplit_schur_precondition": "a11",
-          "fieldsplit_0_ksp_type": "preonly",
-          "fieldsplit_0_pc_type": "mg",
-          "fieldsplit_0_mg_levels_ksp_type": "richardson",
-          "fieldsplit_0_mg_levels_pc_type": "sor",  # the default
-          "fieldsplit_1_ksp_rtol": 1.0e-3,
-          "fieldsplit_1_ksp_type": "gmres",
-          "fieldsplit_1_pc_type": "python",
-          "fieldsplit_1_pc_python_type": "momentummodel.Mass"}
+          "pc_factor_shift_type": "inblocks",
+          "pc_factor_mat_solver_type": "mumps"}
 
 # match packagechoices order above; default goes first:
-packagelist = [_SchurDirect,_Direct,_SchurGMGSelfp,_SchurGMGMass,_SchurGMGMassFull]
-
-# see https://www.firedrakeproject.org/demos/geometric_multigrid.py.html for
-# a constant viscosity version of this AuxiliaryOperatorPC approach
-class Mass(fd.AuxiliaryOperatorPC):
-
-    def form(self, pc, test, trial):
-        # pass in parameters from flow.py
-        # FIXME there should be a better way than through the options database?
-        opts = PETSc.Options()
-        eps = opts.getReal("pcMass_eps")
-        Dtyp = opts.getReal("pcMass_Dtyp")
-        n_glen = opts.getReal("pcMass_n_glen")
-        B3 = opts.getReal("pcMass_B3")
-        more = opts.getReal("pcMass_mass_more_reg")
-
-        # this approach seems to be slightly faster than either keeping u from
-        # P2 or using project(u,P1)
-        ctx = self.get_appctx(pc)
-        u = fd.split(ctx["state"])[0]
-        mesh = test.ufl_domain()
-        P1 = fd.VectorFunctionSpace(mesh, "CG", 1, dim=2)
-        ulow = fd.interpolate(u,P1)
-        Du2 = 0.5 * fd.inner(D(ulow), D(ulow)) + (more * eps * Dtyp)**2.0
-
-        # define weak form of viscosity-weighted mass matrix
-        mrr = 1.0 - 1.0/n_glen  # positive power if n_glen > 1
-        coeff = Du2**(mrr/2.0) / B3
-        a = coeff * fd.inner(test, trial) * fd.dx
-        bcs = None
-        return (a, bcs)
+packagelist = [_SchurDirect,_Direct]
 
 def D(U):    # strain-rate tensor from velocity U
     return 0.5 * (fd.grad(U) + fd.grad(U).T)
@@ -133,12 +53,6 @@ class MomentumModel:
 
     def __init__(self):
         pass
-
-    def set_B3(self):
-        self.B3 = _B3
-
-    def get_B3(self):
-        return self.B3
 
     def set_n_glen(self, n_glen):
         self.n_glen = n_glen
@@ -171,40 +85,22 @@ class MomentumModel:
     def _get_uin(self,mesh):
         _,z = fd.SpatialCoordinate(mesh)
         C = (2.0 / (self.n_glen + 1.0)) \
-            * (self._rho * self._g * np.sin(self.alpha) / self.B3)**self.n_glen
+            * (self._rho * self._g * np.sin(self.alpha) / _B3)**self.n_glen
         uin = fd.as_vector([C * (self.Hin**(self.n_glen+1.0) \
                                 - (self.Hin - z)**(self.n_glen+1.0)),
                             0.0])
         return uin
 
-    def create_mixed_space(self,mesh,mixedtype):
-        if   mixedtype == 'P2P1': # Taylor-Hood
-            self._V = fd.VectorFunctionSpace(mesh, 'CG', 2)
-            self._W = fd.FunctionSpace(mesh, 'CG', 1)
-        elif mixedtype == 'P3P2': # Taylor-Hood
-            self._V = fd.VectorFunctionSpace(mesh, 'CG', 3)
-            self._W = fd.FunctionSpace(mesh, 'CG', 2)
-        elif mixedtype == 'P2P0':
-            self._V = fd.VectorFunctionSpace(mesh, 'CG', 2)
-            self._W = fd.FunctionSpace(mesh, 'DG', 0)
-        elif mixedtype == 'CRP0':
-            self._V = fd.VectorFunctionSpace(mesh, 'CR', 1)
-            self._W = fd.FunctionSpace(mesh, 'DG', 0)
-        elif mixedtype == 'P1P0': # interesting but not recommended
-            self._V = fd.VectorFunctionSpace(mesh, 'CG', 1)
-            self._W = fd.FunctionSpace(mesh, 'DG', 0)
-        else:
-            print('ERROR: unknown mixed type')
-            sys.exit(1)
+    def create_mixed_space(self, mesh):
+        self._V = fd.VectorFunctionSpace(mesh, 'CG', 2)
+        self._W = fd.FunctionSpace(mesh, 'CG', 1)
         self._Z = self._V * self._W
 
-    def solve(self,mesh,bdryids,mixedtype,
-              package = 'SchurDirect',
+    def solve(self, mesh, bdryids, package = 'SchurDirect',
               upold = None, upcoarse = None):
         # define body force and ice hardness
         rhog = self._rho * self._g
         f_body = fd.Constant((rhog * np.sin(self.alpha), - rhog * np.cos(self.alpha)))
-        B3 = self.get_B3()
 
         if self.Hout >= 1.0:
             # if there is an outflow boundary then it is Neumann
@@ -221,7 +117,7 @@ class MomentumModel:
         if upold:
             up = upold
         else:
-            self.create_mixed_space(mesh,mixedtype)
+            self.create_mixed_space(mesh)
             up = fd.Function(self._Z)
             if upcoarse:
                 fd.prolong(upcoarse,up)
@@ -233,12 +129,12 @@ class MomentumModel:
         # define the nonlinear weak form F(u,p;v,q)
         v,q = fd.TestFunctions(self._Z)
         if self.n_glen == 1.0:  # Newtonian ice case
-            F = ( fd.inner(B3 * D(u), D(v)) - p * fd.div(v) - fd.div(u) * q \
+            F = ( fd.inner(_B3 * D(u), D(v)) - p * fd.div(v) - fd.div(u) * q \
                   - fd.inner(f_body, v) ) * fd.dx
         else:                   # (usual) non-Newtonian ice case
             Du2 = 0.5 * fd.inner(D(u), D(u)) + (self.eps * self.Dtyp)**2.0
             rr = 1.0/self.n_glen - 1.0
-            F = ( fd.inner(B3 * Du2**(rr/2.0) * D(u), D(v)) \
+            F = ( fd.inner(_B3 * Du2**(rr/2.0) * D(u), D(v)) \
                   - p * fd.div(v) - fd.div(u) * q - fd.inner(f_body, v) ) * fd.dx
         if self.Hout >= 1.0:
             F = F - fd.inner(outflow_sigma, v) * fd.ds(bdryids['outflow'])
@@ -284,8 +180,7 @@ class MomentumModel:
         P1 = fd.FunctionSpace(mesh, 'CG', 1)
         Du2 = 0.5 * fd.inner(D(self.u), D(self.u)) + (self.eps * self.Dtyp)**2.0
         rr = 1.0/self.n_glen - 1.0
-        B3 = self.get_B3()
-        nu = fd.interpolate(0.5 * B3 * Du2**(rr/2.0), P1)
+        nu = fd.interpolate(0.5 * _B3 * Du2**(rr/2.0), P1)
         nu.rename('effective viscosity')
         return nu
 
