@@ -2,9 +2,12 @@
 
 Copyright 2018--2024 Ed Bueler
 
-## TODO: TOTAL REWRITE PLANNED
+## TODO
 
-Strip out all multigrid ideas.  Strip out all surface evolution ideas.  Add pytest tests.  Also compare, and avoid unnecessary duplication with, [stokes-ice-tutorial](https://github.com/bueler/stokes-ice-tutorial)
+  * check parallel functionality
+  * check convergence for `-slab`
+  * add pytest tests
+  * compare, and avoid unnecessary duplication with, [stokes-ice-tutorial](https://github.com/bueler/stokes-ice-tutorial)
 
 ## Introduction
 
@@ -46,7 +49,7 @@ You can visualize the generated mesh with [Gmsh](http://gmsh.info/):
 
 Now run the Stokes solver `flow.py` on the mesh, which will write velocity and pressure fields into `glacier.pvd`.
 
-        (firedrake) $ ./flow.py -mesh glacier.msh
+        (firedrake) $ ./flow.py -mesh glacier.msh -o glacier.pvd
 
 Now visualize the result using [Paraview](https://www.paraview.org/):
 
