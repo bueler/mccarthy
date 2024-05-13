@@ -20,9 +20,8 @@ bdryids = {'outflow' : 41,
            'inflow'  : 43,
            'base'    : 44}
 
-def writegeometry(geo,bs,L,Lup,Ldown,Hin):
+def writegeometry(geo,bs, L, Lup, Ldown, Hin, Hout):
     # points on boundary, with target mesh densities
-    Hout = Hin
     Lmid = 0.5 * (Lup + Ldown)
     geo.write('Point(1) = {%f,%f,0,lc};\n' % (L,0.0))
     geo.write('Point(2) = {%f,%f,0,lc};\n' % (L,Hout))
@@ -76,8 +75,10 @@ def processopts():
     ''')
     parser.add_argument('-bs', type=float, default=100.0, metavar='X',
                         help='height of bed step (default=100 m)')
-    parser.add_argument('-H0', type=float, default=400.0, metavar='X',
-                        help='thickness of ice (default=400 m)')
+    parser.add_argument('-Hin', type=float, default=400.0, metavar='X',
+                        help='upstream thickness of ice (default=400 m)')
+    parser.add_argument('-Hout', type=float, default=400.0, metavar='X',
+                        help='downstream thickness of ice (default=400 m)')
     parser.add_argument('-hmesh', type=float, default=80.0, metavar='X',
                         help='default target mesh spacing (default=80 m)')
     parser.add_argument('-L', type=float, default=3000.0, metavar='X',
@@ -110,14 +111,12 @@ if __name__ == "__main__":
     geo.write('// command used:\n//   %s\n\n' % commandline)
     # set "characteristic lengths" which are used by gmsh to generate triangles
     lc = args.hmesh / args.refine
-    print('setting target mesh size of %g m' % lc)
     geo.write('lc = %f;\n' % lc)
     if abs(args.bs) > 1.0:
         lc_corner = lc / args.refine_corner
-        print('setting target mesh size of %g m at interior corners' % lc_corner)
     else:
         lc_corner = lc
     geo.write('lc_corner = %f;\n' % lc_corner)
     # write the rest of the .geo file
-    writegeometry(geo,args.bs,args.L,args.Lup,args.Ldown,args.H0)
+    writegeometry(geo, args.bs, args.L, args.Lup, args.Ldown, args.Hin, args.Hout)
     geo.close()
