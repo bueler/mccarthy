@@ -160,4 +160,4 @@ if len(args.o) > 0:
 
 # generate image file with plot of surface values if desired
 if len(args.osurface) > 0:
-    surfaceplot(mesh, u, None, args.osurface)
+    surfaceplot(mesh, u, args.osurface)

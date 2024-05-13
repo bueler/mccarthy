@@ -50,15 +50,17 @@ def removexticks():
         labelbottom=False) # labels along the bottom edge are off
 
 # generate plot of surface velocity values; SERIAL
-def surfaceplot(mesh, L, u, r, filename):
+def surfaceplot(mesh, u, filename):
     import numpy as np
     import matplotlib.pyplot as plt
     from momentummodel import secpera, dayspera
     from domain import bdryids
 
+    xs, _ = getxsurface(mesh, bdryids['top'])
+    L = max(xs)
     x = np.linspace(0.0,L,401)
     sfcn = getboundaryelevation(mesh, bdryids['top'])
-    ufcn, wfcn = getsurfacevelocityfunction(mesh, bdryids['top'],u)
+    ufcn, wfcn = getsurfacevelocityfunction(mesh, bdryids['top'], u)
     plt.figure(figsize=(6.0,8.0))
     rows = 2
     print('plotting surface values of (u,w) in image file %s ...' % filename)
