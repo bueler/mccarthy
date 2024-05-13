@@ -49,7 +49,7 @@ class MomentumModel(OptionsManager):
         self._rho = 910.0             # kg m-3
         self._A3 = 3.1689e-24         # Pa-3 s-1; EISMINT I value of ice softness
         self._B3 = self._A3**(-1.0/3.0)    # Pa s(1/3);  ice hardness
-        self.n_glen = kwargs.pop("n_glen", 3.0)
+        self.n_glen = 3.0
         self.eps = kwargs.pop("eps", 0.01)
         self.alpha = kwargs.pop("alpha", 0.1)
         self.Dtyp = kwargs.pop("Dtyp_pera", 2.0) / secpera

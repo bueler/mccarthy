@@ -104,7 +104,7 @@ def getranks():
     return (element_rank,vertex_rank)
 
 # initialize momentum model
-mm = MomentumModel(n_glen=args.n_glen, eps=args.eps, alpha=args.alpha,
+mm = MomentumModel(eps=args.eps, alpha=args.alpha,
                    Dtyp_pera=args.Dtyp, Hin=args.Hin, Hout=args.Hout)
 
 # solver mode: momentum-only solve of Stokes problem
