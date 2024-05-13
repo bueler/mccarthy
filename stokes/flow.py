@@ -18,10 +18,12 @@ parser.add_argument('-Dtyp', type=float, default=2.0, metavar='X',
                     # e.g. (800 m a-1) / 400 m = 2 a-1
 parser.add_argument('-eps', type=float, default=0.01, metavar='X',
                     help='regularize viscosity using "+(eps Dtyp)^2" (default=0.01)')
+parser.add_argument('-Hin', type=float, default=400.0, metavar='X',
+                    help='upstream thickness of ice (default=400 m)')
+parser.add_argument('-Hout', type=float, default=400.0, metavar='X',
+                    help='downstream thickness of ice (default=400 m)')
 parser.add_argument('-mesh', metavar='MESH', type=str, default='',
                     help='input file name ending with .msh')
-parser.add_argument('-n_glen', type=float, default=3.0, metavar='X',
-                    help='Glen flow law exponent (default=3.0)')
 parser.add_argument('-o', metavar='NAME', type=str, default='',
                     help='output file name ending with .pvd')
 parser.add_argument('-osurface', metavar='NAME', type=str, default='',
@@ -89,17 +91,6 @@ mesh.topology_dm.viewFromOptions('-dm_view')
 # -osurface is not available in parallel
 assert (mesh.comm.size == 1 or len(args.osurface) == 0)
 
-# initialize momentum model
-mm = MomentumModel()
-mm.set_n_glen(args.n_glen)
-mm.set_eps(args.eps)
-mm.set_alpha(args.alpha)
-mm.set_Dtyp_pera(args.Dtyp)
-mm.set_Hin(Hin)  # FIXME ADDRESS THIS
-mm.set_Hout(Hout_initial)
-
-outfile = File(outname)
-
 # return integer-valued fields on the mesh which give the process rank for
 # element ownership (piecewise constant; discontinuous) and vertex/node
 # ownership (integer-valued on vertices; piecewise linear on mesh)
@@ -111,6 +102,10 @@ def getranks():
     vertex_rank.dat.data[:] = mesh.comm.rank
     vertex_rank.rename('vertex_rank')
     return (element_rank,vertex_rank)
+
+# initialize momentum model
+mm = MomentumModel(n_glen=args.n_glen, eps=args.eps, alpha=args.alpha,
+                   Dtyp_pera=args.Dtyp, Hin=args.Hin, Hout=args.Hout)
 
 # solver mode: momentum-only solve of Stokes problem
 def momentumsolve(package=args.package, upold = None, upcoarse = None, indent=0):
@@ -150,18 +145,18 @@ else:
     up = momentumsolve(package=args.package)
 if args.slab:
     numericalerrorsslab()
-u,p = up.split()
+u, p = up.subfunctions
 
 # save results in paraview-readable file
 if len(args.o) > 0:
     nu = mm.effectiveviscosity(mesh)
-    printpar('writing (velocity,pressure,eff.visc.) to %s ...' % outname)
+    printpar('writing (velocity,pressure,eff.visc.) to %s ...' % args.o)
     if args.save_rank:
         element_rank, vertex_rank = getranks()
         printpar('  writing (element_rank,vertex_rank) ...')
-        outfile.write(u, p, nu, element_rank, vertex_rank)
+        VTKFile(args.o).write(u, p, nu, element_rank, vertex_rank)
     else:
-        outfile.write(u, p, nu)
+        VTKFile(args.o).write(u, p, nu)
 
 # generate image file with plot of surface values if desired
 if len(args.osurface) > 0:

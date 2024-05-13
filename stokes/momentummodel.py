@@ -6,12 +6,10 @@
 #   3. it does not know about time stepping or surface kinematical equation
 #   4. it does not interact with files
 
-# TODO: ADDRESS Hin and Hout
-
 import sys
 import numpy as np
 import firedrake as fd
-from firedrake.petsc import PETSc
+from firedrake.petsc import PETSc, OptionsManager
 
 # public data
 secpera = 31556926.0    # seconds per year
@@ -37,55 +35,32 @@ _Direct = {"mat_type": "aij",
           "pc_factor_shift_type": "inblocks",
           "pc_factor_mat_solver_type": "mumps"}
 
-# match packagechoices order above; default goes first:
-packagelist = [_SchurDirect,_Direct]
+packagedict = {"SchurDirect": _SchurDirect,
+               "Direct":      _Direct}
 
 def D(U):    # strain-rate tensor from velocity U
     return 0.5 * (fd.grad(U) + fd.grad(U).T)
 
-class MomentumModel:
+class MomentumModel(OptionsManager):
 
-    # physical constants (private)
-    _g = 9.81                # m s-2
-    _rho = 910.0             # kg m-3
-    _A3 = 3.1689e-24         # Pa-3 s-1; EISMINT I value of ice softness
-    _B3 = _A3**(-1.0/3.0)    # Pa s(1/3);  ice hardness
-
-    def __init__(self):
-        pass
-
-    def set_n_glen(self, n_glen):
-        self.n_glen = n_glen
-
-    def get_n_glen(self):
-        return self.n_glen
-
-    def set_eps(self, eps):
-        self.eps = eps
-
-    def get_eps(self):
-        return self.eps
-
-    def set_alpha(self, alpha):
-        self.alpha = alpha
-
-    def set_Dtyp_pera(self, Dtyp):
-        self.Dtyp = Dtyp / secpera
-
-    def get_Dtyp(self):
-        return self.Dtyp
-
-    def set_Hin(self, Hin):
-        self.Hin = Hin
-
-    def set_Hout(self, Hout):
-        self.Hout = Hout
+    def __init__(self, **kwargs):
+        # physical constants (private)
+        self._g = 9.81                # m s-2
+        self._rho = 910.0             # kg m-3
+        self._A3 = 3.1689e-24         # Pa-3 s-1; EISMINT I value of ice softness
+        self._B3 = self._A3**(-1.0/3.0)    # Pa s(1/3);  ice hardness
+        self.n_glen = kwargs.pop("n_glen", 3.0)
+        self.eps = kwargs.pop("eps", 0.01)
+        self.alpha = kwargs.pop("alpha", 0.1)
+        self.Dtyp = kwargs.pop("Dtyp_pera", 2.0) / secpera
+        self.Hin = kwargs.pop("Hin", 400.0)
+        self.Hout = kwargs.pop("Hout", 400.0)
 
     # compute slab-on-slope inflow velocity; note alpha = 0 ==> uin = 0
     def _get_uin(self,mesh):
         _,z = fd.SpatialCoordinate(mesh)
         C = (2.0 / (self.n_glen + 1.0)) \
-            * (self._rho * self._g * np.sin(self.alpha) / _B3)**self.n_glen
+            * (self._rho * self._g * np.sin(self.alpha) / self._B3)**self.n_glen
         uin = fd.as_vector([C * (self.Hin**(self.n_glen+1.0) \
                                 - (self.Hin - z)**(self.n_glen+1.0)),
                             0.0])
@@ -108,7 +83,7 @@ class MomentumModel:
             # hydrostatic normal force equivalent to height=Hin slab,
             # as though there was a down-stream glacier continuation
             _,z = fd.SpatialCoordinate(mesh)
-            Cout = (self.Hin/self.Hout)**2
+            Cout = (self.Hin / self.Hout)**2
             outflow_sigma = fd.as_vector( \
                 [- Cout * rhog * np.cos(self.alpha) * (self.Hout - z),
                 Cout * rhog * np.sin(self.alpha) * (self.Hout - z)])
@@ -121,20 +96,20 @@ class MomentumModel:
             up = fd.Function(self._Z)
             if upcoarse:
                 fd.prolong(upcoarse,up)
-        u,p = fd.split(up)  # get component ufl expressions to define form
-        self.u,self.p = up.split()
+        u, p = fd.split(up)  # get component ufl expressions to define form
+        self.u, self.p = up.subfunctions
         self.u.rename('velocity')
         self.p.rename('pressure')
 
         # define the nonlinear weak form F(u,p;v,q)
         v,q = fd.TestFunctions(self._Z)
         if self.n_glen == 1.0:  # Newtonian ice case
-            F = ( fd.inner(_B3 * D(u), D(v)) - p * fd.div(v) - fd.div(u) * q \
+            F = ( fd.inner(self._B3 * D(u), D(v)) - p * fd.div(v) - fd.div(u) * q \
                   - fd.inner(f_body, v) ) * fd.dx
         else:                   # (usual) non-Newtonian ice case
             Du2 = 0.5 * fd.inner(D(u), D(u)) + (self.eps * self.Dtyp)**2.0
             rr = 1.0/self.n_glen - 1.0
-            F = ( fd.inner(_B3 * Du2**(rr/2.0) * D(u), D(v)) \
+            F = ( fd.inner(self._B3 * Du2**(rr/2.0) * D(u), D(v)) \
                   - p * fd.div(v) - fd.div(u) * q - fd.inner(f_body, v) ) * fd.dx
         if self.Hout >= 1.0:
             F = F - fd.inner(outflow_sigma, v) * fd.ds(bdryids['outflow'])
@@ -146,7 +121,7 @@ class MomentumModel:
                 fd.DirichletBC(self._Z.sub(0), inflow_u, bdryids['inflow']) ]
 
         # solve
-        params = packagelist[packagechoices.index(package)]
+        params = packagedict[package]
         # note: the Firedrake default is 'basic', i.e. no linesearch
         #       we need 'bt' linesearch for n = 3
         params['snes_linesearch_type'] = 'bt'
@@ -160,15 +135,16 @@ class MomentumModel:
     #   umagmax = maximum velocity magnitude
     #   pav     = average pressure
     #   pmax    = maximum pressure
-    def solutionstats(self,mesh):
+    def solutionstats(self, mesh):
         P1 = fd.FunctionSpace(mesh, 'CG', 1)
-        one = fd.Constant(1.0, domain=mesh)
-        area = fd.assemble(fd.dot(one,one) * fd.dx)
+        R = fd.FunctionSpace(mesh, 'R', 0)
+        one = fd.Function(R).assign(1.0)
+        area = fd.assemble(one * fd.dx)
         pav = fd.assemble(fd.sqrt(fd.dot(self.p, self.p)) * fd.dx) / area
         with self.p.dat.vec_ro as vp:
             pmax = vp.max()[1]
         umagav = fd.assemble(fd.sqrt(fd.dot(self.u, self.u)) * fd.dx) / area
-        umag = fd.interpolate(fd.sqrt(fd.dot(self.u,self.u)),P1)
+        umag = fd.Function(P1).interpolate(fd.sqrt(fd.dot(self.u,self.u)))
         with umag.dat.vec_ro as vumag:
             umagmax = vumag.max()[1]
         return umagav,umagmax,pav,pmax
@@ -176,11 +152,11 @@ class MomentumModel:
     # generate regularized effective viscosity from the solution:
     #   nu = (1/2) B_n X^((1/n)-1)
     # where X = sqrt(|Du|^2 + eps^2 Dtyp^2)
-    def effectiveviscosity(self,mesh):
+    def effectiveviscosity(self, mesh):
         P1 = fd.FunctionSpace(mesh, 'CG', 1)
         Du2 = 0.5 * fd.inner(D(self.u), D(self.u)) + (self.eps * self.Dtyp)**2.0
-        rr = 1.0/self.n_glen - 1.0
-        nu = fd.interpolate(0.5 * _B3 * Du2**(rr/2.0), P1)
+        rr = 1.0 / self.n_glen - 1.0
+        nu = fd.Function(P1).interpolate(0.5 * self._B3 * Du2**(rr/2.0))
         nu.rename('effective viscosity')
         return nu
 
@@ -190,14 +166,14 @@ class MomentumModel:
     def numerical_errors_slab(self,mesh):
         P1 = fd.FunctionSpace(mesh, 'CG', 1)
         up_exact = fd.Function(self._Z)
-        u_exact,p_exact = up_exact.split()
+        u_exact, p_exact = up_exact.subfunctions
         inflow_u = self._get_uin(mesh)
         u_exact.interpolate(inflow_u)
         _,z = fd.SpatialCoordinate(mesh)
         p_exact.interpolate(self._rho * self._g * np.cos(self.alpha) \
                             * (self.Hin - z))
-        uerr = fd.interpolate(fd.sqrt(fd.dot(u_exact-self.u,u_exact-self.u)),P1)
-        perr = fd.interpolate(fd.sqrt(fd.dot(p_exact-self.p,p_exact-self.p)),self._W)
+        uerr = fd.Function(P1).interpolate(fd.sqrt(fd.dot(u_exact-self.u,u_exact-self.u)))
+        perr = fd.Function(self._W).interpolate(fd.sqrt(fd.dot(p_exact-self.p,p_exact-self.p)))
         with uerr.dat.vec_ro as vuerr:
             uerrmax = vuerr.max()[1]
         with perr.dat.vec_ro as vperr:
