@@ -1,0 +1,102 @@
+% Copyright 2009--2022 Ed Bueler
+
+\documentclass[10pt,hyperref={pdfpagelabels=true}]{beamer}
+
+\usetheme{Boadilla}
+
+\usepackage{times}
+\usepackage{hyperref}
+\usepackage[T1]{fontenc}
+\usepackage{verbatim}
+\usepackage{empheq}
+\usepackage{color}
+\usepackage{xmpmulti}  % more portable than animate
+\usepackage{graphicx}
+\usepackage{tikz}
+
+\newcommand{\ddt}[1]{\ensuremath{\frac{\partial #1}{\partial t}}}
+\newcommand{\ddx}[1]{\ensuremath{\frac{\partial #1}{\partial x}}}
+\newcommand{\ddy}[1]{\ensuremath{\frac{\partial #1}{\partial y}}}
+\newcommand{\pp}[2]{\ensuremath{\frac{\partial #1}{\partial #2}}}
+\renewcommand{\t}[1]{\texttt{#1}}
+\newcommand{\Matlab}{\textsc{Matlab}\xspace}
+\newcommand{\bq}{\mathbf{q}}
+\newcommand{\bU}{\mathbf{U}}
+\newcommand{\eps}{\epsilon}
+\newcommand{\grad}{\nabla}
+\newcommand{\Div}{\nabla\cdot}
+\newcommand{\devstress}{\tau}
+
+\newcommand{\mmess}[1]{\vspace{-0.1in}\begin{center}
+\fbox{\url{#1.m}}
+\end{center}}
+
+\newcommand{\minput}[1]{\scriptsize\verbatiminput{tmp/#1.slim.m}
+\tiny\mmess{#1}\normalsize}
+
+\newcommand{\minputtiny}[1]{\tiny\verbatiminput{tmp/#1.slim.m}
+\mmess{#1}\normalsize}
+
+
+
+\title[Numerical modelling]{Numerical modelling of \\ glaciers, ice sheets, and ice shelves}
+
+\author[Bueler]{Ed Bueler}
+
+\institute[UAF]
+{
+  Dept of Math \& Stat, University of Alaska Fairbanks \\
+  \texttt{elbueler@alaska.edu}
+}
+
+\date[]{{\scriptsize McCarthy, Alaska: 2010, 2012, 2014, 2016, 2018, 2022}}
+
+%\titlegraphic{\vspace{-20mm} \includegraphics[width=0.7\textwidth]{roughfinal}}
+
+\beamertemplatenavigationsymbolsempty
+
+\begin{document}
+\graphicspath{{../figures/}}
+
+{
+% centered background image
+\usebackgroundtemplate{%
+\parbox[c][\paperheight][b]{\paperwidth}{\centering \tikz\node[opacity=0.2] {\includegraphics[width=0.8\paperwidth]{whiteoutroughfinal}};}
+}
+
+\begin{frame}
+  \maketitle
+\end{frame}
+}
+
+%\AtBeginSection[]{}
+
+\AtBeginSection[]
+{
+  \begin{frame}<beamer>
+    \frametitle{Outline}
+    \tableofcontents[currentsection,hideallsubsections]
+  \end{frame}
+}
+
+\input{preamble.tex}
+
+\input{sia.tex}
+
+\input{masscont.tex}
+
+\input{ssa.tex}
+
+
+\begin{comment}
+THINK ABOUT THESE THINGS:
+* attempt to use Green's function to understand diffusivity of 1D SSA?
+* why is ice sheet modeling a "1 bar subject"?
+* make sure to test codes in Matlab
+* props
+   -- bicycle for plastic till analogy
+   -- membrane and grid for free boundary
+   -- silly putty
+\end{comment}
+
+\end{document}
