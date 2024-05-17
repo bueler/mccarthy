@@ -1,10 +1,10 @@
 all: slides.pdf
 
 slides.pdf:
-	pdflatex slides
+	xelatex slides
 	bibtex slides
-	pdflatex slides
-	pdflatex slides
+	xelatex slides
+	xelatex slides
 
 .PHONY: clean
 
