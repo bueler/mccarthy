@@ -56,11 +56,44 @@
   \end{center}
 
 \begin{itemize}
-\item two spatial dimensions $x,z$, for a while
-\item $z = s(t,x)$: evolving surface of glacier (m)
-\item $z = b(x)$: fixed bed elevation (m)
+\item two spatial dimensions $x,z$ \hfill \emph{\dots\, at least for a while}
+\item $z = s(t,x)$: ice surface elevation (m)
+\item $z = b(x)$: (fixed) bed elevation (m)
 \item $a(t,x)$: surface mass balance in ice-equivalent units ($\text{m}\,\text{s}^{-1}$)
-\item $\bu(t,x)=$
+\item $\bu(t,x)=(u(t,x),w(t,x))$: ice velocity ($\text{m}\,\text{s}^{-1}$)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{surface kinematical equation (SKE)}
+  \begin{center}
+  FIXME boat/slider pic 1/3 screen
+  \end{center}
+
+\begin{equation*}
+\frac{\partial s}{\partial t} = \uncover<2-4>{a} \uncover<3-4>{+w} \uncover<4>{-u \frac{\partial s}{\partial x}}
+\end{equation*}
+
+the surface moves up and down according to
+\begin{itemize}
+\item<2-4> surface mass balance
+\item<3-4> vertical ice velocity
+\item<4> horizontal ice velocity
+\end{itemize}
+\end{frame}
+
+\begin{frame}{surface kinematical equation (SKE) \dots alternate form}
+  \begin{center}
+  FIXME boat/slider pic 1/3 screen
+  \end{center}
+
+\begin{equation*}
+\frac{\partial s}{\partial t} = a + \bu \cdot \bn_s
+\end{equation*}
+
+\begin{itemize}
+\item $\bu=(u,w)$ is the ice velocity
+\item $\bn_s$ is a vector which points upward and is normal (perpendicular) to the ice surface:
+	$$\bn_s = \left(-\frac{\partial s}{\partial x}, \,1\right)$$
 \end{itemize}
 \end{frame}
 
