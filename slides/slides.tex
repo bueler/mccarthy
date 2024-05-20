@@ -3,7 +3,7 @@
 \usetheme{metropolis}
 \usepackage{appendixnumberbeamer}
 
-\usepackage{booktabs}
+\usepackage{booktabs,empheq}
 \usepackage[scale=2]{ccicons}
 
 \usepackage{pgfplots}
@@ -12,48 +12,59 @@
 \usepackage{xspace}
 \newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
 
-\title{Metropolis}
-\subtitle{A modern beamer theme}
-\date{\today}
-\author{Matthias Vogelgesang}
-\institute{Center for modern beamer themes}
-% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+\newcommand{\bn}{\mathbf{n}}
+\newcommand{\bq}{\mathbf{q}}
+\newcommand{\bu}{\mathbf{u}}
+
+\newcommand{\bU}{\mathbf{U}}
+
+\newcommand{\eps}{\epsilon}
+\newcommand{\grad}{\nabla}
+\newcommand{\Div}{\nabla\cdot}
+
+\title{numerical modeling of glaciers}
+%\subtitle{A modern beamer theme}
+\date{June 2024}
+\author{Ed Bueler}
+\institute{the Hardware Store at McCarthy}
+\titlegraphic{\vspace{-1cm}\par\hspace{-1cm}\includegraphics[width=1.5\textwidth]{polaris-overexposed.png}}
 
 \begin{document}
+\graphicspath{{../figures/}}
 
 \maketitle
 
-\begin{frame}{Table of contents}
-  \setbeamertemplate{section in toc}[sections numbered]
-  \tableofcontents[hideallsubsections]
+\begin{frame}{Outline}
+  %\setbeamertemplate{section in toc}[sections numbered]
+  %\tableofcontents[hideallsubsections]
+  \tableofcontents
 \end{frame}
 
-\section{Introduction}
+\section{\textbf{hour 1: what happens at the surface of a glacier?}}
 
-\begin{frame}[fragile]{Metropolis}
+\subsection{basics}
 
-  The \themename theme is a Beamer theme with minimal visual noise
-  inspired by the \href{https://github.com/hsrmbeamertheme/hsrmbeamertheme}{\textsc{hsrm} Beamer
-  Theme} by Benjamin Weiss.
-
-  Enable the theme by loading
-
-  \begin{verbatim}    \documentclass{beamer}
-    \usetheme{metropolis}\end{verbatim}
-
-  Note, that you have to have Mozilla's \emph{Fira Sans} font and XeTeX
-  installed to enjoy this wonderful typography.
+\begin{frame}{surface motion}
+  \begin{center}
+  FIXME boat/slider pic full screen
+  \end{center}
 \end{frame}
 
-\begin{frame}[fragile]{Sections}
-  Sections group slides of the same topic
+\begin{frame}{surface motion: notation}
+  \begin{center}
+  FIXME boat/slider pic 1/3 screen
+  \end{center}
 
-  \begin{verbatim}    \section{Elements}\end{verbatim}
-
-  for which \themename provides a nice progress indicator \ldots
+\begin{itemize}
+\item two spatial dimensions $x,z$, for a while
+\item $z = s(t,x)$: evolving surface of glacier (m)
+\item $z = b(x)$: fixed bed elevation (m)
+\item $a(t,x)$: surface mass balance in ice-equivalent units ($\text{m}\,\text{s}^{-1}$)
+\item $\bu(t,x)=$
+\end{itemize}
 \end{frame}
 
-\section{Elements}
+\subsection{numerics}
 
 \begin{frame}[fragile]{Typography}
       \begin{verbatim}The theme provides sensible defaults to
@@ -103,13 +114,6 @@ or show \textbf{bold} results.\end{verbatim}
   \end{columns}
 \end{frame}
 
-\begin{frame}{Animation}
-  \begin{itemize}[<+- | alert@+>]
-    \item \alert<4>{This is\only<4>{ really} important}
-    \item Now this
-    \item And now this
-  \end{itemize}
-\end{frame}
 
 \begin{frame}{Figures}
   \begin{figure}
@@ -136,22 +140,6 @@ or show \textbf{bold} results.\end{verbatim}
     \caption{Rotated square from
     \href{http://www.texample.net/tikz/examples/rotated-polygons/}{texample.net}.}
   \end{figure}
-\end{frame}
-
-\begin{frame}{Tables}
-  \begin{table}
-    \caption{Largest cities in the world (source: Wikipedia)}
-    \begin{tabular}{@{} lr @{}}
-      \toprule
-      City & Population\\
-      \midrule
-      Mexico City & 20,116,842\\
-      Shanghai & 19,210,000\\
-      Peking & 15,796,450\\
-      Istanbul & 14,160,467\\
-      \bottomrule
-    \end{tabular}
-  \end{table}
 \end{frame}
 
 \begin{frame}{Blocks}
@@ -191,12 +179,6 @@ or show \textbf{bold} results.\end{verbatim}
   \end{columns}
 \end{frame}
 
-\begin{frame}{Math}
-  \begin{equation*}
-    e = \lim_{n\to \infty} \left(1 + \frac{1}{n}\right)^n
-  \end{equation*}
-\end{frame}
-
 \begin{frame}{Line plots}
   \begin{figure}
     \begin{tikzpicture}
@@ -208,28 +190,6 @@ or show \textbf{bold} results.\end{verbatim}
 
         \addplot {sin(deg(x))};
         \addplot+[samples=100] {sin(deg(2*x))};
-
-      \end{axis}
-    \end{tikzpicture}
-  \end{figure}
-\end{frame}
-
-\begin{frame}{Bar charts}
-  \begin{figure}
-    \begin{tikzpicture}
-      \begin{axis}[
-        mbarplot,
-        xlabel={Foo},
-        ylabel={Bar},
-        width=0.9\textwidth,
-        height=6cm,
-      ]
-
-      \addplot plot coordinates {(1, 20) (2, 25) (3, 22.4) (4, 12.4)};
-      \addplot plot coordinates {(1, 18) (2, 24) (3, 23.5) (4, 13.2)};
-      \addplot plot coordinates {(1, 10) (2, 19) (3, 25) (4, 15.2)};
-
-      \legend{lorem, ipsum, dolor}
 
       \end{axis}
     \end{tikzpicture}
@@ -252,7 +212,217 @@ or show \textbf{bold} results.\end{verbatim}
 }
 
 
-\section{Conclusion}
+\section{\textbf{hour 2: where does the velocity field come from?}}
+
+\subsection{basics}
+
+
+\begin{frame}{ice in glaciers is an atypical fluid}
+
+\begin{itemize}
+\item if the ice were
+  \begin{itemize}
+  \item[$\circ$] faster-moving than it actually is, and
+  \item[$\circ$] linearly-viscous like liquid water
+  \end{itemize}
+
+  then it would be a ``typical'' fluid
+
+\bigskip
+\item for typical fluids one uses the Navier-Stokes equations:
+\begin{align*}
+\nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \\
+\rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) &= -\nabla p + \nabla \cdot \tau_{ij} + \rho \mathbf{g} &&\text{\emph{stress balance}} \\
+2 \nu D\mathbf{u}_{ij} &= \tau_{ij} &&\text{\emph{flow law}}
+\end{align*}
+
+\medskip
+    \begin{itemize}
+    \item[$\circ$] stress balance equation is ``$m a = F$''
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{glaciology as computational fluid dynamics}
+
+\begin{itemize}
+\item \alert{yes}, numerical ice sheet flow modelling is ``computational fluid dynamics''
+  \begin{itemize}
+  \item[$\circ$] it's large-scale like atmosphere and ocean
+  \item[$\circ$] \dots\, but it is a weird one
+  \end{itemize}
+\item consider what makes atmosphere/ocean flow exciting:
+  \begin{itemize}
+  \item[$\circ$] turbulence
+  \item[$\circ$] convection
+  \item[$\circ$] coriolis force
+  \item[$\circ$] density stratification
+  \end{itemize}
+\item none of the above list is relevant to ice flow
+\item what could be interesting about the flow of slow, cold, stiff, laminar, inert old ice?
+  \begin{itemize}
+  \item[$\circ$] \emph{ice dynamics!}
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{ice is a slow, shear-thinning fluid}
+
+\begin{itemize}
+\item ice fluid is \emph{slow} and \emph{non-Newtonian}
+    \begin{itemize}
+    \item[$\circ$] ``slow'' is a technical term:
+      $$\rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) \approx 0 \qquad \iff \qquad \begin{pmatrix} \text{forces of inertia} \\ \text{are neglected} \end{pmatrix}$$
+    \item[$\circ$] ice is non-Newtonian in a ``shear-thinning'' way
+        \begin{itemize}
+        \item higher strain rates means lower viscosity
+        \item viscosity $\nu$ is not constant
+        \end{itemize}
+    \end{itemize}
+
+\bigskip
+\item thus the standard model is Glen-law Stokes:
+\begin{align*}
+\nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \\
+0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \mathbf{g} &&\text{\emph{stress balance}} \\
+D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij} &&\text{\emph{flow law}}
+\end{align*}
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{``slow'' means no memory of velocity/momentum}
+
+\begin{itemize}
+\item note \emph{no time derivatives} in Stokes model:
+\small
+\begin{align*}
+\nabla \cdot \mathbf{u} &= 0 \\
+0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \mathbf{g} \\
+D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
+\end{align*}
+\normalsize
+\item thus a time-stepping ice sheet code can/must recompute the full velocity field at every time step
+  \begin{itemize}
+  \item[$\circ$] velocity is \emph{not} required from the previous time step
+  \item[$\circ$] velocity is a ``diagnostic'' output not needed for starting or restarting the model
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{plane flow Stokes}
+
+\begin{itemize}
+\item again we work in a $x,z$ plane
+    \begin{itemize}
+    \item[$\circ$] glacier flow line (center line), or a cross-flow plane
+    \end{itemize}
+\item $n=3$ Stokes equations say:
+\begin{empheq}[]{align}
+u_x + w_z &= 0 &&\text{\emph{incompressibility}}\notag \\
+p_x &= \tau_{11,x} + \tau_{13,z} &&\text{\emph{stress balance} ($x$)} \notag \\
+p_z &= \tau_{13,x} - \tau_{11,z} - \rho g &&\text{\emph{stress balance} ($z$)} \notag \\
+u_x &= A \tau^2 \tau_{11} &&\text{\emph{flow law (diagonal)}}\notag \\
+u_z + w _x &= 2 A \tau^2 \tau_{13} &&\text{\emph{flow law (off-diagonal)}} \notag
+\end{empheq}
+
+\vspace{-2mm}
+    \begin{itemize}
+    \item[$\circ$] \emph{notation}: subscripts $x,z$ denote partial derivatives, $\tau_{13}$ is the ``vertical'' shear stress, $\tau_{11}$ and $\tau_{33}=-\tau_{11}$ are (deviatoric) longitudinal stresses
+    \end{itemize}
+\item we have five equations in five unknowns ($u,w,p,\tau_{11},\tau_{13}$)
+\item this is complicated enough \dots what about in a simplified situation?
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{slab-on-a-slope}
+
+\hfill \includegraphics[width=0.4\textwidth]{slab}
+
+\vspace{-30mm}
+\begin{itemize}
+\item suppose constant thickness
+\item tilt bedrock by angle $\alpha$
+\item rotate the coordinates
+\item get replacement expressions:
+\begin{align*}
+\mathbf{g} &= g \sin\alpha\, \hat x - g \cos \alpha \,\hat z \phantom{dslfkj sdkfjlskdjf  sdlfj}\\
+p_x &= \tau_{11,x} + \tau_{13,z} + \rho g \sin\alpha \\
+p_z &= \tau_{13,x} - \tau_{11,z} - \rho g \cos\alpha
+\end{align*}
+\item for \alert{slab-on-a-slope} there is \emph{no variation in} $x$:\quad $\partial/\partial x = 0$
+\item the equations simplify:
+\small
+\begin{empheq}[box=\fbox]{align}
+w_z &= 0 &   0 &= \tau_{11} \notag \\
+\tau_{13,z} &= - \rho g \sin\alpha &   u_z &= 2 A \tau^2 \tau_{13} \notag \\
+p_z &= - \rho g \cos\alpha \notag
+\end{empheq}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{slab-on-a-slope 2}
+
+\begin{itemize}
+\item add boundary conditions:
+	$$w(\text{base})=0, \qquad p(\text{surface})=0, \qquad u(\text{base})=u_0$$
+\item by integrating vertically, get:
+\begin{align*}
+w &= 0 \phantom{asdfklj asldkfjalk asdfkj sdlfkj sldafkj adlfjl sdfakj }\\
+p &= \rho g \cos\alpha (H-z) \\
+\tau_{13} &= \rho g \sin\alpha (H-z)
+\end{align*}
+
+\vspace{-25mm}
+\hfill \includegraphics[width=0.4\textwidth]{slabshear}
+
+\vspace{-7mm}
+\item $\tau_{13}$ is linear in depth
+
+\medskip
+\item from $u_z = 2 A \tau^2 \tau_{13}$ get \alert{velocity formula}
+\vspace{-0.05in}
+\begin{align*}
+u(z) &= u_0 + 2 A (\rho g \sin\alpha)^3 \int_0^z (H-z')^3\,dz' \\
+     &= u_0 + \frac{1}{2} A (\rho g \sin\alpha)^3  \left(H^4 - (H-z)^4\right)
+\end{align*}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{slab-on-a-slope 3}
+
+\begin{columns}
+\begin{column}{0.6\textwidth}
+\begin{itemize}
+\item do we believe these equations?
+\item velocity formula on last slide gives figure below
+\item compare to observations at right
+\end{itemize}
+\begin{center}
+% NOT preserving aspect ratio
+\includegraphics[width=0.6\textwidth,height=0.5\textheight]{slabvel}
+\end{center}
+\end{column}
+
+\begin{column}{0.4\textwidth}
+\includegraphics[width=1.0\textwidth]{athabasca-deform}
+
+\medskip
+\scriptsize
+Velocity profile of the Athabasca Glacier, Canada, derived from inclinometry (Savage and Paterson, 1963)
+\end{column}
+\end{columns}
+\end{frame}
+
+
+\subsection{numerics}
 
 \begin{frame}{Summary}
 FIXME
