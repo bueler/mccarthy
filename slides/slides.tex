@@ -3,7 +3,7 @@
 \usetheme{metropolis}
 \usepackage{appendixnumberbeamer}
 
-\usepackage{booktabs,empheq}
+\usepackage{booktabs,empheq,bbold,bm}
 \usepackage[scale=2]{ccicons}
 
 \usepackage{pgfplots}
@@ -16,11 +16,22 @@
 \newcommand{\bq}{\mathbf{q}}
 \newcommand{\bu}{\mathbf{u}}
 
+\newcommand{\hbn}{\hat{\mathbf{n}}}
+\newcommand{\hbx}{\hat{\mathbf{x}}}
+\newcommand{\hbz}{\hat{\mathbf{z}}}
+
 \newcommand{\bU}{\mathbf{U}}
+
+\newcommand{\bpsi}{\bm{\psi}}
+\newcommand{\bzero}{\bm{0}}
 
 \newcommand{\eps}{\epsilon}
 \newcommand{\grad}{\nabla}
 \newcommand{\Div}{\nabla\cdot}
+
+\newcommand{\rhoi}{\rho_{\text{i}}}
+
+\newcommand{\comm}[1]{{\footnotesize \hfill \emph{#1}}}
 
 \title{numerical modeling of glaciers}
 %\subtitle{A modern beamer theme}
@@ -472,8 +483,90 @@ FIXME
   \bibliographystyle{abbrv}
 \end{frame}
 
-\begin{frame}[fragile]{Backup slides}
-FIXME
+
+\subsection[]{extra slides}
+
+\begin{frame}{extra: SKE from mass conservation}
+\begin{center}
+\includegraphics[width=0.3\textwidth]{skemassconservation.jpg}
+\end{center}
+
+\begin{itemize}
+\item derive SKE from mass conservation over rectangle centered at $(x_0,z_0)$, where $s(t_0,x_0)=z_0$:
+   $$\Omega=[x_0-\delta,x_0+\delta] \times [z_0-\eps,z_0+\eps]$$
+\item define mass of ice in $\Omega$ at time $t$ as $M(t)$:
+   $$M(t) = \rhoi \int_\Omega \mathbb{1}_{\{z<s(t,x)\}}\,dx\,dz = \rhoi \int_{x_0-\delta}^{x_0+\delta} s(t,x) - z_0 + \eps\,dx$$
+\item also define:
+   \begin{itemize}
+   \item[$\circ$] $\bpsi$ is the mass flux
+   \item[$\circ$] $\hbn$ is unit outward normal on $\partial\Omega$
+   \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{extra: SKE from mass conservation 2}
+\begin{center}
+\includegraphics[width=0.3\textwidth]{skemassconservation.jpg}
+\end{center}
+
+\begin{itemize}
+\item assumptions:
+    \begin{itemize}
+    \item[$\circ$] there is $\tau>0$ so that, for each $t$ such that $|t-t_0|<\tau$ the functions $s(t,x)$ are well-defined and $|s(t,x)-z_0|<\eps$
+    \item[$\circ$] ice has constant density $\rhoi$
+    \item[$\circ$] the SMB $a(t,x)$ only crosses the top boundary $\Gamma_t$ \hfill \emph{tentative}
+        \begin{itemize}
+        \item $\bpsi\big|_{\Gamma_t} = - \rho_i a(t,x) \hbz$  \comm{note $a>0$ is precipitation}
+        \end{itemize}
+    \item[$\circ$] $\bu(t,x,z)=(u,w)$ is the ice velocity  \comm{only defined on $\{z<s(t,x)\}$}
+        \begin{itemize}
+        \item $\bpsi\big|_{\Gamma_b} = \rho_i w(t,x,z_0-\eps) \hbz$
+        \item $\bpsi\big|_{\Gamma_{\{\ell,r\}}} = \begin{cases} \rho_i u(t,x_0\mp\delta,z) \hbx, & \text{if } z < s(t,x_0\mp\delta), \\ \bzero, & \text{otherwise} \end{cases}$
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{extra: SKE from mass conservation 3}
+\begin{center}
+\includegraphics[width=0.3\textwidth]{skemassconservation.jpg}
+\end{center}
+
+\begin{itemize}
+\item mass is conserved (no sources):
+\begin{align*}
+\frac{dM}{dt} &= - \int_{\partial \Omega} \bpsi \cdot \hbn\,ds \\
+  &= - \underbrace{\rhoi \int_{x_0-\delta}^{x_0+\delta} a(t,x)\,dx}_{\Gamma_t} - \underbrace{\rhoi \int_{x_0-\delta}^{x_0+\delta} w(t,x,z_0-\eps)\,dx}_{\Gamma_b} \\
+  &\quad - \underbrace{\rhoi \int_{z_0-\eps}^{s(t,x_0-\delta)} u(t,x_0-\delta,z)\,dz}_{\Gamma_\ell} + \underbrace{\rhoi \int_{z_0-\eps}^{s(t,x_0+\delta)} u(t,x_0+\delta,z)\,dz}_{\Gamma_r}
+\end{align*}
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{extra: SKE from mass conservation 4}
+
+\begin{itemize}
+\item time derivative:
+\begin{align*}
+\frac{dM}{dt} &= \lim_{\omega\to 0} \frac{M(t+\omega) - M(t)}{\omega} \\
+    &= \lim_{\omega\to 0} \rhoi \int_\Omega \mathbb{1}_{\{z<s(t+\omega,x)\}} - \mathbb{1}_{\{z<s(t,x)\}}\,dx\,dz \\
+    &= \rho_i \int_{x_0-\delta}^{x_0+\delta} \frac{\partial s}{\partial t}(t,x)\,dx
+\end{align*}
+\item Taylor expansions on $\Omega$:
+\begin{align*}
+a(t,x) &= a(t,x_0) + O(\delta) \\
+u(t,x,z) &= u(t,x_0,z_0) + O(\delta) + O(\eps) \\
+w(t,x,z) &= w(t,x_0,z_0) + O(\delta) + O(\eps) \\
+\frac{\partial s}{\partial t}(t,x) &= \frac{\partial s}{\partial t}(t,x_0) + O(\delta)
+\end{align*}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{extra: SKE from mass conservation 5}
+
+\begin{itemize}
+\item FIXME FINISH
+\end{itemize}
 \end{frame}
 
 \end{document}
