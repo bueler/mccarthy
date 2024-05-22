@@ -240,13 +240,6 @@ or show \textbf{bold} results.\end{verbatim}
   \end{figure}
 \end{frame}
 
-\begin{frame}{Quotes}
-  \begin{quote}
-    Veni, Vidi, Vici
-  \end{quote}
-\cite{knuth92,ConcreteMath,Simpson,Er01,greenwade93}
-\end{frame}
-
 {%
 \setbeamertemplate{frame footer}{My custom footer}
 \begin{frame}[fragile]{Frame footer}
@@ -460,7 +453,7 @@ u(z) &= u_0 + 2 A (\rho g \sin\alpha)^3 \int_0^z (H-z')^3\,dz' \\
 
 \medskip
 \scriptsize
-Velocity profile of the Athabasca Glacier, Canada, derived from inclinometry (Savage and Paterson, 1963)
+Velocity profile of the Athabasca Glacier, Canada, derived from inclinometry \cite{SavagePaterson1963}
 \end{column}
 \end{columns}
 \end{frame}
@@ -479,6 +472,7 @@ FIXME
 \appendix
 
 \begin{frame}[allowframebreaks]{References}
+\setbeamertemplate{bibliography item}[text]
   \bibliography{slides}
   \bibliographystyle{abbrv}
 \end{frame}
@@ -488,19 +482,12 @@ FIXME
 
 \begin{frame}{extra: SKE from mass conservation}
 \begin{center}
-\includegraphics[width=0.3\textwidth]{skemassconservation.jpg}
+\includegraphics[width=0.5\textwidth]{skemassconservation.jpg} FIXME REPLACE!
 \end{center}
 
 \begin{itemize}
-\item derive SKE from mass conservation over rectangle centered at $(x_0,z_0)$, where $s(t_0,x_0)=z_0$:
-   $$\Omega=[x_0-\delta,x_0+\delta] \times [z_0-\eps,z_0+\eps]$$
-\item define mass of ice in $\Omega$ at time $t$ as $M(t)$:
-   $$M(t) = \rhoi \int_\Omega \mathbb{1}_{\{z<s(t,x)\}}\,dx\,dz = \rhoi \int_{x_0-\delta}^{x_0+\delta} s(t,x) - z_0 + \eps\,dx$$
-\item also define:
-   \begin{itemize}
-   \item[$\circ$] $\bpsi$ is the mass flux
-   \item[$\circ$] $\hbn$ is unit outward normal on $\partial\Omega$
-   \end{itemize}
+\item these extra slides derive the surface kinematical equation (SKE) from mass conservation applied over a rectangle
+\item contrast this derivation with those in textbooks \cite{GreveBlatter2009,vanderVeen2013}
 \end{itemize}
 \end{frame}
 
@@ -510,20 +497,11 @@ FIXME
 \end{center}
 
 \begin{itemize}
-\item assumptions:
-    \begin{itemize}
-    \item[$\circ$] there is $\tau>0$ so that, for each $t$ such that $|t-t_0|<\tau$ the functions $s(t,x)$ are well-defined and $|s(t,x)-z_0|<\eps$
-    \item[$\circ$] ice has constant density $\rhoi$
-    \item[$\circ$] the SMB $a(t,x)$ only crosses the top boundary $\Gamma_t$ \hfill \emph{tentative}
-        \begin{itemize}
-        \item $\bpsi\big|_{\Gamma_t} = - \rho_i a(t,x) \hbz$  \comm{note $a>0$ is precipitation}
-        \end{itemize}
-    \item[$\circ$] $\bu(t,x,z)=(u,w)$ is the ice velocity  \comm{only defined on $\{z<s(t,x)\}$}
-        \begin{itemize}
-        \item $\bpsi\big|_{\Gamma_b} = \rho_i w(t,x,z_0-\eps) \hbz$
-        \item $\bpsi\big|_{\Gamma_{\{\ell,r\}}} = \begin{cases} \rho_i u(t,x_0\mp\delta,z) \hbx, & \text{if } z < s(t,x_0\mp\delta), \\ \bzero, & \text{otherwise} \end{cases}$
-        \end{itemize}
-    \end{itemize}
+\item $\Omega = $ rectangle centered at $(x_0,z_0)$, where $s(t,x_0)=z_0$:
+   $$\Omega=[x_0-\delta,x_0+\delta] \times [z_0-\eps,z_0+\eps]$$
+\item let $M(t)$ be the mass of (constant-density) ice within $\Omega$ at time $t$:
+   $$M(t) = \int_\Omega \rhoi \mathbb{1}_{\{z<s(t,x)\}}\,dx\,dz = \rhoi \int_{x_0-\delta}^{x_0+\delta} s(t,x) - z_0 + \eps\,dx$$
+\item notation: $\bpsi =$ mass flux and $\hbn =$ unit outward normal on $\partial\Omega$
 \end{itemize}
 \end{frame}
 
@@ -533,26 +511,49 @@ FIXME
 \end{center}
 
 \begin{itemize}
+\item assumptions:
+    \begin{itemize}
+    \item[$\circ$] there is an interval of time $t$ so that $s(t,x)$ are well-defined functions of $x$ for which $z_0-\eps < s(t,x) < z_0 + \eps$
+    \item[$\circ$] the SMB $a(t,x)$ is a mass flux only across $\Gamma_t$: \hfill \emph{tentative}
+        \begin{itemize}
+        \item $\bpsi\big|_{\Gamma_t} = - \rho_i a(t,x) \hbz$  \comm{note $a>0$ is precipitation}
+        \end{itemize}
+    \item[$\circ$] $\bu(t,x,z)=(u,w)$ is the ice velocity defined on $\{z<s(t,x)\}$
+    \item[$\circ$] advective mass fluxes:
+        \begin{itemize}
+        \item $\bpsi\big|_{\Gamma_b} = \rho_i w(t,x,z_0-\eps) \hbz$
+        \item $\bpsi\big|_{\Gamma_{\{\ell,r\}}} = \begin{cases} \rho_i u(t,x_{\{\ell,r\}},z) \hbx, & \text{if } z < s(t,x_{\{\ell,r\}}), \\ \bzero, & \text{otherwise} \end{cases}$
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{extra: SKE from mass conservation 4}
+\begin{center}
+\includegraphics[width=0.3\textwidth]{skemassconservation.jpg}
+\end{center}
+
+\begin{itemize}
 \item mass is conserved (no sources):
 \begin{align*}
 \frac{dM}{dt} &= - \int_{\partial \Omega} \bpsi \cdot \hbn\,ds \\
-  &= - \underbrace{\rhoi \int_{x_0-\delta}^{x_0+\delta} a(t,x)\,dx}_{\Gamma_t} - \underbrace{\rhoi \int_{x_0-\delta}^{x_0+\delta} w(t,x,z_0-\eps)\,dx}_{\Gamma_b} \\
-  &\quad - \underbrace{\rhoi \int_{z_0-\eps}^{s(t,x_0-\delta)} u(t,x_0-\delta,z)\,dz}_{\Gamma_\ell} + \underbrace{\rhoi \int_{z_0-\eps}^{s(t,x_0+\delta)} u(t,x_0+\delta,z)\,dz}_{\Gamma_r}
+  &= \underbrace{\rhoi \int_{x_0-\delta}^{x_0+\delta} a(t,x)\,dx}_{\Gamma_t} + \underbrace{\rhoi \int_{x_0-\delta}^{x_0+\delta} w(t,x,z_0-\eps)\,dx}_{\Gamma_b} \\
+  &\quad + \underbrace{\rhoi \int_{z_0-\eps}^{s(t,x_0-\delta)} u(t,x_0-\delta,z)\,dz}_{\Gamma_\ell} - \underbrace{\rhoi \int_{z_0-\eps}^{s(t,x_0+\delta)} u(t,x_0+\delta,z)\,dz}_{\Gamma_r}
 \end{align*}
 
 \end{itemize}
 \end{frame}
 
-\begin{frame}{extra: SKE from mass conservation 4}
+\begin{frame}{extra: SKE from mass conservation 5}
 
 \begin{itemize}
 \item time derivative:
 \begin{align*}
 \frac{dM}{dt} &= \lim_{\omega\to 0} \frac{M(t+\omega) - M(t)}{\omega} \\
-    &= \lim_{\omega\to 0} \rhoi \int_\Omega \mathbb{1}_{\{z<s(t+\omega,x)\}} - \mathbb{1}_{\{z<s(t,x)\}}\,dx\,dz \\
-    &= \rho_i \int_{x_0-\delta}^{x_0+\delta} \frac{\partial s}{\partial t}(t,x)\,dx
+    &= \lim_{\omega\to 0} \frac{\rhoi}{\omega} \int_\Omega \mathbb{1}_{\{z<s(t+\omega,x)\}} - \mathbb{1}_{\{z<s(t,x)\}}\,dz\,dx \\
+    &= \lim_{\omega\to 0} \frac{\rhoi}{\omega} \int_{x_0-\delta}^{x_0+\delta} s(t+\omega,x) - s(t,x)\,dx = \rho_i \int_{x_0-\delta}^{x_0+\delta} \frac{\partial s}{\partial t}(t,x)\,dx
 \end{align*}
-\item Taylor expansions on $\Omega$:
+\item assume smoothness sufficient for Taylor expansions on $\Omega$:
 \begin{align*}
 a(t,x) &= a(t,x_0) + O(\delta) \\
 u(t,x,z) &= u(t,x_0,z_0) + O(\delta) + O(\eps) \\
@@ -562,10 +563,22 @@ w(t,x,z) &= w(t,x_0,z_0) + O(\delta) + O(\eps) \\
 \end{itemize}
 \end{frame}
 
-\begin{frame}{extra: SKE from mass conservation 5}
+\begin{frame}{extra: SKE from mass conservation 6}
 
 \begin{itemize}
-\item FIXME FINISH
+\item combine mass conservation, time derivative, and Taylor:
+\begin{align*}
+2\delta \rhoi \frac{\partial s}{\partial t}(t,x_0) + O(\delta^2) &= 2\delta \rhoi a(t,x_0) + O(\delta^2) \\
+  &\quad + 2\delta \rhoi w(t,x_0,z_0) + O(\delta^2) + O(\delta \eps) \\
+  &\quad - \rho_i u(t,x_0,z_0) \Big[s(t,x_0+\delta) - s(t,x_0-\delta)\Big] + O(\delta \eps)
+\end{align*}
+\item divide by $2\rhoi\delta$:
+\begin{align*}
+\frac{\partial s}{\partial t}(t,x_0) &= a(t,x_0) + w(t,x_0,z_0) - u(t,x_0,z_0) \frac{s(t,x_0+\delta) - s(t,x_0-\delta)}{2\delta} \\
+  &\quad  + O(\delta) + O(\eps)
+\end{align*}
+\item limit $\delta, \eps \to 0$ to get SKE at $(t,x_0,z_0) = (t,x_0,s(t,x_0))$:
+  $$\frac{\partial s}{\partial t} = a + w - u \frac{\partial s}{\partial x}$$
 \end{itemize}
 \end{frame}
 

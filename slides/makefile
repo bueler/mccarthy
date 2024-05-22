@@ -1,6 +1,6 @@
 all: slides.pdf
 
-slides.pdf:
+slides.pdf: slides.tex slides.bib
 	xelatex slides
 	bibtex slides
 	xelatex slides
