@@ -2,10 +2,11 @@
 Solves time-dependent and steady-state surface kinematical equation
 (SKE) models.  The surface mass balance a(x), horizontal velocity
 u(x), and vertical velocity w(x) are all assumed to be given and
-time-independent.  Runs of the models produce .png figures in the
-output/ directory.  A bed elevation b(x) is shown in these figures.
+time-independent.  (Of course this is unrealistic!)  Runs of the
+models produce .png figures in the output/ directory.  Note that a
+bed elevation b(x) is shown in these figures.
 
-Here is a convenient way to run and view (eog is a .png viewer):
+Convenient way to run and view (where "eog" is a .png viewer):
    $ rm -rf output/;  python3 surface.py;  eog output/
 
 Explore time-dependent runs using code modifications as follows:
@@ -75,6 +76,7 @@ def run_evolution():
         os.mkdir(outdir)
     except FileExistsError:
         pass
+    print(f'  writing {N} steps to image files {outdir}frameXXX.png')
     for k in range(N+1):
         plt.savefig(f'{outdir}frame{k:03d}.png')
         s = explicitstep(s, x, dt)
@@ -104,9 +106,10 @@ def run_steady():
         os.mkdir(outdir)
     except FileExistsError:
         pass
+    print(f'  writing to image file {outdir}steady.png')
     plt.savefig(f'{outdir}steady.png')
 
-print('steady state first ...')
+print('steady state mode ...')
 run_steady()
-print('evolution ...')
+print('evolution mode ...')
 run_evolution()
