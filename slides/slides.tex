@@ -1,5 +1,8 @@
 \documentclass[10pt]{beamer}
 
+\definecolor{links}{HTML}{2A1B81}
+\hypersetup{colorlinks,linkcolor=,urlcolor=links}
+
 \usetheme{metropolis}
 \usepackage{appendixnumberbeamer}
 
@@ -51,9 +54,45 @@
   \tableofcontents
 \end{frame}
 
-\section{\textbf{hour 1: what happens at the surface of a glacier?}}
+\begin{frame}{links}
 
-\subsection{basics}
+\begin{itemize}
+\item these are my ``new'' slides \dots let me know how it works?
+\item \alert{please ask questions at any time!}
+\end{itemize}
+
+\bigskip
+
+\metroset{block=fill}
+\begin{block}{online materials}
+
+all of my slides/notes/projects material is hosted at
+
+\medskip
+\centerline{\href{https://github.com/bueler/mccarthy}{\texttt{github.com/bueler/mccarthy}}}
+\end{block}
+
+\medskip
+{\footnotesize
+\alert{these slides:} {\footnotesize \href{https://github.com/bueler/mccarthy/blob/master/slides/slides-bueler-2024.pdf}{\texttt{mccarthy/blob/master/slides/slides-bueler-2024.pdf}}}
+
+old slides: {\footnotesize \href{https://github.com/bueler/mccarthy/blob/master/slides/slides-bueler-2022.pdf}{\texttt{mccarthy/blob/master/slides/slides-bueler-2022.pdf}}}
+
+notes: {\footnotesize \href{https://github.com/bueler/mccarthy/blob/master/notes/notes-bueler-2024.pdf}{\texttt{mccarthy/blob/master/notes/notes-bueler-2024.pdf}}}
+
+\alert{Python codes:} {\footnotesize \href{https://github.com/bueler/mccarthy/tree/master/py}{\texttt{mccarthy/tree/master/py/}}}
+
+old Matlab codes: {\footnotesize \href{https://github.com/bueler/mccarthy/tree/master/mfiles}{\texttt{mccarthy/tree/master/mfiles/}}}
+
+project codes: {\footnotesize \href{https://github.com/bueler/mccarthy/tree/master/stokes}{\texttt{mccarthy/tree/master/stokes/}}}
+
+}
+%\end{block}
+\end{frame}
+
+\section[what happens at the surface of a glacier?]{\textbf{what happens at the surface of a glacier?} (hour 1)}
+
+\subsection{basic mathematics}
 
 \begin{frame}{surface motion}
   \begin{center}
@@ -249,10 +288,9 @@ or show \textbf{bold} results.\end{verbatim}
 }
 
 
-\section{\textbf{hour 2: where does the velocity field come from?}}
+\section[where does the velocity field come from?]{\textbf{where does the velocity field come from?} (hour 2)}
 
-\subsection{basics}
-
+\subsection{basic mathematics}
 
 \begin{frame}{ice in glaciers is an atypical fluid}
 
@@ -471,8 +509,15 @@ FIXME
 
 \appendix
 
+\setbeamerfont{bibliography item}{size=\footnotesize}
+\setbeamerfont{bibliography entry author}{size=\footnotesize}
+\setbeamerfont{bibliography entry title}{size=\footnotesize}
+\setbeamerfont{bibliography entry location}{size=\footnotesize}
+\setbeamerfont{bibliography entry note}{size=\footnotesize}
+
 \begin{frame}[allowframebreaks]{References}
 \setbeamertemplate{bibliography item}[text]
+
   \bibliography{slides}
   \bibliographystyle{abbrv}
 \end{frame}
