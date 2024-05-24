@@ -1,10 +1,10 @@
-all: stokes.pdf
+all: doc.pdf
 
-stokes.pdf: stokes.tex stokes.bib
-	pdflatex stokes
-	bibtex stokes
-	pdflatex stokes
-	pdflatex stokes
+doc.pdf: doc.tex doc.bib
+	pdflatex doc
+	bibtex doc
+	pdflatex doc
+	pdflatex doc
 
 .PHONY: clean
 
