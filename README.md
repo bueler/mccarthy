@@ -1,3 +1,9 @@
+
+UNDER CONSTRUCTION!
+-------------------
+
+This content will be completely revised for the June 2024 school.  The current state is messy ...
+
 mccarthy
 ========
 
@@ -10,13 +16,6 @@ Download all materials using the [releases page](https://github.com/bueler/mccar
     git clone --depth=1 https://github.com/bueler/mccarthy.git
 
 The `depth` option reduces the download size by not getting the history.
-
-
-UNDER CONSTRUCTION!
--------------------
-
-This content will be completely revised for the June 2024 school.  The current state is messy ...
-
 
 slides and notes
 ----------------
