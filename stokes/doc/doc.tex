@@ -75,24 +75,23 @@ This document is an appendix to my notes for the International Summer School in 
 \item Paraview, a visualization tool \hfill \url{https://www.paraview.org/}
 \end{itemize}
 
+To start we state the Stokes continuum model for 2D ice flow, with glacier-suitable boundary conditions.  The slab-on-a-slope case has an exact solution, so we address that special case first.  (This special case is also used as a source of boundary conditions for other cases.)  We then derive the weak form of the Stokes problem and give a brief overview of finite element (FE) methods.  Our particular FE method uses an unstructured mesh of triangular elements, or an extruded mesh quadrilateral elements, to solve the Glen-Stokes problem by a stable ``mixed'' method with distinct approximating spaces for velocity and pressure.  Finally, we demonstrate numerical solutions and give a brief guide to usage.  The solver works for a variety of ice geometries, for example with a bedrock step as shown in Figure \ref{fig:glacier:bedstep}, which is the default case.
+
 \begin{figure}[h]
 \includegraphics[width=\textwidth,angle=-5.7296]{stepflowlin}  % 0.1 radian = 5.7296 degrees
 \caption{(FIXME: PUT NEW CODE RESULT)  A 2D glacier flowing over a bedrock step.  Arrows show velocity $\bu$ and shading is by pressure $p$.}
 \label{fig:glacier:bedstep}
 \end{figure}
 
-To start the presentation we state the Stokes model for 2D ice flow, with glacier-suitable boundary conditions, for example as in Figure \ref{fig:glacier:bedstep}.  The solver works for any reasonable ice geometry, for example with a bedrock step (rise) as shown.  However, because the slab-on-a-slope case has an exact solution, which is useful for understanding, verification purposes, and as a source of boundary conditions for other cases, we address that special case first.  We then derive the weak form of the Stokes problem and give a brief overview of finite element (FE) methods.  Our particular FE method uses an unstructured mesh of triangular or quadrilateral elements, optionally using an extruded mesh, to solve the Glen-Stokes problem by a stable ``mixed'' method with distinct approximating spaces for velocity and pressure.  Finally, we demonstrate numerical solutions and give a brief guide to usage.
-
-
 \section{Glen-Stokes model} \label{sec:stokes}
 
-Let us start from the Glen-Stokes model stated in the notes.  This model, also described in \cite{GreveBlatter2009,JouvetRappaz2011}, applies on any 2D or 3D domain $\Omega$ which has a piecewise smooth boundary.  Allowing any Glen exponent $n\ge 1$, the equations are:
+Let us start from the Glen-Stokes model for ice dynamics.  This model, also covered in \cite{GreveBlatter2009,JouvetRappaz2011}, applies on any 2D or 3D domain $\Omega$ which has a piecewise smooth boundary.  Allowing any Glen exponent $n\ge 1$, the equations are:
 \begin{align}
 - \nabla \cdot \tau + \nabla p &= \rho \bg &&\text{\emph{stress balance}} \label{forcebalance} \\
 \nabla \cdot \bu &= 0 &&\text{\emph{incompressibility}} \label{incompressible} \\
 D\bu &= A_n |\tau|^{n-1} \tau &&\text{\emph{Glen flow law}} \label{flowlaw}
 \end{align}
-The notation here generally follows the notes, including velocity $\bu$, pressure $p$, ice density $\rho$, acceleration of gravity $\bg$, deviatoric stress tensor $\tau$, strain rate tensor $D\bu$, and ice softness $A_n$.  A key idea is that tensors $D\bu$ and $\tau$ are symmetric (conservation of angular momentum) and have trace zero (incompressibility).  Note that $D\bu$ is the symmetric part of the tensor velocity derivative $\grad \bu$:
+The notation here generally follows my notes and slides, including velocity $\bu$, pressure $p$, ice density $\rho$, acceleration of gravity $\bg$, deviatoric stress tensor $\tau$, strain rate tensor $D\bu$, and ice softness $A_n$.  A key idea is that tensors $D\bu$ and $\tau$ are symmetric (conservation of angular momentum) and have trace zero (incompressibility).  Note that $D\bu$ is the symmetric part of the velocity derivative tensor $\grad \bu$:
 \begin{equation}
 (D\bu)_{ij} = \frac{1}{2} \left(\grad\bu + \grad\bu^\top\right) = \frac{1}{2} \left((u_i)_{x_j} + (u_j)_{x_i}\right) \label{strainrate}
 \end{equation}
@@ -100,7 +99,7 @@ The full (Cauchy) stress tensor $\sigma$ is the deviatoric stress tensor $\tau$ 
 \begin{equation}
     \sigma = \tau - p\,I,  \label{cauchystress}
 \end{equation}
-so equation \eqref{forcebalance} simply says $-\Div \sigma = \rho \bg$.  One may derive from \eqref{cauchystress} that $p = -\frac{1}{2} \trace(\sigma)$, in 2D anyway, thus the pressure is the negative of the average normal stress.  By definition $\Div\tau$ in \eqref{forcebalance} is a vector with components which are the divergences of the columns:
+so equation \eqref{forcebalance} simply says $-\Div \sigma = \rho \bg$.  One may derive from \eqref{cauchystress} that $p = -\frac{1}{2} \trace \sigma$ (in 2D), thus the pressure is the negative of the average normal stress.  By definition $\Div\tau$ in \eqref{forcebalance} is a vector with components which are the divergences of the columns:
 \begin{equation}
     \left(\nabla \cdot \tau\right)_i = \left(\tau_{1i}\right)_{x_1} + \left(\tau_{2i}\right)_{x_2}  \label{divtaudefn}
 \end{equation}
@@ -114,26 +113,25 @@ Here $B_n = (A_n)^{-1/n}$ is the ice hardness in units $\text{Pa}\,\text{s}^{1/n
 \begin{align*}
 |\tau|^2 = \frac{1}{2} \trace\left(\tau^2\right) = \frac{1}{2} \tau_{ij} \tau_{ij}, \qquad |D\bu|^2 = \frac{1}{2} \trace\left((D\bu)^2\right) = \frac{1}{2} (D\bu)_{ij} (D\bu)_{ij}
 \end{align*}
-
 Using \eqref{viscflowlaw} we can eliminate $\tau$ from equation \eqref{forcebalance}, thereby rewriting the system in terms of velocity $\bu$ and pressure $p$ only:
 \begin{align}
 - \nabla \cdot \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu\right) + \nabla p &= \rho \mathbf{g} \label{stokes} \\
 \Div \bu &= 0 \label{incompagain}
 \end{align}
-Also, from now on we denote the points of the 2D region $\Omega$ by $(x,z)$, and we add an angle parameter: gravity is at an angle $\alpha$ with the $z$-direction, so that $\bg = \left<g\sin\alpha,-g\cos\alpha\right>$ where $g>0$.  The numerical model in these notes solves system \eqref{stokes}, \eqref{incompagain} with a body force given by this $\rho \bg$.  A solution of the problem is a pair $(\bu,p)$.
+
+From now on we denote the points of the 2D region $\Omega$ by $(x,z)$, and we add an angle parameter: gravity is at an angle $\alpha$ with the $z$-direction, so that $\bg = \left<g\sin\alpha,-g\cos\alpha\right>$ where $g>0$.  The numerical model in these notes solves system \eqref{stokes}, \eqref{incompagain} with a body force given by this $\rho \bg$.  A solution of the problem is a pair $(\bu,p)$.
 
 Certain glacier-suitable velocity and stress boundary conditions will be used here.  We assume that base, top, inflow, and outflow boundaries can all be identified.  On the base we require no slip:
 \begin{align}
 \bu &= 0  &&\text{\emph{base}} \label{basebc} \\
-\intertext{(although this can be modified if the user desires).  On the top we set a condition of zero applied stress, $\sigma\hbn=0$:}
+\intertext{(Modifying this is not too difficult, and is an excellent exercise.)  On the top we set a condition of zero applied stress, $\sigma\hbn=0$:}
 \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= 0  &&\text{\emph{top}} \label{topbc} \\
 \intertext{The inflow boundary is the left side, which has outward normal $\hbn=\left<-1,0\right>$, and here we set a nonzero inflow velocity:}
 \bu &= \left<f(z),0\right>  &&\text{\emph{inflow}} \label{inflowbc} \\
-\intertext{The implemented function $f(z)$ satisfies the slab-on-slope equations for a given thickness $H_{\text{in}}$; see below.  On an outflow boundary, which is the right side and has $\hbn=\left<1,0\right>$ in the implemented form, we set a nonzero hydrostatic normal stress using the ice thickness $H_{\text{out}}$ at that location:}
-\left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= C_{\text{out}} \big<- \rho g \cos\alpha (H_{\text{out}}-z),  \notag && \\
-    &\qquad\qquad \rho g\sin\alpha (H_{\text{out}}-z)\big> && \text{\emph{outflow}} \label{outflowbc}
+\intertext{The implemented function $f(z)$ satisfies the slab-on-slope equations for a given thickness $H_{\text{in}}$; see below.  On the outflow boundary, which is the right side and has $\hbn=\left<1,0\right>$ in the implemented form, we set a nonzero hydrostatic normal stress using the ice thickness $H_{\text{out}}$ at that location:}
+\left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= \big<- \rho g \cos\alpha (H_{\text{out}}-z),  \notag && \\
+    &\qquad\quad \rho g\sin\alpha (H_{\text{out}}-z)\big> && \text{\emph{outflow}} \label{outflowbc}
 \end{align}
-The implemented constant $C_{\text{out}} $ is set so that the applied stress on the outflow equals what the applied stress on the inflow would be, thus $C_{\text{out}} = (H_{\text{in}}/H_{\text{out}})^2$.
 
 
 \section{Slab-on-slope solutions}  \label{sec:slab}
