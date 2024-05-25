@@ -78,15 +78,12 @@ class MomentumModel(OptionsManager):
         f_body = fd.Constant((rhog * np.sin(self.alpha), - rhog * np.cos(self.alpha)))
 
         if self.Hout >= 1.0:
-            # if there is an outflow boundary then it is Neumann
-            # and thus part of the weak form; here we apply nonhomogeneous:
-            # hydrostatic normal force equivalent to height=Hin slab,
-            # as though there was a down-stream glacier continuation
+            # if there is an outflow boundary then it is nonhomogeneous Neumann
+            # and part of the weak form; we apply hydrostatic normal force
             _,z = fd.SpatialCoordinate(mesh)
-            Cout = (self.Hin / self.Hout)**2
             outflow_sigma = fd.as_vector( \
-                [- Cout * rhog * np.cos(self.alpha) * (self.Hout - z),
-                Cout * rhog * np.sin(self.alpha) * (self.Hout - z)])
+                [- rhog * np.cos(self.alpha) * (self.Hout - z),
+                rhog * np.sin(self.alpha) * (self.Hout - z)])
 
         # create, use old, or prolong coarse solution as initial iterate
         if upold:
@@ -103,16 +100,12 @@ class MomentumModel(OptionsManager):
 
         # define the nonlinear weak form F(u,p;v,q)
         v,q = fd.TestFunctions(self._Z)
-        if self.n_glen == 1.0:  # Newtonian ice case
-            F = ( fd.inner(self._B3 * D(u), D(v)) - p * fd.div(v) - fd.div(u) * q \
-                  - fd.inner(f_body, v) ) * fd.dx
-        else:                   # (usual) non-Newtonian ice case
-            Du2 = 0.5 * fd.inner(D(u), D(u)) + (self.eps * self.Dtyp)**2.0
-            rr = 1.0/self.n_glen - 1.0
-            F = ( fd.inner(self._B3 * Du2**(rr/2.0) * D(u), D(v)) \
-                  - p * fd.div(v) - fd.div(u) * q - fd.inner(f_body, v) ) * fd.dx
+        Du2 = 0.5 * fd.inner(D(u), D(u)) + (self.eps * self.Dtyp)**2.0
+        rr = 1.0/self.n_glen - 1.0
+        F = ( fd.inner(self._B3 * Du2**(rr/2.0) * D(u), D(v)) \
+              - p * fd.div(v) - fd.div(u) * q - fd.inner(f_body, v) ) * fd.dx
         if self.Hout >= 1.0:
-            F = F - fd.inner(outflow_sigma, v) * fd.ds(bdryids['outflow'])
+            F -= fd.inner(outflow_sigma, v) * fd.ds(bdryids['outflow'])
 
         # Dirichlet boundary conditions
         noslip = fd.Constant((0.0, 0.0))
@@ -167,15 +160,11 @@ class MomentumModel(OptionsManager):
         P1 = fd.FunctionSpace(mesh, 'CG', 1)
         up_exact = fd.Function(self._Z)
         u_exact, p_exact = up_exact.subfunctions
-        inflow_u = self._get_uin(mesh)
-        u_exact.interpolate(inflow_u)
-        _,z = fd.SpatialCoordinate(mesh)
-        p_exact.interpolate(self._rho * self._g * np.cos(self.alpha) \
-                            * (self.Hin - z))
-        uerr = fd.Function(P1).interpolate(fd.sqrt(fd.dot(u_exact-self.u,u_exact-self.u)))
-        perr = fd.Function(self._W).interpolate(fd.sqrt(fd.dot(p_exact-self.p,p_exact-self.p)))
-        with uerr.dat.vec_ro as vuerr:
-            uerrmax = vuerr.max()[1]
-        with perr.dat.vec_ro as vperr:
-            perrmax = vperr.max()[1]
-        return uerrmax,perrmax
+        u_exact.interpolate(self._get_uin(mesh))
+        _, z = fd.SpatialCoordinate(mesh)
+        p_exact.interpolate(self._rho * self._g * np.cos(self.alpha) * (self.Hin - z))
+        uexactnorm = fd.norm(u_exact, norm_type='L2')
+        uerr = fd.errornorm(u_exact, self.u, norm_type='L2')
+        pexactnorm = fd.norm(p_exact, norm_type='L2')
+        perr = fd.errornorm(p_exact, self.p, norm_type='L2')
+        return uexactnorm, uerr, pexactnorm, perr
