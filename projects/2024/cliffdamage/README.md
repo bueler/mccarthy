@@ -2,7 +2,7 @@
 
 ## reassurance
 
-The point of the project is not to reach a particular destination!  It is to _help you learn fast from wherever you currently are_.  So please be honest with yourself about what you don't know, and please ask about it!  Another student may know more programming than you, or have seen more differential equations, or have more glaciers background, or data-manipulation skills, or whatever.  That is irrelevant to our goals.  We just want to help you move forward as far as possible in one intense week.  Forward progress must be from things _you_ understand into things _you_ do not yet understand!
+The point of the project is not to reach a particular destination.  It is to _help you learn fast from wherever you currently are_.  So please be honest with yourself about what you don't know, and please ask about it!  Another student may know more programming than you, or have seen more differential equations, or have more glaciers background, or better data manipulation skills, or whatever.  That is irrelevant to our goals.  We want to help you move forward as far as possible in one intense week.  Forward progress will be from things _you_ understand into things _you_ do not yet understand.
 
 ## description
 
