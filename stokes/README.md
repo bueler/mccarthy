@@ -26,7 +26,7 @@ They are documented by the current README and by `doc/doc.pdf` (also in this dir
     [Firedrake download page](https://www.firedrakeproject.org/download.html)
     to install Firedrake.
 
-#### Usage
+## Usage
 
 Activate your [Firedrake](https://www.firedrakeproject.org/) virtual environment (venv) first:
 
@@ -53,7 +53,7 @@ An alternate visualization plots surface values into an image file `surf.png`:
 
         (firedrake) $ ./flow.py -mesh glacier.msh -osurface surf.png
 
-## Slab-on-slope usage
+### Slab-on-slope usage
 
 Set the height of the bedrock step to zero when creating the domain geometry:
 
@@ -63,7 +63,7 @@ Set the height of the bedrock step to zero when creating the domain geometry:
 
 Here the numerical error is displayed because the exact solution is known.  See `doc/doc.pdf` for the slab-on-slope solution.
 
-## Mesh refinement
+### Mesh refinement
 
 The default mesh above (`glacier.msh`) has a typical mesh size of 80 m with grid resolution a factor of 4 finer near the interior corners created by the bedrock step, giving 20 m resolution at these corners.
 
@@ -96,7 +96,7 @@ There are four refinement methods to get finer resolution:
 
     This is slightly faster than methods 2 and 3, but the result should be the same.
 
-## Solver performance information
+### Solver performance information
 
 [Firedrake](https://www.firedrakeproject.org/) calls [PETSc](http://www.mcs.anl.gov/petsc/) to solve the Glen-Stokes equations.  Because this is a nonlinear problem, a PETSc [SNES solver object](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/SNES/index.html) does the Newton iterations.  This solver is addressed using option prefix `-s_`.
 
