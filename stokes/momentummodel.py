@@ -57,7 +57,7 @@ class MomentumModel(OptionsManager):
         self.Hout = kwargs.pop("Hout", 400.0)
 
     # compute slab-on-slope inflow velocity; note alpha = 0 ==> uin = 0
-    def _get_uin(self,mesh):
+    def _get_uin(self, mesh):
         _, z = fd.SpatialCoordinate(mesh)
         C = (2.0 / (self.n_glen + 1.0)) \
             * (self._rho * self._g * np.sin(self.alpha) / self._B3)**self.n_glen
@@ -71,7 +71,7 @@ class MomentumModel(OptionsManager):
         self._W = fd.FunctionSpace(mesh, 'CG', 1)
         self._Z = self._V * self._W
 
-    def solve(self, mesh, bdryids, package = 'SchurDirect',
+    def solve(self, mesh, bdryids, extrudemode = False, package = 'SchurDirect',
               upold = None, upcoarse = None):
         # define body force and ice hardness
         rhog = self._rho * self._g
@@ -105,7 +105,11 @@ class MomentumModel(OptionsManager):
         F = ( fd.inner(self._B3 * Du2**(rr/2.0) * D(u), D(v)) \
               - p * fd.div(v) - fd.div(u) * q - fd.inner(f_body, v) ) * fd.dx(degree=4)
         if self.Hout >= 1.0:
-            F -= fd.inner(outflow_sigma, v) * fd.ds(bdryids['outflow'])
+            if extrudemode:
+                # see bottom page https://www.firedrakeproject.org/extruded-meshes.html
+                F -= fd.inner(outflow_sigma, v) * fd.ds_v(bdryids['outflow'])
+            else:
+                F -= fd.inner(outflow_sigma, v) * fd.ds(bdryids['outflow'])
 
         # Dirichlet boundary conditions
         noslip = fd.Constant((0.0, 0.0))
