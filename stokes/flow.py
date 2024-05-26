@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # (C) 2018--2024 Ed Bueler
 
-# Solves glacier Glen-Stokes problem.  See README.md for usage.
-# Documented by doc/doc.pdf.
+# Solves glacier Glen-Stokes problems.  See README.md for usage.
+# The mathematics and finite element method are documented in doc.pdf.
 
 # process options
 packagechoices = ['SchurDirect','Direct']

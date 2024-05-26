@@ -16,7 +16,7 @@ The Python programs in this directory use advanced, open-source libraries and to
   * [Gmsh](http://gmsh.info/), a mesher
   * [Paraview](https://www.paraview.org/), for visualization of mesh functions
 
-They are documented by the current README and by `doc/doc.pdf` (also in this directory).
+They are documented by the current README and by `doc.pdf` (also in this directory).
 
 ## Installation
 
@@ -53,7 +53,7 @@ An alternate visualization plots surface values into an image file `surf.png`:
 
         (firedrake) $ ./flow.py -mesh glacier.msh -osurface surf.png
 
-### Slab-on-slope usage
+### Slab-on-slope
 
 Set the height of the bedrock step to zero when creating the domain geometry:
 
@@ -61,7 +61,7 @@ Set the height of the bedrock step to zero when creating the domain geometry:
         (firedrake) $ gmsh -2 slab.geo
         (firedrake) $ ./flow.py -slab -mesh slab.msh
 
-Here the numerical error is displayed because the exact solution is known.  See `doc/doc.pdf` for the slab-on-slope solution.
+Here the numerical error is displayed because the exact solution is known.  See `doc.pdf` for the slab-on-slope solution.
 
 ### Mesh refinement
 
@@ -119,13 +119,13 @@ For more on [Firedrake](https://www.firedrakeproject.org/) and [PETSc](http://ww
 There are several ways to get help:
 
   * `./flow.py -flowhelp` shows options specific to `flow.py` itself
-  * `./flow.py -mesh glacier.msh -help` lists a large number of PETSc options
-  * `./flow.py -mesh glacier.msh -help intro` shows the PETSc version number
+  * `./flow.py -help intro` shows PETSc version information
+  * `./flow.py -mesh glacier.msh -help` lists a large number of PETSc solver options
 
-Note that in the latter two usages the `-mesh` option is required in order to advance the program state until a point where a PETSc solver exists.
+The latter form has the `-mesh` option so that the program proceeds to where a PETSc solver exists.
 
 ## Testing
 
-Do this in the current directory (`mccarthy/stokes/`):
+Do this:
 
         $ pytest .
