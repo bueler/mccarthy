@@ -2,10 +2,6 @@
 
 Copyright 2018--2024 Ed Bueler
 
-## TODO
-
-  * add pytest tests
-
 ## Introduction
 
 The Python programs in this directory use advanced, open-source libraries and tools:

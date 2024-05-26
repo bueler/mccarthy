@@ -1,10 +1,10 @@
 /*.m
 __pycache__/
 tmptest/
-*.geo
-*.msh
-*.png
-*.vtu
-*.pvtu
-*.pvd
-*.pvsm
+/*.geo
+/*.msh
+/*.png
+/*.vtu
+/*.pvtu
+/*.pvd
+/*.pvsm
