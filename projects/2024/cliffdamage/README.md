@@ -26,7 +26,5 @@ Now go to the `stokes/` directory and try all the steps documented in `stokes/RE
 
 As a second step, collect and browse the following documents.  I will provide these on paper in McCarthy, but they are also available electronically:
 
-  * `stokes/doc/stokes.pdf`:  This can be built using LaTeX.  It documents how the Firedrake Stokes solver works.
+  * `stokes/doc.pdf`:  This documents how the Firedrake Stokes solver works.  It can be built in `doc/` using LaTeX.
   * `projects/2024/cliffdamage/PralongFunkLuthi2003.pdf`:  This paper contains some key ideas relating the stresses which are modeled in a Stokes solver to the evolution of damage.  We will start with a focus on formula (8), but you should read from the beginning.
-
-My suggested goal of this project is to **FIXME**

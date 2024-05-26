@@ -24,9 +24,7 @@ As the first step, if you have not done it already, please clone my whole [McCar
 
 Now go to the `stokes/` directory and try all the steps documented in `stokes/README.md`.  You will learn how to use my Firedrake-based Python Stokes solver, with pre- and post-processing using Gmsh and Paraview.  Some of these "first step" steps may involve some learning, in which case the project has already been worthwhile!
 
-FIXME As a second step, collect and browse the following documents.  I will provide these on paper in McCarthy, but they are also available electronically:
+As a second step, collect and browse the following documents.  I will provide these on paper in McCarthy, but they are also available electronically:
 
-  * `stokes/doc/stokes.pdf`:  This can be built using LaTeX.  It documents how the Firedrake Stokes solver works.
+  * `stokes/doc.pdf`:  This documents how the Firedrake Stokes solver works.  It can be built in `doc/` using LaTeX.
   * `projects/2024/wavedrag/Schoof2003`:  This paper contains FIXME
-
-My suggested goal of this project is to **FIXME**
