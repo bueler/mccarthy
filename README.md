@@ -27,7 +27,7 @@ The older material is in PDF notes [notes/notes-2024.pdf](notes/notes-2024.pdf),
 Python programs
 ---------------
 
-The codes in subdirectory [py/](py/) solve surface kinematic equation and Stokes problems.  For now the [new slides](slides/slides-2024.pdf) are the documentation, along with line comments.
+The codes in subdirectory [py/](py/) solve surface kinematic equation and Stokes problems.  For now the [new slides](slides/slides-2024.pdf) are the documentation, along with line comments in the `.py` source codes.
 
 Matlab/Octave programs (deprecated)
 -----------------------------------
@@ -43,4 +43,4 @@ The Python tools in [stokes/](stokes/) are primarily for projects.  They solve a
 ancient versions
 ----------------
 
-Much older versions (2009, 2010, 2012, 2014) lived in the repo https://github.com/bueler/karthaus
+Older versions (2009, 2010, 2012, 2014) of this material lived in the repo https://github.com/bueler/karthaus
