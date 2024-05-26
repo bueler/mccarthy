@@ -121,6 +121,6 @@ The latter form has the `-mesh` option so that the program proceeds to where a P
 
 ## Testing
 
-Do this:
+Activate your [Firedrake](https://www.firedrakeproject.org/) venv, as above, and then do:
 
         $ pytest .
