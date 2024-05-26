@@ -5,7 +5,6 @@ Copyright 2018--2024 Ed Bueler
 ## TODO
 
   * add pytest tests
-  * compare, and avoid unnecessary duplication with, [stokes-ice-tutorial](https://github.com/bueler/stokes-ice-tutorial)
 
 ## Introduction
 
