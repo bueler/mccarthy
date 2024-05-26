@@ -58,7 +58,7 @@ class MomentumModel(OptionsManager):
 
     # compute slab-on-slope inflow velocity; note alpha = 0 ==> uin = 0
     def _get_uin(self,mesh):
-        _,z = fd.SpatialCoordinate(mesh)
+        _, z = fd.SpatialCoordinate(mesh)
         C = (2.0 / (self.n_glen + 1.0)) \
             * (self._rho * self._g * np.sin(self.alpha) / self._B3)**self.n_glen
         uin = fd.as_vector([C * (self.Hin**(self.n_glen+1.0) \
@@ -80,7 +80,7 @@ class MomentumModel(OptionsManager):
         if self.Hout >= 1.0:
             # if there is an outflow boundary then it is nonhomogeneous Neumann
             # and part of the weak form; we apply hydrostatic normal force
-            _,z = fd.SpatialCoordinate(mesh)
+            _, z = fd.SpatialCoordinate(mesh)
             outflow_sigma = fd.as_vector( \
                 [- rhog * np.cos(self.alpha) * (self.Hout - z),
                 rhog * np.sin(self.alpha) * (self.Hout - z)])
@@ -99,11 +99,11 @@ class MomentumModel(OptionsManager):
         self.p.rename('pressure')
 
         # define the nonlinear weak form F(u,p;v,q)
-        v,q = fd.TestFunctions(self._Z)
+        v, q = fd.TestFunctions(self._Z)
         Du2 = 0.5 * fd.inner(D(u), D(u)) + (self.eps * self.Dtyp)**2.0
         rr = 1.0/self.n_glen - 1.0
         F = ( fd.inner(self._B3 * Du2**(rr/2.0) * D(u), D(v)) \
-              - p * fd.div(v) - fd.div(u) * q - fd.inner(f_body, v) ) * fd.dx
+              - p * fd.div(v) - fd.div(u) * q - fd.inner(f_body, v) ) * fd.dx(degree=4)
         if self.Hout >= 1.0:
             F -= fd.inner(outflow_sigma, v) * fd.ds(bdryids['outflow'])
 
