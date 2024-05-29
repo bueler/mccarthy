@@ -44,7 +44,7 @@
 \titlegraphic{\vspace{-1cm}\par\hspace{-1cm}\includegraphics[width=1.5\textwidth]{polaris-overexposed.png}}
 
 \begin{document}
-\graphicspath{{../figures/}}
+\graphicspath{{figs/}{../figures/}}
 
 \maketitle
 
@@ -152,6 +152,8 @@ the surface moves up and down according to
 \end{frame}
 
 \subsection{numerics}
+
+
 
 \begin{frame}[fragile]{Typography}
       \begin{verbatim}The theme provides sensible defaults to
@@ -529,45 +531,61 @@ FIXME
 
 \subsection[]{extra slides}
 
-\begin{frame}{extra: SKE from mass conservation}
+
+\begin{frame}[standout]
+Extra Slides
+
+\begin{itemize}
+\item 1. derive SKE from mass conservation
+%\item 2. something
+\end{itemize}
+\end{frame}
+
+\begin{frame}{SKE from mass conservation}
 \begin{center}
-\includegraphics[width=0.5\textwidth]{skemassconservation.jpg} FIXME REPLACE!
+\includegraphics[width=0.65\textwidth]{skederive.png}
 \end{center}
 
 \begin{itemize}
 \item these extra slides derive the surface kinematical equation (SKE) from mass conservation applied over a rectangle
-\item contrast this derivation with those in textbooks \cite{GreveBlatter2009,vanderVeen2013}
+\item contrast with standard (dismissive!) derivations \cite{GreveBlatter2009,SchoofHewitt2013}
 \end{itemize}
 \end{frame}
 
-\begin{frame}{extra: SKE from mass conservation 2}
+\begin{frame}{SKE from mass conservation 2}
 \begin{center}
-\includegraphics[width=0.3\textwidth]{skemassconservation.jpg}
+\includegraphics[width=0.4\textwidth]{skederive.png}
 \end{center}
 
 \begin{itemize}
-\item $\Omega = $ rectangle centered at $(x_0,z_0)$, where $s(t,x_0)=z_0$:
-   $$\Omega=[x_0-\delta,x_0+\delta] \times [z_0-\eps,z_0+\eps]$$
+\item $\Omega = (\text{rectangle centered at} (x_0,z_0)) =[x_0-\delta,x_0+\delta] \times [z_0-\eps,z_0+\eps]$
+
+    \begin{itemize}
+    \item[$\circ$] where $s(t_0,x_0)=z_0$
+    \end{itemize}
 \item let $M(t)$ be the mass of (constant-density) ice within $\Omega$ at time $t$:
    $$M(t) = \int_\Omega \rhoi \mathbb{1}_{\{z<s(t,x)\}}\,dx\,dz = \rhoi \int_{x_0-\delta}^{x_0+\delta} s(t,x) - z_0 + \eps\,dx$$
-\item notation: $\bpsi =$ mass flux and $\hbn =$ unit outward normal on $\partial\Omega$
+\item notation: $\bpsi =$ mass flux, $\hbn =$ outward unit normal
 \end{itemize}
 \end{frame}
 
-\begin{frame}{extra: SKE from mass conservation 3}
+\begin{frame}{SKE from mass conservation 3}
 \begin{center}
-\includegraphics[width=0.3\textwidth]{skemassconservation.jpg}
+\includegraphics[width=0.4\textwidth]{skederive.png}
 \end{center}
+
+\vspace{-3mm}
 
 \begin{itemize}
 \item assumptions:
     \begin{itemize}
-    \item[$\circ$] there is an interval of time $t$ so that $s(t,x)$ are well-defined functions of $x$ for which $z_0-\eps < s(t,x) < z_0 + \eps$
-    \item[$\circ$] the SMB $a(t,x)$ is a mass flux only across $\Gamma_t$: \hfill \emph{tentative}
+    \item[$\circ$] there is an interval of time $t$ so that \,$z_0-\eps < s(t,x) < z_0 + \eps$
+    \item[$\circ$] ice has constant density $\rhoi$
+    \item[$\circ$] the SMB $a(t,x)$ is a mass flux only across $\Gamma_t$:
         \begin{itemize}
         \item $\bpsi\big|_{\Gamma_t} = - \rho_i a(t,x) \hbz$  \comm{note $a>0$ is precipitation}
         \end{itemize}
-    \item[$\circ$] $\bu(t,x,z)=(u,w)$ is the ice velocity defined on $\{z<s(t,x)\}$
+    \item[$\circ$] $\bu(t,x,z)=(u,w)$ is the ice velocity \comm{defined on $\{z<s(t,x)\}$}
     \item[$\circ$] advective mass fluxes:
         \begin{itemize}
         \item $\bpsi\big|_{\Gamma_b} = \rho_i w(t,x,z_0-\eps) \hbz$
@@ -577,10 +595,7 @@ FIXME
 \end{itemize}
 \end{frame}
 
-\begin{frame}{extra: SKE from mass conservation 4}
-\begin{center}
-\includegraphics[width=0.3\textwidth]{skemassconservation.jpg}
-\end{center}
+\begin{frame}{SKE from mass conservation 4}
 
 \begin{itemize}
 \item mass is conserved (no sources):
@@ -593,7 +608,7 @@ FIXME
 \end{itemize}
 \end{frame}
 
-\begin{frame}{extra: SKE from mass conservation 5}
+\begin{frame}{SKE from mass conservation 5}
 
 \begin{itemize}
 \item time derivative:
@@ -612,7 +627,7 @@ w(t,x,z) &= w(t,x_0,z_0) + O(\delta) + O(\eps) \\
 \end{itemize}
 \end{frame}
 
-\begin{frame}{extra: SKE from mass conservation 6}
+\begin{frame}{SKE from mass conservation 6}
 
 \begin{itemize}
 \item combine mass conservation, time derivative, and Taylor:
