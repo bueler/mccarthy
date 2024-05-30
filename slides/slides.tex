@@ -57,7 +57,7 @@
 \begin{frame}{online materials}
 
 \begin{itemize}
-\item these are my ``new'' slides \dots\xspace let me know how it works?
+\item these are my ``new'' slides \dots\xspace please let me know how it works?
 \item in any case, \alert{please ask questions at any time!}
 \end{itemize}
 
@@ -91,7 +91,7 @@ project codes: {\footnotesize \href{https://github.com/bueler/mccarthy/tree/mast
 %\end{block}
 \end{frame}
 
-\section[what happens at the surface of a glacier?]{\textbf{what happens at the surface of a glacier?} (hour 1)}
+\section[how does the surface of a glacier move?]{\textbf{how does the surface of a glacier move?} (hour 1)}
 
 \subsection{basic mathematics}
 
@@ -110,16 +110,26 @@ project codes: {\footnotesize \href{https://github.com/bueler/mccarthy/tree/mast
 
 \begin{frame}{surface motion: notation}
 \begin{center}
-\includegraphics[width=0.5\textwidth]{boatplus}
+\begin{tikzpicture}[scale=1.2]
+\node[inner sep=0pt] (domain) at (0,0)
+    {\includegraphics[width=0.72\textwidth]{domain}};
+\node (a) at (-2.5,0.8) {$a(t,x)$};
+\node (b) at (1.5,-1.0) {$b(x)$};
+\node (s) at (-1.6,0.0) {$s(t,x)$};
+\node (u) at (0.0,-0.5) {$\bu(t,x,z)$};
+\end{tikzpicture}
 \end{center}
 
-\vspace{-5mm}
+\vspace{-3mm}
 \begin{itemize}
 \item two spatial dimensions $x,z$ \hfill \emph{\dots\, at least for a while}
 \item $z = b(x)$: (fixed) bed elevation (m)
-\item {\color{NavyBlue} $z = s(t,x)$}: ice surface elevation (m)
-\item {\color{NavyBlue} $\bu(t,x)=(u(t,x),w(t,x))$}: ice velocity ($\text{m}\,\text{s}^{-1}$)
-\item {\color{Orange} $a(t,x)$}: surface mass balance in ice-equivalent units ($\text{m}\,\text{s}^{-1}$)
+\item $z = s(t,x)$: ice surface elevation (m)
+\item $\bu(t,x,z)=(u,w)$: ice velocity ($\text{m}\,\text{s}^{-1}$)
+\item $a(t,x)$: surface mass balance in ice-equivalent units ($\text{m}\,\text{s}^{-1}$)
+%\item {\color{NavyBlue} $z = s(t,x)$}: ice surface elevation (m)
+%\item {\color{NavyBlue} $\bu(t,x,z)=(u,w)$}: ice velocity ($\text{m}\,\text{s}^{-1}$)
+%\item {\color{Orange} $a(t,x)$}: surface mass balance in ice-equivalent units ($\text{m}\,\text{s}^{-1}$)
 \end{itemize}
 \end{frame}
 
