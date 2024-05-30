@@ -122,8 +122,8 @@ project codes: {\footnotesize \href{https://github.com/bueler/mccarthy/tree/mast
 
 \vspace{-3mm}
 \begin{itemize}
-\item two spatial dimensions $x,z$ \hfill \emph{\dots\, at least for a while}
-\item $z = b(x)$: (fixed) bed elevation (m)
+\item two spatial dimensions $x,z$ \comm{\dots\, at least for a while}
+\item $z = b(x)$: bed elevation (m) \comm{fixed}
 \item $z = s(t,x)$: ice surface elevation (m)
 \item $\bu(t,x,z)=(u,w)$: ice velocity ($\text{m}\,\text{s}^{-1}$)
 \item $a(t,x)$: surface mass balance in ice-equivalent units ($\text{m}\,\text{s}^{-1}$)
@@ -146,8 +146,8 @@ project codes: {\footnotesize \href{https://github.com/bueler/mccarthy/tree/mast
 the surface moves up and down according to
 \begin{itemize}
 \item<2-4> surface mass balance
-\item<3-4> vertical ice velocity
-\item<4> horizontal ice velocity
+\item<3-4> vertical component of ice velocity
+\item<4> horizontal component of ice velocity \emph{and surface slope}
 \end{itemize}
 \end{frame}
 
@@ -162,9 +162,9 @@ the surface moves up and down according to
 \end{equation*}
 
 \begin{itemize}
-\item $\bu=(u,w)$ is the ice velocity
 \item $\bn_s$ is a vector which points upward and is normal (perpendicular) to the ice surface:
 	$$\bn_s = \left(-\frac{\partial s}{\partial x}, \,1\right)$$
+\item $\bu=(u,w)$
 \end{itemize}
 \end{frame}
 
