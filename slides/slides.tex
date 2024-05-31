@@ -604,14 +604,15 @@ Extra Slides
 \begin{itemize}
 \item assumptions:
     \begin{itemize}
+    \item[$\circ$] there are no mass sources within $\Omega$
     \item[$\circ$] there is an interval of time $t$ so that \,$z_0-\eps < s(t,x) < z_0 + \eps$
-    \item[$\circ$] ice has constant density $\rhoi$
+    %\item[$\circ$] ice has constant density $\rhoi$
+    \item[$\circ$] the ice velocity $\bu(t,x,z)=(u,w)$ is defined on $\{z<s(t,x)\}$
     \item[$\circ$] the SMB $a(t,x)$ is a mass flux only across $\Gamma_t$:
         \begin{itemize}
         \item $\bpsi\big|_{\Gamma_t} = - \rho_i a(t,x) \hbz$  \comm{note $a>0$ is precipitation}
         \end{itemize}
-    \item[$\circ$] $\bu(t,x,z)=(u,w)$ is the ice velocity \comm{defined on $\{z<s(t,x)\}$}
-    \item[$\circ$] advective mass fluxes:
+    \item[$\circ$] the other mass fluxes are advective:
         \begin{itemize}
         \item $\bpsi\big|_{\Gamma_b} = \rho_i w(t,x,z_0-\eps) \hbz$
         \item $\bpsi\big|_{\Gamma_{\{\ell,r\}}} = \begin{cases} \rho_i u(t,x_{\{\ell,r\}},z) \hbx, & \text{if } z < s(t,x_{\{\ell,r\}}), \\ \bzero, & \text{otherwise} \end{cases}$
@@ -623,7 +624,7 @@ Extra Slides
 \begin{frame}{SKE from mass conservation 4}
 
 \begin{itemize}
-\item mass is conserved (no sources):
+\item mass is conserved:
 \begin{align*}
 \frac{dM}{dt} &= - \int_{\partial \Omega} \bpsi \cdot \hbn\,ds \\
   &= \underbrace{\rhoi \int_{x_0-\delta}^{x_0+\delta} a(t,x)\,dx}_{\Gamma_t} + \underbrace{\rhoi \int_{x_0-\delta}^{x_0+\delta} w(t,x,z_0-\eps)\,dx}_{\Gamma_b} \\
@@ -640,7 +641,8 @@ Extra Slides
 \begin{align*}
 \frac{dM}{dt} &= \lim_{\omega\to 0} \frac{M(t+\omega) - M(t)}{\omega} \\
     &= \lim_{\omega\to 0} \frac{\rhoi}{\omega} \int_\Omega \mathbb{1}_{\{z<s(t+\omega,x)\}} - \mathbb{1}_{\{z<s(t,x)\}}\,dz\,dx \\
-    &= \lim_{\omega\to 0} \frac{\rhoi}{\omega} \int_{x_0-\delta}^{x_0+\delta} s(t+\omega,x) - s(t,x)\,dx = \rho_i \int_{x_0-\delta}^{x_0+\delta} \frac{\partial s}{\partial t}(t,x)\,dx
+    &= \lim_{\omega\to 0} \frac{\rhoi}{\omega} \int_{x_0-\delta}^{x_0+\delta} s(t+\omega,x) - s(t,x)\,dx \\
+    &= \rho_i \int_{x_0-\delta}^{x_0+\delta} \frac{\partial s}{\partial t}(t,x)\,dx
 \end{align*}
 \item assume smoothness sufficient for Taylor expansions on $\Omega$:
 \begin{align*}
