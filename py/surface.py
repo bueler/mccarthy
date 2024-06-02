@@ -2,7 +2,7 @@
 Solves time-dependent and steady-state surface kinematical equation
 (SKE) models.  The surface mass balance a(x), horizontal velocity
 u(x), and vertical velocity w(x) are all assumed to be given and
-time-independent.  (Of course this is unrealistic!)  Runs of the
+time-independent.  (This is not realistic!)  Runs of the
 models produce .png figures in the output/ directory.  Note that a
 bed elevation b(x) is shown in these figures.
 
@@ -109,7 +109,7 @@ def run_steady():
     print(f'  writing to image file {outdir}steady.png')
     plt.savefig(f'{outdir}steady.png')
 
-print('steady state mode ...')
-run_steady()
 print('evolution mode ...')
 run_evolution()
+print('steady state mode ...')
+run_steady()
