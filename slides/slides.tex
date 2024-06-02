@@ -15,6 +15,36 @@
 \usepackage{xspace}
 \newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
 
+% for python listings; inspired by https://gist.github.com/YidongQIN/a10dd4f72381362aff4257e7a5541d86 
+\usepackage{listings}
+\usepackage{color}
+\definecolor{darkred}{rgb}{0.6,0.0,0.0}
+\definecolor{darkgreen}{rgb}{0,0.50,0}
+\definecolor{lightblue}{rgb}{0.0,0.42,0.91}
+\definecolor{orange}{rgb}{0.99,0.48,0.13}
+\definecolor{grass}{rgb}{0.18,0.80,0.18}
+\definecolor{pink}{rgb}{0.97,0.15,0.45}
+\lstdefinelanguage{PythonPlus}[]{Python}{
+  morekeywords=[1]{,as,assert,nonlocal,with,yield,self,True,False,None,} % Python builtin
+  morekeywords=[2]{,__init__,__add__,__mul__,__div__,__sub__,__call__,__getitem__,__setitem__,__eq__,__ne__,__nonzero__,__rmul__,__radd__,__repr__,__str__,__get__,__truediv__,__pow__,__name__,__future__,__all__,}, % magic methods
+  morekeywords=[3]{,object,type,isinstance,copy,deepcopy,zip,enumerate,reversed,list,set,len,dict,tuple,range,xrange,append,execfile,real,imag,reduce,str,repr,}, % common functions
+  morekeywords=[4]{,Exception,NameError,IndexError,SyntaxError,TypeError,ValueError,OverflowError,ZeroDivisionError,}, % errors
+  morekeywords=[5]{,ode,fsolve,sqrt,exp,sin,cos,arctan,arctan2,arccos,pi, array,norm,solve,dot,arange,isscalar,max,sum,flatten,shape,reshape,find,any,all,abs,plot,linspace,legend,quad,polyval,polyfit,hstack,concatenate,vstack,column_stack,empty,zeros,ones,rand,vander,grid,pcolor,eig,eigs,eigvals,svd,qr,tan,det,logspace,roll,min,mean,cumsum,cumprod,diff,vectorize,lstsq,cla,eye,xlabel,ylabel,squeeze,}, % numpy / math
+}
+\lstdefinestyle{colorEX}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{white},
+  commentstyle=\color{darkgreen}\slshape,
+  keywordstyle=\color{blue}\bfseries\itshape,
+  keywordstyle=[2]\color{blue}\bfseries,
+  keywordstyle=[3]\color{grass},
+  keywordstyle=[4]\color{red},
+  keywordstyle=[5]\color{orange},
+  stringstyle=\color{darkred},
+  emphstyle=\color{pink}\underbar,
+}
+\lstset{style=colorEX}
+
 \newcommand{\bn}{\mathbf{n}}
 \newcommand{\bq}{\mathbf{q}}
 \newcommand{\bu}{\mathbf{u}}
@@ -33,6 +63,7 @@
 \newcommand{\Div}{\nabla\cdot}
 
 \newcommand{\rhoi}{\rho_{\text{i}}}
+\newcommand{\snew}{s^{\text{new}}}
 
 \newcommand{\comm}[1]{{\footnotesize \hfill \emph{#1}}}
 
@@ -40,7 +71,7 @@
 %\subtitle{A modern beamer theme}
 \date{June 2024}
 \author{Ed Bueler}
-\institute{the Hardware Store at McCarthy}
+\institute{Porphyry Place, McCarthy, Alaska}
 \titlegraphic{\vspace{-1cm}\par\hspace{-1cm}\includegraphics[width=1.5\textwidth]{polaris-overexposed.png}}
 
 \begin{document}
@@ -57,7 +88,7 @@
 \begin{frame}{online materials}
 
 \begin{itemize}
-\item these are my ``new'' slides \dots\xspace please let me know how it works?
+\item these are my \alert{new slides} \dots\xspace please let me know how it works?
 \item in any case, \alert{please ask questions at any time!}
 \end{itemize}
 
@@ -74,11 +105,11 @@ my slides/notes/projects materials are hosted at
 
 \medskip
 {\footnotesize
-\alert{these slides:} {\footnotesize \href{https://github.com/bueler/mccarthy/blob/master/slides/slides-2024.pdf}{\texttt{mccarthy/blob/master/slides/slides-2024.pdf}}}
+these slides: {\footnotesize \href{https://github.com/bueler/mccarthy/blob/master/slides/slides-2024.pdf}{\texttt{mccarthy/blob/master/slides/slides-2024.pdf}}}
 
 notes: {\footnotesize \href{https://github.com/bueler/mccarthy/blob/master/notes/notes-2024.pdf}{\texttt{mccarthy/blob/master/notes/notes-2024.pdf}}}
 
-\alert{Python codes:} {\footnotesize \href{https://github.com/bueler/mccarthy/tree/master/py}{\texttt{mccarthy/tree/master/py/}}}
+Python codes: {\footnotesize \href{https://github.com/bueler/mccarthy/tree/master/py}{\texttt{mccarthy/tree/master/py/}}}
 
 project codes: {\footnotesize \href{https://github.com/bueler/mccarthy/tree/master/stokes}{\texttt{mccarthy/tree/master/stokes/}}}
 
@@ -143,7 +174,7 @@ project codes: {\footnotesize \href{https://github.com/bueler/mccarthy/tree/mast
 \frac{\partial s}{\partial t} = \uncover<2-4>{a} \uncover<3-4>{+w} \uncover<4>{-u \frac{\partial s}{\partial x}}
 \end{equation*}
 
-the surface moves up and down according to
+the ice surface moves up and down according to
 \begin{itemize}
 \item<2-4> surface mass balance
 \item<3-4> vertical component of ice velocity
@@ -164,7 +195,31 @@ the surface moves up and down according to
 \begin{itemize}
 \item $\bn_s$ is a vector which points upward and is normal (perpendicular) to the ice surface:
 	$$\bn_s = \left(-\frac{\partial s}{\partial x}, \,1\right)$$
-\item $\bu=(u,w)$
+\item recall $\bu=(u,w)$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{plan for hour 1: numerical glacier shape modeling using SKE}
+
+\begin{itemize}
+\item \alert{model:} the surface kinematical equation (SKE)
+\begin{equation*}
+\frac{\partial s}{\partial t} = a + \bu \cdot \bn_s \qquad \iff \qquad \frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w
+\end{equation*}
+\item \alert{numerical goal:} use a computer program to track of the surface of the glacier $z=s(t,x)$ under some assumptions
+    \begin{itemize}
+    \item[$\circ$] grid of points $\{x_j\}$
+    \item[$\circ$] unknowns are the surface elevations on the grid $s_j(t) \approx s(t,x_j)$
+    \item[$\circ$] assume $a,u,w$ are given functions/values \uncover<2>{\hfill \alert{$\leftarrow$ this is crazy!}}
+    \item[$\circ$] short Python program
+    \end{itemize}
+\item \alert{problems and issues:}
+     \begin{enumerate}
+     \item time-dependent solutions?
+     \item steady state solutions?
+     \item accuracy and stability?
+     \item practical: implementation, debugging, visualization?
+     \end{enumerate}
 \end{itemize}
 \end{frame}
 
@@ -172,151 +227,104 @@ the surface moves up and down according to
 \begin{frame}[standout]
 the central object of glacier theory is the
 
-surface kinematical equation (SKE)
+surface kinematical equation
+
+\begin{equation*}
+\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w
+\end{equation*}
 \end{frame}
 
 
 \subsection{numerics}
 
 
+\begin{frame}{discretize the SKE 1}
 
-\begin{frame}[fragile]{Typography}
-      \begin{verbatim}The theme provides sensible defaults to
-\emph{emphasize} text, \alert{accent} parts
-or show \textbf{bold} results.\end{verbatim}
-
-  \begin{center}becomes\end{center}
-
-  The theme provides sensible defaults to \emph{emphasize} text,
-  \alert{accent} parts or show \textbf{bold} results.
+\begin{center}
+\includegraphics[width=0.7\textwidth]{surfacenotation}
+\end{center}
 \end{frame}
 
-\begin{frame}{Font feature test}
-  \begin{itemize}
-    \item Regular
-    \item \textit{Italic}
-    \item \textsc{Small Caps}
-    \item \textbf{Bold}
-    \item \textbf{\textit{Bold Italic}}
-    \item \textbf{\textsc{Bold Small Caps}}
-    \item \texttt{Monospace}
-    \item \texttt{\textit{Monospace Italic}}
-    \item \texttt{\textbf{Monospace Bold}}
-    \item \texttt{\textbf{\textit{Monospace Bold Italic}}}
-  \end{itemize}
+\begin{frame}{discretize the SKE 2}
+\begin{center}
+\includegraphics[width=0.5\textwidth]{surfacenotation}
+\end{center}
+
+\begin{itemize}
+\item choose time step $\Delta t>0$ and grid spacing $\Delta x>0$
+\item in SKE
+\begin{equation*}
+\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w
+\end{equation*}
+approximate partial derivatives by finite difference\footnote{helpful textbooks include LeVeque \cite{Leveque2007} and Morton \& Mayers \cite{MortonMayers2005}} quotients:
+    $$\frac{\partial s}{\partial t} \approx \frac{\snew_j - s_j}{\Delta t}, \qquad \frac{\partial s}{\partial x} \approx \frac{s_{j+1} - s_{j-1}}{2\Delta x}$$
+\phantom{foo}
+\end{itemize}
 \end{frame}
 
-\begin{frame}{Lists}
-  \begin{columns}[T,onlytextwidth]
-    \column{0.33\textwidth}
-      Items
-      \begin{itemize}
-        \item Milk \item Eggs \item Potatoes
-      \end{itemize}
+\begin{frame}{discretize the SKE 3}
+\begin{center}
+\includegraphics[width=0.5\textwidth]{surfacenotation}
+\end{center}
 
-    \column{0.33\textwidth}
-      Enumerations
-      \begin{enumerate}
-        \item First, \item Second and \item Last.
-      \end{enumerate}
-
-    \column{0.33\textwidth}
-      Descriptions
-      \begin{description}
-        \item[PowerPoint] Meeh. \item[Beamer] Yeeeha.
-      \end{description}
-  \end{columns}
+\begin{itemize}
+\item SKE
+\begin{equation*}
+\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w
+\end{equation*}
+\item becomes a discrete equation:
+    $$\frac{\snew_j - s_j}{\Delta t} + u_j \frac{s_{j+1} - s_{j-1}}{2\Delta x} = a_j + w_j$$
+\item write as an update which determines $\snew_j$:
+	$$\snew_j = s_j - \Delta t\, u_j \frac{s_{j+1}-s_{j-1}}{2\Delta x} + \Delta t (a_j + w_j)$$
+\end{itemize}
 \end{frame}
 
+\begin{frame}{discretize the SKE 4}
 
-\begin{frame}{Figures}
-  \begin{figure}
-    \newcounter{density}
-    \setcounter{density}{20}
-    \begin{tikzpicture}
-      \def\couleur{alerted text.fg}
-      \path[coordinate] (0,0)  coordinate(A)
-                  ++( 90:5cm) coordinate(B)
-                  ++(0:5cm) coordinate(C)
-                  ++(-90:5cm) coordinate(D);
-      \draw[fill=\couleur!\thedensity] (A) -- (B) -- (C) --(D) -- cycle;
-      \foreach \x in {1,...,40}{%
-          \pgfmathsetcounter{density}{\thedensity+20}
-          \setcounter{density}{\thedensity}
-          \path[coordinate] coordinate(X) at (A){};
-          \path[coordinate] (A) -- (B) coordinate[pos=.10](A)
-                              -- (C) coordinate[pos=.10](B)
-                              -- (D) coordinate[pos=.10](C)
-                              -- (X) coordinate[pos=.10](D);
-          \draw[fill=\couleur!\thedensity] (A)--(B)--(C)-- (D) -- cycle;
-      }
-    \end{tikzpicture}
-    \caption{Rotated square from
-    \href{http://www.texample.net/tikz/examples/rotated-polygons/}{texample.net}.}
-  \end{figure}
+\begin{itemize}
+\item \alert{however \dots} \comm{see textbooks for these caveats!}
+\item if we implement this ``centered-space'' scheme
+	$$\snew_j = s_j - \Delta t\, u_j \frac{s_{j+1}-s_{j-1}}{2\Delta x} + \Delta t (a_j + w_j) \hspace{1.0cm} \leftarrow \text{\emph{\alert{bad}}}$$
+then bad things happen!
+\item instead, it is known that when the ``advecting velocity'', here $u_j$, is positive then the ``upwind'' version is stable:
+	$$\hspace{3mm} \snew_j = s_j - \Delta t\, u_j \frac{s_j-s_{j-1}}{\Delta x} + \Delta t (a_j + w_j) \hfill \hspace{1.2cm} \leftarrow \text{\emph{useful}}$$
+
+    \begin{itemize}
+    \item[$\circ$] at least, it is ``conditionally stable'' and the condition is known
+    \item<3>[$\circ$] when $u_j<0$ use $\partial s/\partial x \approx (s_{j+1}-s_j)/\Delta x$
+    \end{itemize}
+
+\bigskip
+\item<2->[] \alert{I will show you these things when we run it!}
+\end{itemize}
 \end{frame}
 
-\begin{frame}{Blocks}
-  Three different block environments are pre-defined and may be styled with an
-  optional background color.
+\begin{frame}[fragile]\frametitle{discretize the SKE 5}
 
-  \begin{columns}[T,onlytextwidth]
-    \column{0.5\textwidth}
-      \begin{block}{Default}
-        Block content.
-      \end{block}
+\begin{itemize}
+\item now the upwind equation:
+    $$\snew_j = s_j - \Delta t\, u_j \frac{s_{j+1}-s_j}{\Delta x} + \Delta t (a_j + w_j)$$
+\item becomes Python code:
+\end{itemize}
+\begin{lstlisting}[language=PythonPlus]
+def explicitstep(s, x, dt):
+    dx = x[1] - x[0]
+    snew = s.copy()
+    snew[1:] -= dt * u(x[1:]) * (s[1:] - s[:-1]) / dx
+    snew[1:] += dt * (a(x[1:]) + w(x[1:]))
+    return snew
+\end{lstlisting}
 
-      \begin{alertblock}{Alert}
-        Block content.
-      \end{alertblock}
-
-      \begin{exampleblock}{Example}
-        Block content.
-      \end{exampleblock}
-
-    \column{0.5\textwidth}
-
-      \metroset{block=fill}
-
-      \begin{block}{Default}
-        Block content.
-      \end{block}
-
-      \begin{alertblock}{Alert}
-        Block content.
-      \end{alertblock}
-
-      \begin{exampleblock}{Example}
-        Block content.
-      \end{exampleblock}
-
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Line plots}
-  \begin{figure}
-    \begin{tikzpicture}
-      \begin{axis}[
-        mlineplot,
-        width=0.9\textwidth,
-        height=6cm,
-      ]
-
-        \addplot {sin(deg(x))};
-        \addplot+[samples=100] {sin(deg(2*x))};
-
-      \end{axis}
-    \end{tikzpicture}
-  \end{figure}
-\end{frame}
-
-{%
-\setbeamertemplate{frame footer}{My custom footer}
-\begin{frame}[fragile]{Frame footer}
-    \themename defines a custom beamer template to add a text to the footer. It can be set via
-    \begin{verbatim}\setbeamertemplate{frame footer}{My custom footer}\end{verbatim}
-\end{frame}
+\vspace{-2mm}
+{\footnotesize
+    \begin{itemize}
+    \item[$\circ$] \texttt{s} and \texttt{x} are NumPy arrays
+    \item[$\circ$] \texttt{x} is equally-spaced
+    \item[$\circ$] \texttt{[1:]} is all indices except the first, and \texttt{[:-1]} is all except the last
+    \item[$\circ$] note that \, \texttt{snew[0] = s[0]} \, is never changed
+    \end{itemize}
 }
+\end{frame}
 
 
 \section[where does the velocity field come from?]{\textbf{where does the velocity field come from?} (hour 2)}
@@ -540,17 +548,18 @@ FIXME
 
 \appendix
 
-\setbeamerfont{bibliography item}{size=\footnotesize}
-\setbeamerfont{bibliography entry author}{size=\footnotesize}
-\setbeamerfont{bibliography entry title}{size=\footnotesize}
-\setbeamerfont{bibliography entry location}{size=\footnotesize}
-\setbeamerfont{bibliography entry note}{size=\footnotesize}
+\setbeamerfont{bibliography item}{size=\scriptsize}
+\setbeamerfont{bibliography entry author}{size=\scriptsize}
+\setbeamerfont{bibliography entry title}{size=\scriptsize}
+\setbeamerfont{bibliography entry location}{size=\scriptsize}
+\setbeamerfont{bibliography entry note}{size=\scriptsize}
 
-\begin{frame}[allowframebreaks]{References}
+\begin{frame}[allowframebreaks]
+\frametitle{References}
 \setbeamertemplate{bibliography item}[text]
 
   \bibliography{slides}
-  \bibliographystyle{abbrv}
+  \bibliographystyle{alpha}
 \end{frame}
 
 
