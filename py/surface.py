@@ -4,15 +4,16 @@ Solves time-dependent and steady-state surface kinematical equation
 u(x), and vertical velocity w(x) are all assumed to be given and
 time-independent.  (This is not realistic!)  Runs of the
 models produce .png figures in the output/ directory.  Note that a
-bed elevation b(x) is shown in these figures.
+bed elevation b(x) is shown in these figures, but it does not
+enter into the SKE itself.
 
 Convenient way to run and view (where "eog" is a .png viewer):
    $ rm -rf output/;  python3 surface.py;  eog output/
 
-Explore time-dependent runs using code modifications as follows:
-   N = 40      instability (N = 50 is threshold)
-   2 * u(x)    instability
-   2 * a(x)    violate s >= b
+Explore using code modifications as follows:
+   u(x)    -->  4 * u(x)    instability
+   N = 50  -->  N = 20      instability (N = 25 is threshold)
+   a(x)    -->  2 * a(x)    violate s >= b, even for steady
 '''
 
 import numpy as np
@@ -22,12 +23,13 @@ secpera = 31556925.0
 # major parameters
 L = 20.0e3             # length of domain (m)
 J = 20                 # number of subintervals
-T_a = 100              # duration of run (a)
-N = 100                # number of time steps
+T_a = 50               # duration of run (a)
+N = 50                 # number of time steps
 outdir = 'output/'     # directory name for frames
 
 def a(x):
-    '''surface mass balance is decreasing and linear'''
+    '''surface mass balance is decreasing and linear, with
+    ELA at x = L/5'''
     return 1.0e-7 - 5.0e-7 * x / L
 
 def b(x):
@@ -52,6 +54,13 @@ def explicitstep(s, x, dt):
     snew[1:] += dt * (a(x[1:]) + w(x[1:]))
     return snew
 
+def mkoutdir(dirname):
+    import os
+    try:
+        os.mkdir(dirname)
+    except FileExistsError:
+        pass
+
 def run_evolution():
     # space-time grid info
     x = np.linspace(0.0, L, J + 1)
@@ -71,11 +80,7 @@ def run_evolution():
     plt.ylabel('elevation (m)')
     sh, = plt.plot(x, s, "-o")
     th = plt.text(1000.0, 700.0, f't = {0.0:6.2f} (a)', name='DejaVu Sans Mono')
-    import os
-    try:
-        os.mkdir(outdir)
-    except FileExistsError:
-        pass
+    mkoutdir(outdir)
     print(f'  writing {N} steps to image files {outdir}frameXXX.png')
     for k in range(N+1):
         plt.savefig(f'{outdir}frame{k:03d}.png')
@@ -101,11 +106,7 @@ def run_steady():
     plt.ylabel('elevation (m)')
     plt.plot(x, s, "-o")
     plt.text(1000.0, 700.0, 'steady state', name='DejaVu Sans Mono')
-    import os
-    try:
-        os.mkdir(outdir)
-    except FileExistsError:
-        pass
+    mkoutdir(outdir)
     print(f'  writing to image file {outdir}steady.png')
     plt.savefig(f'{outdir}steady.png')
 
