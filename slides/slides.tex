@@ -4,6 +4,8 @@
 \hypersetup{colorlinks,linkcolor=,urlcolor=links}
 
 \usetheme{metropolis}
+\metroset{block=fill}
+
 \usepackage{appendixnumberbeamer}
 
 \usepackage{booktabs,empheq,bbold,bm}
@@ -97,7 +99,7 @@
 \metroset{block=fill}
 \begin{block}{online materials}
 
-my slides/notes/projects materials are hosted at
+my slides, notes, codes, and materials are hosted at
 
 \medskip
 \centerline{\href{https://github.com/bueler/mccarthy}{\texttt{github.com/bueler/mccarthy}}}
@@ -111,15 +113,8 @@ notes: {\footnotesize \href{https://github.com/bueler/mccarthy/blob/master/notes
 
 Python codes: {\footnotesize \href{https://github.com/bueler/mccarthy/tree/master/py}{\texttt{mccarthy/tree/master/py/}}}
 
-project codes: {\footnotesize \href{https://github.com/bueler/mccarthy/tree/master/stokes}{\texttt{mccarthy/tree/master/stokes/}}}
-
-\bigskip
-\emph{deprecated}: {\footnotesize \href{https://github.com/bueler/mccarthy/blob/master/slides/slides-2022.pdf}{\texttt{mccarthy/blob/master/slides/slides-2022.pdf}}}
-
-\vspace{-2mm}
-\hspace{14.7mm} {\footnotesize \href{https://github.com/bueler/mccarthy/tree/master/mfiles}{\texttt{mccarthy/tree/master/mfiles/}}}
+project 13,14 codes: {\footnotesize \href{https://github.com/bueler/mccarthy/tree/master/stokes}{\texttt{mccarthy/tree/master/stokes/}}}
 }
-%\end{block}
 \end{frame}
 
 \section[how does the surface of a glacier move?]{\textbf{how does the surface of a glacier move?} (hour 1)}
@@ -199,26 +194,26 @@ the ice surface moves up and down according to
 \end{itemize}
 \end{frame}
 
-\begin{frame}{plan for hour 1: numerical glacier shape modeling using SKE}
+\begin{frame}{plan for hour 1: numerical glacier geometry model using SKE}
 
 \begin{itemize}
 \item \alert{model:} the surface kinematical equation (SKE)
 \begin{equation*}
 \frac{\partial s}{\partial t} = a + \bu \cdot \bn_s \qquad \iff \qquad \frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w
 \end{equation*}
-\item \alert{numerical goal:} use a computer program to track of the surface of the glacier $z=s(t,x)$ under some assumptions
+\item \alert{numerical goal:} use a computer program to track the glacier surface $z=s(t,x)$, under some assumptions
     \begin{itemize}
     \item[$\circ$] grid of points $\{x_j\}$
-    \item[$\circ$] unknowns are the surface elevations on the grid $s_j(t) \approx s(t,x_j)$
-    \item[$\circ$] assume $a,u,w$ are given functions/values \uncover<2>{\hfill \alert{$\leftarrow$ this is crazy!}}
-    \item[$\circ$] short Python program
+    \item[$\circ$] unknowns are the gridded surface elevations $s_j \approx s(t_n,x_j)$
+    \item[$\circ$] assume $a,u,w$ are given functions/values \uncover<2>{\hfill \alert{$\leftarrow$ this needs fixing!}}
+    \item[$\circ$] from one short Python program in 1D
     \end{itemize}
 \item \alert{problems and issues:}
      \begin{enumerate}
-     \item time-dependent solutions?
-     \item steady state solutions?
+     \item how to compute time-dependent solutions?
      \item accuracy and stability?
-     \item practical: implementation, debugging, visualization?
+     \item how to compute steady state solutions?
+     \item practical: debugging, verification, visualization?
      \end{enumerate}
 \end{itemize}
 \end{frame}
@@ -302,9 +297,9 @@ then bad things happen!
 \begin{frame}[fragile]\frametitle{discretize the SKE 5}
 
 \begin{itemize}
-\item now the upwind equation:
+\item the upwind equation:
     $$\snew_j = s_j - \Delta t\, u_j \frac{s_{j+1}-s_j}{\Delta x} + \Delta t (a_j + w_j)$$
-\item becomes Python code:
+becomes a Python function:
 \end{itemize}
 \begin{lstlisting}[language=PythonPlus]
 def explicitstep(s, x, dt):
@@ -318,12 +313,121 @@ def explicitstep(s, x, dt):
 \vspace{-2mm}
 {\footnotesize
     \begin{itemize}
-    \item[$\circ$] \texttt{s} and \texttt{x} are NumPy arrays
+    \item[$\circ$] \texttt{s} and \texttt{x} are 1D NumPy arrays
+    \item[$\circ$] separate functions define $a(x_j)$, $u(x_j)$, $w(x_j)$
     \item[$\circ$] \texttt{x} is equally-spaced
-    \item[$\circ$] \texttt{[1:]} is all indices except the first, and \texttt{[:-1]} is all except the last
+    \item[$\circ$] $j=$\texttt{[1:]} indicates all indices except zero
     \item[$\circ$] note that \, \texttt{snew[0] = s[0]} \, is never changed
     \end{itemize}
 }
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{live demo: evolution of glacier surface}
+\begin{center}
+\includegraphics[width=0.7\textwidth]{frame010}
+\end{center}
+
+\bigskip
+\begin{block}{live demo}
+\begin{itemize}
+\item run \texttt{mccarthy/py/surface.py}:
+\begin{verbatim}
+$ python3 surface.py
+$ eog output/frame*.png            # any image viewer
+\end{verbatim}
+\item the following modifications reveal issues:
+    \begin{enumerate}
+    \item increase velocity: \quad $u(x)$ \, $\to$ \, $4 u(x)$
+    \item or lengthen time-steps: \quad $\Delta t = 1$ a \, $\to$ \, $\Delta t = 2.5$ a
+    \end{enumerate}
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{condition for time-stepping stability}
+\begin{center}
+\includegraphics[width=0.7\textwidth]{steady} FIXME cfl fig
+\end{center}
+
+\bigskip
+\begin{itemize}
+\item FIXME cfl
+$$u_j \frac{\Delta t}{\Delta x} \le 1$$
+
+$$\Delta t \le \frac{\Delta x}{\max |u_j|}$$
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{live demo cont.: steady state of a glacier surface}
+\begin{center}
+\includegraphics[width=0.7\textwidth]{steady}
+\end{center}
+
+\bigskip
+\begin{itemize}
+\item SKE in steady-state ($\frac{\partial s}{\partial t}=0$): \quad $\displaystyle u \frac{\partial s}{\partial x} = a + w$
+\end{itemize}
+
+\begin{block}{live demo}
+\begin{itemize}
+\item same run as before, but view steady-state output:
+\begin{verbatim}
+$ eog output/steady.png
+\end{verbatim}
+\item the following modification reveals an issue:
+    \begin{enumerate}
+    \item double SMB: \quad $a(x)$ \, $\to$ \, $2 a(x)$
+    \end{enumerate}
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{2D steady state of a glacier surface}
+
+\begin{itemize}
+\item this example uses \href{https://www.firedrakeproject.org/}{Firedrake}
+{\footnotesize
+    \begin{itemize}
+    \item[$\circ$] \emph{see me?}
+    \item[$\circ$] \emph{or project 6,13,14 people!}
+    \end{itemize}
+}
+\item code:
+
+\texttt{mccarthy/py/surface2d.py}
+
+\item result figure $\rightarrow$
+
+\vspace{-25mm}
+\mbox{\hspace{60mm} \includegraphics[width=0.45\textwidth]{surface2d}}
+
+\vspace{-12mm}
+\item solves 2D steady-state SKE:
+\begin{align*}
+&& u \frac{\partial s}{\partial x} + v \frac{\partial s}{\partial y} &= a + w \hspace{40mm}\\
+\text{\emph{or}} && (u,v) \cdot \grad s &= a + w \\
+\text{\emph{or}} && -\bu \cdot \bn_s &= a
+\end{align*}
+
+{\footnotesize
+    \begin{itemize}
+    \item[$\circ$] where $\bn_s = (-\frac{\partial s}{\partial x},-\frac{\partial s}{\partial y},1) = (-\grad s,1)$
+    \item[$\circ$] \alert{but subject to $s \ge b$}
+    \end{itemize}
+}
+
+\medskip
+\item note time-dependent SKE in 2D: \quad $\displaystyle \frac{\partial s}{\partial t} - \bu \cdot \bn_s = a$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{many issues}
+\begin{itemize}
+\item FIXME
+\end{itemize}
 \end{frame}
 
 
@@ -554,6 +658,7 @@ FIXME
 \setbeamerfont{bibliography entry location}{size=\scriptsize}
 \setbeamerfont{bibliography entry note}{size=\scriptsize}
 
+\setbeamertemplate{frametitle continuation}{}  % remove the "i"
 \begin{frame}[allowframebreaks]
 \frametitle{References}
 \setbeamertemplate{bibliography item}[text]
