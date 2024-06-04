@@ -1,14 +1,15 @@
 '''
 Solves time-dependent and steady-state surface kinematical equation
-(SKE) models.  The surface mass balance a(x), horizontal velocity
-u(x), and vertical velocity w(x) are all assumed to be given and
-time-independent.  (This is not realistic!)  Runs of the
-models produce .png figures in the output/ directory.  Note that a
+(SKE) models in one dimension.  The surface mass balance a(x),
+horizontal velocity u(x), and vertical velocity w(x) are all assumed
+to be given and time-independent.  (This is not realistic!)
+
+Runs produce .png figures in the output/ directory.  Note that a
 bed elevation b(x) is shown in these figures, but it does not
 enter into the SKE itself.
 
 Convenient way to run and view (where "eog" is a .png viewer):
-   $ rm -rf output/;  python3 surface.py;  eog output/
+   $ rm -rf output/;  python3 surface1d.py;  eog output/
 
 Explore using code modifications as follows:
    u(x)    -->  4 * u(x)    instability
