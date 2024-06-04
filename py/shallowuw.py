@@ -1,6 +1,8 @@
 '''
 Compute and plot the surface values of the horizontal and vertical
 velocity using the non-sliding shallow ice approximation (SIA).
+Techniques emphasize robustness, e.g. when ice thickness goes to
+zero.
 '''
 
 import numpy as np
@@ -28,16 +30,19 @@ def b(x):
     return - alpha * x
 
 def s(x):
-    'Compute s(x), a sine wave.'
-    return b(x) + H0 + wave_amp * np.sin(2.0 * np.pi * x / wave_len)
+    'Compute s(x), a sine wave, but satisfying s(x) >= b(x).'
+    stmp = H0 + wave_amp * np.sin(2.0 * np.pi * x / wave_len)
+    return b(x) + np.maximum(stmp, 0.0)
 
 def u(x, b, s):
     '''Compute surface value of horizontal velocity u = u_j at
     interior regular grid locations.'''
+    assert np.all(b <= s)
     dx = x[1] - x[0]
     dsdx = (s[1:] - s[:-1]) / dx
-    ult = - C * abs(dsdx[:-1])**(n-1) * dsdx[:-1] * (s[:-1] - b[:-1])**(n+1)
-    urt = - C * abs(dsdx[1:] )**(n-1) * dsdx[1:]  * (s[1:]  - b[1:] )**(n+1)
+    Hstag = ((s[:-1] - b[:-1]) + (s[1:] - b[1:])) / 2.0
+    ult = - C * abs(dsdx[:-1])**(n-1) * dsdx[:-1] * Hstag[:-1]**(n+1)
+    urt = - C * abs(dsdx[1:])**(n-1)  * dsdx[1:]  * Hstag[1:]**(n+1)
     return (ult + urt) / 2.0
 
 def vert_int_u_stag(j, x, b, s, zb, zs):
@@ -67,21 +72,28 @@ def vert_int_u_stag(j, x, b, s, zb, zs):
     dx = x[1] - x[0]
     bjj = (b[j] + b[j+1]) / 2.0
     sjj = (s[j] + s[j+1]) / 2.0
+    assert bjj <= sjj
     dsjj = (s[j+1] - s[j]) / dx
     alf = - 0.5 * A * (rhoi * g)**n * abs(dsjj)**(n-1) * dsjj
     bet = (sjj - bjj)**(n+1)
-    if zb <= bjj
+    if zb <= bjj:
         if zs <= bjj:
             I = 0.0
-        else if zs < sjj:
-            I = FIXME
+        elif zs < sjj:
+            I = alf * bet * (zs - bjj) \
+                - (alf / (n+2)) * ((sjj - zs)**(n+2) - (sjj - bjj)**(n+2))
         else:
-            I = FIXME + alf * bet * (zs - sjj)
-    else if zb < sjj:
+            I = alf * bet * (sjj - bjj) \
+                - (alf / (n+2)) * (0.0 - (sjj - bjj)**(n+2)) \
+                + alf * bet * (zs - sjj)
+    elif zb < sjj:
         if zs < sjj:
-            I = FIXME
+            I = alf * bet * (zs - zb) \
+                - (alf / (n+2)) * ((sjj - zs)**(n+2) - (sjj - zb)**(n+2))
         else:
-            I = FIXME + alf * bet * (zs - sjj)
+            I = alf * bet * (sjj - zb) \
+                - (alf / (n+2)) * (0.0 - (sjj - zb)**(n+2)) \
+                + alf * bet * (zs - sjj)
     else:
         I = alf * bet * (zs - zb)
     return I
@@ -110,7 +122,7 @@ def plot_velocity():
     fig, (ax1, ax2) = plt.subplots(2, 1)
     ax1.plot(xint, u(x, b(x), s(x)))
     ax2.plot(xint, w(x, b(x), s(x)))
-    ax2.xlabel('x (m)')
+    plt.xlabel('x (m)')
     #plt.axis([0, L, 0, 1.5 * b(0.0)])
     #plt.ylabel('elevation (m)')
     #plt.text(1000.0, 700.0, 'steady state', name='DejaVu Sans Mono')
