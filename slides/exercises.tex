@@ -1,0 +1,117 @@
+\documentclass[12pt]{amsart}
+%prepared in AMSLaTeX, under LaTeX2e
+\addtolength{\oddsidemargin}{-.55in} 
+\addtolength{\evensidemargin}{-.55in}
+\addtolength{\topmargin}{-.55in}
+\addtolength{\textwidth}{1.3in}
+\addtolength{\textheight}{.9in}
+
+\renewcommand{\baselinestretch}{1.05}
+
+\usepackage{verbatim} % for "comment" environment
+
+\usepackage{palatino}
+
+\newtheorem*{thm}{Theorem}
+\newtheorem*{defn}{Definition}
+\newtheorem*{example}{Example}
+\newtheorem*{problem}{Problem}
+\newtheorem*{remark}{Remark}
+
+\usepackage{fancyvrb,xspace,dsfont}
+
+\usepackage[final]{graphicx}
+
+% macros
+\usepackage{amssymb}
+
+\usepackage{hyperref}
+\hypersetup{pdfauthor={Ed Bueler},
+            pdfcreator={pdflatex},
+            colorlinks=true,
+            citecolor=blue,
+            linkcolor=red,
+            urlcolor=blue,
+            }
+
+\newcommand{\bn}{\mathbf{n}}
+\newcommand{\br}{\mathbf{r}}
+\newcommand{\bv}{\mathbf{v}}
+\newcommand{\bx}{\mathbf{x}}
+\newcommand{\by}{\mathbf{y}}
+
+\newcommand{\cB}{\mathcal{B}}
+\newcommand{\cD}{\mathcal{D}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\cH}{\mathcal{H}}
+\newcommand{\cL}{\mathcal{L}}
+\newcommand{\cV}{\mathcal{V}}
+\newcommand{\cW}{\mathcal{W}}
+
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\ZZ}{\mathbb{Z}}
+
+\renewcommand{\Im}{\mathrm{Im}}
+\renewcommand{\Re}{\mathrm{Re}}
+
+\newcommand{\eps}{\epsilon}
+\newcommand{\grad}{\nabla}
+\newcommand{\lam}{\lambda}
+\newcommand{\lap}{\triangle}
+
+\newcommand{\ip}[2]{\ensuremath{\left<#1,#2\right>}}
+
+\newcommand{\image}{\operatorname{im}}
+\newcommand{\onull}{\operatorname{null}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\range}{\operatorname{range}}
+\newcommand{\trace}{\operatorname{tr}}
+\newcommand{\Span}{\operatorname{span}}
+
+\newcommand{\prob}[1]{\bigskip\noindent\textbf{#1.}\quad }
+
+\newcommand{\epart}[1]{\medskip\noindent\textbf{(#1)}\quad }
+\newcommand{\ppart}[1]{\,\textbf{(#1)}\quad }
+
+\newcommand{\ds}{\displaystyle}
+
+\newcommand{\nex}{\medskip\noindent}
+
+
+\begin{document}
+\scriptsize \hfill \emph{version 1.0 (Bueler) June 2024}
+\normalsize\medskip
+
+\large\centerline{\textbf{Exercises in Numerical Modeling of Glaciers}}
+\medskip
+
+\normalsize
+\begin{quote}
+\emph{These exercises are aligned to my new slides ({\small\emph{\href{https://github.com/bueler/mccarthy/blob/master/slides/slides-2024.pdf}{slides/slides-2024.pdf}}}) more than to the printed notes, but all questions are encouraged!  Abbreviations: SKE $=$ surface kinematical equation, SIA $=$ shallow ice approximation.}
+\end{quote}
+\medskip
+\thispagestyle{empty}
+
+\section*{Paper exercises}
+
+\prob{1}  Sketch an ice surface $z=s(x)$, in the planar case, and convince yourself that the vector $\bn_s = (-\frac{\partial s}{\partial x},1)$ is normal to the surface and upward.  What is the equivalent formula when $z=s(x,y)$, i.e.~in 3D reality?
+
+\prob{2}  \emph{(Do with a friend.)}  For the ice thickness $H=s-b$, what inequality is equivalent to ``$s\ge b$''?   Which other geophysical fluid layer problems, in cryosphere contexts and outside, have the same inequalities?  What (physically) determines the shapes of margins and termini?
+
+\prob{3}  Assume $a=0$ and $w=0$ here, so the SKE is simply $\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = 0$.  For grid spacing $\Delta t,\Delta x$, write down the upwind scheme (see the slides) for both the $u_j\ge 0$ and $u_j\le 0$ cases.  Show that if the CFL condition $|u_j| \frac{\Delta t}{\Delta x} \le 1$ applies for every $j$ then a new surface value is an average of old values.  (For instance, if $u_j\ge 0$ then show that $s_j^{\text{new}} = c_0 s_{j-1} + c_1 s_j$ where $c_0,c_1$ are nonnegative and sum to one.)  What will happen if $\Delta t$ is too large, that is, if the CFL condition is violated?
+
+\prob{4}  In the planar case, derive the mass continuity equation ($\frac{\partial H}{\partial t} + \frac{\partial}{\partial x}(\bar u H) = a$) from the SKE ($\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w$), using the incompressibility of ice ($\frac{\partial u}{\partial x} + \frac{\partial w}{\partial z} = 0$).  Here $\bar u(t,x) = H(t,x)^{-1} \int_{b(t,x)}^{s(t,x)} u(t,x,z)\,dz$ is the vertically-averaged ice velocity; note $\bar u H = \int_b^s u\,dz$ is often called the \emph{ice flux}.  Assume that the ice base is non-sliding ($u(t,x,b(x))=0$), non-penetrating ($w(t,x,b(x))=0$), and that the bedrock is not moving ($\frac{\partial b}{\partial t} = 0$).  You can use the general Leibniz rule for differentiating integrals:
+  $$\frac{d}{dx}\left(\int_{g(x)}^{f(x)} k(x,y)\,dy\right) = f'(x) k(x,f(x)) - g'(x) k(x,g(x)) + \int_{g(x)}^{f(x)} \frac{\partial k}{\partial x}(x,y)\,dy.$$
+% SOLUTION:  Show using H=s-b and differentiating with respect to t and the SKE that \frac{\partial H}{\partial t}=-u\frac{\partial s}{\partial x}+a+w.  Next recognize that \frac{\partial}{\partial x}(\bar u H) = \frac{\partial}{\partial x}(\int_b^s u\,dz) is something you can apply the Leibniz rule to.  Do so, using incompressibility and the non-sliding basal ice and non-moving bedrock assumptions.  Add the two expressions (cancellation here!) to get the mass continuity equation.
+
+\prob{5}  Write out the details of the slab-on-a-slope calculation from the slides.  Thereby derive the ($n=3$) velocity formula $u(z) = u_0 + \frac{1}{2} A (\rho g \sin\alpha)^3  \left(H^4 - (H-z)^4\right)$.  Now add in $x$-dependence, to see the velocity formula for the non-sliding SIA velocity.
+
+\prob{6}  \emph{(Do with a friend.)}  Sketch a hypothetical planar glacier shape, with smooth surface and bed.  Sketch what you think the non-sliding SIA formulas will generate for the surface values of the horizontal ($u$) and vertical ($w$) velocity components.  How would the non-sliding Stokes model change your pictures?  Repeat with a different hypothetical shape.
+
+\section*{Computer exercises}
+
+\prob{7}  FIXME
+
+\end{document}

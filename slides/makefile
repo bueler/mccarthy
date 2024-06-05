@@ -1,10 +1,13 @@
-all: slides.pdf
+all: slides.pdf exercises.pdf
 
 slides.pdf: slides.tex slides.bib
 	xelatex slides
 	bibtex slides
 	xelatex slides
 	xelatex slides
+
+exercises.pdf: exercises.tex
+	pdflatex exercises
 
 .PHONY: clean
 
