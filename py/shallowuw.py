@@ -9,25 +9,32 @@ import numpy as np
 import matplotlib.pyplot as plt
 secpera = 31556925.0
 
-# major parameters
+wave = True            # set to False to compare slab-on-slope formula
+
+# instance parameters
+L = 20.0e3             # length of domain (m)
+H0 = 400.0             # reference ice thickness (m)
+alpha = -0.02          # slope of bed
+if wave:
+    wave_amp = 20.0    # amplitude of surface waves
+else:
+    wave_amp = 0.0
+wave_len = 8.0e3       # wavelength of surface waves
+J = 80                 # number of subintervals (in x direction)
+outdir = 'output/'     # directory name for image output
+
+# physical parameters
 g = 9.81               # acceleration of gravity (m s-2)
 rhoi = 910.0           # density of ice (kg m-3)
 n = 3                  # Glen exponent
 A = 3.1689e-24         # EISMINT I value of ice softness (Pa-3 s-1)
-L = 20.0e3             # length of domain (m)
-H0 = 500.0             # reference ice thickness (m)
-alpha = 0.1            # slope of bed
-wave_amp = 100.0       # amplitude of surface waves
-wave_len = 4.0e3       # wavelength of surface waves
-J = 40                 # number of subintervals (in x direction)
-outdir = 'output/'     # directory name for image output
 
 # derived constant from SIA formulas
-C = (2.0/(n+1)) * A * (rhoi * g)**n
+C = (2.0 / (n+1)) * A * (rhoi * g)**n
 
 def b(x):
     'Compute b(x), a slope.'
-    return - alpha * x
+    return alpha * (x - L)
 
 def s(x):
     'Compute s(x), a sine wave, but satisfying s(x) >= b(x).'
@@ -116,18 +123,37 @@ def mkoutdir(dirname):
     except FileExistsError:
         pass
 
-def plot_velocity():
+def compute_velocity():
     x = np.linspace(0.0, L, J+1)
+    uu = u(x, b(x), s(x)) * secpera
+    ww = w(x, b(x), s(x)) * secpera
+    print(f'  range for u:  min = {uu.min():9.4f},  max = {uu.max():9.4f}  (m/a)')
+    print(f'  range for w:  min = {ww.min():9.4f},  max = {ww.max():9.4f}  (m/a)')
+    if not wave:
+        # in slab-on-slope case, compare horizontal surface velocity
+        u_slab = - (2.0 / (n+1)) * A * (rhoi * g)**n * abs(alpha)**2 * alpha * H0**(n+1)
+        print(f'  COMPARE: slab-on-slope says u={u_slab * secpera:.4f} (m/a)')
+    return x, uu, ww
+
+def plot_velocity(x, u, w):
     xint = x[1:-1]
     fig, (ax1, ax2) = plt.subplots(2, 1)
-    ax1.plot(xint, u(x, b(x), s(x)))
-    ax2.plot(xint, w(x, b(x), s(x)))
-    plt.xlabel('x (m)')
-    #plt.axis([0, L, 0, 1.5 * b(0.0)])
-    #plt.ylabel('elevation (m)')
-    #plt.text(1000.0, 700.0, 'steady state', name='DejaVu Sans Mono')
+    ax1.plot(x / 1.0e3, s(x), '.-', color='C1', ms=4.0, label='s')
+    ax1.plot(x / 1.0e3, b(x), '-', color='C0', label='b')
+    ax1.legend(loc='lower left')
+    ax1.set_xticklabels([])
+    ax2.set_ylabel('elevation (m)')
+    ax2.plot(xint / 1.0e3, u, 'o', ms=6.0, mfc='w', label='u')
+    ax2.plot(xint / 1.0e3, w, '+', ms=8.0, label='w')
+    ax2.legend(loc='upper right')
+    ax2.set_xticks(np.linspace(0.0,20.0,5))
+    ax2.set_xticklabels(['0','5','10','15','20'])
+    ax2.set_ylabel('velocity (m/a)')
+    ax2.grid(visible=True)
+    plt.xlabel('x (km)')
     mkoutdir(outdir)
     print(f'  writing to image file {outdir}uw.png')
     plt.savefig(f'{outdir}uw.png')
 
-plot_velocity()
+x, u, w = compute_velocity()
+plot_velocity(x, u, w)
