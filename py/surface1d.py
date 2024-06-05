@@ -46,7 +46,7 @@ def w(x):
     '''vertical velocity is zero'''
     return 0.0 * x
 
-def explicitstep(s, x, dt):
+def explicitstep(x, s, dt):
     '''compute a time step
     note left-end value snew[0] = s[0] is unmodified'''
     dx = x[1] - x[0]
@@ -85,7 +85,7 @@ def run_evolution():
     print(f'  writing {N} steps to image files {outdir}frameXXX.png')
     for k in range(N+1):
         plt.savefig(f'{outdir}frame{k:03d}.png')
-        s = explicitstep(s, x, dt)
+        s = explicitstep(x, s, dt)
         sh.set_ydata(s)
         th.set_text(f't = {(k+1) * dt / secpera:6.2f} (a)')
 

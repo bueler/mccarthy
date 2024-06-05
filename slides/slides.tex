@@ -5,6 +5,7 @@
 
 \usetheme{metropolis}
 \metroset{block=fill}
+\setmonofont{Ubuntu Mono}
 
 \usepackage{appendixnumberbeamer}
 
@@ -45,7 +46,8 @@
   stringstyle=\color{darkred},
   emphstyle=\color{pink}\underbar,
 }
-\lstset{style=colorEX}
+\lstset{style=colorEX,
+        basewidth = {.49em}}
 
 \newcommand{\bn}{\mathbf{n}}
 \newcommand{\bq}{\mathbf{q}}
@@ -126,8 +128,9 @@ project 13,14 codes: {\footnotesize \href{https://github.com/bueler/mccarthy/tre
 \bigskip
 \begin{center}
 \includegraphics<1>[width=\textwidth]{noboat}
-\includegraphics<2>[width=\textwidth]{boat}
-\includegraphics<3>[width=\textwidth]{boatplus}
+%\includegraphics<2>[width=\textwidth]{boat}
+%\includegraphics<3>[width=\textwidth]{boatplus}
+\includegraphics<2>[width=\textwidth]{boatplus}
 \end{center}
 
 %LIVE really the question is, "what is the most basic thing you can say mathematically at the surface of a glacier?"
@@ -249,9 +252,9 @@ surface kinematical equation
 \item choose time step $\Delta t>0$ and grid spacing $\Delta x>0$
 \item in SKE
 \begin{equation*}
-\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w
+\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w,
 \end{equation*}
-approximate partial derivatives by finite difference\footnote{helpful textbooks include LeVeque \cite{Leveque2007} and Morton \& Mayers \cite{MortonMayers2005}} quotients:
+let us approximate partial derivatives by finite difference\footnote{helpful textbooks include LeVeque \cite{Leveque2007} and Morton \& Mayers \cite{MortonMayers2005}} quotients:
     $$\frac{\partial s}{\partial t} \approx \frac{\snew_j - s_j}{\Delta t}, \qquad \frac{\partial s}{\partial x} \approx \frac{s_{j+1} - s_{j-1}}{2\Delta x}$$
 \phantom{foo}
 \end{itemize}
@@ -265,15 +268,15 @@ approximate partial derivatives by finite difference\footnote{helpful textbooks 
 \begin{itemize}
 \item now SKE\, $\left(\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w\right)$\, becomes a discrete equation:
     $$\frac{\snew_j - s_j}{\Delta t} + u_j \frac{s_{j+1} - s_{j-1}}{2\Delta x} = a_j + w_j$$
-\item write as an update which determines $\snew_j$:
+\item which we can write as an update which determines $\snew_j$:
 	$$\snew_j = s_j - \Delta t\, u_j \frac{s_{j+1}-s_{j-1}}{2\Delta x} + \Delta t (a_j + w_j)$$
 \end{itemize}
 \end{frame}
 
-\begin{frame}{discretize the SKE 4}
+\begin{frame}{upwinding}
 
 \begin{itemize}
-\item \alert{however \dots} \comm{see textbooks for these caveats!}
+\item \alert{however \dots}
 \item if we implement this ``forward-time centered-space'' scheme
 	$$\snew_j = s_j - \Delta t\, u_j \frac{s_{j+1}-s_{j-1}}{2\Delta x} + \Delta t (a_j + w_j) \hspace{1.0cm} \leftarrow \text{\emph{\alert{bad}}}$$
 then bad things happen!
@@ -281,13 +284,18 @@ then bad things happen!
 	$$\hspace{3mm} \snew_j = s_j - \Delta t\, u_j \frac{s_j-s_{j-1}}{\Delta x} + \Delta t (a_j + w_j) \hfill \hspace{1.2cm} \leftarrow \text{\emph{useful}}$$
 
     \begin{itemize}
-    \item[$\circ$] at least, it is ``conditionally stable'', and the condition is known, and I'll demo the problem soon
     \item[$\circ$] when $u_j<0$ use $\partial s/\partial x \approx (s_{j+1}-s_j)/\Delta x$
+    \item[$\circ$] actually, it is ``conditionally stable''
     \end{itemize}
+\item actually, this scheme is ``conditionally stable''
+    \begin{itemize}
+    \item[$\circ$] the condition is known \comm{demo soon}
+    \end{itemize}
+%\item see textbooks for these caveats
 \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]\frametitle{discretize the SKE 5}
+\begin{frame}[fragile]\frametitle{implementation}
 
 \begin{itemize}
 \item the upwind equation:
@@ -306,8 +314,8 @@ def explicitstep(s, x, dt):
 \vspace{-2mm}
 {\footnotesize
     \begin{itemize}
-    \item[$\circ$] \texttt{s} and \texttt{x} are 1D NumPy arrays
-    \item[$\circ$] separate functions define $a(x_j)$, $u(x_j)$, $w(x_j)$
+    \item[$\circ$] \texttt{x}, \texttt{s}, \texttt{snew} are 1D NumPy arrays
+    \item[$\circ$] separate functions define $a(x)$, $u(x)$, $w(x)$ \comm{made-up values here!}
     \item[$\circ$] \texttt{x} is equally-spaced
     \item[$\circ$] $j=$\texttt{[1:]} indicates all indices except zero
     \item[$\circ$] note that \, \texttt{snew[0] = s[0]} \, is never changed; this is a boundary condition
@@ -325,9 +333,9 @@ def explicitstep(s, x, dt):
 \bigskip
 \begin{block}{live demo}
 \begin{itemize}
-\item run \texttt{mccarthy/py/surface.py}:
+\item run \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{mccarthy/py/surface1d.py}:
 \begin{verbatim}
-$ python3 surface.py
+$ python3 surface1d.py
 $ eog output/frame*.png          # any image viewer
 \end{verbatim}
 \item the following modifications reveal issues:
@@ -408,9 +416,11 @@ $ eog output/steady.png
 {\footnotesize
     \begin{itemize}
     \item[$\circ$] where $\bn_s = (-\frac{\partial s}{\partial x},-\frac{\partial s}{\partial y},1) = (-\grad s,1)$
-    \item[$\circ$] \alert{but subject to $s \ge b$}
     \end{itemize}
 }
+
+\smallskip
+\item \alert{but subject to $s \ge b$}
 
 \medskip
 \item versus time-dependent SKE in 2D: \quad $\displaystyle \frac{\partial s}{\partial t} - \bu \cdot \bn_s = a$
