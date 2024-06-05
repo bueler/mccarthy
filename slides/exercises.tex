@@ -89,29 +89,50 @@
 
 \normalsize
 \begin{quote}
-\emph{These exercises are aligned to my new slides ({\small\emph{\href{https://github.com/bueler/mccarthy/blob/master/slides/slides-2024.pdf}{slides/slides-2024.pdf}}}) more than to the printed notes, but all questions are encouraged!  Abbreviations: SKE $=$ surface kinematical equation, SIA $=$ shallow ice approximation.}
+\emph{These exercises are aligned to my new slides {\small \emph{(\href{https://github.com/bueler/mccarthy/blob/master/slides/slides-2024.pdf}{\texttt{slides/slides-2024.pdf}})} } more than to the printed notes, but all questions are encouraged!  Abbreviations: SKE $=$ surface kinematical equation, SIA $=$ shallow ice approximation.}
 \end{quote}
 \medskip
 \thispagestyle{empty}
 
 \section*{Paper exercises}
 
-\prob{1}  Sketch an ice surface $z=s(x)$, in the planar case, and convince yourself that the vector $\bn_s = (-\frac{\partial s}{\partial x},1)$ is normal to the surface and upward.  What is the equivalent formula when $z=s(x,y)$, i.e.~in 3D reality?
+\prob{1}  Sketch an ice surface $z=s(x)$, in the planar case, and convince yourself that the vectors $\bn_s = (-\frac{\partial s}{\partial x},1)$ are normal to the surface and upward.  What is the equivalent formula when $z=s(x,y)$, i.e.~in 3D reality?
 
-\prob{2}  \emph{(Do with a friend.)}  For the ice thickness $H=s-b$, what inequality is equivalent to ``$s\ge b$''?   Which other geophysical fluid layer problems, in cryosphere contexts and outside, have the same inequalities?  What (physically) determines the shapes of margins and termini?
+\prob{2}  \emph{(Do with a friend.)}  For the ice thickness $H=s-b$, what inequality is equivalent to ``$s\ge b$''?   Which other geophysical fluid layer problems, in cryosphere contexts and outside, have the same inequalities?  What (physically) determines the shapes of these fluid layers, and their margins and termini?
 
-\prob{3}  Assume $a=0$ and $w=0$ here, so the SKE is simply $\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = 0$.  For grid spacing $\Delta t,\Delta x$, write down the upwind scheme (see the slides) for both the $u_j\ge 0$ and $u_j\le 0$ cases.  Show that if the CFL condition $|u_j| \frac{\Delta t}{\Delta x} \le 1$ applies for every $j$ then a new surface value is an average of old values.  (For instance, if $u_j\ge 0$ then show that $s_j^{\text{new}} = c_0 s_{j-1} + c_1 s_j$ where $c_0,c_1$ are nonnegative and sum to one.)  What will happen if $\Delta t$ is too large, that is, if the CFL condition is violated?
+\prob{3}  Assume $a=0$ and $w=0$ here, so that the SKE is simply $\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = 0$.  For grid spacing $\Delta t,\Delta x$, write down the upwind scheme (see the slides) for both the $u_j\ge 0$ and $u_j\le 0$ cases.  Show that if the CFL condition $|u_j| \frac{\Delta t}{\Delta x} \le 1$ applies then the new surface value is an average of the old values.  (For instance, when $u_j\ge 0$ show that $s_j^{\text{new}} = c_{-1} s_{j-1} + c_0 s_j$ where $c_{-1},c_0$ are nonnegative and sum to one.)  What will happen if $\Delta t$ is too large, that is, if the CFL condition is violated?
 
-\prob{4}  In the planar case, derive the mass continuity equation ($\frac{\partial H}{\partial t} + \frac{\partial}{\partial x}(\bar u H) = a$) from the SKE ($\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w$), using the incompressibility of ice ($\frac{\partial u}{\partial x} + \frac{\partial w}{\partial z} = 0$).  Here $\bar u(t,x) = H(t,x)^{-1} \int_{b(t,x)}^{s(t,x)} u(t,x,z)\,dz$ is the vertically-averaged ice velocity; note $\bar u H = \int_b^s u\,dz$ is often called the \emph{ice flux}.  Assume that the ice base is non-sliding ($u(t,x,b(x))=0$), non-penetrating ($w(t,x,b(x))=0$), and that the bedrock is not moving ($\frac{\partial b}{\partial t} = 0$).  You can use the general Leibniz rule for differentiating integrals:
+\prob{4}  In the planar case, derive the mass continuity equation ($\frac{\partial H}{\partial t} + \frac{\partial}{\partial x}(\bar u H) = a$) from the SKE ($\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w$), using the incompressibility of ice ($\frac{\partial u}{\partial x} + \frac{\partial w}{\partial z} = 0$).  Here $\bar u(t,x) = H(t,x)^{-1} \int_{b(t,x)}^{s(t,x)} u(t,x,z)\,dz$ is the vertically-averaged ice velocity; note $\bar u H = \int_b^s u\,dz$ is called the \emph{ice flux}.  In the derivation, assume that the ice base is non-sliding ($u(t,x,b(x))=0$), non-penetrating ($w(t,x,b(x))=0$), and that the bedrock is not moving ($\frac{\partial b}{\partial t} = 0$).  Also, use the Leibniz rule for differentiating integrals:
   $$\frac{d}{dx}\left(\int_{g(x)}^{f(x)} k(x,y)\,dy\right) = f'(x) k(x,f(x)) - g'(x) k(x,g(x)) + \int_{g(x)}^{f(x)} \frac{\partial k}{\partial x}(x,y)\,dy.$$
 % SOLUTION:  Show using H=s-b and differentiating with respect to t and the SKE that \frac{\partial H}{\partial t}=-u\frac{\partial s}{\partial x}+a+w.  Next recognize that \frac{\partial}{\partial x}(\bar u H) = \frac{\partial}{\partial x}(\int_b^s u\,dz) is something you can apply the Leibniz rule to.  Do so, using incompressibility and the non-sliding basal ice and non-moving bedrock assumptions.  Add the two expressions (cancellation here!) to get the mass continuity equation.
 
-\prob{5}  Write out the details of the slab-on-a-slope calculation from the slides.  Thereby derive the ($n=3$) velocity formula $u(z) = u_0 + \frac{1}{2} A (\rho g \sin\alpha)^3  \left(H^4 - (H-z)^4\right)$.  Now add in $x$-dependence, to see the velocity formula for the non-sliding SIA velocity.
+\prob{5}  Write out the details of the slab-on-a-slope calculation from the slides.  Thereby derive the ($n=3$) velocity formula $u(z) = u_0 + \frac{1}{2} A (\rho g \sin\alpha)^3  \left(H^4 - (H-z)^4\right)$.  Now add in $x$-dependence, to see the velocity formula for the SIA model velocity.
 
 \prob{6}  \emph{(Do with a friend.)}  Sketch a hypothetical planar glacier shape, with smooth surface and bed.  Sketch what you think the non-sliding SIA formulas will generate for the surface values of the horizontal ($u$) and vertical ($w$) velocity components.  How would the non-sliding Stokes model change your pictures?  Repeat with a different hypothetical shape.
 
 \section*{Computer exercises}
 
-\prob{7}  FIXME
+\begin{quote}
+\emph{These exercises are based on Python codes in the \href{https://github.com/bueler/mccarthy/tree/master/py}{\,\emph{\texttt{py/}} directory} of \emph{\texttt{github.com/ bueler/mccarthy}}; see the \emph{\texttt{README.md}} there.  When you modify a code, first copy it to a new source file, with a new name, and then modify that.  Keep the original, running code in pristine condition!}
+\end{quote}
 
+\prob{7}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} to continue my stability experiments during lecture.  That is, demonstrate conditional stability of the upwind numerical scheme for the SKE by varying the grid spacings $\Delta t$ and $\Delta x$.  Confirm that the CFL condition $|u_j| \frac{\Delta t}{\Delta x} \le 1$ predicts which cases destabilize and which remain stable.
+
+\prob{8}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} to show that the scheme can generate surfaces which violate $s\ge b$, i.e.~\emph{admissibility}.  (As in my experiment during lecture, one can increase the ablation rate to cause this.)  Modify the scheme so that it maintains admissibility, by applying \emph{truncation}.  That is, when a preliminary surface elevation ${\tilde s}_j^{\text{new}}$ is calculated, apply $s_j^{\text{new}} = \max\{{\tilde s}_j^{\text{new}},b_j\}$.
+
+\prob{9}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} so that the data $a,u,w$ can be read from a file.  Check that it runs as before, that is, for values which are the same as in the unmodified code.
+
+\prob{10}  Construct a case where the horizontal velocity depends on time and space: $u=u(t,x)$.  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} to use this case.  Modify the time-stepping scheme so that the time step is determined via the CFL condition.  That is, at each time step, find the largest horizontal speed and adjust the next $\Delta t$ accordingly.
+
+\medskip
+
+\smallskip
+\noindent \emph{Comment.}  Any serious numerical model for glacier geometry should at least have \textbf{8}, \textbf{9}, \textbf{10} capabilities above.  The source of the velocities could be any stress balance submodel.  The surface mass balance could come from an energy balance submodel.
+
+\smallskip
+\prob{11}  In a suitable textbook, read about \emph{implicit time-stepping}, and perhaps also about the \emph{method of lines}.  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} to use an implicit scheme.  Do you see benefits?  What replaces truncation---see \textbf{7 c)}---in an implicit scheme?
+
+\prob{12}  Modify the ice geometry in \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{\texttt{shallowuw.py}} to a case where the glacier terminates.  By trying fractional power shapes for the terminus (margin), show that in some cases the SIA surface velocity goes to zero as one approaches the terminus, and in some cases not.  (\emph{Look up ``Vialov profile'' for a bad case.})  Explain what is going on in terms of the powers which appear in the SIA formulas for surface velocity.
+
+\prob{13}  Combine \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} and \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{\texttt{shallowuw.py}} into one code, and make modifications to numerically solve the time-dependent SIA model by explicit time stepping.  That is, alternately compute surface velocity from the current geometry (a la \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{\texttt{shallowuw.py}}) and then update the geometry using a time step of the SKE (a la \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}}).  Now what is the time step condition for stability?  How might one detect instability as the scheme runs?
 \end{document}
