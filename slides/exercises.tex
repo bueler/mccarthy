@@ -1,7 +1,7 @@
 \documentclass[12pt]{amsart}
 %prepared in AMSLaTeX, under LaTeX2e
 \addtolength{\oddsidemargin}{-.55in} 
-\addtolength{\evensidemargin}{-.55in}
+\addtolength{\evensidemargin}{-0.8in}
 \addtolength{\topmargin}{-.55in}
 \addtolength{\textwidth}{1.3in}
 \addtolength{\textheight}{.9in}
@@ -96,7 +96,8 @@
 
 \section*{Paper exercises}
 
-\prob{1}  Sketch an ice surface $z=s(x)$, in the planar case, and convince yourself that the vectors $\bn_s = (-\frac{\partial s}{\partial x},1)$ are normal to the surface and upward.  What is the equivalent formula when $z=s(x,y)$, i.e.~in 3D reality?
+\vspace{-2mm}
+\prob{1}  Sketch a smooth ice surface $z=s(x)$ in the planar case.  Convince yourself that the vectors $\bn_s = (-\frac{\partial s}{\partial x},1)$ are normal to the surface and upward.  What is the equivalent formula when $z=s(x,y)$, i.e.~in 3D reality?
 
 \prob{2}  \emph{(Do with a friend.)}  For the ice thickness $H=s-b$, what inequality is equivalent to ``$s\ge b$''?   Which other geophysical fluid layer problems, in cryosphere contexts and outside, have the same inequalities?  What (physically) determines the shapes of these fluid layers, and their margins and termini?
 
@@ -112,27 +113,27 @@
 
 \section*{Computer exercises}
 
+\smallskip
 \begin{quote}
-\emph{These exercises are based on Python codes in the \href{https://github.com/bueler/mccarthy/tree/master/py}{\,\emph{\texttt{py/}} directory} of \emph{\texttt{github.com/ bueler/mccarthy}}; see the \emph{\texttt{README.md}} there.  When you modify a code, first copy it to a new source file, with a new name, and then modify that.  Keep the original, running code in pristine condition!}
+\emph{These exercises are based on Python codes in the \href{https://github.com/bueler/mccarthy/tree/master/py}{\,\emph{\texttt{py/}}} directory of \emph{\texttt{github.com/ bueler/mccarthy}}; see the \emph{\texttt{README.md}}.  Note that when you modify a code, first copy it to a new source file and then modify that.  Keep the original, running code in pristine condition to check how things are supposed to work.}
 \end{quote}
 
-\prob{7}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} to continue my stability experiments during lecture.  That is, demonstrate conditional stability of the upwind numerical scheme for the SKE by varying the grid spacings $\Delta t$ and $\Delta x$.  Confirm that the CFL condition $|u_j| \frac{\Delta t}{\Delta x} \le 1$ predicts which cases destabilize and which remain stable.
+\prob{7}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} to systematically test its stability.  That is, demonstrate conditional stability of the upwind numerical scheme for the SKE, by varying the grid spacings $\Delta t$ and $\Delta x$, in the given-velocity case.  Confirm that the CFL condition $|u_j| \frac{\Delta t}{\Delta x} \le 1$ predicts which cases destabilize and which remain stable.
 
-\prob{8}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} to show that the scheme can generate surfaces which violate $s\ge b$, i.e.~\emph{admissibility}.  (As in my experiment during lecture, one can increase the ablation rate to cause this.)  Modify the scheme so that it maintains admissibility, by applying \emph{truncation}.  That is, when a preliminary surface elevation ${\tilde s}_j^{\text{new}}$ is calculated, apply $s_j^{\text{new}} = \max\{{\tilde s}_j^{\text{new}},b_j\}$.
+\prob{8}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} to show that the scheme can generate surfaces which fail $s\ge b$, i.e.~which violate \emph{admissibility}.  (One can increase the ablation rate to cause this.)  Modify the scheme so that it maintains admissibility via \emph{truncation}.  That is, when a preliminary surface elevation ${\tilde s}_j^{\text{new}}$ is calculated, apply $s_j^{\text{new}} = \max\{{\tilde s}_j^{\text{new}},b_j\}$.
 
-\prob{9}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} so that the data $a,u,w$ can be read from a file.  Check that it runs as before, that is, for values which are the same as in the unmodified code.
-
-\prob{10}  Construct a case where the horizontal velocity depends on time and space: $u=u(t,x)$.  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} to use this case.  Modify the time-stepping scheme so that the time step is determined via the CFL condition.  That is, at each time step, find the largest horizontal speed and adjust the next $\Delta t$ accordingly.
+\prob{9}  Construct a case where the horizontal velocity depends on time and space: $u=u(t,x)$.  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} to use this case.  Modify the time-stepping scheme so that the time step is determined via the CFL condition.  That is, at each time step, find the largest horizontal speed and adjust the next $\Delta t$ accordingly.
 
 \medskip
 
 \smallskip
-\noindent \emph{Comment.}  Any serious numerical model for glacier geometry should at least have \textbf{8}, \textbf{9}, \textbf{10} capabilities above.  The source of the velocities could be any stress balance submodel.  The surface mass balance could come from an energy balance submodel.
+\noindent \emph{Comment.}  Any serious numerical model for glacier geometry should at least have \textbf{8} and \textbf{9} capabilities above.  The surface mass balance could then come from an energy balance submodel, and the surface velocities from any stress balance submodel.   However, numerical stability will still not be guaranteed because ice flows downhill.
 
-\smallskip
+\prob{10}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} so that the data $a,u,w$ can be read from a file.  Check that it runs as before, that is, for values which are the same as in the unmodified code.
+
 \prob{11}  In a suitable textbook, read about \emph{implicit time-stepping}, and perhaps also about the \emph{method of lines}.  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} to use an implicit scheme.  Do you see benefits?  What replaces truncation---see \textbf{7 c)}---in an implicit scheme?
 
-\prob{12}  Modify the ice geometry in \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{\texttt{shallowuw.py}} to a case where the glacier terminates.  By trying fractional power shapes for the terminus (margin), show that in some cases the SIA surface velocity goes to zero as one approaches the terminus, and in some cases not.  (\emph{Look up ``Vialov profile'' for a bad case.})  Explain what is going on in terms of the powers which appear in the SIA formulas for surface velocity.
+\prob{12}  Modify the ice geometry in \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{\texttt{shallowuw.py}} to a case where the glacier terminates.  By trying different fractional power shapes for the terminus (margin), show that in some cases the SIA surface velocity goes to zero as one approaches the terminus, and in some cases not.  (\emph{Look up ``Vialov profile'' for a bad case.})  Explain what is going on in terms of the powers which appear in the SIA formulas for surface velocity.
 
-\prob{13}  Combine \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} and \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{\texttt{shallowuw.py}} into one code, and make modifications to numerically solve the time-dependent SIA model by explicit time stepping.  That is, alternately compute surface velocity from the current geometry (a la \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{\texttt{shallowuw.py}}) and then update the geometry using a time step of the SKE (a la \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}}).  Now what is the time step condition for stability?  How might one detect instability as the scheme runs?
+\prob{13}  Combine \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} and \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{\texttt{shallowuw.py}} into one code which numerically solves the time-dependent SIA model via explicit time stepping.  That is, alternately compute surface velocity from the current geometry (\href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{\texttt{shallowuw.py}} does this), and then update the geometry using a time step of the SKE (\href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} does this).  Now what is the time step condition for stability?  How might one detect instability as the scheme runs?
 \end{document}
