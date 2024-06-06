@@ -89,6 +89,7 @@
   \tableofcontents
 \end{frame}
 
+
 \begin{frame}{online materials}
 
 \begin{itemize}
@@ -109,19 +110,24 @@ my slides, notes, codes, and materials are hosted at
 
 \medskip
 {\footnotesize
-these slides: {\footnotesize \href{https://github.com/bueler/mccarthy/blob/master/slides/slides-2024.pdf}{\texttt{mccarthy/blob/master/slides/slides-2024.pdf}}}
+these slides: \href{https://github.com/bueler/mccarthy/blob/master/slides/slides-2024.pdf}{\texttt{slides/slides-2024.pdf}}
 
-notes: {\footnotesize \href{https://github.com/bueler/mccarthy/blob/master/notes/notes-2024.pdf}{\texttt{mccarthy/blob/master/notes/notes-2024.pdf}}}
+exercises: \href{https://github.com/bueler/mccarthy/blob/master/slides/exercises-2024.pdf}{\texttt{slides/exercises-2024.pdf}}
 
-Python codes: {\footnotesize \href{https://github.com/bueler/mccarthy/tree/master/py}{\texttt{mccarthy/tree/master/py/}}}
+notes: \href{https://github.com/bueler/mccarthy/blob/master/notes/notes-2024.pdf}{\texttt{notes/notes-2024.pdf}}
 
-project 13,14 codes: {\footnotesize \href{https://github.com/bueler/mccarthy/tree/master/stokes}{\texttt{mccarthy/tree/master/stokes/}}}
+Python codes: \href{https://github.com/bueler/mccarthy/tree/master/py}{\texttt{py/}}
+
+project 13,14 Python codes: \href{https://github.com/bueler/mccarthy/tree/master/stokes}{\texttt{stokes/}}
+
 }
 \end{frame}
+
 
 \section[how does the surface of a glacier move?]{\textbf{how does the surface of a glacier move?} (hour 1)}
 
 \subsection{basic mathematics}
+
 
 \begin{frame}{surface motion}
 
@@ -132,6 +138,7 @@ project 13,14 codes: {\footnotesize \href{https://github.com/bueler/mccarthy/tre
 %\includegraphics<3>[width=\textwidth]{boatplus}
 \includegraphics<2>[width=\textwidth]{boatplus}
 \end{center}
+
 
 %LIVE really the question is, "what is the most basic thing you can say mathematically at the surface of a glacier?"
 %LIVE imagine a magic glacier boat which always floats on the top of the ice.
@@ -162,6 +169,7 @@ project 13,14 codes: {\footnotesize \href{https://github.com/bueler/mccarthy/tre
 \end{itemize}
 \end{frame}
 
+
 \begin{frame}{surface kinematical equation (SKE)}
 \begin{center}
 \includegraphics[width=0.5\textwidth]{boatplus}
@@ -174,7 +182,7 @@ project 13,14 codes: {\footnotesize \href{https://github.com/bueler/mccarthy/tre
 
 the ice surface moves up and down according to
 \begin{itemize}
-\item<2-4> surface mass balance
+\item<2-4> surface mass balance (SMB)
 \item<3-4> vertical component of ice velocity
 \item<4> horizontal component of ice velocity \emph{and surface slope}
 \end{itemize}
@@ -193,25 +201,27 @@ the ice surface moves up and down according to
 \begin{itemize}
 \item $\bn_s$ is a vector which points upward and is normal (perpendicular) to the ice surface:
 	$$\bn_s = \left(-\frac{\partial s}{\partial x}, \,1\right)$$
-\item recall $\bu=(u,w)$
+\item recall: $\bu=(u,w)$
 \end{itemize}
 \end{frame}
 
-\begin{frame}{plan for hour 1: numerical glacier geometry model using SKE}
+
+\begin{frame}{plan for hour 1: SKE as a numerical glacier geometry model}
 
 \begin{itemize}
 \item \alert{model:} the planar surface kinematical equation (SKE)
 \begin{equation*}
 \frac{\partial s}{\partial t} = a + \bu \cdot \bn_s \qquad \iff \qquad \frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w
 \end{equation*}
-\item \alert{numerical goal:} use a computer program to track the glacier surface $z=s(t,x)$, under some assumptions
+
     \begin{itemize}
-    \item[$\circ$] grid of points $\{x_j\}$
-    \item[$\circ$] unknowns are the gridded surface elevations $s_j \approx s(t_n,x_j)$
     \item[$\circ$] assume $a,u,w$ are given functions/values \uncover<2>{\hfill \alert{$\leftarrow$ this needs fixing!}}
-    \item[$\circ$] from one short Python program in 1D
     \end{itemize}
-\item \alert{problems and issues:}
+\item \alert{numerical modeling goal:} use a computer program to evolve the glacier surface $z=s(t,x)$
+    \begin{itemize}
+    \item[$\circ$] one short Python program in 1D
+    \end{itemize}
+\item \alert{to address:}
      \begin{enumerate}
      \item how to compute time-dependent solutions?
      \item accuracy and stability?
@@ -223,9 +233,9 @@ the ice surface moves up and down according to
 
 
 \begin{frame}[standout]
-the central object of glacier theory is the
+claim: the central object of glacier theory
 
-surface kinematical equation
+is the surface kinematical equation
 
 \begin{equation*}
 \frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w
@@ -233,7 +243,18 @@ surface kinematical equation
 \end{frame}
 
 
-\subsection{numerics}
+\begin{frame}{surface smoothness versus thickness smoothness}
+
+\bigskip
+\begin{center}
+\includegraphics[width=0.95\textwidth]{giscross}
+\end{center}
+
+\hfill \tiny [Data from Morlighem et al (2017), and thanks to A.~Aschwanden]
+\end{frame}
+
+
+\subsection{some numerics}
 
 
 \begin{frame}{discretize the SKE 1}
@@ -243,22 +264,23 @@ surface kinematical equation
 \end{center}
 \end{frame}
 
+
 \begin{frame}{discretize the SKE 2}
 \begin{center}
 \includegraphics[width=0.5\textwidth]{surfacenotation}
 \end{center}
 
 \begin{itemize}
+\item SKE: $\displaystyle \frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w$
+
+\smallskip
 \item choose time step $\Delta t>0$ and grid spacing $\Delta x>0$
-\item in SKE
-\begin{equation*}
-\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w,
-\end{equation*}
-let us approximate partial derivatives by finite difference\footnote{helpful textbooks include LeVeque \cite{Leveque2007} and Morton \& Mayers \cite{MortonMayers2005}} quotients:
+\item approximate partial derivatives by finite difference\footnote{helpful textbooks include LeVeque \cite{Leveque2007} and Morton \& Mayers \cite{MortonMayers2005}} quotients:
     $$\frac{\partial s}{\partial t} \approx \frac{\snew_j - s_j}{\Delta t}, \qquad \frac{\partial s}{\partial x} \approx \frac{s_{j+1} - s_{j-1}}{2\Delta x}$$
 \phantom{foo}
 \end{itemize}
 \end{frame}
+
 
 \begin{frame}{discretize the SKE 3}
 \begin{center}
@@ -273,6 +295,7 @@ let us approximate partial derivatives by finite difference\footnote{helpful tex
 \end{itemize}
 \end{frame}
 
+
 \begin{frame}{upwinding}
 
 \begin{itemize}
@@ -280,26 +303,23 @@ let us approximate partial derivatives by finite difference\footnote{helpful tex
 \item if we implement this ``forward-time centered-space'' scheme
 	$$\snew_j = s_j - \Delta t\, u_j \frac{s_{j+1}-s_{j-1}}{2\Delta x} + \Delta t (a_j + w_j) \hspace{1.0cm} \leftarrow \text{\emph{\alert{bad}}}$$
 then bad things happen!
-\item instead, it is known that when the ``advecting velocity'', here $u_j$, is positive then the ``upwind'' version is stable:
+\item instead, it is known that when the ``advecting velocity'' is positive ($u_j \ge 0$) then the ``upwind'' version is conditionally stable:
 	$$\hspace{3mm} \snew_j = s_j - \Delta t\, u_j \frac{s_j-s_{j-1}}{\Delta x} + \Delta t (a_j + w_j) \hfill \hspace{1.2cm} \leftarrow \text{\emph{useful}}$$
 
     \begin{itemize}
-    \item[$\circ$] when $u_j<0$ use $\partial s/\partial x \approx (s_{j+1}-s_j)/\Delta x$
-    \item[$\circ$] actually, it is ``conditionally stable''
-    \end{itemize}
-\item actually, this scheme is ``conditionally stable''
-    \begin{itemize}
-    \item[$\circ$] the condition is known \comm{demo soon}
+    \item[$\circ$] upwind formula: \quad $\displaystyle \frac{\partial s}{\partial x} \approx \frac{1}{\Delta x} \begin{cases} (s_j-s_{j-1}), & u_j \ge 0 \\ (s_{j+1}-s_j), & u_j < 0 \end{cases}$
+    \item[$\circ$] the condition for stability is known \comm{demo soon}
     \end{itemize}
 %\item see textbooks for these caveats
 \end{itemize}
 \end{frame}
 
+
 \begin{frame}[fragile]\frametitle{implementation}
 
 \begin{itemize}
-\item the upwind equation:
-    $$\snew_j = s_j - \Delta t\, u_j \frac{s_{j+1}-s_j}{\Delta x} + \Delta t (a_j + w_j)$$
+\item this upwind scheme for the SKE (assumes $u_j \ge 0$):
+    $$\snew_j = s_j - \Delta t\, u_j \frac{s_j-s_{j-1}}{\Delta x} + \Delta t (a_j + w_j)$$
 becomes a Python function:
 \end{itemize}
 \begin{lstlisting}[language=PythonPlus]
@@ -315,7 +335,7 @@ def explicitstep(s, x, dt):
 {\footnotesize
     \begin{itemize}
     \item[$\circ$] \texttt{x}, \texttt{s}, \texttt{snew} are 1D NumPy arrays
-    \item[$\circ$] separate functions define $a(x)$, $u(x)$, $w(x)$ \comm{made-up values here!}
+    \item[$\circ$] separate functions define $a(x)$, $u(x)$, $w(x)$ \comm{(need to make up some values)}
     \item[$\circ$] \texttt{x} is equally-spaced
     \item[$\circ$] $j=$\texttt{[1:]} indicates all indices except zero
     \item[$\circ$] note that \, \texttt{snew[0] = s[0]} \, is never changed; this is a boundary condition
@@ -338,31 +358,52 @@ def explicitstep(s, x, dt):
 $ python3 surface1d.py
 $ eog output/frame*.png          # any image viewer
 \end{verbatim}
-\item the following modifications reveal issues:
+\item the following example modifications reveal stability issues:
     \begin{enumerate}
-    \item increase velocity: \quad $u(x)$ \, $\to$ \, $4 u(x)$
-    \item or lengthen time-steps: \quad $\Delta t = 1$ a \, $\to$ \, $\Delta t = 2.5$ a
+    \item increase velocity: \quad $u(x)$ \, $\to$ \, $2.5\, u(x)$
+    \item increase resolution: \quad $\Delta x=1000$ m \, $\to$ \, $\Delta x=400$ m
+    \item lengthen time-steps: \quad $\Delta t = 1$ a \, $\to$ \, $\Delta t = 2.5$ a
     \end{enumerate}
 \end{itemize}
 \end{block}
 \end{frame}
 
+
 \begin{frame}{condition for time-stepping stability}
-\begin{center}
-\includegraphics[width=0.7\textwidth]{steady} FIXME cfl fig
-\end{center}
 
-\bigskip
+\bigskip\medskip
 \begin{itemize}
-\item FIXME cfl
-$$|u_j| \frac{\Delta t}{\Delta x} \le 1$$
+\item if horizontal velocity $u$ is given
 
-$$\Delta t \le \frac{\Delta x}{\max |u_j|}$$
+in the SKE $\left(\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w\right)$,
+
+info about surface changes
+
+travels at speed $u$
+\item from this $(t,x)$ grid picture, the
+
+upwind scheme can only be
+
+stable if
+$$|u_j| \Delta t \le \Delta x \hspace{40mm}$$
+
+for every $j$
+    \begin{itemize}
+    \item[$\circ$] observed by Courant, Friedrichs, and Lewy (1928)
+    \end{itemize}
+
+\vspace{-45mm}
+\hfill \includegraphics[width=0.43\textwidth]{cfl.png}
+
+\vspace{15mm}
+\item this is the \alert{CFL condition} on the time step:
+$$\Delta t \le \frac{\Delta x}{\max |u_j|} \hspace{40mm}$$
 \end{itemize}
 \end{frame}
 
+
 \begin{frame}[fragile]
-\frametitle{live demo cont.: steady state of a glacier surface}
+\frametitle{live demo: steady state of a glacier surface}
 \begin{center}
 \includegraphics[width=0.7\textwidth]{steady}
 \end{center}
@@ -386,6 +427,7 @@ $ eog output/steady.png
 \end{block}
 \end{frame}
 
+
 \begin{frame}{2D steady state of a glacier surface}
 
 \begin{itemize}
@@ -400,7 +442,7 @@ $ eog output/steady.png
 
 {\small \texttt{mccarthy/py/surface2d.py}}
 
-\item result figure $\rightarrow$
+\item result: $\rightarrow$
 
 \vspace{-25mm}
 \mbox{\hspace{60mm} \includegraphics[width=0.45\textwidth]{surface2d}}
@@ -423,13 +465,36 @@ $ eog output/steady.png
 \item \alert{but subject to $s \ge b$}
 
 \medskip
-\item versus time-dependent SKE in 2D: \quad $\displaystyle \frac{\partial s}{\partial t} - \bu \cdot \bn_s = a$
+\item compare time-dependent SKE in 2D: \quad $\displaystyle \frac{\partial s}{\partial t} - \bu \cdot \bn_s = a$
 \end{itemize}
 \end{frame}
 
+
+\begin{frame}[standout]
+let's talk about all the many issues
+\end{frame}
+
+
 \begin{frame}{many issues}
 \begin{itemize}
-\item FIXME
+\item[] \alert{MAJOR modeling issues}
+    \begin{enumerate}
+    \item whence the SMB $a$?
+    \item whence the surface velocity $u,w$? \comm{2nd hour!}
+    \end{enumerate}
+\item[] \alert{mathematical issues}
+    \begin{enumerate}\setcounter{enumi}{2}
+    \item is the time-dependent SKE well-posed for (various) initial \& boundary data?
+    \item is the steady-state SKE well-posed for (various) boundary data?
+    \item how do we understand admissibility $s\ge b$ (in theory)?
+    \end{enumerate}
+\item[] \alert{numerical issues}
+    \begin{enumerate}\setcounter{enumi}{5}
+    \item when the surface velocity $u, w$ comes from a stress-balance submodel, is the upwind scheme still conditionally stable?
+    \item are there better explicit schemes?
+    \item how does one enforce admissibility the best way?
+    \item is it better to use an implicit scheme?
+    \end{enumerate}
 \end{itemize}
 \end{frame}
 
@@ -636,14 +701,15 @@ u(z) &= u_0 + 2 A (\rho g \sin\alpha)^3 \int_0^z (H-z')^3\,dz' \\
 \includegraphics[width=1.0\textwidth]{athabasca-deform}
 
 \medskip
-\scriptsize
-Velocity profile of the Athabasca Glacier, Canada, derived from inclinometry \cite{SavagePaterson1963}
+\tiny [velocity profile of the Athabasca Glacier, Canada;
+
+from inclinometry (Savage \& Paterson 1963)]
 \end{column}
 \end{columns}
 \end{frame}
 
 
-\subsection{numerics}
+\subsection{some numerics}
 
 \begin{frame}{Summary}
 FIXME
@@ -653,15 +719,17 @@ FIXME
   Questions?
 \end{frame}
 
+
 \appendix
+
 
 \setbeamerfont{bibliography item}{size=\scriptsize}
 \setbeamerfont{bibliography entry author}{size=\scriptsize}
 \setbeamerfont{bibliography entry title}{size=\scriptsize}
 \setbeamerfont{bibliography entry location}{size=\scriptsize}
 \setbeamerfont{bibliography entry note}{size=\scriptsize}
-
 \setbeamertemplate{frametitle continuation}{}  % remove the "i"
+
 \begin{frame}[allowframebreaks]
 \frametitle{References}
 \setbeamertemplate{bibliography item}[text]
@@ -694,6 +762,7 @@ Extra Slides
 \end{itemize}
 \end{frame}
 
+
 \begin{frame}{SKE from mass conservation 2}
 \begin{center}
 \includegraphics[width=0.4\textwidth]{skederive.png}
@@ -710,6 +779,7 @@ Extra Slides
 \item notation: $\bpsi =$ mass flux, $\hbn =$ outward unit normal
 \end{itemize}
 \end{frame}
+
 
 \begin{frame}{SKE from mass conservation 3}
 \begin{center}
@@ -738,6 +808,7 @@ Extra Slides
 \end{itemize}
 \end{frame}
 
+
 \begin{frame}{SKE from mass conservation 4}
 
 \begin{itemize}
@@ -750,6 +821,7 @@ Extra Slides
 
 \end{itemize}
 \end{frame}
+
 
 \begin{frame}{SKE from mass conservation 5}
 
@@ -770,6 +842,7 @@ w(t,x,z) &= w(t,x_0,z_0) + O(\delta) + O(\eps) \\
 \end{align*}
 \end{itemize}
 \end{frame}
+
 
 \begin{frame}{SKE from mass conservation 6}
 

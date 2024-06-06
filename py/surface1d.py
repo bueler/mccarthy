@@ -11,7 +11,7 @@ enter into the SKE itself.
 Convenient way to run and view (where "eog" is a .png viewer):
    $ rm -rf output/;  python3 surface1d.py;  eog output/
 
-Explore using code modifications as follows:
+Explore using code modifications (for example):
    u(x)    -->  4 * u(x)    instability
    N = 50  -->  N = 20      instability (N = 25 is threshold)
    a(x)    -->  2 * a(x)    violate s >= b, even for steady
@@ -64,7 +64,7 @@ def mkoutdir(dirname):
 
 def run_evolution():
     # space-time grid info
-    x = np.linspace(0.0, L, J + 1)
+    x = np.linspace(0.0, L, J + 1)  # dx = (L - 0) / J
     dx = x[1] - x[0]
     dt = (T_a * secpera) / N
     print(f'  stability constant = {u(x).max() * dt / dx:8.4f}')
