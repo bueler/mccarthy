@@ -211,7 +211,7 @@ the ice surface moves up and down according to
 \begin{itemize}
 \item \alert{model:} the planar surface kinematical equation (SKE)
 \begin{equation*}
-\frac{\partial s}{\partial t} = a + \bu \cdot \bn_s \qquad \iff \qquad \frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w
+\frac{\partial s}{\partial t} - \bu \cdot \bn_s = a \qquad \iff \qquad \frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w
 \end{equation*}
 
     \begin{itemize}
@@ -302,7 +302,7 @@ is the surface kinematical equation
 \item \alert{however \dots}
 \item if we implement this ``forward-time centered-space'' scheme
 	$$\snew_j = s_j - \Delta t\, u_j \frac{s_{j+1}-s_{j-1}}{2\Delta x} + \Delta t (a_j + w_j) \hspace{1.0cm} \leftarrow \text{\emph{\alert{bad}}}$$
-then bad things happen!
+then bad things happen! \comm{exercise?}
 \item instead, it is known that when the ``advecting velocity'' is positive ($u_j \ge 0$) then the ``upwind'' version is conditionally stable:
 	$$\hspace{3mm} \snew_j = s_j - \Delta t\, u_j \frac{s_j-s_{j-1}}{\Delta x} + \Delta t (a_j + w_j) \hfill \hspace{1.2cm} \leftarrow \text{\emph{useful}}$$
 
@@ -326,7 +326,7 @@ becomes a Python function:
 def explicitstep(s, x, dt):
     dx = x[1] - x[0]
     snew = s.copy()
-    snew[1:] -= dt * u(x[1:]) * (s[1:] - s[:-1]) / dx
+    snew[1:] -= dt * u(x[1:]) * (s[1:] - s[:-1]) / dx  # assumes u >= 0
     snew[1:] += dt * (a(x[1:]) + w(x[1:]))
     return snew
 \end{lstlisting}
@@ -335,7 +335,7 @@ def explicitstep(s, x, dt):
 {\footnotesize
     \begin{itemize}
     \item[$\circ$] \texttt{x}, \texttt{s}, \texttt{snew} are 1D NumPy arrays
-    \item[$\circ$] separate functions define $a(x)$, $u(x)$, $w(x)$ \comm{(need to make up some values)}
+    \item[$\circ$] separate functions define $a(x)$, $u(x)$, $w(x)$ \comm{(need to make up some values?)}
     \item[$\circ$] \texttt{x} is equally-spaced
     \item[$\circ$] $j=$\texttt{[1:]} indicates all indices except zero
     \item[$\circ$] note that \, \texttt{snew[0] = s[0]} \, is never changed; this is a boundary condition
@@ -377,7 +377,7 @@ $ eog output/frame*.png          # any image viewer
 
 in the SKE $\left(\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w\right)$,
 
-info about surface changes
+then info about the surface
 
 travels at speed $u$
 \item from this $(t,x)$ grid picture, the
@@ -396,7 +396,7 @@ for every $j$
 \hfill \includegraphics[width=0.43\textwidth]{cfl.png}
 
 \vspace{15mm}
-\item this is the \alert{CFL condition} on the time step:
+\item rearranged, this is the \alert{CFL condition} on the time step:
 $$\Delta t \le \frac{\Delta x}{\max |u_j|} \hspace{40mm}$$
 \end{itemize}
 \end{frame}
@@ -428,7 +428,7 @@ $ eog output/steady.png
 \end{frame}
 
 
-\begin{frame}{2D steady state of a glacier surface}
+\begin{frame}{teaser: 2D steady state of a glacier surface}
 
 \begin{itemize}
 \item this example uses \href{https://www.firedrakeproject.org/}{Firedrake}
@@ -471,7 +471,14 @@ $ eog output/steady.png
 
 
 \begin{frame}[standout]
-let's talk about all the many issues
+let's talk about all the (many) issues
+
+when numerically solving the SKE
+
+\vspace{10mm}
+\begin{center}
+\includegraphics[width=0.5\textwidth]{boatplus}
+\end{center}
 \end{frame}
 
 
@@ -479,14 +486,14 @@ let's talk about all the many issues
 \begin{itemize}
 \item[] \alert{MAJOR modeling issues}
     \begin{enumerate}
-    \item whence the SMB $a$?
+    \item whence the SMB $a$? \comm{Regine!}
     \item whence the surface velocity $u,w$? \comm{2nd hour!}
     \end{enumerate}
 \item[] \alert{mathematical issues}
     \begin{enumerate}\setcounter{enumi}{2}
     \item is the time-dependent SKE well-posed for (various) initial \& boundary data?
     \item is the steady-state SKE well-posed for (various) boundary data?
-    \item how do we understand admissibility $s\ge b$ (in theory)?
+    \item how do we understand admissibility $s\ge b$ in the theory?
     \end{enumerate}
 \item[] \alert{numerical issues}
     \begin{enumerate}\setcounter{enumi}{5}
@@ -503,19 +510,19 @@ let's talk about all the many issues
 
 \subsection{basic mathematics}
 
-\begin{frame}{ice in glaciers is an atypical fluid}
+\begin{frame}{ice in glaciers is an atypical fluid (relative to textbooks)}
 
 \begin{itemize}
 \item if the ice were
   \begin{itemize}
   \item[$\circ$] faster-moving than it actually is, and
-  \item[$\circ$] linearly-viscous like liquid water
+  \item[$\circ$] linearly-viscous like liquid water or air
   \end{itemize}
 
   then it would be a ``typical'' fluid
 
 \bigskip
-\item for typical fluids one uses the Navier-Stokes equations:
+\item for liquid water one uses the incompressible Navier-Stokes equations:
 \begin{align*}
 \nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \\
 \rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) &= -\nabla p + \nabla \cdot \tau_{ij} + \rho \mathbf{g} &&\text{\emph{stress balance}} \\
@@ -524,7 +531,7 @@ let's talk about all the many issues
 
 \medskip
     \begin{itemize}
-    \item[$\circ$] stress balance equation is ``$m a = F$''
+    \item[$\circ$] note that the stress balance equation is ``$m a = F$''
     \end{itemize}
 \end{itemize}
 \end{frame}
@@ -533,10 +540,10 @@ let's talk about all the many issues
 \begin{frame}{glaciology as computational fluid dynamics}
 
 \begin{itemize}
-\item \alert{yes}, numerical ice sheet flow modelling is ``computational fluid dynamics''
+\item nonetheless, numerical glacier modelling is first-class ``computational fluid dynamics''
   \begin{itemize}
   \item[$\circ$] it's large-scale like atmosphere and ocean
-  \item[$\circ$] \dots\, but it is a weird one
+  \item[$\circ$] \dots\, but it is weird relative to those
   \end{itemize}
 \item consider what makes atmosphere/ocean flow exciting:
   \begin{itemize}
@@ -546,10 +553,7 @@ let's talk about all the many issues
   \item[$\circ$] density stratification
   \end{itemize}
 \item none of the above list is relevant to ice flow
-\item what could be interesting about the flow of slow, cold, stiff, laminar, inert old ice?
-  \begin{itemize}
-  \item[$\circ$] \emph{ice dynamics!}
-  \end{itemize}
+\item how do we handle slow, cold, stiff, laminar, and inert ice?
 \end{itemize}
 \end{frame}
 
@@ -563,18 +567,24 @@ let's talk about all the many issues
       $$\rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) \approx 0 \qquad \iff \qquad \begin{pmatrix} \text{forces of inertia} \\ \text{are neglected} \end{pmatrix}$$
     \item[$\circ$] ice is non-Newtonian in a ``shear-thinning'' way
         \begin{itemize}
-        \item higher strain rates means lower viscosity
-        \item viscosity $\nu$ is not constant
+        \item ``non-Newtonian'' means viscosity $\nu$ is not constant and depends on the fluid state
+        \item specifically: higher strain rates means lower viscosity
         \end{itemize}
     \end{itemize}
 
 \bigskip
-\item thus the standard model is Glen-law Stokes:
+\item thus the standard model is \alert{(Glen-Steinmann power law) Stokes}:
 \begin{align*}
 \nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \\
 0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \mathbf{g} &&\text{\emph{stress balance}} \\
 D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij} &&\text{\emph{flow law}}
 \end{align*}
+
+    \begin{itemize}
+    \item[$\circ$] in fact the standard model of glaciology is:
+
+\alert{SKE $+$ (Glen-law) Stokes}
+    \end{itemize}
 
 \end{itemize}
 \end{frame}
@@ -583,18 +593,16 @@ D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij} &&\text{\emph{flow law}}
 \begin{frame}{``slow'' means no memory of velocity/momentum}
 
 \begin{itemize}
-\item note \emph{no time derivatives} in Stokes model:
-\small
+\item note \emph{no time derivatives} in the Stokes flow model:
 \begin{align*}
 \nabla \cdot \mathbf{u} &= 0 \\
 0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \mathbf{g} \\
 D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
 \end{align*}
-\normalsize
-\item thus a time-stepping ice sheet code can/must recompute the full velocity field at every time step
+\item thus a time-stepping ice sheet code can (must?) recompute the velocity field at every time step
   \begin{itemize}
-  \item[$\circ$] velocity is \emph{not} required from the previous time step
-  \item[$\circ$] velocity is a ``diagnostic'' output not needed for starting or restarting the model
+  \item[$\circ$] but velocity from the previous time step is \emph{not} required
+  \item[$\circ$] velocity is a ``diagnostic'' output, not needed for (re)starting the model
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -603,11 +611,8 @@ D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
 \begin{frame}{plane flow Stokes}
 
 \begin{itemize}
-\item again we work in a $x,z$ plane
-    \begin{itemize}
-    \item[$\circ$] glacier flow line (center line), or a cross-flow plane
-    \end{itemize}
-\item $n=3$ Stokes equations say:
+\item return to a $x,z$ plane \dots
+\item $n=3$ Glen-law Stokes equations say:
 \begin{empheq}[]{align}
 u_x + w_z &= 0 &&\text{\emph{incompressibility}}\notag \\
 p_x &= \tau_{11,x} + \tau_{13,z} &&\text{\emph{stress balance} ($x$)} \notag \\
@@ -620,29 +625,35 @@ u_z + w _x &= 2 A \tau^2 \tau_{13} &&\text{\emph{flow law (off-diagonal)}} \nota
     \begin{itemize}
     \item[$\circ$] \emph{notation}: subscripts $x,z$ denote partial derivatives, $\tau_{13}$ is the ``vertical'' shear stress, $\tau_{11}$ and $\tau_{33}=-\tau_{11}$ are (deviatoric) longitudinal stresses
     \end{itemize}
-\item we have five equations in five unknowns ($u,w,p,\tau_{11},\tau_{13}$)
-\item this is complicated enough \dots what about in a simplified situation?
+\item we have 5 equations in 5 unknowns ($u,w,p,\tau_{11},\tau_{13}$)
+\item this is complicated enough \dots \,try a simplified situation?
 \end{itemize}
 \end{frame}
 
 
 \begin{frame}{slab-on-a-slope}
 
-\hfill \includegraphics[width=0.4\textwidth]{slab}
+\vspace{5mm}
+\hfill \includegraphics[width=0.45\textwidth]{slab}
 
-\vspace{-30mm}
+\vspace{-45mm}
 \begin{itemize}
 \item suppose constant thickness
-\item tilt bedrock by angle $\alpha$
-\item rotate the coordinates
-\item get replacement expressions:
+
+and constant bedrock slope
+
+with angle $\alpha$
+\item rotate the coordinates so $x$
+
+is bed-parallel
+\item new expressions:
 \begin{align*}
-\mathbf{g} &= g \sin\alpha\, \hat x - g \cos \alpha \,\hat z \phantom{dslfkj sdkfjlskdjf  sdlfj}\\
+\mathbf{g} &= g \sin\alpha\, \hat x - g \cos \alpha \,\hat z \hspace{40mm} \\
 p_x &= \tau_{11,x} + \tau_{13,z} + \rho g \sin\alpha \\
 p_z &= \tau_{13,x} - \tau_{11,z} - \rho g \cos\alpha
 \end{align*}
 \item for \alert{slab-on-a-slope} there is \emph{no variation in} $x$:\quad $\partial/\partial x = 0$
-\item the equations simplify:
+\item the 5 equations simplify:
 \small
 \begin{empheq}[box=\fbox]{align}
 w_z &= 0 &   0 &= \tau_{11} \notag \\
@@ -656,9 +667,9 @@ p_z &= - \rho g \cos\alpha \notag
 \begin{frame}{slab-on-a-slope 2}
 
 \begin{itemize}
-\item add boundary conditions:
+\item now add boundary conditions:
 	$$w(\text{base})=0, \qquad p(\text{surface})=0, \qquad u(\text{base})=u_0$$
-\item by integrating vertically, get:
+\item then by integrating vertically, get:
 \begin{align*}
 w &= 0 \phantom{asdfklj asldkfjalk asdfkj sdlfkj sldafkj adlfjl sdfakj }\\
 p &= \rho g \cos\alpha (H-z) \\
@@ -672,7 +683,7 @@ p &= \rho g \cos\alpha (H-z) \\
 \item $\tau_{13}$ is linear in depth
 
 \medskip
-\item from $u_z = 2 A \tau^2 \tau_{13}$ get \alert{velocity formula}
+\item from $u_z = 2 A \tau^2 \tau_{13}$ get a \alert{velocity formula}:
 \vspace{-0.05in}
 \begin{align*}
 u(z) &= u_0 + 2 A (\rho g \sin\alpha)^3 \int_0^z (H-z')^3\,dz' \\
