@@ -9,16 +9,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 secpera = 31556925.0
 
-wave = True            # set to False to compare slab-on-slope formula
+slabonslope = False    # when False, put waves on surface
 
 # instance parameters
 L = 20.0e3             # length of domain (m)
 H0 = 400.0             # reference ice thickness (m)
 alpha = -0.02          # slope of bed
-if wave:
-    wave_amp = 20.0    # amplitude of surface waves
-else:
+if slabonslope:
     wave_amp = 0.0
+else:
+    wave_amp = 20.0    # amplitude of surface waves
 wave_len = 8.0e3       # wavelength of surface waves
 J = 80                 # number of subintervals (in x direction)
 outdir = 'output/'     # directory name for image output
@@ -129,8 +129,7 @@ def compute_velocity():
     ww = w(x, b(x), s(x)) * secpera
     print(f'  range for u:  min = {uu.min():9.4f},  max = {uu.max():9.4f}  (m/a)')
     print(f'  range for w:  min = {ww.min():9.4f},  max = {ww.max():9.4f}  (m/a)')
-    if not wave:
-        # in slab-on-slope case, compare horizontal surface velocity
+    if slabonslope:
         u_slab = - (2.0 / (n+1)) * A * (rhoi * g)**n * abs(alpha)**2 * alpha * H0**(n+1)
         print(f'  COMPARE: slab-on-slope says u={u_slab * secpera:.4f} (m/a)')
     return x, uu, ww
