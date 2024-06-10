@@ -53,27 +53,25 @@ def u(x, b, s):
     return (ult + urt) / 2.0
 
 def vert_int_u_stag(j, x, b, s, zb, zs):
-    '''Vertically integrate the horizontal velocity at a
-    staggered location jj = j+1/2 from level zb up to level zs.
+    '''Vertically integrate the horizontal velocity, at a
+    staggered location jj = j+1/2, from level zb up to level zs.
     Inputs are a horizontal index j, three vectors x, b, s
     (functions of x), and two scalars zb, zs.
 
-    This most-technical code integrates ujj(z), which is
-    defined piecewise as follows.  For a given j the staggered-
-    location values of b, s, and surface slope are computed
-    (namely: bjj, sjj, dsjj).  SIA formulas convert these to
-    constant values alf, bet in the formula for the horizontal
-    velocity:
+    This code integrates ujj(z), which is defined piecewise as
+    follows.  For a given j the staggered-location values of
+    b, s, and surface slope are computed (namely: bjj, sjj,
+    dsjj).  SIA formulas convert these to constant values
+    alf, bet in the formula for the horizontal velocity:
                 / 0
       ujj(z) = |  alf * (bet - (sjj - z)^(n+1))
                 \ alf * bet
     for vertical ranges z <= bjj, bjj < z < sjj, sjj <= z
-    respectively.  Note that ujj = 0 below the bed and that
-    it is continued above the surface by its surface value.
-
+    respectively.  Note that ujj = 0 below the bed, and
+    it is continued above the surface as constant.
     The returned value is the exact integral
-      I = int_zb^zs ujj(z) dz.  Six cases are needed to
-    compute this integral.
+      I = int_zb^zs ujj(z) dz.
+    Six cases are needed to compute this integral.
     '''
     assert zb <= zs
     dx = x[1] - x[0]
