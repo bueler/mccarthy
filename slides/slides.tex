@@ -870,15 +870,15 @@ FIXME figure with $u_{j-1/2}(z)$ and $u_{j+1/2}(z)$ AND levels for $w(x)$ calcul
 
 \begin{block}{live demo}
 \begin{verbatim}
-       $ python3 shallowuw.py
-       $ eog output/uw.png
+      $ python3 shallowuw.py
+      $ eog output/uw.png
 \end{verbatim}
 
 \vspace{-2mm}
 \begin{itemize}
 \item the following modification suggests robustness:
     \begin{enumerate}
-    \item \texttt{H0} $=100$ m, \, \texttt{wave\_amp} $=200$ m
+    \item \texttt{H0} $=100$ m and \texttt{wave\_amp} $=200$ m
     \end{enumerate}
 \end{itemize}
 \end{block}
@@ -896,12 +896,12 @@ w &= - \int_{b}^{s} \frac{\partial u}{\partial x}(x,z)\,dz
 \end{align*}
 \item implementing is an exercise (exercise \textbf{13})
   \begin{itemize}
-  \item[$\circ$] combine my above codes \href{https://github.com/bueler/mccarthy/blob/master/py/surace1d.py}{py/surface1d.py} and \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{py/shallowuw.py}
+  \item[$\circ$] combine my codes \href{https://github.com/bueler/mccarthy/blob/master/py/surace1d.py}{py/surface1d.py} and \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{py/shallowuw.py}
   \end{itemize}
 \item important fact: \alert{this model \emph{diffuses} the surface elevation}
   \begin{itemize}
-  \item[$\circ$] it is because ice flows downhill
-  \item[$\circ$] this fact affects which time-step conditions are sufficient for stability
+  \item[$\circ$] because ice flows downhill
+  \item[$\circ$] time-step conditions sufficient for stability are known
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -942,10 +942,7 @@ D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
   \item[$\circ$] I do not trust \emph{anyone's} view of time stepping (yet)
   \item[$\circ$] subject (as always) to \alert{$s \ge b$}
   \end{itemize}
-\item stopping here!
-  \begin{itemize}
-  \item[$\circ$] but projects 13, 14 look at numerical solutions of the Stokes equations (w/o SKE)
-  \end{itemize}
+\item projects 13, 14 look at numerical solutions of the Stokes equations only (w/o SKE)
 \end{itemize}
 \end{frame}
 
@@ -955,13 +952,13 @@ D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
 \item[] \alert{MAJOR modeling issues}
     \begin{enumerate}
     \item \alert{sliding laws} determine the basal stress state; what's good?
-    \item how to adapt Stokes to compressible (e.g.~across CTS) ice?
+    \item how to adapt Stokes to compressible (e.g.~temperate) ice?
     \end{enumerate}
 \item[] \alert{mathematical issues}
     \begin{enumerate}\setcounter{enumi}{2}
-    \item \dots \quad \comm{I'm happy to talk separately \dots}
+    \item \dots \quad \comm{I'm happy to talk separately}
     \end{enumerate}
-\item[] \alert{numerical issues}
+\item[] \alert{numerical issues/recommendations}
     \begin{enumerate}\setcounter{enumi}{3}
     \item as a practical matter, use a powerful finite element library
         \begin{itemize}
