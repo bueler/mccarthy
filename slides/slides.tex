@@ -863,21 +863,23 @@ FIXME figure with $u_{j-1/2}(z)$ and $u_{j+1/2}(z)$ AND levels for $w(x)$ calcul
 
 \begin{frame}[fragile]
 \frametitle{live demo: SIA velocity for wavy surface}
+
 \begin{center}
-FIXME %\includegraphics[width=0.7\textwidth]{steady}
+\includegraphics[width=0.55\textwidth]{uw}
 \end{center}
 
-\bigskip
-\begin{itemize}
-\item FIXME
-\end{itemize}
-
 \begin{block}{live demo}
-\begin{itemize}
-\item FIXME:
 \begin{verbatim}
-$ foo
+       $ python3 shallowuw.py
+       $ eog output/uw.png
 \end{verbatim}
+
+\vspace{-2mm}
+\begin{itemize}
+\item the following modification suggests robustness:
+    \begin{enumerate}
+    \item \texttt{H0} $=100$ m, \, \texttt{wave\_amp} $=200$ m
+    \end{enumerate}
 \end{itemize}
 \end{block}
 \end{frame}
