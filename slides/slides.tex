@@ -182,7 +182,7 @@ project 13,14 Python codes: \href{https://github.com/bueler/mccarthy/tree/master
 
 the ice surface moves up and down according to
 \begin{itemize}
-\item<2-4> surface mass balance (SMB)
+\item<2-4> surface mass balance (SMB) \comm{(\emph{climatic} mass balance ice equiv.)}
 \item<3-4> vertical component of ice velocity
 \item<4> horizontal component of ice velocity \emph{and surface slope}
 \end{itemize}
@@ -219,7 +219,7 @@ the ice surface moves up and down according to
     \end{itemize}
 \item \alert{numerical modeling goal:} use a computer program to evolve the glacier surface $z=s(t,x)$
     \begin{itemize}
-    \item[$\circ$] one short Python program in 1D
+    \item[$\circ$] one short Python program in 1D: \quad \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{py/surface1d.py}
     \end{itemize}
 \item \alert{to address:}
      \begin{enumerate}
@@ -353,7 +353,7 @@ def explicitstep(s, x, dt):
 \bigskip
 \begin{block}{live demo}
 \begin{itemize}
-\item run \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{mccarthy/py/surface1d.py}:
+\item run \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{py/surface1d.py}:
 \begin{verbatim}
 $ python3 surface1d.py
 $ eog output/frame*.png          # any image viewer
@@ -438,9 +438,7 @@ $ eog output/steady.png
     \item[$\circ$] \emph{or project 6, 13, 14 people!}
     \end{itemize}
 }
-\item code:
-
-{\small \texttt{mccarthy/py/surface2d.py}}
+\item code: \href{https://github.com/bueler/mccarthy/blob/master/py/surface2d.py}{py/surface2d.py}
 
 \item result: $\rightarrow$
 
@@ -596,7 +594,7 @@ D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij} &&\text{\emph{flow law}}
 \item note \emph{no time derivatives} in the Stokes flow model:
 \begin{align*}
 \nabla \cdot \mathbf{u} &= 0 \\
-0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \mathbf{g} \\
+-\nabla \cdot \tau_{ij} + \nabla p &= \rho\, \bm{g} \\
 D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
 \end{align*}
 \item thus, in the standard model, the velocity and pressure fields of a glacier are \alert{instantaneous functions} of the glacier geometry and its boundary stresses
@@ -728,14 +726,16 @@ from inclinometry (Savage \& Paterson 1963)]
 \begin{frame}{plan for hour 2: surface velocity from the SIA model}
 
 \begin{itemize}
-\item \alert{model:} the shallow ice approximation (SIA) adopts the above slab-on-slope formula for $u(x)$, but as a general formula for glaciers
+\item \alert{model:} the nonsliding shallow ice approximation (SIA)
   \begin{itemize}
+  \item[$\circ$] this model adopts the above slab-on-slope formula for $u(x)$ \emph{as a general formula for glaciers}
   \item[$\circ$] it is an imperfect stress balance (momentum) model for a glacier, but it gives a meaningful velocity field in any geometry
+  \item[$\circ$] there are careful shallowness scale analysis arguments ($\eps = [H]/[L] \to 0$) for this SIA model \cite{Fowler1997}
   \end{itemize}
-\item \alert{numerics:}
+\item \alert{numerical modeling goals:}
   \begin{itemize}
-  \item[$\circ$] finite difference computation of $u(x)$ from SIA
-  \item[$\circ$] finite difference computation of $w(x)$ from SIA and incompressibility \comm{(less trivial)}
+  \item[$\circ$] finite difference computations of surface velocity $u(x)$, $w(x)$ from SIA model
+  \item[$\circ$] one short Python code: \quad \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{py/shallowuw.py}
   \end{itemize}
 \item \alert{to address:}
      \begin{enumerate}
@@ -752,14 +752,14 @@ from inclinometry (Savage \& Paterson 1963)]
 \begin{frame}{SIA formulas for velocity}
 
 \begin{itemize}
-\item the Glen-law, planar, non-sliding shallow ice approximation (SIA) is the following system of equations:
-\begin{align*}
-u &= - \frac{2}{n+1} A (\rho g)^n \left|\frac{\partial s}{\partial x}\right|^{n-1} \frac{\partial s}{\partial x} \left[\big(s - b\big)^{n+1} - \big(s-z\big)^{n+1}\right] \\
-\frac{\partial u}{\partial x} + \frac{\partial w}{\partial z} &= 0
-\end{align*}
+\item the planar, isothermal, Glen-law, non-sliding \alert{shallow ice approximation (SIA)} is the following system of equations:
+\begin{gather*}
+u = - \frac{2}{n+1} A (\rho g)^n \left|\frac{\partial s}{\partial x}\right|^{n-1} \frac{\partial s}{\partial x} \left[\big(s - b\big)^{n+1} - \big(s-z\big)^{n+1}\right] \\
+\frac{\partial u}{\partial x} + \frac{\partial w}{\partial z} = 0
+\end{gather*}
 
   \begin{itemize}
-  \item[$\circ$] $u,w$ depend on $x$ and $z$
+  \item[$\circ$] $u,w$ here depend on $x$ and $z$
   \item[$\circ$] $s,b$ depend only on $x$
   \end{itemize}
 
@@ -777,7 +777,7 @@ FIXME figure with $u_{j-1/2}(z)$ and $u_{j+1/2}(z)$
 \end{center}
 
 \begin{itemize}
-\item differencing the surface elevations gives \alert{slopes computed on the staggered grid}:
+\item centered-differencing the surface elevations gives \alert{slopes computed on the staggered grid}:
     $$\frac{\partial s}{\partial x}\Big|_{j+1/2} = \frac{s_{j+1} - s_j}{\Delta x}$$
 \item averaging gives \alert{elevations computed on the staggered grid}:
     $$s_{j+1/2} = \frac{s_j + s_{j+1}}{2}, \qquad b_{j+1/2} = \frac{b_j + b_{j+1}}{2}$$
@@ -797,7 +797,7 @@ FIXME figure with $u_{j-1/2}(z)$ and $u_{j+1/2}(z)$
 \alpha &= \frac{2}{n+1} A (\rho g)^n \left|\frac{\partial s}{\partial x}\Big|_{j+1/2}\right|^{n-1} \frac{\partial s}{\partial x}\Big|_{j+1/2} \\
 \beta  &= \left(s_{j+1/2} - b_{j+1/2}\right)^{n+1}
 \end{align*}
-\item then \alert{horizontal velocity is defined at all levels}:
+\item \alert{horizontal velocity defined at all levels}:
     $$u_{j+1/2}(z) = \begin{cases} 0, & z \le b_{j+1/2} \\
                                    -\alpha \left(\beta - (s_{j+1/2} - z)^{n+1}\right), & b_{j+1/2} < z < s_{j+1/2} \\
                                    -\alpha \beta, & s_{j+1/2} \le z \end{cases}$$
@@ -805,27 +805,58 @@ FIXME figure with $u_{j-1/2}(z)$ and $u_{j+1/2}(z)$
 \end{frame}
 
 
+\begin{frame}[fragile]
+\frametitle{Python code: SIA computation of horizontal velocity}
+
+\begin{itemize}
+\item compute the horizontal velocity onto the regular grid $x_j$:
+\begin{lstlisting}[language=PythonPlus]
+def u(x, b, s):
+    assert np.all(b <= s)              # check admissibility
+    dx = x[1] - x[0]
+    dsdx = (s[1:] - s[:-1]) / dx
+    Hstag = ((s[:-1] - b[:-1]) + (s[1:] - b[1:])) / 2.0
+    C = (2.0 / (n+1)) * A * (rhoi * g)**n
+    ult = - C * abs(dsdx[:-1])**(n-1) * dsdx[:-1] * Hstag[:-1]**(n+1)
+    urt = - C * abs(dsdx[1:])**(n-1)  * dsdx[1:]  * Hstag[1:]**(n+1)
+    return (ult + urt) / 2.0
+\end{lstlisting}
+\end{itemize}
+\end{frame}
+
+
 \begin{frame}{finite differences for $w(x)$}
 
 \begin{itemize}
-\item we integrate vertically to recover the surface value of $w$ from $\partial u/\partial x$, by \alert{using incompressibility}:
+\item we can integrate vertically to recover the surface value of $w$ from $\partial u/\partial x$, by \alert{using incompressibility} \,$\left(\frac{\partial u}{\partial x} + \frac{\partial w}{\partial z} = 0\right)$:
 \begin{align*}
 w(x,s(x)) &= w(x,s(x)) - w(x,b(x)) \\
-   &= - \int_{b(x)}^{s(x)} - \frac{\partial u}{\partial x}(x,z)\,dx
+   &= - \int_{b(x)}^{s(x)} \frac{\partial u}{\partial x}(x,z)\,dz
 \end{align*}
-\item thus get regular-grid value $w_j \approx w(x_j,s(x_j))$ by integrating vertically:
+  \begin{itemize}
+  \item[$\circ$] for a non-sliding and non-penetrating model: $w(x,b(x))=0$
+  \end{itemize}
+\item regular-grid value $w_j \approx w(x_j,s_j)$ found by integrating vertically:
 \begin{align*}
 w_j &= - \int_{b_j}^{s_j} \frac{u_{j+1/2}(z) - u_{j-1/2}(z)}{\Delta x}\,dz \\
-    &= - \frac{1}{\Delta x} \left(\int_{b_j}^{s_j} u_{j+1/2}(z)\,dz - \int_{b_j}^{s_j} u_{j+1/2}(z)\,dz\right)
+    &= - \frac{1}{\Delta x} \left(\int_{b_j}^{s_j} u_{j+1/2}(z)\,dz - \int_{b_j}^{s_j} u_{j-1/2}(z)\,dz\right)
 \end{align*}
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{Python code}
+\begin{frame}{finite differences for $w(x)$ 2}
+
+\begin{center}
+FIXME figure with $u_{j-1/2}(z)$ and $u_{j+1/2}(z)$ AND levels for $w(x)$ calculation
+\end{center}
 
 \begin{itemize}
-\item foo
+\item this code is more complicated
+  \begin{itemize}
+  \item[$\circ$] see robustness aspects
+  \end{itemize}
+\item see the code \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{py/shallowuw.py}, which also visualizes $u(x),w(x)$ at the surface
 \end{itemize}
 \end{frame}
 
@@ -852,11 +883,91 @@ $ foo
 \end{frame}
 
 
-\begin{frame}{time-dependent SKE approximation}
+\begin{frame}{time-dependent SKE $+$ SIA approximation}
 
 \begin{itemize}
-\item FIXME: show
-\item implementing is an exercise
+\item the equations of the \alert{time-dependent SIA model}, using surface elevation as the variable:
+\begin{align*}
+\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} &= a + w \\
+u &= - \frac{2}{n+1} A (\rho g)^n \left|\frac{\partial s}{\partial x}\right|^{n-1} \frac{\partial s}{\partial x} \left[\big(s - b\big)^{n+1} - \big(s-z\big)^{n+1}\right] \\
+w &= - \int_{b}^{s} \frac{\partial u}{\partial x}(x,z)\,dz
+\end{align*}
+\item implementing is an exercise (exercise \textbf{13})
+  \begin{itemize}
+  \item[$\circ$] combine my above codes \href{https://github.com/bueler/mccarthy/blob/master/py/surace1d.py}{py/surface1d.py} and \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{py/shallowuw.py}
+  \end{itemize}
+\item important fact: \alert{this model \emph{diffuses} the surface elevation}
+  \begin{itemize}
+  \item[$\circ$] it is because ice flows downhill
+  \item[$\circ$] this fact affects which time-step conditions are sufficient for stability
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{issues for the SIA}
+\begin{itemize}
+\item[] \alert{MAJOR modeling issues}
+    \begin{enumerate}
+    \item what do we lose when using the SIA, versus Stokes?
+    \only<1>{\item how to add sliding to SIA?}
+    \only<2>{\item add sliding via a \alert{membrane-stress-resolving stress balance}}
+    \end{enumerate}
+\item[] \alert{mathematical issues}
+    \begin{enumerate}\setcounter{enumi}{2}
+    \item well-posedness partially resolved \comm{let's talk separately?}
+    \end{enumerate}
+\item[] \alert{numerical issues}
+    \begin{enumerate}\setcounter{enumi}{3}
+    \item few?
+    \end{enumerate}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{time-dependent SKE $+$ Stokes approximation}
+
+\begin{itemize}
+\item the equations of the \alert{time-dependent Glen-law Stokes model}:
+\begin{align*}
+\frac{\partial s}{\partial t} - \mathbf{u} \cdot \mathbf{n}_s &= a \\
+\nabla \cdot \mathbf{u} &= 0 \\
+-\nabla \cdot \tau_{ij} + \nabla p &= \rho\, \bm{g} \\
+D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
+\end{align*}
+\item implementing is a major topic of current research
+  \begin{itemize}
+  \item[$\circ$] I do not trust \emph{anyone's} view of time stepping (yet)
+  \item[$\circ$] subject (as always) to \alert{$s \ge b$}
+  \end{itemize}
+\item stopping here!
+  \begin{itemize}
+  \item[$\circ$] but projects 13, 14 look at numerical solutions of the Stokes equations (w/o SKE)
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{issues for any Stokes model}
+\begin{itemize}
+\item[] \alert{MAJOR modeling issues}
+    \begin{enumerate}
+    \item \alert{sliding laws} determine the basal stress state; what's good?
+    \item how to adapt Stokes to compressible (e.g.~across CTS) ice?
+    \end{enumerate}
+\item[] \alert{mathematical issues}
+    \begin{enumerate}\setcounter{enumi}{2}
+    \item \dots \quad \comm{I'm happy to talk separately \dots}
+    \end{enumerate}
+\item[] \alert{numerical issues}
+    \begin{enumerate}\setcounter{enumi}{3}
+    \item as a practical matter, use a powerful finite element library
+        \begin{itemize}
+        \item[$\circ$] Firedrake? Elmer? FENiCs? Deal.ii? Dune? Moose? \dots
+        \end{itemize}
+    \item now worry about solver performance!
+    \item I'm sure the issues will be fully resolved by 2100
+    \end{enumerate}
 \end{itemize}
 \end{frame}
 
