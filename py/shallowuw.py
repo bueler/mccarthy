@@ -114,7 +114,7 @@ def w(x, b, s):
     for j in range(J-1):
         Ilt[j] = vert_int_u_stag(j,   x, b, s, b[j+1], s[j+1])
         Irt[j] = vert_int_u_stag(j+1, x, b, s, b[j+1], s[j+1])
-    return - (Ilt - Irt) / dx
+    return - (Irt - Ilt) / dx
 
 def mkoutdir(dirname):
     import os
