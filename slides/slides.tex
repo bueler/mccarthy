@@ -773,7 +773,7 @@ for a positive coefficient $\Gamma$, so \alert{ice flows downhill}
 \begin{frame}{finite differences for $u(x)$}
 
 \begin{center}
-FIXME figure with $u_{j-1/2}(z)$ and $u_{j+1/2}(z)$
+\includegraphics[width=0.4\textwidth]{staggered}
 \end{center}
 
 \begin{itemize}
@@ -788,7 +788,7 @@ FIXME figure with $u_{j-1/2}(z)$ and $u_{j+1/2}(z)$
 \begin{frame}{finite differences for $u(x)$ 2}
 
 \begin{center}
-FIXME figure with $u_{j-1/2}(z)$ and $u_{j+1/2}(z)$
+\includegraphics[width=0.3\textwidth]{staggered}
 \end{center}
 
 \begin{itemize}
@@ -848,15 +848,18 @@ w_j &= - \int_{b_j}^{s_j} \frac{u_{j+1/2}(z) - u_{j-1/2}(z)}{\Delta x}\,dz \\
 \begin{frame}{finite differences for $w(x)$ 2}
 
 \begin{center}
-FIXME figure with $u_{j-1/2}(z)$ and $u_{j+1/2}(z)$ AND levels for $w(x)$ calculation
+\includegraphics[width=0.5\textwidth]{staggeredw}
 \end{center}
 
 \begin{itemize}
 \item this code is more complicated
   \begin{itemize}
-  \item[$\circ$] see robustness aspects
+  \item[$\circ$] see robustness aspect: integrate $u_{j\pm 1/2}(z)$ from $b_j$ to $s_j$, even if that puts you above or below the ice
   \end{itemize}
-\item see the code \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{py/shallowuw.py}, which also visualizes $u(x),w(x)$ at the surface
+\item see the code \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{py/shallowuw.py}
+  \begin{itemize}
+  \item[$\circ$] result: visualization of $u(x),w(x)$ at the surface
+  \end{itemize}
 \end{itemize}
 \end{frame}
 
