@@ -894,15 +894,46 @@ FIXME figure with $u_{j-1/2}(z)$ and $u_{j+1/2}(z)$ AND levels for $w(x)$ calcul
 u &= - \frac{2}{n+1} A (\rho g)^n \left|\frac{\partial s}{\partial x}\right|^{n-1} \frac{\partial s}{\partial x} \left[\big(s - b\big)^{n+1} - \big(s-z\big)^{n+1}\right] \\
 w &= - \int_{b}^{s} \frac{\partial u}{\partial x}(x,z)\,dz
 \end{align*}
-\item implementing is an exercise (exercise \textbf{13})
+\item implementing is exercise \textbf{13}
   \begin{itemize}
   \item[$\circ$] combine my codes \href{https://github.com/bueler/mccarthy/blob/master/py/surace1d.py}{py/surface1d.py} and \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{py/shallowuw.py}
   \end{itemize}
-\item important fact: \alert{this model \emph{diffuses} the surface elevation}
+\item important fact which I want to flesh-out: \alert{this model \emph{diffuses} the surface elevation}
   \begin{itemize}
   \item[$\circ$] because ice flows downhill
-  \item[$\circ$] time-step conditions sufficient for stability are known
+  \item[$\circ$] time-step conditions sufficient for stability are known \emph{for SIA}
   \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{SKE versus mass continuity equation}
+\begin{itemize}
+\item in non-sliding, incompressible ice we have equations:
+\begin{align*}
+\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} &= a + w &&\text{\emph{SKE}} \\
+\frac{\partial u}{\partial x} + \frac{\partial w}{\partial z} &= 0 &&\text{\emph{incompressible}} \\
+u(x,b(x))=0, w(x,b(x))&=0  &&\text{\emph{non-sliding/penetrating}}
+\end{align*}
+\item exercise \textbf{4} asks you to derive via vertical integration:
+$$\frac{\partial H}{\partial t} + \frac{\partial}{\partial x}\left(\bar u H\right) = a \hspace{10mm} \text{\emph{\alert{mass continuity equation}}}$$
+where $H=s-b$ is ice thickness and $\bar u$ is the vertically-averaged horizontal velocity
+\item \alert{main idea.} for incompressible ice these are equivalent:
+$$\text{SKE} \quad \leftrightarrow \quad \text{mass continuity equation}$$
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{time-dependent SIA for thickness, and diffusivity}
+\begin{itemize}
+\item returning to SIA velocities \dots
+\item we can write the time-dependent equation in terms of thickness:
+$$\frac{\partial H}{\partial t} = a + \frac{\partial}{\partial x}\left(D \frac{\partial s}{\partial x}\right)$$
+where $D$ is the \alert{diffusivity} in the SIA:
+	$$D = \frac{2}{n+2} A (\rho g)^n H^{n+2} \left|\frac{\partial s}{\partial x}\right|^{n-1}$$
+\item analogy to Fourier's heat equation:
+$$\frac{\partial H}{\partial t} = a + \frac{\partial}{\partial x}\left(D \frac{\partial s}{\partial x}\right) \quad \leftrightarrow \quad \frac{\partial T}{\partial t} = f + \frac{\partial}{\partial x}\left(D \frac{\partial T}{\partial x}\right)$$
+where $T$ is temperature and $f$ is a heat source
 \end{itemize}
 \end{frame}
 
@@ -913,7 +944,7 @@ w &= - \int_{b}^{s} \frac{\partial u}{\partial x}(x,z)\,dz
     \begin{enumerate}
     \item what do we lose when using the SIA, versus Stokes?
     \only<1>{\item how to add sliding to SIA?}
-    \only<2>{\item add sliding via a \alert{membrane-stress-resolving stress balance}}
+    \only<2>{\item \underline{answer:} add sliding via a \alert{membrane stress resolving balance}}
     \end{enumerate}
 \item[] \alert{mathematical issues}
     \begin{enumerate}\setcounter{enumi}{2}
@@ -921,7 +952,7 @@ w &= - \int_{b}^{s} \frac{\partial u}{\partial x}(x,z)\,dz
     \end{enumerate}
 \item[] \alert{numerical issues}
     \begin{enumerate}\setcounter{enumi}{3}
-    \item few?
+    \item few? (see the literature)
     \end{enumerate}
 \end{itemize}
 \end{frame}
@@ -971,8 +1002,14 @@ D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
 \end{frame}
 
 
-\begin{frame}{Summary}
-FIXME
+\begin{frame}{an opinionated Summary}
+
+\begin{itemize}
+\item numerical models are inevitable, whether you like them or not
+\item<2-> most of your work is understand the math, not writing code!
+\item<3-> writing your own numerical models is of great value, but (usually) toss the result in the trash once you understand it
+\item<4-> machine learning \emph{after} continuum mechanics
+\end{itemize}
 \end{frame}
 
 \begin{frame}[standout]
