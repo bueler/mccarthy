@@ -1,9 +1,4 @@
 
-UNDER CONSTRUCTION!
--------------------
-
-This content will be completely revised for the June 2024 school.  The current state is messy ...
-
 mccarthy
 ========
 
@@ -11,11 +6,14 @@ Copyright 2010--2024  Ed Bueler
 
 This repository contains slides, notes, and computer programs for numerical glacier and ice sheet modeling.  These materials have been used for the [International Summer School in Glaciology](http://glaciers.gi.alaska.edu/courses/summerschool), McCarthy, AK in years 2010, 2012, 2014, 2016, 2018, 2022, and 2024.
 
-Download all materials using the [releases page](https://github.com/bueler/mccarthy/releases) for a `.zip`/`.tar.gz` archive, or by cloning this repository:
+Download all materials by one of these methods:
+
+  * use the [releases page](https://github.com/bueler/mccarthy/releases) for a `.zip`/`.tar.gz` archive
+  * shallow clone this repository:
 
     git clone --depth=1 https://github.com/bueler/mccarthy.git
 
-The `depth` option reduces the download size by not getting the history.
+The optional `depth=1` setting reduces the download size by not getting the history.
 
 slides and notes
 ----------------
@@ -27,7 +25,9 @@ The older material is in PDF notes [notes/notes-2024.pdf](notes/notes-2024.pdf),
 Python programs
 ---------------
 
-The codes in subdirectory [py/](py/) solve surface kinematic equation and Stokes problems.  For now the [new slides](slides/slides-2024.pdf) are the documentation, along with line comments in the `.py` source codes.
+The codes in subdirectory [py/](py/) solve surface kinematic equation (SKE) and shallow ice approximation (SIA) problems.  Python programs [surface1d.py](py/surface1d.py) and [shallowuw.py](py/shallowuw.py) use only the numpy and matplotlib libraries.  The [surface2d.py](py/surface2d.py) program uses Firedrake; compare the additional Firedrake codes in the [stokes/](stokes/) directory.
+
+For now the [new slides](slides/slides-2024.pdf) are the documentation, along with line comments in the `.py` source codes.  Please report any bugs, either by email or by using the [issues](https://github.com/bueler/mccarthy/issues) for this repository.
 
 Matlab/Octave programs (deprecated)
 -----------------------------------
