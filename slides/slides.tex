@@ -124,12 +124,12 @@ project 13,14 Python codes: \href{https://github.com/bueler/mccarthy/tree/master
 \end{frame}
 
 
-\section[how does the surface of a glacier move?]{\textbf{how does the surface of a glacier move?} (hour 1)}
+\section[how does the glacier surface move?]{\textbf{how does the glacier surface move?} (hour 1)}
 
 \subsection{basic mathematics}
 
 
-\begin{frame}{surface motion}
+\begin{frame}{how does the glacier surface move?}
 
 \bigskip
 \begin{center}
@@ -158,9 +158,12 @@ project 13,14 Python codes: \href{https://github.com/bueler/mccarthy/tree/master
 
 \vspace{-3mm}
 \begin{itemize}
-\item two spatial dimensions $x,z$ \comm{\dots\, at least for a while}
-\item $z = b(x)$: bed elevation (m) \comm{fixed}
-\item $z = s(t,x)$: ice surface elevation (m)
+\item two spatial dimensions (planar), along a flow line
+    \begin{itemize}
+    \item[$\circ$] $x$ horizontal, $z$ vertical
+    \end{itemize}
+\item $b(x)$: bed elevation (m) \comm{fixed in time!}
+\item $s(t,x)$: ice surface elevation (m)
 \item $\bu(t,x,z)=(u,w)$: ice velocity ($\text{m}\,\text{s}^{-1}$)
 \item $a(t,x)$: surface mass balance in ice-equivalent units ($\text{m}\,\text{s}^{-1}$)
 %\item {\color{NavyBlue} $z = s(t,x)$}: ice surface elevation (m)
@@ -182,11 +185,12 @@ project 13,14 Python codes: \href{https://github.com/bueler/mccarthy/tree/master
 
 the ice surface moves up and down according to
 \begin{itemize}
-\item<2-4> surface mass balance (SMB) \comm{(\emph{climatic} mass balance ice equiv.)}
+\item<2-4> surface mass balance (SMB) \comm{\emph{climatic} mass balance (ice equiv.)}
 \item<3-4> vertical component of ice velocity
 \item<4> horizontal component of ice velocity \emph{and surface slope}
 \end{itemize}
 \end{frame}
+
 
 \begin{frame}{surface kinematical equation (SKE) \dots alternate form}
 \begin{center}
@@ -199,9 +203,9 @@ the ice surface moves up and down according to
 \end{equation*}
 
 \begin{itemize}
-\item $\bn_s$ is a vector which points upward and is normal (perpendicular) to the ice surface:
-	$$\bn_s = \left(-\frac{\partial s}{\partial x}, \,1\right)$$
 \item recall: $\bu=(u,w)$
+\item $\bn_s$ is a vector which points upward and is normal (perpendicular) to the ice surface: \quad $\displaystyle \bn_s = \left(-\frac{\partial s}{\partial x}, \,1\right)$
+\item how would you prove the SKE? \comm{one answer: extra slides at end}
 \end{itemize}
 \end{frame}
 
@@ -217,7 +221,7 @@ the ice surface moves up and down according to
     \begin{itemize}
     \item[$\circ$] assume $a,u,w$ are given functions/values \uncover<2>{\hfill \alert{$\leftarrow$ this needs fixing!}}
     \end{itemize}
-\item \alert{numerical modeling goal:} use a computer program to evolve the glacier surface $z=s(t,x)$
+\item \alert{numerical modeling goal:} use a computer program to \emph{approximately} evolve the glacier surface $z=s(t,x)$ according to the SKE
     \begin{itemize}
     \item[$\circ$] one short Python program in 1D: \quad \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{py/surface1d.py}
     \end{itemize}
@@ -245,9 +249,13 @@ is the surface kinematical equation
 
 \begin{frame}{surface smoothness versus thickness smoothness}
 
+\begin{itemize}
+\item why not use thickness $H=s-b$ to describe glacier geometry?
+\end{itemize}
+
 \bigskip
 \begin{center}
-\includegraphics[width=0.95\textwidth]{giscross}
+\includegraphics[width=0.9\textwidth]{giscross}
 \end{center}
 
 \hfill \tiny [Data from Morlighem et al (2017), and thanks to A.~Aschwanden]
@@ -288,9 +296,9 @@ is the surface kinematical equation
 \end{center}
 
 \begin{itemize}
-\item now SKE\, $\left(\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w\right)$\, becomes a discrete equation:
+\item now the SKE\, $\left(\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w\right)$\, becomes discrete:
     $$\frac{\snew_j - s_j}{\Delta t} + u_j \frac{s_{j+1} - s_{j-1}}{2\Delta x} = a_j + w_j$$
-\item which we can write as an update which determines $\snew_j$:
+\item we can write this as an equation which determines $\snew_j$:
 	$$\snew_j = s_j - \Delta t\, u_j \frac{s_{j+1}-s_{j-1}}{2\Delta x} + \Delta t (a_j + w_j)$$
 \end{itemize}
 \end{frame}
@@ -302,13 +310,13 @@ is the surface kinematical equation
 \item \alert{however \dots}
 \item if we implement this ``forward-time centered-space'' scheme
 	$$\snew_j = s_j - \Delta t\, u_j \frac{s_{j+1}-s_{j-1}}{2\Delta x} + \Delta t (a_j + w_j) \hspace{1.0cm} \leftarrow \text{\emph{\alert{bad}}}$$
-then bad things happen! \comm{exercise?}
+then bad (unstable) things happen! \comm{exercise?}
 \item instead, it is known that when the ``advecting velocity'' is positive ($u_j \ge 0$) then the ``upwind'' version is conditionally stable:
 	$$\hspace{3mm} \snew_j = s_j - \Delta t\, u_j \frac{s_j-s_{j-1}}{\Delta x} + \Delta t (a_j + w_j) \hfill \hspace{1.2cm} \leftarrow \text{\emph{useful}}$$
 
     \begin{itemize}
     \item[$\circ$] upwind formula: \quad $\displaystyle \frac{\partial s}{\partial x} \approx \frac{1}{\Delta x} \begin{cases} (s_j-s_{j-1}), & u_j \ge 0 \\ (s_{j+1}-s_j), & u_j < 0 \end{cases}$
-    \item[$\circ$] the condition for stability is known \comm{demo soon}
+    \item[$\circ$] the condition for stability is known \comm{(more soon)}
     \end{itemize}
 %\item see textbooks for these caveats
 \end{itemize}
@@ -335,9 +343,9 @@ def explicitstep(s, x, dt):
 {\footnotesize
     \begin{itemize}
     \item[$\circ$] \texttt{x}, \texttt{s}, \texttt{snew} are 1D NumPy arrays
-    \item[$\circ$] separate functions define $a(x)$, $u(x)$, $w(x)$ \comm{(need to make up some values?)}
+    \item[$\circ$] separate functions define $a(x)$, $u(x)$, $w(x)$
     \item[$\circ$] \texttt{x} is equally-spaced
-    \item[$\circ$] $j=$\texttt{[1:]} indicates all indices except zero
+    \item[$\circ$] all indices except zero: \, $j=$\texttt{ 1:}
     \item[$\circ$] note that \, \texttt{snew[0] = s[0]} \, is never changed; this is a boundary condition
     \end{itemize}
 }
@@ -373,19 +381,20 @@ $ eog output/frame*.png          # any image viewer
 
 \bigskip\medskip
 \begin{itemize}
+\item SKE: \quad $\displaystyle \frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w$
+
+\medskip
 \item if horizontal velocity $u$ is given
 
-in the SKE $\left(\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w\right)$,
+then information about the
 
-then info about the surface
-
-travels at speed $u$
+surface travels at speed $u$
 \item from this $(t,x)$ grid picture, the
 
 upwind scheme can only be
 
 stable if
-$$|u_j| \Delta t \le \Delta x \hspace{40mm}$$
+$$|u_j| \Delta t \le \Delta x \hspace{45mm}$$
 
 for every $j$
     \begin{itemize}
@@ -430,25 +439,25 @@ $ eog output/steady.png
 
 \begin{frame}{teaser: 2D steady state of a glacier surface}
 
+\bigskip
 \begin{itemize}
 \item this example uses \href{https://www.firedrakeproject.org/}{Firedrake}
 {\footnotesize
     \begin{itemize}
     \item[$\circ$] \emph{talk to me?}
-    \item[$\circ$] \emph{or project 6, 13, 14 people!}
     \end{itemize}
 }
 \item code: \href{https://github.com/bueler/mccarthy/blob/master/py/surface2d.py}{py/surface2d.py}
 
 \item result: $\rightarrow$
 
-\vspace{-25mm}
-\mbox{\hspace{60mm} \includegraphics[width=0.45\textwidth]{surface2d}}
+\vspace{-15mm}
+\mbox{\hspace{58mm} \includegraphics[width=0.45\textwidth]{surface2d}}
 
-\vspace{-12mm}
+\vspace{-18mm}
 \item solves 2D steady-state SKE:
 \begin{align*}
-&& u \frac{\partial s}{\partial x} + v \frac{\partial s}{\partial y} &= a + w \hspace{40mm}\\
+&& u \frac{\partial s}{\partial x} + v \frac{\partial s}{\partial y} &= a + w \hspace{45mm}\\
 \text{\emph{or}} && (u,v) \cdot \grad s &= a + w \\
 \text{\emph{or}} && -\bu \cdot \bn_s &= a
 \end{align*}
@@ -468,32 +477,32 @@ $ eog output/steady.png
 \end{frame}
 
 
-\begin{frame}[standout]
-let's talk about all the (many) issues
+%\begin{frame}[standout]
+%let's talk about all the (many) issues
 
-when numerically solving the SKE
+%when numerically solving the SKE
 
-\vspace{10mm}
-\begin{center}
-\includegraphics[width=0.5\textwidth]{boatplus}
-\end{center}
-\end{frame}
+%\vspace{10mm}
+%\begin{center}
+%\includegraphics[width=0.5\textwidth]{boatplus}
+%\end{center}
+%\end{frame}
 
 
-\begin{frame}{many issues}
+\begin{frame}{some questions when solving the SKE}
 \begin{itemize}
-\item[] \alert{MAJOR modeling issues}
+\item[] \alert{MAJOR modeling questions}
     \begin{enumerate}
-    \item whence the SMB $a$? \comm{Regine!}
+    \item whence the SMB $a$? \comm{Regine?}
     \item whence the surface velocity $u,w$? \comm{2nd hour!}
     \end{enumerate}
-\item[] \alert{mathematical issues}
+\item[] \alert{mathematical questions}
     \begin{enumerate}\setcounter{enumi}{2}
     \item is the time-dependent SKE well-posed for (various) given-field, initial condition, \& boundary condition assumptions?
     \item is the steady-state SKE well-posed for (various) \dots \, assumptions?
-    \item how do we understand admissibility $s\ge b$ in the theory?
+    \item how do we understand admissibility ($s\ge b$) in the theory?
     \end{enumerate}
-\item[] \alert{numerical issues}
+\item[] \alert{numerical questions}
     \begin{enumerate}\setcounter{enumi}{5}
     \item when the surface velocity $u, w$ comes from a stress-balance submodel, is the upwind scheme still conditionally stable?
     \item are there better explicit schemes?
@@ -514,10 +523,10 @@ when numerically solving the SKE
 \item if the ice were
   \begin{itemize}
   \item[$\circ$] faster-moving than it actually is, and
-  \item[$\circ$] linearly-viscous like liquid water or air
+  \item[$\circ$] linearly-viscous
   \end{itemize}
 
-  then it would be a ``typical'' fluid
+  then it would be a ``typical'' fluid like liquid water
 
 \bigskip
 \item for liquid water one typically uses the incompressible Navier-Stokes model:
@@ -542,7 +551,6 @@ when numerically solving the SKE
   \begin{itemize}
   \item[$\circ$] it's large-scale like atmosphere and ocean
   \item[$\circ$] \dots\, but it is weird relative to those
-  \item[$\circ$] \dots\, so CFD textbooks etc.~of limited utility
   \end{itemize}
 \item consider what makes atmosphere/ocean flow exciting:
   \begin{itemize}
@@ -552,6 +560,7 @@ when numerically solving the SKE
   \item[$\circ$] density stratification
   \end{itemize}
 \item none of the above list is relevant to ice flow!
+\item CFD textbooks are of limited utility to glaciologists
 \item how do we handle slow, cold, stiff, laminar, and inert ice?
 \end{itemize}
 \end{frame}
@@ -566,7 +575,7 @@ when numerically solving the SKE
       $$\rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) \approx 0 \qquad \iff \qquad \begin{pmatrix} \text{forces of inertia} \\ \text{are neglected} \end{pmatrix}$$
     \item[$\circ$] ice is non-Newtonian in a ``shear-thinning'' way
         \begin{itemize}
-        \item ``non-Newtonian'' means viscosity $\nu$ is not constant and depends on the fluid state
+        \item ``non-Newtonian'' means viscosity $\nu$ is not constant, but instead depends on the fluid state
         \item specifically: higher strain rates means lower viscosity
         \end{itemize}
     \end{itemize}
@@ -591,13 +600,13 @@ D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij} &&\text{\emph{flow law}}
 \begin{frame}{``slow'' means no memory of velocity/momentum}
 
 \begin{itemize}
-\item note \emph{no time derivatives} in the Stokes flow model:
+\item note \emph{no time derivatives} in the Stokes model:
 \begin{align*}
 \nabla \cdot \mathbf{u} &= 0 \\
--\nabla \cdot \tau_{ij} + \nabla p &= \rho\, \bm{g} \\
+0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \bm{g} \\
 D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
 \end{align*}
-\item thus, in the standard model, the velocity and pressure fields of a glacier are \alert{instantaneous functions} of the glacier geometry and its boundary stresses
+\item in the standard model, the velocity and pressure fields of a glacier are \alert{instantaneous functions} of the glacier geometry and its boundary stresses
 \item thus a time-stepping ice sheet code can (and must) recompute the velocity field at every time step
   \begin{itemize}
   \item[$\circ$] but velocity from the previous time step is \emph{not} required, unlike (e.g.) a weather model
@@ -668,22 +677,22 @@ p_z &= - \rho g \cos\alpha \notag
 \begin{frame}{slab-on-a-slope 2}
 
 \begin{itemize}
-\item add known basal velocity boundary conditions:
-	$$u(\text{base})=u_0, \qquad w(\text{base})=0$$
-\item add zero surface stress boundary condition:
-	$$p(\text{surface})=0$$
+\item add known (but non-penetrating) basal velocity conditions:
+	$$u(0)=u_0, \qquad w(0)=0$$
+\item add zero normal stress condition at surface $z=H=s$:
+	$$p(H)=0$$
 \item then by integrating vertically, get:
 \begin{align*}
-w &= 0 \phantom{asdfklj asldkfjalk asdfkj sdlfkj sldafkj adlfjl sdfakj }\\
-p &= \rho g \cos\alpha (H-z) \\
-\tau_{13} &= \rho g \sin\alpha (H-z)
+w(z) &= 0 \phantom{asdfklj asldkfjalk asdfkj sdlfkj sldafkj adlfjl sdfakj }\\
+p(z) &= \rho g \cos\alpha (H-z) \\
+\tau_{13}(z) &= \rho g \sin\alpha (H-z)
 \end{align*}
 
 \vspace{-25mm}
 \hfill \includegraphics[width=0.3\textwidth]{slabshear}
 
 \vspace{-2mm}
-\item $\tau_{13}$ is linear in depth
+\item note $\tau_{13}$ is linear in depth
 
 \medskip
 \item from $u_z = 2 A \tau^2 \tau_{13}$, integrate to get the \alert{velocity formula}:
@@ -764,8 +773,8 @@ u = - \frac{2}{n+1} A (\rho g)^n \left|\frac{\partial s}{\partial x}\right|^{n-1
   \end{itemize}
 
 \item note that the horizontal velocity formula is of the form
-	$$u = - \Gamma \frac{\partial s}{\partial x}$$
-for a positive coefficient $\Gamma$, so \alert{ice flows downhill}
+	$$u = - \Gamma \frac{\partial s}{\partial x},$$
+with positive coefficient $\Gamma$, so \alert{ice flows downhill}
 \end{itemize}
 \end{frame}
 
@@ -792,7 +801,7 @@ for a positive coefficient $\Gamma$, so \alert{ice flows downhill}
 \end{center}
 
 \begin{itemize}
-\item for notational convenience let
+\item notational convenience: given $j$, let
 \begin{align*}
 \alpha &= \frac{2}{n+1} A (\rho g)^n \left|\frac{\partial s}{\partial x}\Big|_{j+1/2}\right|^{n-1} \frac{\partial s}{\partial x}\Big|_{j+1/2} \\
 \beta  &= \left(s_{j+1/2} - b_{j+1/2}\right)^{n+1}
@@ -809,7 +818,7 @@ for a positive coefficient $\Gamma$, so \alert{ice flows downhill}
 \frametitle{Python code: SIA computation of horizontal velocity}
 
 \begin{itemize}
-\item compute the horizontal velocity onto the regular grid $x_j$:
+\item computing the surface value of the horizontal velocity at each regular grid location $x_j$ is a Python function:
 \begin{lstlisting}[language=PythonPlus]
 def u(x, b, s):
     assert np.all(b <= s)              # check admissibility
@@ -836,7 +845,7 @@ w(x,s(x)) &= w(x,s(x)) - w(x,b(x)) \\
   \begin{itemize}
   \item[$\circ$] for a non-sliding and non-penetrating model: $w(x,b(x))=0$
   \end{itemize}
-\item regular-grid value $w_j \approx w(x_j,s_j)$ found by integrating vertically:
+\item $w_j \approx w(x_j,s_j)$ is found by integrating vertically:
 \begin{align*}
 w_j &= - \int_{b_j}^{s_j} \frac{u_{j+1/2}(z) - u_{j-1/2}(z)}{\Delta x}\,dz \\
     &= - \frac{1}{\Delta x} \left(\int_{b_j}^{s_j} u_{j+1/2}(z)\,dz - \int_{b_j}^{s_j} u_{j-1/2}(z)\,dz\right)
@@ -852,7 +861,7 @@ w_j &= - \int_{b_j}^{s_j} \frac{u_{j+1/2}(z) - u_{j-1/2}(z)}{\Delta x}\,dz \\
 \end{center}
 
 \begin{itemize}
-\item this code is more complicated
+\item this code is more complicated \comm{thus not shown \dots}
   \begin{itemize}
   \item[$\circ$] see robustness aspect: integrate $u_{j\pm 1/2}(z)$ from $b_j$ to $s_j$, even if that puts you above or below the ice
   \end{itemize}
@@ -891,7 +900,7 @@ w_j &= - \int_{b_j}^{s_j} \frac{u_{j+1/2}(z) - u_{j-1/2}(z)}{\Delta x}\,dz \\
 \begin{frame}{time-dependent SKE $+$ SIA approximation}
 
 \begin{itemize}
-\item the equations of the \alert{time-dependent SIA model}, using surface elevation as the variable:
+\item the equations of the \alert{time-dependent SIA model}, using surface elevation as the variable, are the following:
 \begin{align*}
 \frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} &= a + w \\
 u &= - \frac{2}{n+1} A (\rho g)^n \left|\frac{\partial s}{\partial x}\right|^{n-1} \frac{\partial s}{\partial x} \left[\big(s - b\big)^{n+1} - \big(s-z\big)^{n+1}\right] \\
@@ -941,21 +950,21 @@ where $T$ is temperature and $f$ is a heat source
 \end{frame}
 
 
-\begin{frame}{issues for the SIA}
+\begin{frame}{questions and issues for the SIA}
 \begin{itemize}
-\item[] \alert{MAJOR modeling issues}
+\item[] \alert{MAJOR modeling questions}\only<2>{\alert{/answers}}
     \begin{enumerate}
     \item what do we lose when using the SIA, versus Stokes?
     \only<1>{\item how to add sliding to SIA?}
-    \only<2>{\item \underline{answer:} add sliding via a \alert{membrane stress resolving balance}}
+    \only<2>{\item \underline{answer:} add sliding via a \alert{membrane-stress-resolving balance}}
     \end{enumerate}
 \item[] \alert{mathematical issues}
     \begin{enumerate}\setcounter{enumi}{2}
-    \item well-posedness partially resolved \comm{let's talk separately?}
+    \item well-posedness not fully resolved \comm{talk separately?}
     \end{enumerate}
-\item[] \alert{numerical issues}
+\item[] \alert{numerical questions}
     \begin{enumerate}\setcounter{enumi}{3}
-    \item few? (see the literature)
+    \item how to do efficient implicit time-stepping?
     \end{enumerate}
 \end{itemize}
 \end{frame}
@@ -964,42 +973,42 @@ where $T$ is temperature and $f$ is a heat source
 \begin{frame}{time-dependent SKE $+$ Stokes approximation}
 
 \begin{itemize}
-\item the equations of the \alert{time-dependent Glen-law Stokes model}:
+\item \alert{time-dependent SKE and Glen-law Stokes model}:
 \begin{align*}
 \frac{\partial s}{\partial t} - \mathbf{u} \cdot \mathbf{n}_s &= a \\
 \nabla \cdot \mathbf{u} &= 0 \\
 -\nabla \cdot \tau_{ij} + \nabla p &= \rho\, \bm{g} \\
 D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
 \end{align*}
-\item implementing is a major topic of current research
+\item implementing well is a major topic of current research
   \begin{itemize}
-  \item[$\circ$] I do not trust \emph{anyone's} view of time stepping (yet)
   \item[$\circ$] subject (as always) to \alert{$s \ge b$}
+  \item[$\circ$] I do not trust \emph{anyone's} view of time stepping (yet)
   \end{itemize}
-\item projects 13, 14 look at numerical solutions of the Stokes equations only (w/o SKE)
+%\item projects 13, 14 look at numerical solutions of the Stokes equations only (w/o SKE)
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{issues for any Stokes model}
+\begin{frame}{questions and issues for any Stokes model}
 \begin{itemize}
-\item[] \alert{MAJOR modeling issues}
+\item[] \alert{modeling questions}
     \begin{enumerate}
-    \item \alert{sliding laws} determine the basal stress state; what's good?
+    \item \alert{sliding laws} determine the basal stress state; what's best?
     \item how to adapt Stokes to compressible (e.g.~temperate) ice?
     \end{enumerate}
-\item[] \alert{mathematical issues}
+\item[] \alert{mathematical question}
     \begin{enumerate}\setcounter{enumi}{2}
-    \item \dots \quad \comm{I'm happy to talk separately}
+    \item well-posedness of SKE+Stokes?
     \end{enumerate}
-\item[] \alert{numerical issues/recommendations}
+\item[] \alert{numerical questions/recommendations/issues}
     \begin{enumerate}\setcounter{enumi}{3}
-    \item as a practical matter, use a powerful finite element library
+    \item how to numerically combine SKE and Stokes in an efficient and stable manner?
+    \item as a practical matter, use a powerful finite element \cite{Elmanetal2014} library
         \begin{itemize}
-        \item[$\circ$] Firedrake? Elmer? FENiCs? Deal.ii? Dune? Moose? \dots
+        \item[$\circ$] Firedrake? Elmer? FENiCs? Moose? \dots
         \end{itemize}
-    \item now worry about solver performance!
-    \item I'm sure the issues will be fully resolved by 2100
+    \item solver performance is a major concern \dots\, I'm sure the speed will be adequate by 2050
     \end{enumerate}
 \end{itemize}
 \end{frame}
@@ -1009,9 +1018,10 @@ D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
 
 \begin{itemize}
 \item numerical models are inevitable, whether you like them or not
-\item<2-> most of your work is understand the math, not writing code!
-\item<3-> writing your own numerical models is of great value, but (usually) toss the result in the trash once you understand it
-\item<4-> machine learning \emph{after} continuum mechanics
+\item<2-> most of your work is to understand the math, not to write the code
+\item<3-> writing your own numerical models is of great value, but you should toss the result in the trash once you understand it
+\item<4-> respect surface mass/energy balance just as much as ice dynamics
+\item<5-> machine learning \emph{after} continuum mechanics
 \end{itemize}
 \end{frame}
 
@@ -1030,8 +1040,8 @@ D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
 \setbeamerfont{bibliography entry note}{size=\scriptsize}
 \setbeamertemplate{frametitle continuation}{}  % remove the "i"
 
-\begin{frame}[allowframebreaks]
-\frametitle{References}
+\begin{frame}%[allowframebreaks]
+\frametitle{further reading}
 \setbeamertemplate{bibliography item}[text]
 
   \bibliography{slides}
