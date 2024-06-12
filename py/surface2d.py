@@ -61,7 +61,7 @@ import matplotlib.pyplot as plt
 from firedrake.pyplot import tricontour
 fig, axes = plt.subplots()
 tricontourf(H, axes=axes, levels=[0.0, 1.0], cmap="Greys")
-contours = tricontour(s, axes=axes, levels=15, cmap="Greys")
+contours = tricontour(s, axes=axes, levels=15, cmap="magma")
 fig.colorbar(contours, label='s (m)')
 axes.set_aspect("equal")
 tickskm = np.linspace(0,L/1000.0,6)
