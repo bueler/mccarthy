@@ -142,15 +142,18 @@ u, p = up.subfunctions
 # save results in paraview-readable file
 if len(args.o) > 0:
     nu = mm.effectiveviscosity(mesh)
+    f, chi = mm.damage(mesh)
     if mesh.comm.size > 1:
         rank = Function(FunctionSpace(mesh,'DG',0))
         rank.dat.data[:] = mesh.comm.rank
         rank.rename('rank (element-wise)')
         printpar(f'writing (velocity, pressure, eff.visc., rank) to {args.o} ...')
-        VTKFile(args.o).write(u, p, nu, rank)
+        VTKFile(args.o).write(u, p, nu, f, rank)
     else:
-        printpar(f'writing (velocity,pressure,eff.visc.) to {args.o} ...')
-        VTKFile(args.o).write(u, p, nu)
+        #printpar(f'writing (velocity,pressure,eff.visc.,damage) to {args.o} ...')
+        printpar(f'writing (velocity,pressure,eff.visc.,damage,chi) to {args.o} ...')
+        #VTKFile(args.o).write(u, p, nu, f)
+        VTKFile(args.o).write(u, p, nu, f, chi)
 
 # generate image file with plot of surface values if desired
 if len(args.osurface) > 0:

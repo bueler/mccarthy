@@ -41,6 +41,10 @@ packagedict = {"SchurDirect": _SchurDirect,
 def D(U):    # strain-rate tensor from velocity U
     return 0.5 * (fd.grad(U) + fd.grad(U).T)
 
+# Define a max function for later
+def Max(a, b): 
+    return (a+b+abs(a-b))/fd.Constant(2)    
+
 class MomentumModel(OptionsManager):
 
     def __init__(self, **kwargs):
@@ -55,6 +59,11 @@ class MomentumModel(OptionsManager):
         self.Dtyp = kwargs.pop("Dtyp_pera", 2.0) / secpera
         self.Hin = kwargs.pop("Hin", 400.0)
         self.Hout = kwargs.pop("Hout", 400.0)
+        self.gamma = 0.9
+        self.B = 4.73e-12  # Pa-gamma s-1
+        self.alpha_coeff = 0.31
+        self.a1 = 0.326
+        self.a2 = 6.033e-6
 
     # compute slab-on-slope inflow velocity; note alpha = 0 ==> uin = 0
     def _get_uin(self, mesh):
@@ -81,9 +90,11 @@ class MomentumModel(OptionsManager):
             # if there is an outflow boundary then it is nonhomogeneous Neumann
             # and part of the weak form; we apply hydrostatic normal force
             _, z = fd.SpatialCoordinate(mesh)
-            outflow_sigma = fd.as_vector( \
-                [- rhog * np.cos(self.alpha) * (self.Hout - z),
-                rhog * np.sin(self.alpha) * (self.Hout - z)])
+            #outflow_sigma = fd.as_vector( \
+            #    [- rhog * np.cos(self.alpha) * (self.Hout - z),
+            #    rhog * np.sin(self.alpha) * (self.Hout - z)])
+            # Replace outflow boundary stresses with zeros.
+            outflow_sigma = fd.as_vector([fd.Constant(0), fd.Constant(0)])
 
         # create, use old, or prolong coarse solution as initial iterate
         if upold:
@@ -156,6 +167,51 @@ class MomentumModel(OptionsManager):
         nu = fd.Function(P1).interpolate(0.5 * self._B3 * Du2**(rr/2.0))
         nu.rename('effective viscosity')
         return nu
+
+    # generate damage field:
+    def damage(self, mesh):
+        P1 = fd.FunctionSpace(mesh, 'CG', 1)
+        Du2 = 0.5 * fd.inner(D(self.u), D(self.u)) + (self.eps * self.Dtyp) ** 2.0
+        rr = 1.0 / self.n_glen - 1.0
+        nu = 0.5 * self._B3 * Du2 ** (rr / 2.0)
+
+        # deviatoric tensor from velocity U
+        # dev_sigma = (1 / self._A3) * (Du2 ** (rr / 2)) * D(self.u)
+        dev_sigma = 2 * nu * Du2
+
+        # second invariant of deviatoric tensor from velocity U
+        dev_sigma2 = 0.5 * fd.inner(dev_sigma, dev_sigma)
+
+        # cauchy stress tensor
+        stress = -np.identity(2) * self.p + dev_sigma
+        #stress = -np.identity(2) * self.p + 2 * Du2 * nu
+
+        s11 = stress[0, 0]
+        s13 = stress[1, 0]
+        s33 = stress[1, 1]
+
+        #eig1 = fd.Function(P1).interpolate(0.5 * (s11 + s33 + ((s11 + s33) ** 2 - 4 * (s11 * s33 - s13**2)) ** 0.5))
+        #eig2 = fd.Function(P1).interpolate(0.5 * (s11 + s33 - ((s11 + s33) ** 2 - 4 * (s11 * s33 - s13**2)) ** 0.5))
+        eig1 = 0.5 * (s11 + s33 + ((s11 + s33) ** 2 - 4 * (s11 * s33 - s13**2)) ** 0.5)
+        eig2 = 0.5 * (s11 + s33 - ((s11 + s33) ** 2 - 4 * (s11 * s33 - s13**2)) ** 0.5)
+
+        max_eig = Max(eig1, eig2)
+
+        chi = fd.Function(P1).interpolate(
+            self.alpha_coeff * max_eig + (1 - self.alpha_coeff) * (3 * dev_sigma2)**0.5
+        )
+
+        # check if chi is positive
+        # if chi > 0:
+        #     print("chi > 0")
+
+        k = self.a1 + self.a2 * (3 * dev_sigma2) ** 0.5
+        d = 1e-15
+        f = fd.Function(P1).interpolate(self.B * (chi**self.gamma) / (1 - d) ** k)
+        f.rename("damage")
+        chi.rename("chi")
+        #return f
+        return f, chi
 
     # numerical errors relative to slab-on-slope solution:
     #   uerrmax = maximum magnitude of velocity error
