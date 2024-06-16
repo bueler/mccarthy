@@ -1,7 +1,7 @@
 \documentclass[12pt]{amsart}
 %prepared in AMSLaTeX, under LaTeX2e
-\addtolength{\oddsidemargin}{-.55in} 
-\addtolength{\evensidemargin}{-0.8in}
+\addtolength{\oddsidemargin}{-0.6in} 
+\addtolength{\evensidemargin}{-0.6in}
 \addtolength{\topmargin}{-.55in}
 \addtolength{\textwidth}{1.3in}
 \addtolength{\textheight}{.9in}
@@ -86,7 +86,7 @@
 \scriptsize \hfill \emph{(Bueler) June 2024}
 \normalsize\medskip
 
-\Large\centerline{\textbf{Solutions to Paper Exercises}}
+\Large\centerline{\textbf{Solutions to \underline{Paper} Exercises}}
 
 \normalsize
 \medskip
@@ -155,21 +155,29 @@ Thus we have turned the flux divergence into those dynamic terms which appear in
 	$$\frac{\partial}{\partial x}(\bar u H) = u \frac{\partial s}{\partial x} - w = -\frac{\partial s}{\partial t} + a = -\frac{\partial H}{\partial t} + a$$
 This is the mass continuity equation.
 
-\prob{5}  FIXME Write out the details of the slab-on-a-slope calculation from the slides.  Thereby derive the ($n=3$) velocity formula $u(z) = u_0 + \frac{1}{2} A (\rho g \sin\alpha)^3  \left(H^4 - (H-z)^4\right)$.  Now add in $x$-dependence, to see the velocity formula for the SIA model velocity.
 
-\prob{6}  \emph{(Do with a friend.)}  Sketch a hypothetical planar glacier shape, with smooth surface and bed.  Sketch what you think the non-sliding SIA formulas will generate for the surface values of the horizontal ($u$) and vertical ($w$) velocity components.  How would the non-sliding Stokes model change your pictures?  Repeat with a different hypothetical shape.
+\prob{5}  Starting from the 5 boxed equations on slide 24, the formulas for $w(z)$, $p(z)$, and $\tau_{13}(z)$ on slide 25 are straightforward to get by integration, using the given boundary conditions, under the additional\footnote{I forgot to mention this boundary condition in the slides!  Sorry about that.  The idea is that the atmosphere applies no (significant) shearing to the ice surface.} condition that $\tau_{13}(H)=0$.
 
-%\prob{7}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} to systematically test its stability.  That is, demonstrate conditional stability of the upwind numerical scheme for the SKE, by varying the grid spacings $\Delta t$ and $\Delta x$, in the given-velocity case.  Confirm that the CFL condition $|u_j| \frac{\Delta t}{\Delta x} \le 1$ predicts which cases destabilize and which remain stable.
+Now using the boundary condition $u(0)=u_0$ and the formula for $\tau_{13}(z)$ we have
+    $$u(z) = u_0 + 2 A (\rho g \sin\alpha)^3 \int_0^z (H-z')^3\,dz'$$
+Use the substitution $\zeta = H-z'$ and get the desired slab-on-slope horizontal velocity formula:
+\begin{align*}
+u(z) &= u_0 - 2 A (\rho g \sin\alpha)^3 \int_H^{H-z} \zeta^3\,d\zeta \\
+     &= u_0 - \frac{2}{4} A (\rho g \sin\alpha)^3  \left((H-z)^4 - H^4\right) \\
+     &= u_0 + \frac{1}{2} A (\rho g \sin\alpha)^3  \left(H^4 - (H-z)^4\right)
+\end{align*}
 
-%\prob{8}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} to show that the scheme can generate surfaces which fail $s\ge b$, i.e.~which violate \emph{admissibility}.  (One can increase the ablation rate to cause this.)  Modify the scheme so that it maintains admissibility via \emph{truncation}.  That is, when a preliminary surface elevation ${\tilde s}_j^{\text{new}}$ is calculated, apply $s_j^{\text{new}} = \max\{{\tilde s}_j^{\text{new}},b_j\}$.
+The claim is that the SIA uses this slab-on-a-slope formula, but with the local, i.e.~$x$-dependent, surface slope and thickness.  So, again using $\tan\alpha \approx \sin\alpha$, we should regard ``$\sin\alpha$'' as the local slope $\partial s/\partial x$.  On the other hand, we want to consider both positive and negative values for $\sin\alpha$, and we observe that the ice flows downhill whether it is flowing left or flowing right.  So if $m$ is the slope we want the 3rd power to behave properly:
+	$$m^3 \qquad \stackrel{\text{replace}}{\to} \qquad |m|^2 m.$$
 
-%\prob{9}  Construct a case where the horizontal velocity depends on time and space: $u=u(t,x)$.  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} to use this case.  Modify the time-stepping scheme so that the time step is determined via the CFL condition.  That is, at each time step, find the largest horizontal speed and adjust the next $\Delta t$ accordingly.
+Thus we have the non-sliding, isothermal SIA formula
+    $$u(t,x,z) = u_0 + \frac{1}{2} A (\rho g)^3 \left|\frac{\partial s}{\partial x}\right|^2 \frac{\partial s}{\partial x} \left(H^4 - (H-z)^4\right).$$
+In this expression $s=s(t,x)$, $H=H(t,x)$, and $u_0(t,x)$.  However, the expression only makes sense at a point which is inside the ice:
+	$$b(x) < z < s(t,x)$$
 
-%\prob{10}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} so that the data $a,u,w$ can be read from a file.  Check that it runs as before, that is, for values which are the same as in the unmodified code.
+Before believing this stuff, please note that one does not get the basal sliding function $u_0(t,x)$ as data!  Rather, one needs to solve stress balances \emph{both} for deformation within the ice (e.g.~$\partial u/\partial z$) \emph{and} for the basal sliding velocity $u_0$.  In this context, there is no way for the SIA simplified model to balance the longitudinal (or ``membrane'') stresses which control the value $u_0$.  For this purpose, 21st-century practitioners recommend that the sliding be determined by solving a non-trivializing stress balance.  That is, one should either use a hybrid balance combining the SIA and the shallow shelf approximation, or a unified balance like the Blatter-Pattyn equations, or even the (full) Stokes model.  In glaciology there is no physically-based model for sliding which is as cheap as the SIA for internal deformation.
 
-%\prob{11}  In a suitable textbook, read about \emph{implicit time-stepping}, and perhaps also about the \emph{method of lines}.  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} to use an implicit scheme.  Do you see benefits?  What replaces truncation---see \textbf{7 c)}---in an implicit scheme?
 
-%\prob{12}  Modify the ice geometry in \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{\texttt{shallowuw.py}} to a case where the glacier terminates.  By trying different fractional power shapes for the terminus (margin), show that in some cases the SIA surface velocity goes to zero as one approaches the terminus, and in some cases not.  (\emph{Look up ``Vialov profile'' for a bad case.})  Explain what is going on in terms of the powers which appear in the SIA formulas for surface velocity.
+\prob{6}  FIXME \emph{(Do with a friend.)}  Sketch a hypothetical planar glacier shape, with smooth surface and bed.  Sketch what you think the non-sliding SIA formulas will generate for the surface values of the horizontal ($u$) and vertical ($w$) velocity components.  How would the non-sliding Stokes model change your pictures?  Repeat with a different hypothetical shape.
 
-%\prob{13}  Combine \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} and \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{\texttt{shallowuw.py}} into one code which numerically solves the time-dependent SIA model via explicit time stepping.  That is, alternately compute surface velocity from the current geometry (\href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{\texttt{shallowuw.py}} does this), and then update the geometry using a time step of the SKE (\href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} does this).  Now what is the time step condition for stability?  How might one detect instability as the scheme runs?
 \end{document}
