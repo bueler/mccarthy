@@ -1,8 +1,12 @@
-all: exercises.pdf
+all: exercises.pdf papersolns.pdf
 
 exercises.pdf: exercises.tex
 	pdflatex exercises.tex
 	pdflatex exercises.tex
+
+papersolns.pdf: papersolns.tex
+	pdflatex papersolns.tex
+	pdflatex papersolns.tex
 
 .PHONY: clean
 
