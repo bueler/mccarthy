@@ -37,6 +37,7 @@
 \newcommand{\bn}{\mathbf{n}}
 \newcommand{\br}{\mathbf{r}}
 \newcommand{\bt}{\mathbf{t}}
+\newcommand{\bu}{\mathbf{u}}
 \newcommand{\bv}{\mathbf{v}}
 \newcommand{\bx}{\mathbf{x}}
 \newcommand{\by}{\mathbf{y}}
@@ -79,6 +80,7 @@
 \newcommand{\ds}{\displaystyle}
 
 \newcommand{\snew}{s^{\text{new}}}
+\newcommand{\rhoi}{\rho_{\text{i}}}
 
 
 
@@ -168,16 +170,31 @@ u(z) &= u_0 - 2 A (\rho g \sin\alpha)^3 \int_H^{H-z} \zeta^3\,d\zeta \\
 \end{align*}
 
 The claim is that the SIA uses this slab-on-a-slope formula, but with the local, i.e.~$x$-dependent, surface slope and thickness.  So, again using $\tan\alpha \approx \sin\alpha$, we should regard ``$\sin\alpha$'' as the local slope $\partial s/\partial x$.  On the other hand, we want to consider both positive and negative values for $\sin\alpha$, and we observe that the ice flows downhill whether it is flowing left or flowing right.  So if $m$ is the slope we want the 3rd power to behave properly:
-	$$m^3 \qquad \stackrel{\text{replace}}{\to} \qquad |m|^2 m.$$
+	$$(-m)^3 \qquad \stackrel{\text{replace}}{\to} \qquad -|m|^2 m.$$
 
 Thus we have the non-sliding, isothermal SIA formula
-    $$u(t,x,z) = u_0 + \frac{1}{2} A (\rho g)^3 \left|\frac{\partial s}{\partial x}\right|^2 \frac{\partial s}{\partial x} \left(H^4 - (H-z)^4\right).$$
+    $$u(t,x,z) = u_0 - \frac{1}{2} A (\rho g)^3 \left|\frac{\partial s}{\partial x}\right|^2 \frac{\partial s}{\partial x} \left((s-b)^4 - (s-z)^4\right).$$
 In this expression $s=s(t,x)$, $H=H(t,x)$, and $u_0(t,x)$.  However, the expression only makes sense at a point which is inside the ice:
 	$$b(x) < z < s(t,x)$$
 
 Before believing this stuff, please note that one does not get the basal sliding function $u_0(t,x)$ as data!  Rather, one needs to solve stress balances \emph{both} for deformation within the ice (e.g.~$\partial u/\partial z$) \emph{and} for the basal sliding velocity $u_0$.  In this context, there is no way for the SIA simplified model to balance the longitudinal (or ``membrane'') stresses which control the value $u_0$.  For this purpose, 21st-century practitioners recommend that the sliding be determined by solving a non-trivializing stress balance.  That is, one should either use a hybrid balance combining the SIA and the shallow shelf approximation, or a unified balance like the Blatter-Pattyn equations, or even the (full) Stokes model.  In glaciology there is no physically-based model for sliding which is as cheap as the SIA for internal deformation.
 
 
-\prob{6}  FIXME \emph{(Do with a friend.)}  Sketch a hypothetical planar glacier shape, with smooth surface and bed.  Sketch what you think the non-sliding SIA formulas will generate for the surface values of the horizontal ($u$) and vertical ($w$) velocity components.  How would the non-sliding Stokes model change your pictures?  Repeat with a different hypothetical shape.
+\prob{6}  The basic point, when one is thinking about how the non-sliding SIA model converts a given glacier shape into a surface velocity field, is that ice flows downhill in this model.  That is, the SIA model always makes the horizontal component point opposite the surface gradient: $u \sim - \partial s/\partial x$.
+
+The next point is that the magnitude of the horizontal surface velocity $|u|$ scales with the 4th power\footnote{Assuming $n=3$ as usual.} of the ice thickness.  Relatively small increases in thickness correspond to substantial increases in surface speed.
+
+Not so obvious is how the vertical component $w$ works in the non-sliding SIA model.  It acts diffusively.  Specifically, the nontrivial term in the SKE has the following surface value in the planar case:
+\begin{align*}
+\bu \cdot \bn_s &= \left(u,w\right) \cdot \left(-\frac{\partial s}{\partial x},1\right) \\
+    &= \frac{1}{2}  A (\rho g)^3 H^{4} \left|\frac{\partial s}{\partial x}\right|^{4} + \frac{\partial}{\partial x} \left(\frac{2}{5}  A (\rho g)^3 H^{5} \left|\frac{\partial s}{\partial x}\right|^{2} \frac{\partial s}{\partial x}\right)
+\end{align*}
+The $w$ contribution to the SKE is of the form
+	$$w = \frac{\partial}{\partial x} \left(D \frac{\partial s}{\partial x}\right)$$
+where the diffusivity $D>0$ has a highly nonlinear power form.  (A 5th power on thickness and a second power on the magnitude of the surface slope.)  This means, roughly speaking, that a smooth maximum of $s$ tends to be decreased ($\partial s/\partial t < 0$) over time.  Correspondingly, a smooth minimum in $s$ will generally be increased.
+
+In summary the non-sliding SIA velocity can be roughly sketched as downhill, but with a vertical component that tends to damp-out surface bumps.
+
+By contrast, it requires more tuition than I have seen, or have experienced, to see at a glance what the velocity from the Stokes model looks like.  At each location $x$ the surface velocity from a non-sliding Stokes model has a highly-nontrivial response to the longitudinal stresses transmitted from neighboring ice.  Nonetheless, this response to longitudinal stress balance is superimposed on a large-scale response to the direction of gravity relative to the general surface slope.  Over several ice thicknesses or more, the Stokes velocity is downhill and damping.\footnote{The SIA model is not lying.  Rather, it only makes sense to use the SIA when you are seeking the response to surface and thickness features over a horizontal range of several ice thickness.}  However, actually running a Stokes model for a given geometry would seem to be most helpful when thinking about the surface dynamical response.  This statement is even more true if there is sliding.
 
 \end{document}
