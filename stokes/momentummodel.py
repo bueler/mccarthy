@@ -57,8 +57,8 @@ class MomentumModel(OptionsManager):
         self.eps = kwargs.pop("eps", 0.01)
         self.alpha = kwargs.pop("alpha", 0.1)
         self.Dtyp = kwargs.pop("Dtyp_pera", 2.0) / secpera
-        self.Hin = kwargs.pop("Hin", 400.0)
-        self.Hout = kwargs.pop("Hout", 400.0)
+        self.Hin = kwargs.pop("Hin", 100.0)
+        self.Hout = kwargs.pop("Hout", 100.0)
         self.gamma = 0.9
         self.B = 4.73e-12  # Pa-gamma s-1
         self.alpha_coeff = 0.31
@@ -196,6 +196,8 @@ class MomentumModel(OptionsManager):
         eig2 = 0.5 * (s11 + s33 - ((s11 + s33) ** 2 - 4 * (s11 * s33 - s13**2)) ** 0.5)
 
         max_eig = Max(eig1, eig2)
+        # ensure max principle stress is extensional, else set to 0. 
+        max_eig = Max(max_eig, 0)
 
         chi = fd.Function(P1).interpolate(
             self.alpha_coeff * max_eig + (1 - self.alpha_coeff) * (3 * dev_sigma2)**0.5
@@ -208,6 +210,7 @@ class MomentumModel(OptionsManager):
         k = self.a1 + self.a2 * (3 * dev_sigma2) ** 0.5
         d = 1e-15
         f = fd.Function(P1).interpolate(self.B * (chi**self.gamma) / (1 - d) ** k)
+
         f.rename("damage")
         chi.rename("chi")
         #return f

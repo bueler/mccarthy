@@ -20,9 +20,9 @@ parser.add_argument('-eps', type=float, default=0.01, metavar='X',
                     help='regularize viscosity using "+(eps Dtyp)^2" (default=0.01)')
 parser.add_argument('-flowhelp', action='store_true', default=False,
                     help='print help for flow.py options and exit')
-parser.add_argument('-Hin', type=float, default=400.0, metavar='X',
+parser.add_argument('-Hin', type=float, default=100.0, metavar='X',
                     help='upstream thickness of ice (default=400 m)')
-parser.add_argument('-Hout', type=float, default=400.0, metavar='X',
+parser.add_argument('-Hout', type=float, default=100.0, metavar='X',
                     help='downstream thickness of ice (default=400 m)')
 parser.add_argument('-mesh', metavar='MESH', type=str, default='',
                     help='input file name ending with .msh')
@@ -143,6 +143,16 @@ u, p = up.subfunctions
 if len(args.o) > 0:
     nu = mm.effectiveviscosity(mesh)
     f, chi = mm.damage(mesh)
+    x, z = SpatialCoordinate(mesh)
+    # print out max f results
+    with f.dat.vec_ro as ff:
+        maxf = ff.max()[1]
+        xx = mesh.coordinates.dat.data_ro[:,0]
+        maxfx = xx[ff.max()[0]]
+        printpar('max f = %10.3f 1/y' \
+                % (maxf*secpera))
+        printpar('x at max f = %10.3f m' \
+                % (maxfx))
     if mesh.comm.size > 1:
         rank = Function(FunctionSpace(mesh,'DG',0))
         rank.dat.data[:] = mesh.comm.rank

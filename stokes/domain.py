@@ -20,20 +20,21 @@ bdryids = {'outflow' : 41,
            'inflow'  : 43,
            'base'    : 44}
 
-def writegeometry(geo,bs, L, Lup, Ldown, Hin, Hout):
+#def writegeometry(geo,bs, L, Lup, Ldown, Hin, Hout):
+def writegeometry(geo,bs, Lbase, Ltop, Hin, Hout):
     # points on boundary, with target mesh densities
-    Lmid = 0.5 * (Lup + Ldown)
-    geo.write('Point(1) = {%f,%f,0,lc};\n' % (L,0.0))
-    geo.write('Point(2) = {%f,%f,0,lc};\n' % (L,Hout))
+    # Lmid = 0.5 * (Lup + Ldown)
+    geo.write('Point(1) = {%f,%f,0,lc};\n' % (Ltop,0.0))
+    geo.write('Point(2) = {%f,%f,0,lc_corner};\n' % (Lbase,Hout))
     geo.write('Point(3) = {%f,%f,0,lc};\n' % (0.0,Hin))
     geo.write('Point(4) = {%f,%f,0,lc};\n' % (0.0,0.0))
     # if there is a bedrock step, *refine* in the interior corners
-    if abs(bs) > 1.0:
-        geo.write('Point(5) = {%f,%f,0,lc};\n' % (Lup,0.0))
-        geo.write('Point(6) = {%f,%f,0,lc_corner};\n' % (Lup,bs))
-        geo.write('Point(7) = {%f,%f,0,lc};\n' % (Lmid,bs))
-        geo.write('Point(8) = {%f,%f,0,lc_corner};\n' % (Ldown,bs))
-        geo.write('Point(9) = {%f,%f,0,lc};\n' % (Ldown,0.0))
+    #if abs(bs) > 1.0:
+    #    geo.write('Point(5) = {%f,%f,0,lc};\n' % (Lup,0.0))
+    #    geo.write('Point(6) = {%f,%f,0,lc_corner};\n' % (Lup,bs))
+    #    geo.write('Point(7) = {%f,%f,0,lc};\n' % (Lmid,bs))
+    #    geo.write('Point(8) = {%f,%f,0,lc_corner};\n' % (Ldown,bs))
+    #    geo.write('Point(9) = {%f,%f,0,lc};\n' % (Ldown,0.0))
 
     # lines along boundary
     geo.write('Line(11) = {1,2};\n')
@@ -73,25 +74,29 @@ def processopts():
     for the outline of a glacier flow domain with bedrock steps.  Also
     generates slab-on-slope geometry with -bs 0.0.
     ''')
-    parser.add_argument('-bs', type=float, default=100.0, metavar='X',
+    parser.add_argument('-bs', type=float, default=0.0, metavar='X',
                         help='height of bed step (default=100 m)')
-    parser.add_argument('-Hin', type=float, default=400.0, metavar='X',
+    parser.add_argument('-Hin', type=float, default=100.0, metavar='X',
                         help='upstream thickness of ice (default=400 m)')
-    parser.add_argument('-Hout', type=float, default=400.0, metavar='X',
+    parser.add_argument('-Hout', type=float, default=100.0, metavar='X',
                         help='downstream thickness of ice (default=400 m)')
-    parser.add_argument('-hmesh', type=float, default=80.0, metavar='X',
+    parser.add_argument('-hmesh', type=float, default=10, metavar='X',
                         help='default target mesh spacing (default=80 m)')
-    parser.add_argument('-L', type=float, default=3000.0, metavar='X',
-                        help='flow line length (default=3000 m)')
-    parser.add_argument('-Lup', type=float, default=1500.0, metavar='X',
-                        help='start of bedrock step (default=1500 m)')
-    parser.add_argument('-Ldown', type=float, default=2000.0, metavar='X',
-                        help='end of bedrock step (default=2000 m)')
+    #parser.add_argument('-L', type=float, default=5*Hin, metavar='X',
+    #                    help='flow line length')
+    parser.add_argument('-Lbase', type=float, default=1000, metavar='X',
+                        help='flow line length')
+    parser.add_argument('-Ltop', type=float, default=1000, metavar='X',
+                        help='flow line length')
+    #parser.add_argument('-Lup', type=float, default=1500.0, metavar='X',
+    #                    help='start of bedrock step (default=1500 m)')
+    #parser.add_argument('-Ldown', type=float, default=2000.0, metavar='X',
+    #                    help='end of bedrock step (default=2000 m)')
     parser.add_argument('-o', metavar='FILE.geo', default='glacier.geo',
                         help='output file name (ends in .geo; default=glacier.geo)')
     parser.add_argument('-refine', type=float, default=1.0, metavar='X',
                         help='refine resolution by this factor (default=1)')
-    parser.add_argument('-refine_corner', type=float, default=4.0, metavar='X',
+    parser.add_argument('-refine_corner', type=float, default=10.0, metavar='X',
                         help='further local refinement at interior corner by this factor (default=4)')
     return parser.parse_args()
 
@@ -112,11 +117,9 @@ if __name__ == "__main__":
     # set "characteristic lengths" which are used by gmsh to generate triangles
     lc = args.hmesh / args.refine
     geo.write('lc = %f;\n' % lc)
-    if abs(args.bs) > 1.0:
-        lc_corner = lc / args.refine_corner
-    else:
-        lc_corner = lc
+    lc_corner = lc / args.refine_corner
     geo.write('lc_corner = %f;\n' % lc_corner)
     # write the rest of the .geo file
-    writegeometry(geo, args.bs, args.L, args.Lup, args.Ldown, args.Hin, args.Hout)
+    #writegeometry(geo, args.bs, args.L, args.Lup, args.Ldown, args.Hin, args.Hout)
+    writegeometry(geo, args.bs, args.Ltop, args.Lbase, args.Hin, args.Hout)
     geo.close()
