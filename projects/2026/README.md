@@ -1,6 +1,6 @@
 # projects/2026/
 
-These are notes and data and codes for my two suggested projects for the McCarthy International Summer School in Glaciology in 2026.  See `README.md` in the subdirectories `coverage/` (Project XX) and `influence/` (Project YY) for documentation.  These projects appear in the [projects list](https://glacierschool.alaska.edu/2026/student-projects-2026) for the Summer School.
+These are notes for my two suggested projects for the McCarthy International Summer School in Glaciology in 2026.  See `README.md` in the subdirectories `coverage/` (Project XX) and `influence/` (Project YY) for documentation.  These projects appear in the [projects list](https://glacierschool.alaska.edu/2026/student-projects-2026) for the Summer School.
 
 ## coverage/
 
