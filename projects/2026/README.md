@@ -1,10 +1,10 @@
 # projects/2026/
 
-These are notes and codes for my two suggested projects for the McCarthy International Summer School in Glaciology in 2026.  See `README.md` in the subdirectories `coverage/` (Project XX) and `influence/` (Project YY) for documentation.  These projects appear in the [projects list](https://glacierschool.alaska.edu/2026/student-projects-2026) for the Summer School.
+These are notes and codes for my two suggested projects for the McCarthy International Summer School in Glaciology in 2026.  See `README.md` in the subdirectories `coverage/` (Project 7) and `influence/` (Project 8) for documentation.  These projects appear in the [projects list](https://glacierschool.alaska.edu/2026/student-projects-2026) for the Summer School.
 
 ## coverage/
 
-PROJECT XX: What land is covered by glaciers?
+PROJECT 7: What land is covered by glaciers?
 
 ADVISOR: Ed Bueler
 
@@ -14,7 +14,7 @@ Required tools:  This project assumes some familiarity with Python and different
 
 ## influence/
 
-PROJECT YY: How far can glacier stresses reach?
+PROJECT 8: How far can glacier stresses reach?
 
 ADVISOR: Ed Bueler
 
