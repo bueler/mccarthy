@@ -1,9 +1,12 @@
 mccarthy
 ========
 
-Copyright 2010--2024  Ed Bueler
+Copyright 2010--2026  Ed Bueler
 
-This repository contains slides, notes, and computer programs for numerical glacier and ice sheet modeling.  These materials have been used for the [International Summer School in Glaciology](http://glaciers.gi.alaska.edu/courses/summerschool), McCarthy, AK in years 2010, 2012, 2014, 2016, 2018, 2022, and 2024.
+This repository contains slides, notes, exercises, and computer programs for numerical glacier and ice sheet modeling.  These materials have been used for the [International Summer School in Glaciology](http://glaciers.gi.alaska.edu/courses/summerschool), McCarthy, AK in years 2010, 2012, 2014, 2016, 2018, 2022, 2024, and 2026.
+
+Download
+--------
 
 Download all materials by one of these methods:
 
@@ -14,33 +17,27 @@ Download all materials by one of these methods:
 
 The optional `depth=1` setting reduces the download size by not getting the history, which most users will not need.
 
-slides and notes
-----------------
+Slides, exercises, and notes
+----------------------------
 
-The PDF slides [slides/slides-2024.pdf](slides/slides-2024.pdf) are new this year.  I believe they cover the essential material in a better way.  They are supported by Python codes in [py/](py/).
-
-The older material is in PDF notes [notes/notes-2024.pdf](notes/notes-2024.pdf), previous slides [slides/slides-2022.pdf](slides/slides-2022.pdf), and Matlab/Octave programs [mfiles/](mfiles/).  My plan is to update the notes soon!
+The PDF slides [slides/slides-2026.pdf](slides/slides-2026.pdf) cover the essential material in the briefest way.  They are supported by Python codes in [py/](py/).  There are [exercises](exercises/exercises-2026.pdf) and [notes](notes/notes-2026.pdf) which are aligned to the slides, and also support them.
 
 Python programs
 ---------------
 
-The codes in subdirectory [py/](py/) solve surface kinematic equation (SKE) and shallow ice approximation (SIA) problems.  Python programs [surface1d.py](py/surface1d.py) and [shallowuw.py](py/shallowuw.py) use only the numpy and matplotlib libraries.  You are encouraged to actually run and modify them!  Feel free to email me about how they work.
+The Python codes in subdirectory [py/](py/) solve surface kinematic equation (SKE) and shallow ice approximation (SIA) problems.  The primary Python programs [surface1d.py](py/surface1d.py) and [shallowuw.py](py/shallowuw.py) use only the numpy and matplotlib libraries.
 
-For now the [slides (slides-2024.pdf)](slides/slides-2024.pdf) are the documentation, along with line comments in the `.py` source codes.  Please report any bugs, either by email or by using the [issues](https://github.com/bueler/mccarthy/issues) for this repository.
+You are encouraged to actually run and modify these codes!  Feel free to email me about how they work.
 
-The [surface2d.py](py/surface2d.py) program uses Firedrake.  Additional Firedrake codes which solve the glaciological (Glen-law) Stokes model are in the [stokes/](stokes/) directory.  See [stokes/doc.pdf](stokes/doc.pdf) for some documentation.
+The [slides](slides/slides-2026.pdf) and the [notes](notes/notes-2026.pdf) are the documentation for the Python codes, along with line comments in the `.py` source codes.
 
-Matlab/Octave programs (deprecated)
------------------------------------
+The [surface2d.py](py/surface2d.py) program uses [Firedrake](https://www.firedrakeproject.org/) (a finite element library) which calls [PETSc](http://www.mcs.anl.gov/petsc/) for equation solvers.
 
-The codes in subdirectory [mfiles/](mfiles/) solve SIA and SSA problems.  They should work in either Matlab or [Octave](https://www.gnu.org/software/octave/); if not please report a bug, either by email or by using the [issues](https://github.com/bueler/mccarthy/issues) for this repository.  The [current notes](notes/notes-2024.pdf) and the [older slides](slides/slides-2022.pdf) document these programs, but the programs also have help files (leading comments).
+The codes in [py/stokes/](py/stokes/) also use Firedrake to solve a 2D Glen-law Stokes flow over a bedrock step.  The workflow for the Stokes codes also use [Gmsh](http://gmsh.info/) (a mesh generator) and [Paraview](https://www.paraview.org/) (for visualization).  See [stokes/doc.pdf](stokes/doc.pdf) for more information.
 
-Stokes solver
--------------
+Please report any bugs in the codes either by email or by using the [issues](https://github.com/bueler/mccarthy/issues) for this repository.
 
-The Python tools in [stokes/](stokes/) are primarily for projects.  By default they solve a 2D Glen-law Stokes flow over a bedrock step.  The workflow uses the following tools: [Firedrake](https://www.firedrakeproject.org/) (a finite element library), [Gmsh](http://gmsh.info/) (a mesh generator), [PETSc](http://www.mcs.anl.gov/petsc/) (a solver library), and [Paraview](https://www.paraview.org/) (for visualization).  See [stokes/doc.pdf](stokes/doc.pdf) for more information.
+Older material
+--------------
 
-ancient versions
-----------------
-
-Older versions (2009, 2010, 2012, 2014) of this material lived in the repo https://github.com/bueler/karthaus
+The older material is in the form of PDF notes, e.g. [old/notes/notes-2024.pdf](old/notes/notes-2024.pdf), previous slides (see [slides/](slides/), and Matlab/Octave programs [old/mfiles/](old/mfiles/).  Even older versions (2009--2014) of this material lived in the repo https://github.com/bueler/karthaus
