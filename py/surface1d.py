@@ -56,6 +56,7 @@ def explicitstep(x, s, dt):
     return snew
 
 def mkoutdir(dirname):
+    '''convenience function for creating an output directory'''
     import os
     try:
         os.mkdir(dirname)

@@ -4,5 +4,4 @@ all:
 
 clean:
 	rm -f *~ *.pyc *.pvd *.vtu *.pvtu
-	rm -rf __pycache__/
-	rm -rf output/
+	rm -rf __pycache__/ output/

@@ -1,13 +1,14 @@
 from firedrake import *
+secpera = 31556926.0
 
 # define mesh and function spaces on [0,L]^2
-L, N = 50.0e3, 100
+N = 100  # N x N mesh
+L = 50.0e3  # 50 km
 mesh = RectangleMesh(N, N, L, L)
 P1 = FunctionSpace(mesh, "CG", 1)
 P1vector = VectorFunctionSpace(mesh, "CG", 1, dim=3)
 
-# define data a, b, u
-secpera = 31556926.0
+# functions compute "data" a, b, u
 
 def surfacemassbalance(xy):
     lapserate = 0.2 / (1.0e3 * secpera)
@@ -24,15 +25,17 @@ def surfacevelocity(xy):
     U0 = 300.0 / secpera
     return as_vector([Constant(U0), -Constant(U0), 0.0])
 
-# define (regularized) weak form problem
+# functions for data
 xy = SpatialCoordinate(mesh)
 a = Function(P1, name='a(x,y)').interpolate(surfacemassbalance(xy))
 b = Function(P1, name='b(x,y)').interpolate(bedelevation(xy))
 u = Function(P1vector, name='u(x,y)').interpolate(surfacevelocity(xy))
-s = Function(P1, name='s(x,y)').interpolate(b)  # initialize to no ice
-ns = as_vector([-s.dx(0), -s.dx(1), 1.0])
+s = Function(P1, name='s(x,y)').interpolate(b)  # initialize to no ice, so s=b
+
+# define (regularized) weak form problem
 v = TestFunction(P1)
 epsreg = Constant(0.001)
+ns = as_vector([-s.dx(0), -s.dx(1), 1.0])
 F = epsreg * inner(grad(s), grad(v)) * dx \
     + (-inner(u, ns) - a) * v * dx
 bcs = DirichletBC(P1, b, "on_boundary")
