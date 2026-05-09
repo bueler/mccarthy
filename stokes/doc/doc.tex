@@ -58,7 +58,7 @@ urlcolor=black     % only if colorlinks=true
 \vspace{-8mm}
 \begin{center}
 \footnotesize
-\emph{version: \today~for McCarthy 2024}
+\emph{version: \today~for McCarthy 2026}
 \end{center}
 
 \thispagestyle{empty}
@@ -189,21 +189,22 @@ This justifies formula \eqref{outflowbc}.
 
 \section{Weak form} \label{sec:weakform}
 
-Equations \eqref{stokes} and \eqref{incompagain} are called the \emph{strong form} of the Glen-Stokes model.  An integral equation form of the same equations, the \emph{weak form}, is needed when building a numerical finite element (FE) method \cite{Elmanetal2014}.  This new form is derived by multiplying the strong form equations by test functions and then integrating over $\Omega$.  This defines a nonlinear functional $F$, that is, a function which takes functions as input and returns scalars.  The weak form says that $F$ is zero when acting on test functions.  The significance of the weak form can be stated in several ways:
+Equations \eqref{stokes} and \eqref{incompagain} are called the \emph{strong form} of the Glen-Stokes model.  An integral equation form of the same equations, the \emph{weak form}, is needed when building a numerical finite element (FE) method \cite{Elmanetal2014}.  This new form will be derived by multiplying the strong form equations by test functions and then integrating over $\Omega$, which defines a nonlinear functional $F$, that is, a function which takes functions as input and returns scalars.  The weak form says that $F$ is zero when acting on test functions.  The significance of the weak form can be stated in several ways:
 \begin{itemize}
 \item It is well-posed in the sense of always having a unique solution  for glaciologically-relevant boundary values \cite{JouvetRappaz2011}.
 \item It has a larger space of potential solutions than the strong form, for instance it is more flexible with respect to discontinuities in the data.
-\item An FE method can create test functions via local constructions which work on a mesh of triangles or quadrilaterals.  These piecewise-defined test functions are allowed in the weak form.  This framework is more flexible with respect to problem geometry than are, for example, finite difference methods based on the strong form.
+\item An FE method can create test functions via local constructions which work on a mesh of triangles or quadrilaterals, and these piecewise-defined functions are allowed in the weak form.  This framework is more flexible with respect to problem geometry than finite difference methods based on the strong form.
 \end{itemize}
 
-A solution to the weak form stated below is a pair $(\bu,p)$ wherein each function lives in a certain function space.  We write $\bu\in V_D$ and $p \in Q$ here, where the Sobolev spaces $V_D$ and $Q$ are precisely-identified in \cite{JouvetRappaz2011}.  Test functions $\bv\in V_0$ and $q\in Q$ come from nearly the same spaces, with $V_D$ and $V_0$ differing only by the value on the Dirichlet boundary: $\bu\in V_D$ satisfies a nonhomogeneous inflow condition \eqref{inflowbc} while $\bv\in V_0$ is zero there.
+A solution to the weak form below is a velocity-pressure pair $(\bu,p)$.  Each function lives in a certain function space.  We write $\bu\in V_D$ and $p \in Q$, and the Sobolev spaces $V_D$ and $Q$ are precisely-identified in \cite{JouvetRappaz2011}.  Test functions $\bv\in V_0$ and $q\in Q$ come from nearly the same spaces, with $V_D$ and $V_0$ differing only by the value on the Dirichlet boundary: $\bu\in V_D$ satisfies a nonhomogeneous inflow condition \eqref{inflowbc} while $\bv\in V_0$ is zero there.
 
 To give a preliminary definition of $F$ we multiply \eqref{stokes} by $\bv\in V_0$ and \eqref{incompagain} by $q\in Q$, then add and integrate:
 \begin{equation}
 F(\bu,p;\bv,q) = \int_\Omega - \left(\nabla \cdot \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu\right)\right)\cdot \bv + \nabla p \cdot \bv - \rho \mathbf{g} \cdot \bv - \left(\nabla \cdot \bu\right) q \label{nonfuncone}
 \end{equation}
+However, the actual definition of $F$ re-balances the number of derivatives on $(\bv,q)$ versus $(\bu,p)$, to have only first derivatives on $\bu,\bv$, and no derivative on $p,q$.  For this we need integration-by-parts.
 
-However, the desired final definition of $F$ re-balances the number of derivatives on $(\bv,q)$ versus $(\bu,p)$, that is, it has only first derivatives on $\bu,\bv$, and no derivative on $p,q$.  For this we need integration-by-parts.  Recall the product rule $\nabla \cdot(f\bX) = \grad f\cdot \bX + f \nabla \cdot \bX$ and the divergence theorem $\int_\Omega \nabla \cdot (f\bX) = \int_{\partial \Omega} f\bX \cdot \hbn$.  Denoting $\tau = B_n |D\bu|^{\frac{1}{n} - 1} D\bu$ for convenience we have
+Recall the product rule $\nabla \cdot(f\bX) = \grad f\cdot \bX + f \nabla \cdot \bX$ and the divergence theorem $\int_\Omega \nabla \cdot (f\bX) = \int_{\partial \Omega} f\bX \cdot \hbn$.  Denoting $\tau = B_n |D\bu|^{\frac{1}{n} - 1} D\bu$ for convenience we have
 \begin{align*}
 \int_\Omega \left(\nabla \cdot \tau\right)\cdot \bv &= \sum_{j=1}^2 \int_\Omega \nabla \cdot (\tau_{j\circ})\, v_j = \sum_{j=1}^2 \int_\Omega \nabla \cdot (\tau_{j\circ} v_j) - \tau_{j\circ} \nabla v_j \\
   &= \sum_{j=1}^2 \int_{\partial \Omega} (\tau_{j\circ} v_j) \cdot \hbn - \int_\Omega \tau_{j\circ} \cdot \nabla v_j = \int_{\partial \Omega} (\tau \hbn)\cdot \bv - \int_\Omega \trace(\tau \nabla \bv)
@@ -286,7 +287,7 @@ A continuous scalar function on $\Omega$ which is piecewise-linear on each trian
 
 For the vector-valued velocity functions, $V_0^h$ denotes the space of \emph{pairs} of scalar piecewise-quadratic functions on $\Omega$, additionally required to be zero on the base \eqref{basebc} and inflow \eqref{inflowbc} Dirichlet boundaries.  The functions in $V_0^h$ are 2D vector fields with scalar components which are continuous and piecewise-quadratic scalar functions in $P_2$.  We define $V_D^h$ to be the same space except satisfying \eqref{inflowbc} on the inflow boundary.  These two $P_2$ subspaces are used in the FE weak form \eqref{feweak} below: $V_0^h \subset V_0$, $V_D^h \subset V_D$.
 
-A well-known basis of the tests functions are the \emph{hat functions}.\footnote{Figure 1.6 in \cite{Elmanetal2014} and Figure 10.4 in \cite{Bueler2021} show $P_1$ hat functions, while Figure 1.7 in \cite{Elmanetal2014} suggests how $P_2$ hat functions would look.}  For pressure, let $\psi_j(x,z)$ be a $P_1$ hat function from $Q^h$ which is linear on each triangle, continuous on $\Omega$, equal to one at node $(x_j,z_j)$, and otherwise zero at all other nodes.  Thus $\psi_j(x_i,z_i) = \delta_{ij}$.  The set $\{\psi_j\}$ is a set of $N_1$ linearly-independent functions, and thus it is a basis of $Q^h$.  Similarly, for every $P_2$ node which is not in the base or inflow boundary, whether a triangle vertex or edge midpoint, there is a $P_2$ hat function.  Pairs of such piecewise-quadratic hat functions form a basis of $2N_2$ functions for the velocity test space $V_0^h$.
+A basis of test functions are the \emph{hat functions}.\footnote{Figure 1.6 in \cite{Elmanetal2014} and Figure 10.4 in \cite{Bueler2021} show $P_1$ hat functions, while Figure 1.7 in \cite{Elmanetal2014} suggests how $P_2$ hat functions would look.}  For pressure, let $\psi_j(x,z)$ be a $P_1$ hat function from $Q^h$ which is linear on each triangle, continuous on $\Omega$, equal to one at node $(x_j,z_j)$, and otherwise zero at all other nodes.  Thus $\psi_j(x_i,z_i) = \delta_{ij}$.  The set $\{\psi_j\}$ is a set of $N_1$ linearly-independent functions, and thus it is a basis of $Q^h$.  Similarly, for every $P_2$ node which is not in the base or inflow boundary, whether a triangle vertex or edge midpoint, there is a $P_2$ hat function.  Pairs of such piecewise-quadratic hat functions form a basis of $2N_2$ functions for the velocity test space $V_0^h$.
 
 When using $P_2$ elements for velocity and $P_1$ elements for pressure we see that the dimension $2N_2$ of the velocity space is much higher than the dimension $N_1$ for the pressure space.  However, such a dimension imbalance turns out to be desirable!  As explained in the FE literature under the obscure name ``inf-sup condition'' \cite{Braess2007,Bueler2021,Elmanetal2014}, Stokes equations mixed methods are only stable if the velocity space is sufficiently rich relative to the pressure space.
 
@@ -296,7 +297,7 @@ F(\bu^h,p^h;\bv^h,q^h) = 0 \qquad \text{ for all } \bv^h\in V_0^h \text{ and } q
 \end{equation}
 By linearity of $F$ in its last two arguments, it suffices to consider only the hat function basis of the test function spaces $V_0^h$ and $Q^h$.  Note that relative to \eqref{weak} the nonlinear functional $F$ is unchanged and we have merely added ``$h$'' superscripts to all continuum quantities, thus problem \eqref{feweak} can be shown to be well-posed by the same theory that applies to the continuum problem \cite[Theorem 4.3]{JouvetRappaz2011}.
 
-FE problem \eqref{feweak} is a nonlinear system which should be solved by Newton's method \cite{Bueler2021,Kelley2003}.  To sketch this, suppose we have some current iterate $\bu^h,p^h$ which does not exactly solve \eqref{feweak}.  Then for each test function $\bv^h$ or $q^h$, i.e.~for each hat function, the value of the ``residual'' $F(\bu^h,p^h;\bv^h,q^h)$ can be computed concretely, though also approximately, by quadrature \cite{Bueler2021,Elmanetal2014}.  Also we can use the current iterate, and the derivatives of $F$, to evaluate the Jacobian at the current iterate.  This ``assembly'' process\footnote{Actually the equations are assembled element-by-element, not node-by-node.  For each triangle $\triangle_k$ the contribution to \eqref{feweak} is added to the correct discrete equation.  However, the point of using Firedrake is that it hides the assembly process, and we may think about the problem at a higher level \cite{Rathgeberetal2016}.} generates a system of sparse, linear algebraic equations, namely the Newton step equations of the discrete Glen-Stokes problem.  Each Newton step requires us to solve a sparse and indefinite linear system.  These systems have a well-known block structure (Figure \ref{fig:lowspy}), and we may either apply a direct solver for the whole matrix or use a Schur complement preconditioner in a GMRES Krylov iteration \cite{Elmanetal2014,GolubVanLoan2013}.  Because solver technology is complicated we abandon further explanation, but see Chapter 14 of \cite{Bueler2021}.
+FE problem \eqref{feweak} is a nonlinear system which should be solved by Newton's method \cite{Bueler2021,Kelley2003}.  To sketch this, suppose we have some current iterate $\bu^h,p^h$ which does not exactly solve \eqref{feweak}.  Then for each test function $\bv^h$ or $q^h$, i.e.~for each hat function, the value of the ``residual'' $F(\bu^h,p^h;\bv^h,q^h)$ can be computed concretely, though also approximately, by quadrature \cite{Bueler2021,Elmanetal2014}.  Also we can use the current iterate, and the derivatives of $F$, to evaluate the Jacobian at the current iterate.  This ``assembly'' process\footnote{Actually the equations are assembled element-by-element, not node-by-node.  For each triangle $\triangle_k$ the contribution to \eqref{feweak} is added to the correct discrete equation.  However, Firedrake hides the assembly process so that we may think about the problem at a higher level \cite{Rathgeberetal2016}.} generates a system of sparse, linear algebraic equations, namely the Newton step equations of the discrete Glen-Stokes problem.  Each Newton step requires us to solve a sparse and indefinite linear system.  These systems have a well-known block structure (Figure \ref{fig:lowspy}), and we may either apply a direct solver for the whole matrix or use a Schur complement preconditioner in a GMRES Krylov iteration \cite{Elmanetal2014,GolubVanLoan2013}.  Because solver technology is complicated we abandon further explanation, but see Chapter 14 of \cite{Bueler2021}.
 
 \begin{figure}[h]
 \includegraphics[width=0.45\textwidth]{lowspy}
@@ -311,7 +312,7 @@ FE problem \eqref{feweak} is a nonlinear system which should be solved by Newton
 
 \section{Implementation in Python} \label{sec:implementation}
 
-This section gives a practical view of our codes, including how they are divided into modules and the sequence in which they are used in practice.  In overview, we implement problem \eqref{feweak}, and make the stated discretization choices, in Python using Firedrake \cite{Rathgeberetal2016}.  The PETSc \cite{Balayetal2018} and Mumps \cite{Amestoy2001} solver libraries are called via Firedrake on the discretized nonlinear equations.
+This section gives a practical view of our codes and how they are used in practice.  In overview, we implement problem \eqref{feweak}, and make the stated discretization choices, in Python using Firedrake \cite{Rathgeberetal2016}.  The PETSc \cite{Balayetal2018,Bueler2021} and Mumps \cite{Amestoy2001} solver libraries are called via Firedrake on the discretized nonlinear equations.
 
 To define the nonlinear residual function $F$ in \eqref{defineF} in code, we apply the UFL domain-specific language, designed for describing such weak forms \cite{Alnaesetal2014}.  This language comes rather close to the mathematical form.  Compare \eqref{strainrate}, \eqref{viscflowlaw}, and \eqref{defineF} to the following:
 \begin{Verbatim}[fontsize=\small,frame=lines]
@@ -322,6 +323,7 @@ rr = 1.0/3.0 - 1.0
 F = ( inner(B3 * Du2**(rr/2.0) * D(u), D(v)) - p * div(v) - div(u) * q ) * dx \
     - inner(f_body, v) ) * dx - inner(outflow_sigma, v) * ds(bdryids['outflow'])
 \end{Verbatim}
+
 Firedrake knows how to take this code, plus a choice of mesh and function spaces, and run the assemble process to create the Newton step equations for this problem.  Then Firedrake's \texttt{solve()} command solves \eqref{feweak} \cite{Rathgeberetal2016}.
 
 \medskip
@@ -344,7 +346,7 @@ As shown in Figure \ref{fig:blockdiagram} there are three major Python component
     \node [other]  (gmsh)[right of= domain] {Gmsh};
     \node [tool]   (flow)[right of=gmsh] {\texttt{flow.py}};
     \node [other]  (paraview)[right of=flow] {Paraview};
-    \node [module] (momentummodel)[above left of=flow, yshift=-8mm] {\begin{minipage}{4.0cm} \texttt{momentummodel.py} \footnotesize (\texttt{class MomentumModule}) \end{minipage}};
+    \node [module] (momentummodel)[above left of=flow, yshift=-8mm] {\begin{minipage}{4.0cm} \texttt{momentummodel.py} \footnotesize (\texttt{class MomentumModel}) \end{minipage}};
     \path[->] (domain) edge node[below] {\texttt{.geo}} (gmsh) ;
     \path[->] (gmsh) edge node[below] {\texttt{.msh}} (flow) ;
     \path[->] (flow) edge node[below] {\texttt{.pvd}} (paraview) ;
@@ -352,7 +354,7 @@ As shown in Figure \ref{fig:blockdiagram} there are three major Python component
 \end{tikzpicture}
 
 \medskip
-\caption{Users interact with the solid-outline tools in the given order.}
+\caption{Users interact with the tools in order.}
 \label{fig:blockdiagram}
 \end{figure}
 
@@ -364,12 +366,12 @@ $ ./domain.py -o glacier.geo                   # create domain outline
 $ gmsh -2 glacier.geo                          # mesh domain
 $ source ~/firedrake/bin/activate              # start Firedrake
 (firedrake) $ ./flow.py -mesh glacier.msh      # solve Stokes problem
-(firedrake) $ paraview glacier.pvd             # visualize results
+(firedrake) $ paraview output/result.pvd       # visualize results
 \end{Verbatim}
 %$
 
 \medskip
-\noindent The \verb|README.md| file documents the usage more thoroughly.
+\noindent Paraview can be used to generate Figure \ref{fig:glacier:bedstep} from the output file.  The \verb|README.md| file documents the usage more thoroughly, including mesh refinement and parallel solutions.
 
 
 \small
