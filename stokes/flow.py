@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# (C) 2018--2024 Ed Bueler
+# (C) 2018--2026 Ed Bueler
 
 # Solves glacier Glen-Stokes problems.  See README.md for usage.
 # The mathematics and finite element method are documented in doc.pdf.
@@ -8,8 +8,7 @@
 packagechoices = ['SchurDirect','Direct']
 from argparse import ArgumentParser, RawTextHelpFormatter
 parser = ArgumentParser(description=\
-'''Solve 2D glacier Glen-Stokes problem.  Requires an activated
-Firedrake environment.  Solver uses option prefix -s_...''',
+'''Solve 2D glacier Glen-Stokes problem.  Requires an activated Firedrake environment.  Solver option prefix is -s_.''',
     formatter_class=RawTextHelpFormatter, add_help=False)
 parser.add_argument('-alpha', type=float, default=0.1, metavar='X',
                     help='downward slope of bed as angle in radians (default=0.1)')
@@ -26,7 +25,7 @@ parser.add_argument('-Hout', type=float, default=400.0, metavar='X',
                     help='downstream thickness of ice (default=400 m)')
 parser.add_argument('-mesh', metavar='MESH', type=str, default='',
                     help='input file name ending with .msh')
-parser.add_argument('-o', metavar='NAME', type=str, default='',
+parser.add_argument('-o', metavar='NAME', type=str, default='output/result.pvd',
                     help='output file name ending with .pvd')
 parser.add_argument('-osurface', metavar='NAME', type=str, default='',
                     help='save plot of surface values in this image file\n(i.e. .png,.pdf,...)')
@@ -36,8 +35,6 @@ parser.add_argument('-package', metavar='X', default='Direct',
                          % (','.join(packagechoices)) )
 parser.add_argument('-refine', type=int, default=0, metavar='N',
                     help='number of refinement levels after reading mesh (default=0)')
-parser.add_argument('-sequence', type=int, default=0, metavar='N',
-                    help='number of grid-sequencing levels (default=0)')
 parser.add_argument('-slab', action='store_true',
                     help='compute errors relative to slab-on-slope')
 args, passthroughoptions = parser.parse_known_args()
@@ -63,34 +60,27 @@ if len(args.mesh) == 0:
     parser.print_help()
     sys.exit(1)
 
-def printpar(thestr, comm=COMM_WORLD, indent=0):
-    spaces = indent * '  '
-    PETSc.Sys.Print('%s%s' % (spaces, thestr), comm=comm)
+def printpar(thestr, comm=COMM_WORLD):
+    PETSc.Sys.Print(thestr, comm=comm)
 
-def describe(thismesh, indent=0):
+def describe(thismesh):
     if thismesh.comm.size == 1:
-        printpar('mesh has %d elements (cells) and %d vertices' \
-                 % (thismesh.num_cells(),thismesh.num_vertices()),
-                 indent=indent)
+        printpar('  mesh has %d elements (cells) and %d vertices' \
+                 % (thismesh.num_cells(),thismesh.num_vertices()))
     else:
-        PETSc.Sys.syncPrint('rank %d owns %d elements (cells) and can access %d vertices' \
+        PETSc.Sys.syncPrint('  rank %d owns %d elements (cells) and can access %d vertices' \
                             % (thismesh.comm.rank,thismesh.num_cells(),thismesh.num_vertices()), comm=thismesh.comm)
         PETSc.Sys.syncFlush(comm=thismesh.comm)
 
-if args.sequence > 0:
-    printpar('using %d levels of grid-sequencing ...' % args.sequence)
-
 # read initial mesh, refine, and report on it
-printpar('reading initial mesh from %s ...' % args.mesh,indent=args.sequence)
+printpar('reading initial mesh from %s ...' % args.mesh)
 mesh = Mesh(args.mesh)
-if args.refine + args.sequence > 0:
-    hierarchy = MeshHierarchy(mesh, args.refine + args.sequence)
-    if args.refine > 0:
-        printpar('refining mesh %d times ...' % args.refine,indent=args.sequence+1)
+if args.refine > 0:
+    printpar('  refining mesh %d times ...' % args.refine)
+    hierarchy = MeshHierarchy(mesh, args.refine)
     mesh = hierarchy[args.refine]
-describe(mesh, indent=args.sequence+1)
-
-mesh.topology_dm.viewFromOptions('-dm_view')
+describe(mesh)
+mesh.topology_dm.viewFromOptions('-dm_view')  # option to see DMPlex layout
 
 # -osurface is not available in parallel
 assert (mesh.comm.size == 1 or len(args.osurface) == 0)
@@ -101,40 +91,24 @@ mm = MomentumModel(eps=args.eps, alpha=args.alpha,
 
 # solver mode: momentum-only solve of Stokes problem
 def momentumsolve(package=args.package, upold = None, upcoarse = None, indent=0):
-    up = mm.solve(mesh, bdryids,
-                  package=package, upold=upold, upcoarse=upcoarse)
+    up = mm.solve(mesh, bdryids, package=package, upold=upold, upcoarse=upcoarse)
     umagav,umagmax,pav,pmax = mm.solutionstats(mesh)
-    printpar('flow speed: av = %10.3f m a-1,  max = %10.3f m a-1' \
-             % (secpera*umagav,secpera*umagmax),
-             indent=indent+1)
-    printpar('pressure:   av = %10.3f bar,    max = %10.3f bar' \
-             % (1.0e-5*pav,1.0e-5*pmax),
-             indent=indent+1)
+    printpar('  flow speed: av = %10.3f m a-1,  max = %10.3f m a-1' \
+             % (secpera*umagav,secpera*umagmax))
+    printpar('  pressure:   av = %10.3f bar,    max = %10.3f bar' \
+             % (1.0e-5*pav,1.0e-5*pmax))
     return up
 
 # in slab-on-slope case, compute and report numerical errors
 def numericalerrorsslab(indent=0):
     uexactnorm, uerr, pexactnorm, perr = mm.numerical_errors_slab(mesh)
-    printpar('numerical errors: |u-uex|_2/|uex|_2 = %.3e, |p-pex|_2/|pex|_2 = %.3e' \
-             % (uerr / uexactnorm, perr / pexactnorm), indent=indent)
+    printpar('  numerical errors: |u-uex|_2/|uex|_2 = %.3e, |p-pex|_2/|pex|_2 = %.3e' \
+             % (uerr / uexactnorm, perr / pexactnorm))
 
 # solve, after deciding on solver mode
 printpar('using %s solver package ...' % args.package)
-if args.sequence > 0:
-    l = args.sequence
-    printpar(f'solving for velocity and pressure using {l} levels of grid-sequencing ...', indent=l)
-    up = momentumsolve(package=args.package, indent=l)
-    for j in range(l):
-        if args.slab:
-            numericalerrorsslab(indent=l-j)
-        mesh = hierarchy[args.refine+j+1]
-        printpar('transferring to next-refined mesh ...', indent=l-j-1)
-        describe(mesh, indent=l-j-1)
-        printpar('solving for velocity and pressure ...', indent=l-j-1)
-        up = momentumsolve(package=args.package, upcoarse=up, indent=l-j-1)
-else:
-    printpar('solving for velocity and pressure ...')
-    up = momentumsolve(package=args.package)
+printpar('solving for velocity and pressure ...')
+up = momentumsolve(package=args.package)
 if args.slab:
     numericalerrorsslab()
 u, p = up.subfunctions

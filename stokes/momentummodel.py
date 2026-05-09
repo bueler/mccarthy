@@ -9,7 +9,8 @@
 import sys
 import numpy as np
 import firedrake as fd
-from firedrake.petsc import PETSc, OptionsManager
+from firedrake.petsc import PETSc
+from petsctools import OptionsManager
 
 # public data
 secpera = 31556926.0    # seconds per year
