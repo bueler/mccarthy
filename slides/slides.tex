@@ -97,7 +97,8 @@
 \begin{frame}{online materials}
 
 \begin{itemize}
-\item \alert{please ask questions at any time! interruptions are a positive good}
+\item \alert{please ask questions at any time!}
+\item interruptions are a positive good
 \end{itemize}
 
 \bigskip
@@ -105,7 +106,7 @@
 \metroset{block=fill}
 \begin{block}{online materials}
 
-my slides, notes, codes, and materials are hosted at
+my slides, exercises, notes, and codes are hosted at
 
 \medskip
 \centerline{\href{https://github.com/bueler/mccarthy}{\texttt{github.com/bueler/mccarthy}}}
@@ -115,8 +116,10 @@ my slides, notes, codes, and materials are hosted at
 {\footnotesize
 these slides: \href{https://github.com/bueler/mccarthy/blob/master/slides/slides-2026.pdf}{\texttt{slides/slides-2026.pdf}}
 
+\smallskip
 exercises: \href{https://github.com/bueler/mccarthy/blob/master/exercises/exercises-2026.pdf}{\texttt{exercises/exercises-2026.pdf}}
 
+\smallskip
 notes: \href{https://github.com/bueler/mccarthy/blob/master/notes/notes-2026.pdf}{\texttt{notes/notes-2026.pdf}}
 
 Python codes: \href{https://github.com/bueler/mccarthy/tree/master/py}{\texttt{py/}}
@@ -124,12 +127,12 @@ Python codes: \href{https://github.com/bueler/mccarthy/tree/master/py}{\texttt{p
 \end{frame}
 
 
-\section[how does the glacier surface move?]{\textbf{how does the glacier surface move?} (hour 1)}
+\section[how does a glacier surface move?]{\textbf{how does a glacier surface move?} (hour 1)}
 
 \subsection{basic mathematics}
 
 
-\begin{frame}{how does the glacier surface move?}
+\begin{frame}{how does a glacier surface move?}
 
 \bigskip
 \begin{center}
@@ -138,7 +141,6 @@ Python codes: \href{https://github.com/bueler/mccarthy/tree/master/py}{\texttt{p
 %\includegraphics<3>[width=\textwidth]{boatplus}
 \includegraphics<2>[width=\textwidth]{boatplus}
 \end{center}
-
 
 %LIVE really the question is, "what is the most basic thing you can say mathematically at the surface of a glacier?"
 %LIVE imagine a magic glacier boat which always floats on the top of the ice.
@@ -158,17 +160,11 @@ Python codes: \href{https://github.com/bueler/mccarthy/tree/master/py}{\texttt{p
 
 \vspace{-3mm}
 \begin{itemize}
-\item two spatial dimensions (planar), along a flow line
-    \begin{itemize}
-    \item[$\circ$] $x$ horizontal, $z$ vertical
-    \end{itemize}
-\item $b(x)$: bed elevation (m) \comm{fixed in time!}
+\item 2D flow-line coordinates: \, $x$ horizontal, $z$ vertical
+\item $b(x)$: bed elevation (m)
 \item $s(t,x)$: ice surface elevation (m)
-\item $\bu(t,x,z)=(u,w)$: ice velocity ($\text{m}\,\text{s}^{-1}$)
+\item $\bu(t,x,z)=(u(t,x,z), w(t,x,z))$: \, ice velocity ($\text{m}\,\text{s}^{-1}$)
 \item $a(t,x)$: surface mass balance in ice-equivalent units ($\text{m}\,\text{s}^{-1}$)
-%\item {\color{NavyBlue} $z = s(t,x)$}: ice surface elevation (m)
-%\item {\color{NavyBlue} $\bu(t,x,z)=(u,w)$}: ice velocity ($\text{m}\,\text{s}^{-1}$)
-%\item {\color{Orange} $a(t,x)$}: surface mass balance in ice-equivalent units ($\text{m}\,\text{s}^{-1}$)
 \end{itemize}
 \end{frame}
 
@@ -185,16 +181,19 @@ Python codes: \href{https://github.com/bueler/mccarthy/tree/master/py}{\texttt{p
 
 the ice surface moves up and down according to
 \begin{itemize}
-\item<2-4> surface mass balance (SMB) \comm{\emph{climatic} mass balance (ice equiv.)}
+\item<2-4> surface mass balance (SMB)
 \item<3-4> vertical component of ice velocity
-\item<4> horizontal component of ice velocity \emph{and surface slope}
+\item<4> (horizontal component of ice velocity) $\times$ (surface slope)
 \end{itemize}
 \end{frame}
 
 
 \begin{frame}{surface kinematical equation (SKE) \dots alternate form}
+
 \begin{center}
 \includegraphics[width=0.5\textwidth]{boatplus}
+
+FIXME add $\bn_s$ arrow to figure
 \end{center}
 
 \vspace{-5mm}
@@ -203,9 +202,9 @@ the ice surface moves up and down according to
 \end{equation*}
 
 \begin{itemize}
-\item recall: $\bu=(u,w)$
+\item here $\bu=(u,w)$ denotes the velocity \alert{at the ice surface}
 \item $\bn_s$ is a vector which points upward and is normal (perpendicular) to the ice surface: \quad $\displaystyle \bn_s = \left(-\frac{\partial s}{\partial x}, \,1\right)$
-\item how would you prove the SKE? \comm{one answer: extra slides at end}
+\item how would you prove the SKE? \comm{answer: extra slides at end}
 \end{itemize}
 \end{frame}
 
@@ -219,7 +218,7 @@ the ice surface moves up and down according to
 \end{equation*}
 
     \begin{itemize}
-    \item[$\circ$] assume $a,u,w$ are given functions/values \uncover<2>{\hfill \alert{$\leftarrow$ this needs fixing!}}
+    \item[$\circ$] assume $a,u,w$ are given functions/values \comm{fixed in hour 2}
     \end{itemize}
 \item \alert{numerical modeling goal:} use a computer program to \emph{approximately} evolve the glacier surface $z=s(t,x)$ according to the SKE
     \begin{itemize}
@@ -247,39 +246,35 @@ is the surface kinematical equation
 \end{frame}
 
 
-\begin{frame}{surface smoothness versus thickness smoothness}
+\begin{frame}{surface elevation versus thickness}
 
 \begin{itemize}
 \item why not use thickness $H=s-b$ to describe glacier geometry?
 \end{itemize}
 
-\bigskip
+\medskip
 \begin{center}
-\includegraphics[width=0.9\textwidth]{giscross}
+\includegraphics[width=0.75\textwidth]{giscross}
 \end{center}
 
-\hfill \tiny [Data from Morlighem et al (2017), and thanks to A.~Aschwanden]
+\vspace{-5mm}
+\hfill {\tiny [Data from Morlighem et al (2017), and thanks to A.~Aschwanden]}
+
+\begin{itemize}
+\item answer: glacier surfaces are generally smoother than the bedrock topography, which means that $H$ is rougher than $s$
+\end{itemize}
 \end{frame}
 
 
 \subsection{some numerics}
 
-
-\begin{frame}{discretize the SKE 1}
-
-\begin{center}
-\includegraphics[width=0.7\textwidth]{surfacenotation}
-\end{center}
-\end{frame}
-
-
-\begin{frame}{discretize the SKE 2}
+\begin{frame}{discretize the SKE}
 \begin{center}
 \includegraphics[width=0.5\textwidth]{surfacenotation}
 \end{center}
 
 \begin{itemize}
-\item SKE: $\displaystyle \frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w$
+\item SKE: \qquad $\displaystyle \frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w$
 
 \smallskip
 \item choose time step $\Delta t>0$ and grid spacing $\Delta x>0$
@@ -290,7 +285,7 @@ is the surface kinematical equation
 \end{frame}
 
 
-\begin{frame}{discretize the SKE 3}
+\begin{frame}{discretize the SKE}
 \begin{center}
 \includegraphics[width=0.5\textwidth]{surfacenotation}
 \end{center}
