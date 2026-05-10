@@ -246,26 +246,6 @@ is the surface kinematical equation
 \end{frame}
 
 
-\begin{frame}{surface elevation versus thickness}
-
-\begin{itemize}
-\item why not use thickness $H=s-b$ to describe glacier geometry?
-\end{itemize}
-
-\medskip
-\begin{center}
-\includegraphics[width=0.75\textwidth]{giscross}
-\end{center}
-
-\vspace{-5mm}
-\hfill {\tiny [Data from Morlighem et al (2017), and thanks to A.~Aschwanden]}
-
-\begin{itemize}
-\item answer: glacier surfaces are generally smoother than the bedrock topography, which means that $H$ is rougher than $s$
-\end{itemize}
-\end{frame}
-
-
 \subsection{some numerics}
 
 \begin{frame}{discretize the SKE}
@@ -1052,9 +1032,10 @@ Extra Slides
 
 \begin{itemize}
 \item 1. derive SKE from mass conservation
-%\item 2. something
+\item 2. why $s$ is preferable to $H=s-b$
 \end{itemize}
 \end{frame}
+
 
 \begin{frame}{SKE from mass conservation}
 \begin{center}
@@ -1165,6 +1146,26 @@ w(t,x,z) &= w(t,x_0,z_0) + O(\delta) + O(\eps) \\
 \end{align*}
 \item limit $\delta, \eps \to 0$ to get SKE at $(t,x_0,z_0) = (t,x_0,s(t,x_0))$:
   $$\frac{\partial s}{\partial t} = a + w - u \frac{\partial s}{\partial x}$$
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{surface elevation versus thickness}
+
+\begin{itemize}
+\item why not use thickness $H=s-b$ to describe glacier geometry?
+\end{itemize}
+
+\medskip
+\begin{center}
+\includegraphics[width=0.75\textwidth]{giscross}
+\end{center}
+
+\vspace{-5mm}
+\hfill {\tiny [Data from Morlighem et al (2017), and thanks to A.~Aschwanden]}
+
+\begin{itemize}
+\item answer: glacier surfaces are generally smoother than the bedrock topography, which means that $H$ is rougher than $s$
 \end{itemize}
 \end{frame}
 
