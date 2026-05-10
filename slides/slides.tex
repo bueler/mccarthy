@@ -5,9 +5,8 @@
 
 \usetheme{metropolis}
 \metroset{block=fill}
-\setmonofont{Ubuntu Mono}
 
-\usepackage{appendixnumberbeamer}
+%\usepackage{appendixnumberbeamer}
 
 \usepackage{booktabs,empheq,bbold,bm}
 \usepackage[scale=2]{ccicons}
@@ -69,7 +68,8 @@
 \newcommand{\rhoi}{\rho_{\text{i}}}
 \newcommand{\snew}{s^{\text{new}}}
 
-\newcommand{\comm}[1]{{\footnotesize \hfill \emph{#1}}}
+\newcommand{\comm}[1]{{\footnotesize \hfill \emph{#1}}}  % small font comment at right
+
 
 \title{numerical modeling of glaciers}
 %\subtitle{version 1.1}
@@ -176,7 +176,7 @@ Python codes: \href{https://github.com/bueler/mccarthy/tree/master/py}{\texttt{p
 
 \vspace{-5mm}
 \begin{equation*}
-\frac{\partial s}{\partial t} = \uncover<2-4>{a} \uncover<3-4>{+w} \uncover<4>{-u \frac{\partial s}{\partial x}}
+\text{SKE:} \qquad \frac{\partial s}{\partial t} = \uncover<2-4>{a} \uncover<3-4>{+w} \uncover<4>{-u \frac{\partial s}{\partial x}}
 \end{equation*}
 
 the ice surface moves up and down according to
@@ -188,22 +188,27 @@ the ice surface moves up and down according to
 \end{frame}
 
 
-\begin{frame}{surface kinematical equation (SKE) \dots alternate form}
+\begin{frame}{surface kinematical equation (SKE) \dots\, vector form}
+
+\vspace{1mm}
 
 \begin{center}
-\includegraphics[width=0.5\textwidth]{boatplus}
-
-FIXME add $\bn_s$ arrow to figure
+\includegraphics[width=0.498\textwidth]{boatplusnormal}
 \end{center}
 
 \vspace{-5mm}
 \begin{equation*}
-\frac{\partial s}{\partial t} = a + \bu \cdot \bn_s
+\text{SKE:} \qquad \frac{\partial s}{\partial t} = a + \bu \cdot {\color{PineGreen} \bn_s}
 \end{equation*}
 
 \begin{itemize}
-\item here $\bu=(u,w)$ denotes the velocity \alert{at the ice surface}
-\item $\bn_s$ is a vector which points upward and is normal (perpendicular) to the ice surface: \quad $\displaystyle \bn_s = \left(-\frac{\partial s}{\partial x}, \,1\right)$
+\item $\bu=(u,w)$ denotes the velocity \alert{at the ice surface}
+
+\medskip
+\item $\bn_s$ is a \alert{surface-normal vector} which points upward:
+    $${\color{PineGreen} \bn_s} = \Big(-\frac{\partial s}{\partial x}, \,1\Big)$$
+
+\medskip
 \item how would you prove the SKE? \comm{answer: extra slides at end}
 \end{itemize}
 \end{frame}
@@ -218,9 +223,9 @@ FIXME add $\bn_s$ arrow to figure
 \end{equation*}
 
     \begin{itemize}
-    \item[$\circ$] assume $a,u,w$ are given functions/values \comm{fixed in hour 2}
+    \item[$\circ$] assume $a,u,w$ are given functions/values \comm{$\leftarrow$ silly! \dots\, fixed in hour 2}
     \end{itemize}
-\item \alert{numerical modeling goal:} use a computer program to \emph{approximately} evolve the glacier surface $z=s(t,x)$ according to the SKE
+\item \alert{numerical modeling goal:} build a computer program which evolves the glacier surface $z=s(t,x)$ according to the SKE
     \begin{itemize}
     \item[$\circ$] one short Python program in 1D: \quad \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{py/surface1d.py}
     \end{itemize}
@@ -236,7 +241,7 @@ FIXME add $\bn_s$ arrow to figure
 
 
 \begin{frame}[standout]
-claim: the central object of glacier theory
+bold claim: the central object of glacier theory
 
 is the surface kinematical equation
 
@@ -271,9 +276,9 @@ is the surface kinematical equation
 \end{center}
 
 \begin{itemize}
-\item now the SKE\, $\left(\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w\right)$\, becomes discrete:
+\item the SKE becomes discrete:
     $$\frac{\snew_j - s_j}{\Delta t} + u_j \frac{s_{j+1} - s_{j-1}}{2\Delta x} = a_j + w_j$$
-\item we can write this as an equation which determines $\snew_j$:
+\item write as an equation which determines $\snew_j$:
 	$$\snew_j = s_j - \Delta t\, u_j \frac{s_{j+1}-s_{j-1}}{2\Delta x} + \Delta t (a_j + w_j)$$
 \end{itemize}
 \end{frame}
@@ -285,13 +290,18 @@ is the surface kinematical equation
 \item \alert{however \dots}
 \item if we implement this ``forward-time centered-space'' scheme
 	$$\snew_j = s_j - \Delta t\, u_j \frac{s_{j+1}-s_{j-1}}{2\Delta x} + \Delta t (a_j + w_j) \hspace{1.0cm} \leftarrow \text{\emph{\alert{bad}}}$$
-then bad (unstable) things happen! \comm{exercise?}
-\item instead, it is known that when the ``advecting velocity'' is positive ($u_j \ge 0$) then the ``upwind'' version is conditionally stable:
+then bad (unstable) things happen! \comm{exercise \textbf{2}}
+\item instead, it is known that an \alert{upwind} scheme is stable
+    \begin{itemize}
+    \item[$\circ$] \alert{conditionally} stable, anyway, for this kind of \alert{advection} problem
+    \end{itemize}
+
+\item namely, when the velocity is positive ($u_j \ge 0$) then:
 	$$\hspace{3mm} \snew_j = s_j - \Delta t\, u_j \frac{s_j-s_{j-1}}{\Delta x} + \Delta t (a_j + w_j) \hfill \hspace{1.2cm} \leftarrow \text{\emph{useful}}$$
 
     \begin{itemize}
-    \item[$\circ$] upwind formula: \quad $\displaystyle \frac{\partial s}{\partial x} \approx \frac{1}{\Delta x} \begin{cases} (s_j-s_{j-1}), & u_j \ge 0 \\ (s_{j+1}-s_j), & u_j < 0 \end{cases}$
-    \item[$\circ$] the condition for stability is known \comm{(more soon)}
+    \item[$\circ$] general upwind formula: \quad $\displaystyle \frac{\partial s}{\partial x} \approx \frac{1}{\Delta x} \begin{cases} (s_j-s_{j-1}), & u_j \ge 0 \\ (s_{j+1}-s_j), & u_j < 0 \end{cases}$
+    \item[$\circ$] the condition for stability is known \comm{more soon}
     \end{itemize}
 %\item see textbooks for these caveats
 \end{itemize}
@@ -318,9 +328,8 @@ def explicitstep(s, x, dt):
 {\footnotesize
     \begin{itemize}
     \item[$\circ$] \texttt{x}, \texttt{s}, \texttt{snew} are 1D NumPy arrays
-    \item[$\circ$] separate functions define $a(x)$, $u(x)$, $w(x)$
-    \item[$\circ$] \texttt{x} is equally-spaced
-    \item[$\circ$] all indices except zero: \, $j=$\texttt{ 1:}
+    \item[$\circ$] \texttt{x} is an equally-spaced grid
+    \item[$\circ$] note that separate functions define $a(x)$, $u(x)$, $w(x)$
     \item[$\circ$] note that \, \texttt{snew[0] = s[0]} \, is never changed; this is a boundary condition
     \end{itemize}
 }
@@ -339,7 +348,7 @@ def explicitstep(s, x, dt):
 \item run \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{py/surface1d.py}:
 \begin{verbatim}
 $ python3 surface1d.py
-$ eog output/frame*.png          # any image viewer
+$ eog output/frame*.png          # view images
 \end{verbatim}
 \item the following example modifications reveal stability issues:
     \begin{enumerate}
@@ -359,21 +368,16 @@ $ eog output/frame*.png          # any image viewer
 \item SKE: \quad $\displaystyle \frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w$
 
 \medskip
-\item if horizontal velocity $u$ is given
+\item information about the surface
 
-then information about the
+travels at speed $u$
+\item from grid picture, the upwind
 
-surface travels at speed $u$
-\item from this $(t,x)$ grid picture, the
+scheme can only be stable if
+$$|u_j| \Delta t \le \Delta x \quad \text{for every } j \hspace{40mm}$$
 
-upwind scheme can only be
-
-stable if
-$$|u_j| \Delta t \le \Delta x \hspace{45mm}$$
-
-for every $j$
     \begin{itemize}
-    \item[$\circ$] observed by Courant, Friedrichs, and Lewy (1928)
+    \item[$\circ$] observed by Courant, Friedrichs, and Lewy in 1928 \cite{CFL1928}
     \end{itemize}
 
 \vspace{-45mm}
@@ -405,25 +409,26 @@ $ eog output/steady.png
 \end{verbatim}
 \item the following modification reveals an issue:
     \begin{enumerate}
-    \item double SMB: \quad $a(x)$ \, $\to$ \, $2 a(x)$
+    \item triple SMB: \quad $a(x)$ \, $\to$ \, $3 a(x)$
     \end{enumerate}
 \end{itemize}
 \end{block}
 \end{frame}
 
 
-\begin{frame}{teaser: 2D steady state of a glacier surface}
+\begin{frame}{more advanced: 2D steady state of a glacier surface}
 
 \bigskip
 \begin{itemize}
-\item this example uses \href{https://www.firedrakeproject.org/}{Firedrake}
+\item code: \href{https://github.com/bueler/mccarthy/blob/master/py/surface2d.py}{py/surface2d.py}
 {\footnotesize
     \begin{itemize}
-    \item[$\circ$] \emph{talk to me?}
+    \item[$\circ$] this example uses \href{https://www.firedrakeproject.org/}{Firedrake}
+    \item[$\circ$] it's the project \textbf{7} starting point
     \end{itemize}
 }
-\item code: \href{https://github.com/bueler/mccarthy/blob/master/py/surface2d.py}{py/surface2d.py}
 
+\bigskip
 \item result: $\rightarrow$
 
 \vspace{-15mm}
@@ -440,49 +445,35 @@ $ eog output/steady.png
 {\footnotesize
     \begin{itemize}
     \item[$\circ$] where $\bn_s = (-\frac{\partial s}{\partial x},-\frac{\partial s}{\partial y},1) = (-\grad s,1)$
+    \item[$\circ$] compare time-dependent SKE: \quad $\displaystyle \frac{\partial s}{\partial t} - \bu \cdot \bn_s = a$
     \end{itemize}
 }
 
-\smallskip
+\bigskip
 \item \alert{but subject to $s \ge b$}
-
-\medskip
-\item compare time-dependent SKE in 2D: \quad $\displaystyle \frac{\partial s}{\partial t} - \bu \cdot \bn_s = a$
 \end{itemize}
 \end{frame}
-
-
-%\begin{frame}[standout]
-%let's talk about all the (many) issues
-
-%when numerically solving the SKE
-
-%\vspace{10mm}
-%\begin{center}
-%\includegraphics[width=0.5\textwidth]{boatplus}
-%\end{center}
-%\end{frame}
 
 
 \begin{frame}{some questions when solving the SKE}
 \begin{itemize}
 \item[] \alert{MAJOR modeling questions}
     \begin{enumerate}
-    \item whence the SMB $a$? \comm{Regine?}
-    \item whence the surface velocity $u,w$? \comm{2nd hour!}
+    \item whence the SMB $a$?
+    \item whence the surface velocity $u,w$? \comm{topic of the 2nd hour!}
     \end{enumerate}
 \item[] \alert{mathematical questions}
     \begin{enumerate}\setcounter{enumi}{2}
-    \item is the time-dependent SKE well-posed for (various) given-field, initial condition, \& boundary condition assumptions?
-    \item is the steady-state SKE well-posed for (various) \dots \, assumptions?
+    \item is the time-dependent SKE well-posed for (various) initial \& boundary conditions?
+    \item same question for the steady-state SKE
     \item how do we understand admissibility ($s\ge b$) in the theory?
     \end{enumerate}
 \item[] \alert{numerical questions}
     \begin{enumerate}\setcounter{enumi}{5}
     \item when the surface velocity $u, w$ comes from a stress-balance submodel, is the upwind scheme still conditionally stable?
     \item are there better explicit schemes?
-    \item how does one enforce admissibility the best way?
     \item is it better to use an implicit scheme?
+    \item how does one enforce admissibility in the right way?
     \end{enumerate}
 \end{itemize}
 \end{frame}
@@ -881,14 +872,13 @@ w_j &= - \int_{b_j}^{s_j} \frac{u_{j+1/2}(z) - u_{j-1/2}(z)}{\Delta x}\,dz \\
 u &= - \frac{2}{n+1} A (\rho g)^n \left|\frac{\partial s}{\partial x}\right|^{n-1} \frac{\partial s}{\partial x} \left[\big(s - b\big)^{n+1} - \big(s-z\big)^{n+1}\right] \\
 w &= - \int_{b}^{s} \frac{\partial u}{\partial x}(x,z)\,dz
 \end{align*}
-\item implementing is exercise \textbf{13}
+\item implementing is exercise \textbf{16}
   \begin{itemize}
   \item[$\circ$] combine my codes \href{https://github.com/bueler/mccarthy/blob/master/py/surace1d.py}{py/surface1d.py} and \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{py/shallowuw.py}
   \end{itemize}
-\item important fact which I want to flesh-out: \alert{this model \emph{diffuses} the surface elevation}
+\item but there is an important fact which I want to flesh-out: \alert{this model \emph{diffuses} the surface elevation}
   \begin{itemize}
   \item[$\circ$] because ice flows downhill
-  \item[$\circ$] time-step conditions sufficient for stability are known \emph{for SIA}
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -902,7 +892,7 @@ w &= - \int_{b}^{s} \frac{\partial u}{\partial x}(x,z)\,dz
 \frac{\partial u}{\partial x} + \frac{\partial w}{\partial z} &= 0 &&\text{\emph{incompressible}} \\
 u(x,b(x))=0, w(x,b(x))&=0  &&\text{\emph{non-sliding/penetrating}}
 \end{align*}
-\item exercise \textbf{4} asks you to derive via vertical integration:
+\item exercise \textbf{5} asks you to derive via vertical integration:
 $$\frac{\partial H}{\partial t} + \frac{\partial}{\partial x}\left(\bar u H\right) = a \hspace{10mm} \text{\emph{\alert{mass continuity equation}}}$$
 where $H=s-b$ is ice thickness and $\bar u$ is the vertically-averaged horizontal velocity
 \item \alert{main idea.} for incompressible ice these are equivalent:
@@ -992,11 +982,14 @@ D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
 \begin{frame}{an opinionated Summary}
 
 \begin{itemize}
-\item numerical models are inevitable, whether you like them or not
-\item<2-> most of your work is to understand the math, not to write the code
+\item numerical models are inevitable in glaciology
+\item<2-> most of your work is to understand the math, not to write code
 \item<3-> writing your own numerical models is of great value, but you should toss the result in the trash once you understand it
-\item<4-> respect surface mass/energy balance just as much as ice dynamics
-\item<5-> machine learning \emph{after} continuum mechanics
+    \begin{itemize}
+    \item<3->[$\circ$] almost always: find the pro version
+    \end{itemize}
+\item<4-> surface mass/energy balances are as important as ice dynamics
+\item<5-> machine learning \emph{after} understanding the laws of physics
 \end{itemize}
 \end{frame}
 
@@ -1006,7 +999,6 @@ D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
 
 
 \appendix
-
 
 \setbeamerfont{bibliography item}{size=\scriptsize}
 \setbeamerfont{bibliography entry author}{size=\scriptsize}
@@ -1158,14 +1150,15 @@ w(t,x,z) &= w(t,x_0,z_0) + O(\delta) + O(\eps) \\
 
 \medskip
 \begin{center}
-\includegraphics[width=0.75\textwidth]{giscross}
+\includegraphics[width=0.7\textwidth]{giscross}
 \end{center}
 
 \vspace{-5mm}
-\hfill {\tiny [Data from Morlighem et al (2017), and thanks to A.~Aschwanden]}
+\hfill {\tiny [Morlighem et al (2017); figure thanks to A.~Aschwanden]}
 
 \begin{itemize}
-\item answer: glacier surfaces are generally smoother than the bedrock topography, which means that $H$ is rougher than $s$
+\item answer: glacier surfaces are generally smoother than the bedrock topography
+\item $H$ is rougher than $s$ because $H=s-b$ is as rough as the bed
 \end{itemize}
 \end{frame}
 
