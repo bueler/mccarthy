@@ -350,7 +350,7 @@ def explicitstep(s, x, dt):
 $ python3 surface1d.py
 $ eog output/frame*.png          # view images
 \end{verbatim}
-\item the following example modifications reveal stability issues:
+\item the following modifications reveal stability issues:
     \begin{enumerate}
     \item increase velocity: \quad $u(x)$ \, $\to$ \, $2.5\, u(x)$
     \item increase resolution: \quad $\Delta x=1000$ m \, $\to$ \, $\Delta x=400$ m
@@ -386,6 +386,10 @@ $$|u_j| \Delta t \le \Delta x \quad \text{for every } j \hspace{40mm}$$
 \vspace{15mm}
 \item rearranged, this is the \alert{CFL condition} on the time step:
 $$\Delta t \le \frac{\Delta x}{\max |u_j|} \hspace{40mm}$$
+
+    \begin{itemize}
+    \item[$\circ$] exercise \textbf{12}: add this to \texttt{surface1d.py} for $u(t,x)$
+    \end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -407,7 +411,7 @@ $$\Delta t \le \frac{\Delta x}{\max |u_j|} \hspace{40mm}$$
 \begin{verbatim}
 $ eog output/steady.png
 \end{verbatim}
-\item the following modification reveals an issue:
+\item the following modification reveals an admissibility issue:
     \begin{enumerate}
     \item triple SMB: \quad $a(x)$ \, $\to$ \, $3 a(x)$
     \end{enumerate}
@@ -425,11 +429,9 @@ $ eog output/steady.png
     \begin{itemize}
     \item[$\circ$] this example uses \href{https://www.firedrakeproject.org/}{Firedrake}
     \item[$\circ$] it's the project \textbf{7} starting point
+    \item[$\circ$] result: $\rightarrow$
     \end{itemize}
 }
-
-\bigskip
-\item result: $\rightarrow$
 
 \vspace{-15mm}
 \mbox{\hspace{58mm} \includegraphics[width=0.45\textwidth]{surface2d}}
@@ -450,7 +452,7 @@ $ eog output/steady.png
 }
 
 \bigskip
-\item \alert{but subject to $s \ge b$}
+\item but subject to \alert{$s \ge b$}, that is, \alert{admissibility} of surface elevation
 \end{itemize}
 \end{frame}
 
@@ -479,7 +481,7 @@ $ eog output/steady.png
 \end{frame}
 
 
-\section[where does the velocity field come from?]{\textbf{where does the velocity field come from?} (hour 2)}
+\section[where does the velocity field come from? (hour 2)]{\textbf{where does the velocity field come from?} (hour 2)}
 
 \subsection{basic mathematics}
 
@@ -493,19 +495,17 @@ $ eog output/steady.png
   \end{itemize}
 
   then it would be a ``typical'' fluid like liquid water
-
-\bigskip
-\item for liquid water one typically uses the incompressible Navier-Stokes model:
+\item for liquid water, the incompressible Navier-Stokes model:
 \begin{align*}
 \nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \\
 \rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) &= -\nabla p + \nabla \cdot \tau_{ij} + \rho \bm{g} &&\text{\emph{stress balance}} \\
 2 \nu D\mathbf{u}_{ij} &= \tau_{ij} &&\text{\emph{flow law}}
 \end{align*}
 
-\medskip
     \begin{itemize}
     \item[$\circ$] note that the stress balance equation is ``$m a = F$''
     \end{itemize}
+\item for such fluids: computational fluid dynamics (CFD) textbooks and software
 \end{itemize}
 \end{frame}
 
@@ -513,12 +513,11 @@ $ eog output/steady.png
 \begin{frame}{glaciology as computational fluid dynamics}
 
 \begin{itemize}
-\item numerical glacier modelling is first-class computational fluid dynamics (CFD)
+\item numerical glacier modelling is first-class, large-scale CFD
   \begin{itemize}
-  \item[$\circ$] it's large-scale like atmosphere and ocean
-  \item[$\circ$] \dots\, but it is weird relative to those
+  \item[$\circ$] \dots\, but it's weird relative to atmosphere and ocean models
   \end{itemize}
-\item consider what makes atmosphere/ocean flow exciting:
+\item consider what makes ocean flows exciting:
   \begin{itemize}
   \item[$\circ$] turbulence
   \item[$\circ$] convection
@@ -526,8 +525,8 @@ $ eog output/steady.png
   \item[$\circ$] density stratification
   \end{itemize}
 \item none of the above list is relevant to ice flow!
-\item CFD textbooks are of limited utility to glaciologists
-\item how do we handle slow, cold, stiff, laminar, and inert ice?
+\item \dots\, and CFD textbooks are of limited utility to glaciologists
+\item how do we model slow, cold, stiff, laminar, and inert ice?
 \end{itemize}
 \end{frame}
 
@@ -539,15 +538,15 @@ $ eog output/steady.png
     \begin{itemize}
     \item[$\circ$] ``slow'' is a technical term:
       $$\rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) \approx 0 \qquad \iff \qquad \begin{pmatrix} \text{forces of inertia} \\ \text{are neglected} \end{pmatrix}$$
-    \item[$\circ$] ice is non-Newtonian in a ``shear-thinning'' way
+    \item[$\circ$] ice is non-Newtonian in a shear-thinning way
         \begin{itemize}
-        \item ``non-Newtonian'' means viscosity $\nu$ is not constant, but instead depends on the fluid state
-        \item specifically: higher strain rates means lower viscosity
+        \item non-Newtonian means viscosity $\nu$ is not constant, but depends on the fluid state
+        \item shear-thinning means higher strain rates implies lower viscosity
         \end{itemize}
     \end{itemize}
 
 \bigskip
-\item the standard model is \alert{(Glen-Steinemann-Nye power law) Stokes}:
+\item the standard model is Glen-Steinemann-Nye \alert{power-law Stokes}:
 \begin{align*}
 \nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \\
 0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \bm{g} &&\text{\emph{stress balance}} \\
@@ -556,9 +555,34 @@ D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij} &&\text{\emph{flow law}}
 
     \begin{itemize}
     \item[$\circ$] $\rho$ is ice density, $\bm{g}$ is acceleration of gravity, $A$ is ice softness
-    \item[$\circ$] the standard \emph{time-dependent} model is \alert{SKE $+$ Stokes}
+    \item[$\circ$] the standard \emph{time-dependent} model is \alert{SKE $+$ power-law Stokes}
     \end{itemize}
 
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{spatial derivatives}
+
+\begin{itemize}
+\item the Stokes equations are loaded with spatial derivatives:
+{\small
+\begin{align*}
+\nabla \cdot \bu &= 0 \\
+0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \bm{g} \\
+D\bu_{ij} &= A \tau^{n-1} \tau_{ij}
+\end{align*}
+}
+\item note that $p$ is a scalar, $\bu$ is vector, and $\tau_{ij}$ is a tensor (matrix)
+\item by definition, in 3D coordinates $(x_1,x_2,x_3)$ with $\bu=\left<u_1,u_2,u_3\right>$:
+\begin{align*}
+\nabla p &= \left<\frac{\partial p}{\partial x_1}, \frac{\partial p}{\partial x_2}, \frac{\partial p}{\partial x_3}\right> &&\text{\emph{vector}} \\
+\nabla \cdot \bu &= \frac{\partial u_1}{\partial x_1} + \frac{\partial u_2}{\partial x_2} + \frac{\partial u_3}{\partial x_3} &&\text{\emph{scalar}} \\
+\nabla \cdot \tau_{ij} &= \left<\nabla \cdot \tau_{1}, \nabla \cdot \tau_{2}, \nabla \cdot \tau_{3}\right> &&\text{\emph{vector}} \\
+D\bu_{ij} &= \frac{1}{2}\left(\grad \bu + (\grad \bu)^\top\right)_{ij} &&\text{\emph{tensor}} \\
+\tau^{n-1} &= \big(\frac{1}{2}\tau_{ij}\,\tau_{ji}\big)^{(n-1)/2} &&\text{\emph{scalar}}
+\end{align*}
+\item getting comfortable with this notation is a skill in itself
 \end{itemize}
 \end{frame}
 
@@ -567,16 +591,18 @@ D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij} &&\text{\emph{flow law}}
 
 \begin{itemize}
 \item note \emph{no time derivatives} in the Stokes model:
+{\small
 \begin{align*}
-\nabla \cdot \mathbf{u} &= 0 \\
+\nabla \cdot \bu &= 0 \\
 0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \bm{g} \\
-D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
+D\bu_{ij} &= A \tau^{n-1} \tau_{ij}
 \end{align*}
-\item in the standard model, the velocity and pressure fields of a glacier are \alert{instantaneous functions} of the glacier geometry and its boundary stresses
-\item thus a time-stepping ice sheet code can (and must) recompute the velocity field at every time step
+}
+\item the velocity and pressure fields of a glacier are \alert{instantaneous functions} of the glacier geometry and its boundary stresses
+\item thus a time-stepping ice sheet code can (and must) \alert{recompute the pressure and velocity fields at every time step}
   \begin{itemize}
-  \item[$\circ$] but velocity from the previous time step is \emph{not} required, unlike (e.g.) a weather model
-  \item[$\circ$] velocity is a ``diagnostic'' output, not needed for (re)starting the model
+  \item[$\circ$] velocity from the previous time step is \emph{not} required, unlike (e.g.) a weather model
+  \item[$\circ$] velocity is a ``diagnostic'' output, not needed for starting or restarting a model run
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -585,21 +611,24 @@ D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
 \begin{frame}{plane flow Stokes}
 
 \begin{itemize}
-\item return to a $x,z$ plane \dots
+\item let's return to the $x,z$ flow-line plane, and look at details
 \item the $n=3$ Glen-law Stokes equations say:
 \begin{empheq}[]{align}
 u_x + w_z &= 0 &&\text{\emph{incompressibility}}\notag \\
-0 &= -p_x \tau_{11,x} + \tau_{13,z} &&\text{\emph{stress balance} ($x$)} \notag \\
-0 &= -p_z \tau_{13,x} - \tau_{11,z} - \rho g &&\text{\emph{stress balance} ($z$)} \notag \\
+0 &= -p_x + \tau_{11,x} + \tau_{13,z} &&\text{\emph{stress balance} ($x$)} \notag \\
+0 &= -p_z + \tau_{13,x} - \tau_{11,z} - \rho g &&\text{\emph{stress balance} ($z$)} \notag \\
 u_x &= A \tau^2 \tau_{11} &&\text{\emph{flow law (diagonal)}}\notag \\
 \frac{1}{2} \left(u_z + w _x\right) &= A \tau^2 \tau_{13} &&\text{\emph{flow law (off-diagonal)}} \notag
 \end{empheq}
 
-\vspace{-2mm}
     \begin{itemize}
-    \item[$\circ$] \emph{notation}: subscripts $x,z$ denote partial derivatives
-    \item[$\circ$] \emph{notation}: $\tau_{11}$ and $\tau_{33}$ are (deviatoric) longitudinal stresses, $\tau_{13}$ is the ``vertical'' shear stress
-    \item[$\circ$] \emph{observation}: $\tau_{33}=-\tau_{11}$ \comm{why?}
+    \item[$\circ$] here the subscripts $x,z$ denote partial derivatives
+    \item[$\circ$] $\tau_{11}$ and $\tau_{33}$ are (deviatoric) longitudinal stresses
+        \begin{itemize}
+        \item observation: $\tau_{33}=-\tau_{11}$ \comm{why?}
+        \end{itemize}
+    \item[$\circ$] $\tau_{13}$ is the ``vertical'' shear stress
+    \item[$\circ$] after simplification: \, $\tau^2 = \tau_{11}^2 + \tau_{13}^2$
     \end{itemize}
 \item we have 5 equations in 5 unknowns ($u,w,p,\tau_{11},\tau_{13}$)
 \item this is complicated enough \dots \,try a simplified situation?
@@ -615,20 +644,43 @@ u_x &= A \tau^2 \tau_{11} &&\text{\emph{flow law (diagonal)}}\notag \\
 \vspace{-45mm}
 \begin{itemize}
 \item suppose constant thickness
+\item suppose constant bedrock 
 
-and constant bedrock slope
-
-with angle $\alpha$
+slope at angle $\alpha$
 \item rotate the coordinates so $x$
 
 is bed-parallel
+\item new gravity:
+    $$\bm{g} = g \sin\alpha\, \hat x - g \cos \alpha \,\hat z \hspace{40mm}$$
 \item new/revised equations:
 \begin{align*}
-\bm{g} &= g \sin\alpha\, \hat x - g \cos \alpha \,\hat z \hspace{40mm} \\
-p_x &= \tau_{11,x} + \tau_{13,z} + \rho g \sin\alpha \\
-p_z &= \tau_{13,x} - \tau_{11,z} - \rho g \cos\alpha
+0 &= -p_x + \tau_{11,x} + \tau_{13,z} + \rho g \sin\alpha \hspace{20mm} \\
+0 &= -p_z + \tau_{13,x} - \tau_{11,z} - \rho g \cos\alpha
 \end{align*}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{slab-on-a-slope}
+
+\hfill \includegraphics[width=0.35\textwidth]{slab}
+
+\vspace{-25mm}
+
+\begin{itemize}
+\item revised equations:
+\begin{align*}
+u_x + w_z &= 0 \\
+0 &= -p_x + \tau_{11,x} + \tau_{13,z} + \rho g \sin\alpha \hspace{50mm} \\
+0 &= -p_z + \tau_{13,x} - \tau_{11,z} - \rho g \cos\alpha \\
+u_x &= A \tau^2 \tau_{11} \\
+\frac{1}{2} \left(u_z + w _x\right) &= A \tau^2 \tau_{13} 
+\end{align*}
+
+\smallskip
 \item for \alert{slab-on-a-slope} there is \emph{no variation in} $x$:\quad $\partial/\partial x = 0$
+
+\smallskip
 \item the 5 equations simplify:
 \small
 \begin{empheq}[box=\fbox]{align}
@@ -640,12 +692,12 @@ p_z &= - \rho g \cos\alpha \notag
 \end{frame}
 
 
-\begin{frame}{slab-on-a-slope 2}
+\begin{frame}{slab-on-a-slope}
 
 \begin{itemize}
-\item add known (but non-penetrating) basal velocity conditions:
+\item add known non-penetrating basal velocity conditions:
 	$$u(0)=u_0, \qquad w(0)=0$$
-\item add zero normal stress condition at surface $z=H=s$:
+\item add zero normal stress condition at surface $z=H$:
 	$$p(H)=0$$
 \item then by integrating vertically, get:
 \begin{align*}
@@ -654,11 +706,11 @@ p(z) &= \rho g \cos\alpha (H-z) \\
 \tau_{13}(z) &= \rho g \sin\alpha (H-z)
 \end{align*}
 
-\vspace{-25mm}
-\hfill \includegraphics[width=0.3\textwidth]{slabshear}
+\vspace{-26mm}
+\hfill \includegraphics[width=0.35\textwidth]{slabshear}
 
-\vspace{-2mm}
-\item note $\tau_{13}$ is linear in depth
+\vspace{-5mm}
+\item note $p$ \& $\tau_{13}$ are linear in depth
 
 \medskip
 \item from $u_z = 2 A \tau^2 \tau_{13}$, integrate to get the \alert{velocity formula}:
@@ -671,7 +723,7 @@ u(z) &= u_0 + 2 A (\rho g \sin\alpha)^3 \int_0^z (H-z')^3\,dz' \\
 \end{frame}
 
 
-\begin{frame}{slab-on-a-slope 3}
+\begin{frame}{slab-on-a-slope}
 
 \begin{columns}
 \begin{column}{0.6\textwidth}
@@ -701,21 +753,22 @@ from inclinometry (Savage \& Paterson 1963)]
 \begin{frame}{plan for hour 2: surface velocity from the SIA model}
 
 \begin{itemize}
-\item \alert{model:} the nonsliding shallow ice approximation (SIA)
+\item \alert{model:} the shallow ice approximation (SIA)
   \begin{itemize}
-  \item[$\circ$] this model adopts the above slab-on-slope formula for $u(x)$ \emph{as a general formula for glaciers}
+  \item[$\circ$] this model adopts the slab-on-slope formula for $u(x)$ \emph{as a general formula for glaciers}
   \item[$\circ$] it is an imperfect stress balance (momentum) model for a glacier, but it gives a meaningful velocity field in any geometry
-  \item[$\circ$] there are careful shallowness scale analysis arguments ($\eps = [H]/[L] \to 0$) for this SIA model \cite{Fowler1997}
+  \item[$\circ$] there are careful shallowness scale analysis arguments for the SIA model, using $\eps = [H]/[L] \to 0$ \cite{Fowler1997}
   \end{itemize}
 \item \alert{numerical modeling goals:}
   \begin{itemize}
-  \item[$\circ$] finite difference computations of surface velocity $u(x)$, $w(x)$ from SIA model
+  \item[$\circ$] finite difference computations of surface velocity $u(x)$, $w(x)$
+  \item[$\circ$] staggered grid points
   \item[$\circ$] one short Python code: \quad \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{py/shallowuw.py}
   \end{itemize}
 \item \alert{to address:}
      \begin{enumerate}
      \item how to make the computations robust over geometries?
-     \item how do you include sliding into the SIA?
+     \item can we include sliding into the SIA?
      \item how does the SIA velocity field compare to the Stokes field for the same geometry?
      \end{enumerate}
 \end{itemize}
@@ -729,7 +782,7 @@ from inclinometry (Savage \& Paterson 1963)]
 \begin{itemize}
 \item the planar, isothermal, Glen-law, non-sliding \alert{shallow ice approximation (SIA)} is the following system of equations:
 \begin{gather*}
-u = - \frac{2}{n+1} A (\rho g)^n \left|\frac{\partial s}{\partial x}\right|^{n-1} \frac{\partial s}{\partial x} \left[\big(s - b\big)^{n+1} - \big(s-z\big)^{n+1}\right] \\
+u = - \frac{2}{n+1} A (\rho g)^n \left[\big(s - b\big)^{n+1} - \big(s-z\big)^{n+1}\right] \left|\frac{\partial s}{\partial x}\right|^{n-1} \frac{\partial s}{\partial x} \\
 \frac{\partial u}{\partial x} + \frac{\partial w}{\partial z} = 0
 \end{gather*}
 
@@ -740,19 +793,19 @@ u = - \frac{2}{n+1} A (\rho g)^n \left|\frac{\partial s}{\partial x}\right|^{n-1
 
 \item note that the horizontal velocity formula is of the form
 	$$u = - \Gamma \frac{\partial s}{\partial x},$$
-with positive coefficient $\Gamma$, so \alert{ice flows downhill}
+with positive coefficient $\Gamma>0$, so \alert{ice flows downhill}
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{finite differences for $u(x)$}
+\begin{frame}{slopes and elevations onto the staggered grid}
 
 \begin{center}
 \includegraphics[width=0.4\textwidth]{staggered}
 \end{center}
 
 \begin{itemize}
-\item centered-differencing the surface elevations gives \alert{slopes computed on the staggered grid}:
+\item center-differencing the surface elevations gives \alert{slopes computed on the staggered grid}:
     $$\frac{\partial s}{\partial x}\Big|_{j+1/2} = \frac{s_{j+1} - s_j}{\Delta x}$$
 \item averaging gives \alert{elevations computed on the staggered grid}:
     $$s_{j+1/2} = \frac{s_j + s_{j+1}}{2}, \qquad b_{j+1/2} = \frac{b_j + b_{j+1}}{2}$$
@@ -760,19 +813,19 @@ with positive coefficient $\Gamma$, so \alert{ice flows downhill}
 \end{frame}
 
 
-\begin{frame}{finite differences for $u(x)$ 2}
+\begin{frame}{finite differences for $u$}
 
 \begin{center}
 \includegraphics[width=0.3\textwidth]{staggered}
 \end{center}
 
 \begin{itemize}
-\item notational convenience: given $j$, let
+\item convenience notation: \, given $j$, let
 \begin{align*}
 \alpha &= \frac{2}{n+1} A (\rho g)^n \left|\frac{\partial s}{\partial x}\Big|_{j+1/2}\right|^{n-1} \frac{\partial s}{\partial x}\Big|_{j+1/2} \\
 \beta  &= \left(s_{j+1/2} - b_{j+1/2}\right)^{n+1}
 \end{align*}
-\item \alert{horizontal velocity defined at all levels}:
+\item horizontal velocity \alert{defined at all levels}, on the staggered grid:
     $$u_{j+1/2}(z) = \begin{cases} 0, & z \le b_{j+1/2} \\
                                    -\alpha \left(\beta - (s_{j+1/2} - z)^{n+1}\right), & b_{j+1/2} < z < s_{j+1/2} \\
                                    -\alpha \beta, & s_{j+1/2} \le z \end{cases}$$
@@ -784,7 +837,7 @@ with positive coefficient $\Gamma$, so \alert{ice flows downhill}
 \frametitle{Python code: SIA computation of horizontal velocity}
 
 \begin{itemize}
-\item computing the surface value of the horizontal velocity at each regular grid location $x_j$ is a Python function:
+\item computing the surface value of the horizontal velocity at each interior regular-grid location $x_j$ is a Python function:
 \begin{lstlisting}[language=PythonPlus]
 def u(x, b, s):
     assert np.all(b <= s)              # check admissibility
@@ -809,7 +862,7 @@ w(x,s(x)) &= w(x,s(x)) - w(x,b(x)) \\
    &= - \int_{b(x)}^{s(x)} \frac{\partial u}{\partial x}(x,z)\,dz
 \end{align*}
   \begin{itemize}
-  \item[$\circ$] for a non-sliding and non-penetrating model: $w(x,b(x))=0$
+  \item[$\circ$] uses non-penetrating model: $w(x,b(x))=0$
   \end{itemize}
 \item $w_j \approx w(x_j,s_j)$ is found by integrating vertically:
 \begin{align*}
@@ -820,7 +873,7 @@ w_j &= - \int_{b_j}^{s_j} \frac{u_{j+1/2}(z) - u_{j-1/2}(z)}{\Delta x}\,dz \\
 \end{frame}
 
 
-\begin{frame}{finite differences for $w(x)$ 2}
+\begin{frame}{finite differences for $w(x)$}
 
 \begin{center}
 \includegraphics[width=0.5\textwidth]{staggeredw}
@@ -840,25 +893,17 @@ w_j &= - \int_{b_j}^{s_j} \frac{u_{j+1/2}(z) - u_{j-1/2}(z)}{\Delta x}\,dz \\
 
 
 \begin{frame}[fragile]
-\frametitle{live demo: SIA velocity for wavy surface}
+\frametitle{demo: SIA velocity for wavy surface}
 
 \begin{center}
-\includegraphics[width=0.55\textwidth]{uw}
+\includegraphics[width=0.7\textwidth]{uw}
 \end{center}
 
-\begin{block}{live demo}
+\begin{block}{demo}
 \begin{verbatim}
       $ python3 shallowuw.py
       $ eog output/uw.png
 \end{verbatim}
-
-\vspace{-2mm}
-\begin{itemize}
-\item the following modification suggests robustness:
-    \begin{enumerate}
-    \item \texttt{H0} $=100$ m and \texttt{wave\_amp} $=200$ m
-    \end{enumerate}
-\end{itemize}
 \end{block}
 \end{frame}
 
@@ -866,7 +911,7 @@ w_j &= - \int_{b_j}^{s_j} \frac{u_{j+1/2}(z) - u_{j-1/2}(z)}{\Delta x}\,dz \\
 \begin{frame}{time-dependent SKE $+$ SIA approximation}
 
 \begin{itemize}
-\item the equations of the \alert{time-dependent SIA model}, using surface elevation as the variable, are the following:
+\item here are the equations of the \alert{time-dependent SIA model}:
 \begin{align*}
 \frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} &= a + w \\
 u &= - \frac{2}{n+1} A (\rho g)^n \left|\frac{\partial s}{\partial x}\right|^{n-1} \frac{\partial s}{\partial x} \left[\big(s - b\big)^{n+1} - \big(s-z\big)^{n+1}\right] \\
@@ -876,9 +921,12 @@ w &= - \int_{b}^{s} \frac{\partial u}{\partial x}(x,z)\,dz
   \begin{itemize}
   \item[$\circ$] combine my codes \href{https://github.com/bueler/mccarthy/blob/master/py/surace1d.py}{py/surface1d.py} and \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{py/shallowuw.py}
   \end{itemize}
+
+\bigskip
 \item but there is an important fact which I want to flesh-out: \alert{this model \emph{diffuses} the surface elevation}
   \begin{itemize}
   \item[$\circ$] because ice flows downhill
+  \item[$\circ$] hard to see in the above form
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -886,11 +934,11 @@ w &= - \int_{b}^{s} \frac{\partial u}{\partial x}(x,z)\,dz
 
 \begin{frame}{SKE versus mass continuity equation}
 \begin{itemize}
-\item in non-sliding, incompressible ice we have equations:
+\item consider this subset of the equations:
 \begin{align*}
 \frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} &= a + w &&\text{\emph{SKE}} \\
 \frac{\partial u}{\partial x} + \frac{\partial w}{\partial z} &= 0 &&\text{\emph{incompressible}} \\
-u(x,b(x))=0, w(x,b(x))&=0  &&\text{\emph{non-sliding/penetrating}}
+u(x,b(x))=0,\,\, w(x,b(x))&=0  &&\text{\emph{non-sliding/penetrating}}
 \end{align*}
 \item exercise \textbf{5} asks you to derive via vertical integration:
 $$\frac{\partial H}{\partial t} + \frac{\partial}{\partial x}\left(\bar u H\right) = a \hspace{10mm} \text{\emph{\alert{mass continuity equation}}}$$
@@ -903,7 +951,6 @@ $$\text{SKE} \quad \leftrightarrow \quad \text{mass continuity equation}$$
 
 \begin{frame}{time-dependent SIA for thickness, and diffusivity}
 \begin{itemize}
-\item returning to SIA velocities \dots
 \item we can write the time-dependent equation in terms of thickness:
 $$\frac{\partial H}{\partial t} = a + \frac{\partial}{\partial x}\left(D \frac{\partial s}{\partial x}\right)$$
 where $D$ is the \alert{diffusivity} in the SIA:
@@ -925,7 +972,11 @@ where $T$ is temperature and $f$ is a heat source
     \end{enumerate}
 \item[] \alert{mathematical issues}
     \begin{enumerate}\setcounter{enumi}{2}
-    \item well-posedness not fully resolved \comm{talk separately?}
+    \item well-posedness not fully resolved
+        \begin{itemize}
+        \item existence for the steady case
+        \item non-uniqueness in a some cases
+        \end{itemize}
     \end{enumerate}
 \item[] \alert{numerical questions}
     \begin{enumerate}\setcounter{enumi}{3}
@@ -935,22 +986,22 @@ where $T$ is temperature and $f$ is a heat source
 \end{frame}
 
 
-\begin{frame}{time-dependent SKE $+$ Stokes approximation}
+\begin{frame}{time-dependent SKE $+$ Stokes}
 
 \begin{itemize}
-\item \alert{time-dependent SKE and Glen-law Stokes model}:
+\item what is the \alert{standard model} of glaciology?
+\item \alert{SKE with power-law Stokes with admissible surfaces}:
 \begin{align*}
 \frac{\partial s}{\partial t} - \mathbf{u} \cdot \mathbf{n}_s &= a \\
 \nabla \cdot \mathbf{u} &= 0 \\
--\nabla \cdot \tau_{ij} + \nabla p &= \rho\, \bm{g} \\
-D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
+0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \bm{g} \\
+D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij} \\
+s &\ge b
 \end{align*}
-\item implementing well is a major topic of current research
+\item implementing well is a topic of current research
   \begin{itemize}
-  \item[$\circ$] subject (as always) to \alert{$s \ge b$}
-  \item[$\circ$] I do not trust \emph{anyone's} view of time stepping (yet)
+  \item[$\circ$] reliable and fast coupled solvers are not yet available
   \end{itemize}
-%\item projects 13, 14 look at numerical solutions of the Stokes equations only (w/o SKE)
 \end{itemize}
 \end{frame}
 
@@ -960,35 +1011,47 @@ D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij}
 \item[] \alert{modeling questions}
     \begin{enumerate}
     \item \alert{sliding laws} determine the basal stress state; what's best?
+    \item how to couple to temperature/enthalpy equation?
     \item how to adapt Stokes to compressible (e.g.~temperate) ice?
     \end{enumerate}
-\item[] \alert{mathematical question}
-    \begin{enumerate}\setcounter{enumi}{2}
-    \item well-posedness of SKE+Stokes?
-    \end{enumerate}
-\item[] \alert{numerical questions/recommendations/issues}
+\item[] \alert{mathematical questions}
     \begin{enumerate}\setcounter{enumi}{3}
-    \item how to numerically combine SKE and Stokes in an efficient and stable manner?
+    \item well-posedness of the Stokes model for fixed geometry?
+        \begin{itemize}
+        \item[$\circ$] essentially settled: yes
+        \end{itemize}
+    \item well-posedness of the time-dependent standard model?
+        \begin{itemize}
+        \item[$\circ$] entirely open as far as I can tell
+        \item[$\circ$] can't be easier than for the SIA
+        \end{itemize}
+    \end{enumerate}
+\item[] \alert{numerical recommendations and questions}
+    \begin{enumerate}\setcounter{enumi}{5}
     \item as a practical matter, use a powerful finite element \cite{Elmanetal2014} library
         \begin{itemize}
-        \item[$\circ$] Firedrake? Elmer? FENiCs? Moose? \dots
+        \item[$\circ$] Firedrake? Elmer? FENiCs? Icepack? \dots
         \end{itemize}
-    \item solver performance is a major concern \dots\, I'm sure the speed will be adequate by 2050
+    \item how to numerically combine SKE and Stokes in an efficient and stable manner?
+    \item how to achieve good time-stepping solver performance?
     \end{enumerate}
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{an opinionated Summary}
+\begin{frame}{an opinionated summary}
 
 \begin{itemize}
 \item numerical models are inevitable in glaciology
 \item<2-> most of your work is to understand the math, not to write code
+    \begin{itemize}
+    \item<2->[$\circ$] even more true in the generative AI era
+    \end{itemize}
 \item<3-> writing your own numerical models is of great value, but you should toss the result in the trash once you understand it
     \begin{itemize}
     \item<3->[$\circ$] almost always: find the pro version
     \end{itemize}
-\item<4-> surface mass/energy balances are as important as ice dynamics
+\item<4-> surface mass/energy processes are as important as ice dynamics
 \item<5-> machine learning \emph{after} understanding the laws of physics
 \end{itemize}
 \end{frame}
