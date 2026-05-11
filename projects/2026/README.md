@@ -1,10 +1,9 @@
 # projects/2026/
 
-These are notes and codes for my two suggested projects for the McCarthy International Summer School in Glaciology in 2026.  See `README.md` in the subdirectories `coverage/` (Project 7) and `influence/` (Project 8) for documentation.  These projects appear in the [projects list](https://glacierschool.alaska.edu/2026/student-projects-2026) for the Summer School.
+This is where I will put notes and codes for my two suggested projects for the McCarthy International Summer School in Glaciology in 2026.  These projects appear in the [projects list](https://glacierschool.alaska.edu/2026/student-projects-2026) for the Summer School.
 
-## coverage/
 
-PROJECT 7: What land is covered by glaciers?
+## PROJECT 7: What land is covered by glaciers?
 
 ADVISOR: Ed Bueler
 
@@ -12,9 +11,7 @@ DESCRIPTION:  Given a _prescribed_ ice surface velocity field, a general distrib
 
 Required tools:  This project assumes some familiarity with Python and differential equations, a knowledge basis which we will strengthen.  Students will learn the Firedrake finite element library and the Paraview tool for visualization.
 
-## influence/
-
-PROJECT 8: How far can glacier stresses reach?
+## PROJECT 8: How far can glacier stresses reach?
 
 ADVISOR: Ed Bueler
 
