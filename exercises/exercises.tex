@@ -81,7 +81,7 @@
 
 
 \begin{document}
-\scriptsize \hfill \emph{version 1.1 June 2026 (Bueler)}
+\scriptsize \hfill \emph{June 2026\, (Bueler)}
 \normalsize\medskip
 
 \large\centerline{\textbf{Exercises in Numerical Modeling of Glaciers}}
@@ -103,8 +103,8 @@
 
 \prob{3}  Continuing the assumptions in \textbf{2}, write down the upwind scheme, from the slides, for both the $u_j\ge 0$ and $u_j\le 0$ cases.  Show that if the CFL condition $|u_j| \frac{\Delta t}{\Delta x} \le 1$ applies then the new surface value is a true average of the old values.  (For instance, when $u_j\ge 0$ show that $s_j^{\text{new}} = c_{-} s_{j-1} + c_0 s_j$ where $c_{-},c_0$ are nonnegative and sum to one.)  What will happen if $\Delta t$ is too large, that is, if the CFL condition is violated?
 
-\prob{4}  Practice using the Leibniz rule for differentiating integrals, namely
-  $$\frac{d}{dx}\left(\int_{g(x)}^{f(x)} k(x,y)\,dy\right) = f'(x) k(x,f(x)) - g'(x) k(x,g(x)) + \int_{g(x)}^{f(x)} \frac{\partial k}{\partial x}(x,y)\,dy$$
+\prob{4}  Practice using the Leibniz rule for differentiating integrals, namely this rule
+  $$\frac{d}{dx}\left(\int_{g(x)}^{f(x)} k(x,y)\,dy\right) = f'(x)\, k(x,f(x)) - g'(x)\, k(x,g(x)) + \int_{g(x)}^{f(x)} \frac{\partial k}{\partial x}(x,y)\,dy,$$
 by finding $\frac{\partial}{\partial x} \left(\int_{b(t,x)}^{s(t,x)} u(t,x,z)\,dz\right)$.  This will be used next.
 
 \prob{5}  In the planar case, derive the mass continuity equation ($\frac{\partial H}{\partial t} + \frac{\partial}{\partial x}(\bar u H) = a$) from the SKE ($\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w$), using the incompressibility of ice ($\frac{\partial u}{\partial x} + \frac{\partial w}{\partial z} = 0$).  Here $\bar u(t,x) = \frac{1}{H(t,x)} \int_{b(t,x)}^{s(t,x)} u(t,x,z)\,dz$ is the vertically-averaged ice velocity; note $\bar u H = \int_b^s u\,dz$ is called the \emph{ice flux}.  Start the derivation by computing $\frac{\partial}{\partial x}(\bar u H)$.  Assume the bed is not moving ($\frac{\partial b}{\partial t} = 0$) and the ice is not sliding ($u(t,x,b(x))=0$) or penetrating ($w(t,x,b(x))=0$).
@@ -135,7 +135,7 @@ by finding $\frac{\partial}{\partial x} \left(\int_{b(t,x)}^{s(t,x)} u(t,x,z)\,d
 \medskip
 
 \smallskip
-\noindent \emph{Comment.}  Any serious numerical model for glacier geometry should at least have the mechanisms in \textbf{11} and \textbf{12}.  The surface mass balance could then safely come from an energy balance sub-model, and the surface velocities from a stress balance sub-model.  (See \textbf{16} below.)  However, numerical stability will still not be \emph{guaranteed} by the CFL above, \emph{because ice flows downhill}, and the precise stability condition is (essentially) an open question.
+\noindent \emph{Comment.}  Any serious numerical model for glacier geometry should at least have the mechanisms in \textbf{11} and \textbf{12}.  The surface mass balance could then safely come from any energy balance sub-model, and the surface velocities from any stress balance sub-model.  (See \textbf{16} below.)  However, numerical stability will not be \emph{guaranteed} by the CFL above, \emph{because ice flows downhill}.  The precise stability condition is mostly an open question.
 
 \prob{13}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} so that the data $a,u,w$ can be read from a file.  Check that it runs as before by loading the same values as in the unmodified code.
 
