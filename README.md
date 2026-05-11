@@ -33,11 +33,11 @@ The [slides](slides/slides-2026.pdf) and the [notes](notes/notes-2026.pdf) are t
 
 The [surface2d.py](py/surface2d.py) program uses [Firedrake](https://www.firedrakeproject.org/) (a finite element library) which calls [PETSc](http://www.mcs.anl.gov/petsc/) for equation solvers.
 
-The codes in [py/stokes/](py/stokes/) also use Firedrake to solve a 2D Glen-law Stokes flow over a bedrock step.  The workflow for the Stokes codes also use [Gmsh](http://gmsh.info/) (a mesh generator) and [Paraview](https://www.paraview.org/) (for visualization).  See [stokes/doc.pdf](stokes/doc.pdf) for more information.
+The codes in [py/stokes/](py/stokes/) also use Firedrake to solve a 2D Glen-law Stokes flow over a bedrock step.  The workflow for the Stokes codes also use [Gmsh](http://gmsh.info/) (a mesh generator) and [Paraview](https://www.paraview.org/) (for visualization).  See [py/stokes/doc.pdf](py/stokes/doc.pdf) for more information.
 
 Please report any bugs in the codes either by email or by using the [issues](https://github.com/bueler/mccarthy/issues) for this repository.
 
 Older material
 --------------
 
-The older material is in the form of PDF notes, e.g. [old/notes/notes-2024.pdf](old/notes/notes-2024.pdf), previous slides (see [slides/](slides/), and Matlab/Octave programs [old/mfiles/](old/mfiles/).  Even older versions (2009--2014) of this material lived in the repo https://github.com/bueler/karthaus
+Older and deprecated material is in the form of PDF notes (see [old/notes/](old/notes/)), slides (see [slides/old/](slides/old/), and Matlab/Octave programs [old/mfiles/](old/mfiles/).  Even older versions (2009--2014) of this material lives in the repo [github.com/bueler/karthaus](https://github.com/bueler/karthaus).
