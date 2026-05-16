@@ -160,14 +160,14 @@ $x_i$ & $x_1,x_2,x_3=x,y,z$ coordinates & m
 
 \section{Ice flow equations}  \label{sec:continuum}
 
-Ice in glaciers behaves as a viscous fluid \cite{GreveBlatter2009}, so we describe its motion by a velocity field $\mathbf{u}(t,x,y,z)$.  If the ice fluid were faster-moving than it is in reality, and if furthermore it were linearly-viscous like liquid water, then it would be a ``typical'' incompressible fluid and we would use the Navier-Stokes equations as the model \cite{Wesseling2001}:
+Ice in glaciers behaves as a viscous fluid \cite{GreveBlatter2009}, so we describe its motion by a velocity field $\mathbf{u}(t,x,y,z)$.  If the ice fluid were faster-moving than it is in reality, and if furthermore it were linearly-viscous like liquid water, then it would be a ``typical'' incompressible fluid and we would use the Navier-Stokes partial differential equations as the model \cite{Wesseling2001}:
 \begin{align}
 \nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \label{incompressible} \\
 \rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) &= \nabla \cdot (\nu \nabla \mathbf{u}) - \nabla p + \rho \mathbf{g} &&\text{\emph{stress balance}} \label{navierstokes}
 \end{align}
 The velocity field $\bu$ is divergence-free (equation \eqref{incompressible}), thus no fluid is created or lost within the domain.  Equation \eqref{navierstokes} says ``$ma=F$''; it is Newton's second law.  The left side has the acceleration $\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}$, while the right-hand side is the total force per unit volume, the sum of viscous, pressure, and gravity ($\rho \mathbf{g} = \left<0,0,-\rho g\right>$) forces, respectively.  Using $\sigma$ to denote the Cauchy stress tensor, the right side can be written $\nabla \cdot \sigma + \rho \mathbf{g}$.  Note that incompressibility \eqref{incompressible} constrains the possible solutions of \eqref{navierstokes}. 
 
-The space of solutions to \eqref{incompressible} and \eqref{navierstokes} is rich.  It includes turbulent flows, which we will not need here, and in fact reading a book-length introduction to fluids such as \cite{Acheson1990}, or their numerical solution (\emph{computational fluid dynamics}; CFD) such as \cite{Wesseling2001}, is overkill for glacier modeling.  (Perhaps recommended for broader education?)  One might even ask: is ice flow modelling really a part of CFD?  Glacier flow is a large-scale, climate-relevant fluid problem, comparable like ocean circulation for example.  On the other hand the topics which make such flows exciting, for example turbulence, convection, coriolis force, and density stratification, are irrelevant to ice flow.  What could be interesting about the flow of slow and strong ice?
+The space of solutions to \eqref{incompressible} and \eqref{navierstokes} is rich.  It includes turbulent flows, which we will not need here, and in fact reading a book-length introduction to fluids such as \cite{Acheson1990}, or their numerical solution (\emph{computational fluid dynamics}) such as \cite{Wesseling2001}, is overkill for glacier modeling.  (Perhaps recommended for broader education?)  One might even ask: is ice flow modelling really computational fluid dynamics at all?  Glacier flow is a large-scale, climate-relevant fluid problem, comparable like ocean circulation for example.  On the other hand the topics which make such flows exciting, for example turbulence, convection, coriolis force, and density stratification, are irrelevant to ice flow.  What could be interesting about the flow of slow and strong ice?
 
 \subsection*{The Glen-Stokes equations}  We have said that glacier ice is a ``slow'' fluid.  In terms of equation \eqref{navierstokes}, this means that $\rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) \approx 0$, in other words that the forces (stresses) of inertia are negligible, so that Newton's second law becomes a \emph{stress balance}.  However, ice is also a shear-thinning fluid, a nonlinearly-viscous (\emph{non-Newtonian}) behavior in which larger strain rates imply smaller viscosity.  The viscosity $\nu$ in \eqref{navierstokes} is therefore not constant, and one must add an empirically-based flow law.  Combining these ideas gives the canonical slow-and-shear-thinning ice flow model:
 \begin{align}
@@ -251,36 +251,34 @@ While $p$ is gone from this simplified model, \eqref{stresshydrostatic} remains 
 Now solving \eqref{viscositypowerlaw}, \eqref{stressblatter} as a boundary value problem yields the scalar horizontal velocity $u$.  One may recover $w$ from incompressibility \eqref{incompressiblexz} and integration in $z$.  Because it has a form similar to the well-understood Poisson equation $u_{xx} + u_{zz} = f$ \cite{LeVeque2007,MortonMayers2005}, the process of solving equation \eqref{stressblatter} may be more familiar than \eqref{stresshydrostatic}.
 
 
-\section{Surface kinematical equation, and the evolution of glaciers}   \label{sec:masscont}
+\section{Surface kinematical equation (evolution of glaciers)}   \label{sec:masscont}
 
-However, the Glen-Stokes stress balance model for ice flow, and its approximations such as the hydrostatic stress balance, are woefully incomplete as models for glaciers in one critical sense.  They describe the ice flow at every instant but they give no clue how glaciers \emph{change}; recall that these equations have no time derivatives.  In fact, the stress balance equations also do not ``see'' the climate in which the glacier lives,\footnote{The stress balance does ``see'' basal stress, as a boundary condition, which might be regarded as a climate input in some situations, but that clearly involves additional models.} so clearly we must remedy this situation.
+The Glen-Stokes stress balance model for ice flow, and its approximations just described, are incomplete as models for glacier behavior in one critical sense.  They describe the ice flow at every instant but they give no clue how glaciers \emph{change}.  (Recall that the stress balance equations contain no time derivatives.)  In fact, the stress balance equations do not directly ``see'' the climate in which the glacier lives.\footnote{The stress balance ``sees'' basal stress as a boundary condition.  This is sometimes regarded as a climate input, but of course that involves additional models.}
 
-Therefore our focus switches to an equation for the evolving geometry of glaciers, namely the \emph{surface kinematical equation} (SKE).  To state this equation we need notation, and the same notation describes the evolving domain in which Glen-Stokes equations are being solved.  In 3D let $s(t,x,y)$ denote the evolving surface elevation of the ice; this is written $s(t,x)$ in planar 2D (Figure \ref{fig:domain}).  The ice surface itself is $z=s(t,x,y)$, respectively $z=s(t,x)$.  The glacier also has a time-independent\footnote{Erosion and earth deformation (glacial isostasy) are two processes which would make the bed elevation time dependent.} bed elevation $b(x,y)$ or $b(x)$; the bed surface is $z=b(x,y)$ or $z=b(x)$, respectively.
+However, the \emph{domain} on which the stress balance equations are solved evolves in time.  We need notation for this time-dependent glacier geometry.  Let $s(t,x,y)$ be the evolving ice surface elevation; the ice surface itself is $z=s(t,x,y)$ in 3D.  We assume that the glacier bed is a time-independent\footnote{Erosion and earth deformation (e.g.~glacial isostasy) are two processes which would make the bed elevation time dependent, in which case the \emph{basal kinematical equation} \eqref{basekine} is needed.} surface $z=b(x,y)$.  The stress balance differential equations, whichever they are, are solved on the 3D set
+\begin{equation}
+\left\{(x,y,z)\,:\,b(x,y) < z < s(t,x,y)\right\}. \label{domain}
+\end{equation}
+As show in Figure \ref{fig:domain}, in the planar (2D) case this notation becomes $z=s(t,x)$, $z=b(x)$, and $\left\{(x,z)\,:\,b(x) < z < s(t,x)\right\}$ (labeled ``\textsf{ice}''), respectively.  In other words, an important feature of glacier equations is that the ice domain is what evolves in time.  The instantaneous stress balance equations are solved on this evolving domain.
 
 \onefig{domain}{Notation for the evolving geometry of a planar (2D) glacier.}
 
-FIXME
+The upper surface evolves in part through the \emph{surface mass balance rate} (SMB), denoted $a(t,x,y)$, or $a(t,x)$ in the planar case.  The SMB is also known as the \emph{climatic} mass balance \cite{Cogleyetal2011}.  By definition this is the balance between accumulating snow and the loss of melt water, by melt of the snow, firn, or ice, through runoff, at the upper surface.\footnote{These notes only consider simulations of land-based glaciers, without floating portions, but ice shelves are also subject to a \emph{basal} mass balance rate.}  Our elevations are measured in meters, and time in seconds, and so the SMB function $a$ is measured in ice-equivalent meters per second.
 
-Our initial goal is an equation for which one might say:
-\begin{center}
-\emph{by numerically solving this equation one has a usable model for an ice sheet.}
-\end{center}
-A usable model must be \emph{understood} at least as much as it is \emph{correct} in a physical sense.  Our initial model will definitely \emph{not} be complete.  First we need a brief summary of the the continuum mechanical equations of ice flow.
+The upper surface evolves according to the \emph{surface kinematical equation} (SKE), which can be written in the planar case as
+\begin{equation}
+\frac{\partial s}{\partial t} = a + w -u \frac{\partial s}{\partial x}. \label{ske}
+\end{equation}
+Recalling our notation $\bu=\left<u,w\right>$ for the planar ice velocity, the variables $u$ and $w$ in \eqref{eq:ske} are the upper surface values of the velocity, i.e.~$u=u(t,x,s(t,x))$ because $z=s(t,x)$ at the upper surface, and similarly for $w$.
 
-FIXME
-
-surface kinematical equation (SKE)
-
-\begin{equation*}
-\text{SKE:} \qquad \frac{\partial s}{\partial t} = a + w -u \frac{\partial s}{\partial x}
-\end{equation*}
-
-the ice surface moves up and down according to
+FIXME the ice surface moves up and down according to
 \begin{itemize}
 \item surface mass balance (SMB)
 \item vertical component of ice velocity
 \item (horizontal component of ice velocity) $\times$ (surface slope)
 \end{itemize}
+
+dimensionally right, at least
 
 vector form
 
@@ -295,6 +293,12 @@ vector form
 \end{itemize}
 
 SKE as a numerical glacier geometry model
+
+Our initial goal is an equation for which one might say:
+\begin{center}
+\emph{by numerically solving this equation one has a usable model for an ice sheet.}
+\end{center}
+A usable model must be \emph{understood} at least as much as it is \emph{correct} in a physical sense.  Our initial model will definitely \emph{not} be complete.  First we need a brief summary of the the continuum mechanical equations of ice flow.
 
 \begin{itemize}
 \item model: the planar surface kinematical equation (SKE)
@@ -318,11 +322,6 @@ SKE as a numerical glacier geometry model
      \end{enumerate}
 \end{itemize}
 
-bold claim: the central object of glacier theory is the surface kinematical equation
-
-\begin{equation*}
-\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w
-\end{equation*}
 
 
 \subsection*{Numerical solution of the SKE}
@@ -486,13 +485,13 @@ In the SIA the stress balance becomes formula \eqref{siavelocity} for the veloci
 
 The most basic shallow assumption made by most ice flow models is that the surface and base of the ice are differentiable functions $z=h(t,x,y)$ and $z=b(t,x,y)$.  That is, though the Stokes theory allows the fluid boundary to be any closed surface in three-dimensional space, ice sheet and glacier models take a map-plane perspective and have a well-defined ice thickness: $H=h-b$.  For example, surface overhang is rarely allowed in models.
 
-\emph{Kinematical} equations apply on the upper and lower surfaces of the ice sheet.  Let $a$ be the climatic mass balance function ($a>0$ is accumulation) and $s$ be the basal melt rate function ($s>0$ is basal melting).  We need these fields in thickness-per-time units; convert from mass flux units by assuming an ice density.  The net map-plane mass balance $M=a-s$, which appears in the mass continuity equation \eqref{masscont}, is the difference of these surface fluxes.  The \emph{(upper) surface kinematical equation} is
+\emph{Kinematical} equations apply on the upper and lower surfaces of the ice sheet.  Let $a$ be the climatic mass balance function ($a>0$ is accumulation) and $m$ be the basal melt rate function ($m>0$ is basal melting).  We need these fields in thickness-per-time units; convert from mass flux units by assuming an ice density.  The net map-plane mass balance $M=a-m$, which appears in the mass continuity equation \eqref{masscont}, is the difference of these surface fluxes.  The \emph{(upper) surface kinematical equation} is
 \begin{equation}
 h_t = a - \mathbf{U}\big|_h \cdot \grad h + w\big|_h,  \label{surfkine}
 \end{equation}
-and the \emph{base kinematical equation} is
+and the \emph{basal kinematical equation} is
 \begin{equation}
-b_t = s - \mathbf{U}\big|_b \cdot \grad b + w\big|_b.  \label{basekine}
+b_t = m - \mathbf{U}\big|_b \cdot \grad b + w\big|_b.  \label{basekine}
 \end{equation}
 In these equations $\mathbf{U}$ is the horizontal ice velocity and $w$ the vertical ice velocity.  Equations \eqref{surfkine} and \eqref{basekine} describe the movement of the ice surfaces caused by the velocity of the ice and the mass balance functions.
 

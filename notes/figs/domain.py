@@ -8,6 +8,7 @@ from writeout import writeout
 
 fsize=18.0
 bigfsize=24.0
+biggerfsize=28.0
 
 def genbasicfig(xshift=0.0):
     x = np.linspace(0.0,10.0,1001)
@@ -39,8 +40,8 @@ def drawclimate(x,s):
 # domain notation figure
 plt.figure(figsize=(10,5.5))
 x, s, b = genbasicfig()
-#plt.text(x[550] - 1.0, b[600] + 0.4 * s[600], r'$\Lambda(t)$',
-#         fontsize=bigfsize, color='k')
+plt.text(x[550] - 1.0, b[600] + 0.4 * s[600], 'ice',
+         fontsize=biggerfsize, color='k')
 #plt.text(x[550] - 1.0, b[600] + 0.4 * s[600], r'$\mathbf{u}(t,x,z)$',
 #         fontsize=bigfsize, color='k')
 drawclimate(x,s)
