@@ -316,10 +316,10 @@ then bad (unstable) things happen! \comm{exercise \textbf{2}}
 becomes a Python function:
 \end{itemize}
 \begin{lstlisting}[language=PythonPlus]
-def explicitstep(s, x, dt):
+def explicitupwindstep(x, s, dt):
     dx = x[1] - x[0]
     snew = s.copy()
-    snew[1:] -= dt * u(x[1:]) * (s[1:] - s[:-1]) / dx  # assumes u >= 0
+    snew[1:] -= dt * u(x[1:]) * (s[1:] - s[:-1]) / dx
     snew[1:] += dt * (a(x[1:]) + w(x[1:]))
     return snew
 \end{lstlisting}
@@ -853,7 +853,7 @@ def u(x, b, s):
 \end{frame}
 
 
-\begin{frame}{finite differences for $w(x)$}
+\begin{frame}{finite differences for $w$}
 
 \begin{itemize}
 \item we can integrate vertically to recover the surface value of $w$ from $\partial u/\partial x$, by \alert{using incompressibility} \,$\left(\frac{\partial u}{\partial x} + \frac{\partial w}{\partial z} = 0\right)$:
