@@ -47,7 +47,7 @@ def w(x):
     return 0.0 * x
 
 def explicitstep(x, s, dt):
-    '''compute a time step
+    '''compute a time step of the SKE, assuming u(x)>0 always
     note left-end value snew[0] = s[0] is unmodified'''
     dx = x[1] - x[0]
     snew = s.copy()

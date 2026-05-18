@@ -74,7 +74,6 @@ urlcolor=black
 \newcommand{\twofig}[3]{\twofigsizes{#1}{#2}{#3}{2.5in}{2.5in}}
 
 
-
 \begin{document}
 \graphicspath{{figs/}}
 
@@ -299,65 +298,64 @@ where $\bu=\left<u,v,w\right>$ (Table \ref{tab:notation}) is evaluated at the su
 \begin{center}
 \emph{by numerically solving this equation for $s$ one has a model for a glacier.}
 \end{center}
-However, what we really mean is that this equation is \emph{correct} in a physical sense and that it can be \emph{understood} as a glacier model.  It is very incomplete
+However, it is more honest to say that this equation is \emph{correct} in a physical sense and that it can be \emph{understood} as a glacier model.  It is very incomplete as a model.
 
-In this section we will numerically solve the planar case \eqref{skeplanar} of the SKE for the surface elevation $s(t,x)$.  To do this we make the bold assumptions that the SMB function $a(t,x)$, \emph{and} the surface values of the velocity components, namely $u(t,x)$ and $w(t,x)$, are given by other agents.  In practice the SMB could be the output of a sub-model, such as a mass/energy process model coupled to atmosphere physics and data, and this is highly-nontrivial.  Likewise, the surface velocity components $u,w$ could be the output of a stress balance model (Section \ref{sec:continuum}), which then depends on the surface elevation $s$ itself to determine the ice domain geometry for the stress balance.\footnote{Actually, the SMB could depend on $s$ also, another form of the coupling.}  In fact the whole problem is non-trivially coupled together \cite{SchoofHewitt2013}, but we must start somewhere.
+In this section we will numerically solve the planar SKE \eqref{skeplanar} for the surface elevation $s(t,x)$.  To do this we make the bold assumptions that the SMB function $a(t,x)$, \emph{and} the surface values of the velocity components, namely $u(t,x)$ and $w(t,x)$, are given by other agents.  In practice the SMB could be the output of a sub-model, such as a mass/energy process model coupled to atmosphere physics and data, and this is highly-nontrivial.  Likewise, the surface velocity components $u,w$ could be the output of a stress balance model (Section \ref{sec:continuum}), which then depends on the surface elevation $s$ itself to determine the ice domain geometry for the stress balance.\footnote{Actually, the SMB could depend on $s$ also, another form of the coupling.}  In fact the whole problem is non-trivially coupled together \cite{SchoofHewitt2013}, but we must start somewhere.
 
-The numerical model is in a short Python program \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{py/surface1d.py}}.  (See the download discussion in Section \ref{sec:intro}.)  It generates an approximation to $s(t,x)$, over space $0<x<L$ and time $0<t<T$ intervals, and it evolves it according to \eqref{skeplanar}.  This is a \emph{time-dependent numerical solution} for the surface elevation.  We'll use this first program to consider questions of accuracy and stability, plus practicalities like debugging, verification, and visualization.
+The numerical model is in a short Python program \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{py/surface1d.py}}.  (See the Download part of Section \ref{sec:intro}.)  It generates an approximation to the surface elevation $s(t,x)$, over intervals of space $0<x<L$ and time $0<t<T$, which evolves according to \eqref{skeplanar}, by an \emph{explicit} time-dependent numerical method.  We'll use this first program to consider questions of accuracy and stability, plus practicalities like debugging, verification, and visualization.
 
 \subsection*{Finite differences}  The program is based on \emph{finite difference} (FD) approximations \cite{LeVeque2007, MortonMayers2005}.  From calculus, Taylor's theorem says that for a smooth function $f(x)$ and a real number $\Delta$,
 \begin{equation}
 f(x+\Delta) = f(x) + f'(x) \Delta + \frac{1}{2} f''(x) \Delta^2 + \frac{1}{3!} f'''(x) \Delta^3 + \dots  \label{taylor}
 \end{equation}
-(The precise theorem uses a finite sum and estimates the remainder, but our loose version will suffice here.)  One may replace ``$\Delta$'' by its negative or other multiples to get related forms, e.g.
-    $$f(x-\Delta) = f(x) - f'(x) \Delta + \frac{1}{2} f''(x) \Delta^2 - \frac{1}{3!} f'''(x) \Delta^3 + \dots.$$
+(The precise theorem uses a finite sum and estimates the remainder, but a loose version will suffice here.)  One may replace ``$\Delta$'' by its negative or other multiples to get related forms, e.g.~$f(x-\Delta) = f(x) - f'(x) \Delta + \frac{1}{2} f''(x) \Delta^2 - \dots$.
 
-FD methods for differential equations are constructed by combining such expressions to approximate the derivatives in an equation.  The resulting algebraic equations relate unknown gridded values via mere arithmetic.  As a simple example, if we take \eqref{taylor} and subtract $f(x)$ and then divide by $\Delta$, this yields an approximation of the first derivative:
-	$$\frac{f(x+\Delta) - f(x)}{\Delta} \approx f'(x).$$
-The same fact can be written
-	$$f'(x) = \frac{f(x+\Delta) - f(x)}{\Delta} + O(\Delta)$$
-to emphasize the size of the remainder from Taylor's theorem.  Recall that $O(\Delta)$ is a quantity that is smaller than a fixed multiple of $\Delta$, asymptotically as $\Delta \to 0$.
-
-We want to apply this FD approach to a \emph{partial} differential equation, so let us choose a time step $\Delta t>0$ and a grid spacing $\Delta x>0$.  Apply Taylor expansions for each variable to approximate the partial derivatives appearing in the SKE:
+FD numerical models are constructed by combining such expressions to approximate the derivatives in the continuum equations.  The resulting algebraic equations relate unknown gridded values via mere arithmetic, which digital computers can do well.  As a simple example, subtract $f(x)$ from both sides of expansion \eqref{taylor}, then divide by $\Delta$, to find an approximation of the first derivative,
+	$$\frac{f(x+\Delta) - f(x)}{\Delta} \approx f'(x),$$
+which can be written to emphasize the size of the remainder from Taylor's theorem,
+	$$f'(x) = \frac{f(x+\Delta) - f(x)}{\Delta} + O(\Delta).$$
+(Recall that $O(\Delta)$ is a quantity that is smaller than a fixed multiple of $\Delta$, asymptotically as $\Delta \to 0$.)  To apply this FD approach to a \emph{partial} differential equation like SKE \eqref{skeplanar}, let us choose a time step $\Delta t>0$ and a grid spacing $\Delta x>0$.  Apply Taylor expansions for each variable to approximate the partial derivatives appearing in the equation:
 \begin{align}
 \frac{\partial s}{\partial t}(t,x) &= \frac{s(t+\Delta t,x) - s(t,x)}{\Delta t} + O(\Delta t), \label{fd:partials} \\
 \frac{\partial s}{\partial x}(t,x) &= \frac{s(t,x+\Delta x) - s(t,x-\Delta x)}{2\Delta x} + O((\Delta x)^2). \notag
 \end{align}
 
-The numerical solution will use a spatial grid of points $x_j$ with equal spacing $\Delta x$ and an integer index $j$.  It will use a temporal grid $t_n$ with (possibly unequal) spacing $\Delta t$.  A grid location is $(t_n,x_j)$.  We want to approximate a new value $s(t_{n+1},x_j)$ from current values $s(t_n,x_{\bullet})$ for several values of the spatial index.  Actually, to be a bit more careful, we distinguish between the exact solution value $s(t_n,x_j)$, which evaluates the generally--unknown solution of the continuum SKE \eqref{skeplanar} at some grid point $(t_n,x_j)$, and our numerical approximation of this value, denoted by $s_j^n$.  This is \emph{not} the exactly correct value $s(t_n,x_j)$, but we hope that $s_j^n \approx s(t_n,x_j)$.  In any case, we will actually compute the values $s_j^n$.
+Our numerical solution will use a spatial grid $\{x_j\}$, with equal spacing $\Delta x$ and an integer index $j$, and a temporal grid $\{t_n\}$ with (possibly unequal) spacing $\Delta t$.  We seek to approximate the new value $s(t_{n+1},x_j)$ from some current values $s(t_n,x_{\bullet})$.  Actually, one should distinguish between the continuum solution value $s(t_n,x_j)$, from evaluating the generally--unknown exact solution of the continuum SKE \eqref{skeplanar} at a grid point, and our numerical approximation of it at that grid point, now denoted by $s_j^n$.  Conceptually, $s_j^n \approx s(t_n,x_j)$, and actually learn the values $s_j^n$ by computation.  Furthermore we will significantly declutter the grid notation by writing $s_j$ for $s_j^n$ and $\snew_j$ for $s_j^{n+1}$.
 
-Furthermore we will significantly declutter the grid notation by writing $s_j$ for $s_j^n$ and $\snew_j$ for $s_j^{n+1}$.  We these conventions, into \eqref{skeplanar} we make the replacements \eqref{fd:partials}
-    $$\frac{\partial s}{\partial t} \approx \frac{\snew_j - s_j}{\Delta t}, \qquad \frac{\partial s}{\partial x} \approx \frac{s_{j+1} - s_{j-1}}{2\Delta x}$$
-and so the SKE becomes discrete:
+We all these conventions, these replacements \eqref{fd:partials}, namely
+    $$\frac{\partial s}{\partial t} \approx \frac{\snew_j - s_j}{\Delta t}, \qquad \frac{\partial s}{\partial x} \approx \frac{s_{j+1} - s_{j-1}}{2\Delta x},$$
+convert the SKE \eqref{skeplanar} into a discrete and algebraic equation:
 \begin{equation*}
 \frac{\snew_j - s_j}{\Delta t} = a_j + w_j - u_j \frac{s_{j+1} - s_{j-1}}{2\Delta x}. \end{equation*}
 This is intended to be a line of code which determines $\snew_j$, so we rewrite it that way:
 \begin{equation}
 \snew_j = s_j - \Delta t\, u_j \frac{s_{j+1}-s_{j-1}}{2\Delta x} + \Delta t (a_j + w_j). \label{fd:ftcs}
 \end{equation}
-Note that this scheme uses 3 values at the current time to determine one value at the new time, and a simple \emph{stencil} diagram captures this meaning (Figure \ref{fig:stencils}, left), and it helps in remembering the standard name \emph{forward-time, centered-space} for the scheme.
+Note that this scheme uses 3 values at the current time to determine one value at the new time.  A \emph{stencil} diagram captures this meaning, Figure \ref{fig:stencils}, left.  The standard name for scheme \eqref{fd:ftcs} is \emph{forward-time, centered-space}.
 
 \begin{figure}[ht]
 \input{tikz/ftcs.tex} \quad \input{tikz/upwind.tex}
-\caption{To compute $\snew_j$ (circle), scheme \eqref{fd:ftcs} (left) uses 3 gridded values at the current time $t_n$ (solid), while the upwind scheme \eqref{fd:upwind} (right; for $u_j>0$) uses just 2, but depending on the flow direction.}
+\caption{To compute $\snew_j=s_j^{n+1}$ (circle), scheme \eqref{fd:ftcs} (left) uses 3 gridded values at the current time $t_n$ (solid), while the upwind scheme \eqref{fd:upwind} (right; for $u_j>0$) uses just 2, depending on the flow direction.}
 \label{fig:stencils}
 \end{figure}
 
-However, if we implement scheme \eqref{fd:ftcs} in code then the simulation will exhibit wiggles which do not go away.  The well-known \cite{MortonMayers2005}, if surprising, remedy is to revert to a less-accurate FD choice in space, one which is also asymmetric.  For the FD approximation of $\partial s/\partial x$ we take
+However, if we run a simulation based on scheme \eqref{fd:ftcs} then we will see wiggles which do not go away.  The possibly-surprising remedy is to revert to a less-accurate and asymmetric FD choice for the spatial derivative \cite{MortonMayers2005}.  For $\partial s/\partial x$ we take
     $$\frac{\partial s}{\partial x}(t,x) = \frac{s(t,x) - s(t,x-\Delta x)}{\Delta x} + O(\Delta x)$$
 if $u_j>0$, and
     $$\frac{\partial s}{\partial x}(t,x) = \frac{s(t,x+\Delta x) - s(t,x)}{\Delta x} + O(\Delta x)$$
-otherwise ($u_j \le 0$).  These formulas have only first-order accuracy, versus the formula in \eqref{fd:partials}, but this \emph{upwind} differencing choice exhibits (conditional) stability and avoidance of wiggles.  Written comparably to \eqref{fd:ftcs}, the upwind scheme is
+otherwise ($u_j \le 0$).  These formulas have only first-order accuracy, versus the centered-difference before, but such \emph{upwind} differencing exhibits (conditional) stability and avoidance of wiggles.  Written comparably to \eqref{fd:ftcs}, the upwind scheme is
 \begin{equation}
 \snew_j = s_j - \Delta t\, \frac{u_j}{\Delta x} \left\{\begin{matrix} s_j-s_{j-1}, & u_j > 0 \\ s_{j+1}-s_j, & u_j \le 0 \end{matrix}\right\} + \Delta t (a_j + w_j),\label{fd:upwind}
 \end{equation}
-as stenciled in Figure \ref{fig:stencils}, right.
+with the stencil in Figure \ref{fig:stencils}, right, at points where $u_j>0$.
 
-\subsection*{Implementation}  We can now look at the code.  This upwind scheme for the SKE becomes a short Python function:
+\subsection*{Implementation}  We can now look at the code.  This upwind scheme for the SKE \eqref{skeplanar} becomes a short Python function in the program \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{py/surface1d.py}}:
 
 \medskip
 \begin{Verbatim}[frame=single, framesep=1.5mm, xleftmargin=4mm]
-def explicitstep(s, x, dt):
+def explicitstep(x, s, dt):
+    '''compute a time step of the SKE, assuming u(x)>0 always
+    note left-end value snew[0] = s[0] is unmodified'''
     dx = x[1] - x[0]
     snew = s.copy()
     snew[1:] -= dt * u(x[1:]) * (s[1:] - s[:-1]) / dx
@@ -365,38 +363,43 @@ def explicitstep(s, x, dt):
     return snew
 \end{Verbatim}
 
-\noindent In detail, \texttt{x}, \texttt{s}, \texttt{snew} are one-dimensional NumPy \cite{Harrisetal2020} arrays, where \texttt{x} is assumed to be an equally-spaced grid, and \texttt{dt} is a provided time step.  Separate functions must define $a(x)$, $u(x)$, and $w(x)$.  Note that \texttt{snew[0] = s[0]} is never changed; this is a boundary condition.
+\noindent In detail, \texttt{x}, \texttt{s}, and \texttt{snew} are one-dimensional NumPy \cite{Harrisetal2020} arrays, and \texttt{x} is assumed to hold an equally-spaced grid.  Separate ``data'' functions must define $a(x)$, $u(x)$, and $w(x)$.  This version requires the formula for $u(x)$ to produce positive numbers, but the two cases in \eqref{fd:upwind} are easily handled by the addition of a conditional statement.  The fact that \texttt{snew[0] = s[0]} is never changed is a \emph{boundary condition} compatible with the fact that the velocity is inward at the left end: \texttt{u(x[0])}$>0$ in the version here.
 
-FIXME demo: evolution of glacier surface
-
-%\begin{center}
-%\includegraphics[width=0.7\textwidth]{frame010}
-%\end{center}
-
-\begin{itemize}
-\item run \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{py/surface1d.py}:
-\begin{verbatim}
+The rest of the code is worth a look, but there is no need to print it here.  It contains formulas for the data functions, a time-stepping loop, and calls to the \texttt{matplotlib} library to generate figures.  Various default choices are made for convenience, for example $\Delta t=1$ a and $\Delta x=1$ km, and indeed all choices are merely pedagogical.  Run the code, and view the simulation results using your favorite image viewer, as follows:
+\begin{Verbatim}[xleftmargin=4mm]
 $ python3 surface1d.py
-$ eog output/frame*.png          # view images
-\end{verbatim}
-\item the following modifications reveal stability issues:
-    \begin{enumerate}
+evolution mode ...
+  stability constant =   0.5000
+  writing 50 steps to image files output/frameXXX.png
+steady state mode ...
+  writing to image file output/steady.png
+$ [viewer] output/frame*.png
+\end{Verbatim}
+The initial condition and final result, at the 50th time step, are shown in Figure \ref{fig:demo}.
+
+\begin{figure}[ht]
+\includegraphics[width=0.65\textwidth]{figs/frame000.png}
+
+\includegraphics[width=0.65\textwidth]{figs/frame050.png}
+\caption{Initial condition (top) and the final result (bottom) of a boring solution of the SKE \eqref{skeplanar} using scheme \eqref{fd:upwind}.}
+\label{fig:demo}
+\end{figure}
+
+All of this looks good and boring.  However, easily-made modifications reveal stability issues with our scheme, exposing high-spatial-frequency, rapidly-growing oscillations.  In particular, these modifications generate such exploding wiggles:
+    \begin{itemize}
     \item increase velocity: \quad $u(x)$ \, $\to$ \, $2.5\, u(x)$
     \item increase resolution: \quad $\Delta x=1000$ m \, $\to$ \, $\Delta x=400$ m
-    \item lengthen time-steps: \quad $\Delta t = 1$ a \, $\to$ \, $\Delta t = 2.5$ a
-    \end{enumerate}
-\end{itemize}
+    \item lengthen time-steps: \quad $\Delta t = 1$ a \, $\to$ \, $\Delta t = 2.5$ a    
+    \end{itemize}
+This situation is understood, and in fact the condition for time-stepping stability has been known since 1928 \cite{CFL1928}.  The idea is that in the SKE \eqref{skeplanar}, information about the surface travels at the speeds $\{u_j\}$.  The maximum dimensionless Courant, Friedrichs, \& Lewy (CFL) ratio needs to be less than one so that information does not travel more than one spatial distance $\Delta x$ during the time step $\Delta t$:
+\begin{equation}
+\max_j \frac{|u_j| \Delta t}{\Delta x} \le 1.  \label{cfl}
+\end{equation}
+Our destabilizing modifications each pushed this maximum ratio above 1.
 
-the condition for time-stepping stability is known; information about the surface travels at speed $u$; from grid picture, the upwind scheme can only be stable if
-$$|u_j| \Delta t \le \Delta x \quad \text{for every } j$$
-as observed by Courant, Friedrichs, and Lewy in 1928 \cite{CFL1928}
-%\includegraphics[width=0.43\textwidth]{cfl.png}
-rearranged, this is the \alert{CFL condition} on the time step:
-$$\Delta t \le \frac{\Delta x}{\max |u_j|} \hspace{40mm}$$
-exercise \textbf{12}: add this to \texttt{surface1d.py} for $u(t,x)$
+In practice, one may set the time step $\Delta t$ to assure stability.  For example, a program can, at run time, set $\Delta t = C \frac{\Delta x}{\max |u_j|}$ using $C=0.7$, so that \eqref{cfl} holds.
 
-
-demo: steady state of a glacier surface
+\subsection*{Steady state, and two horizontal dimensions}  FIXME demo: steady state of a glacier surface
 %\begin{center}
 %\includegraphics[width=0.7\textwidth]{steady}
 %\end{center}
