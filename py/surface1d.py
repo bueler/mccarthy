@@ -1,8 +1,8 @@
 '''
 Solves time-dependent and steady-state surface kinematical equation
-(SKE) models in one dimension.  The surface mass balance a(x),
-horizontal velocity u(x), and vertical velocity w(x) are all assumed
-to be given and time-independent.  (This is not realistic!)
+(SKE) models in one dimension, for s(t,x).  The surface mass balance
+a(x), horizontal velocity u(x), and vertical velocity w(x) are all
+assumed to be given and time-independent.  (This is not realistic!)
 
 Runs produce .png figures in the output/ directory.  Note that a
 bed elevation b(x) is shown in these figures, but it does not
@@ -46,9 +46,9 @@ def w(x):
     '''vertical velocity is zero'''
     return 0.0 * x
 
-def explicitstep(x, s, dt):
-    '''compute a time step of the SKE, assuming u(x)>0 always
-    note left-end value snew[0] = s[0] is unmodified'''
+def explicitupwindstep(x, s, dt):
+    '''compute a time step of the SKE, assuming u(x)>0 always,
+    by upwind scheme; left-end value snew[0] = s[0] is unmodified'''
     dx = x[1] - x[0]
     snew = s.copy()
     snew[1:] -= dt * u(x[1:]) * (s[1:] - s[:-1]) / dx

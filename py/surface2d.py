@@ -1,3 +1,20 @@
+'''
+Solves the steady-state surface kinematical equation (SKE) model
+in two dimensions, for s(x,y).  The surface mass balance a(x,y),
+horizontal velocity u(x,y), and vertical velocity w(x,y) are all
+assumed to be given and time-independent.  (This is not realistic!)
+
+Runs produce Paraview (.pvd) and image (.png) files in the output/
+directory.
+
+Here is the default way to run and view output:
+   $ rm -rf output/
+   $ . venv-firedrake/bin/activate
+   (venv-firedrake) $ python3 surface2d.py
+   (venv-firedrake) $ paraview output/result.pvd
+   (venv-firedrake) $ eog output/result.png    # eog = image viewer
+'''
+
 from firedrake import *
 secpera = 31556926.0
 
@@ -56,7 +73,7 @@ nvs.solve(bounds=(b, upper))
 # Paraview-readable output
 from firedrake.output import VTKFile
 H = Function(P1, name='H(x,y)').interpolate(s - b)  # ice thickness
-VTKFile('output/surface2d.pvd').write(a,b,u,s,H)
+VTKFile('output/result.pvd').write(a,b,u,s,H)
 
 # image output (greyscale contour map)
 import numpy as np
@@ -73,4 +90,4 @@ axes.set_xticks(tickskm * 1000.0, tickstrs)
 plt.xlabel('x (km)')
 axes.set_yticks(tickskm * 1000.0, tickstrs)
 plt.ylabel('y (km)')
-plt.savefig('output/surface2d.png', bbox_inches='tight')
+plt.savefig('output/result.png', bbox_inches='tight')
