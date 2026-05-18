@@ -81,12 +81,12 @@ def run_evolution():
     plt.xlabel('x (m)')
     plt.ylabel('elevation (m)')
     sh, = plt.plot(x, s, "-o")
-    th = plt.text(1000.0, 700.0, f't = {0.0:6.2f} (a)', name='DejaVu Sans Mono')
+    th = plt.text(1000.0, 700.0, f't = {0.0:6.2f} (a)')
     mkoutdir(outdir)
-    print(f'  writing {N} steps to image files {outdir}frameXXX.png')
+    print(f'  writing {N} steps to image files {outdir}frame???.png')
     for k in range(N+1):
         plt.savefig(f'{outdir}frame{k:03d}.png')
-        s = explicitstep(x, s, dt)
+        s = explicitupwindstep(x, s, dt)
         sh.set_ydata(s)
         th.set_text(f't = {(k+1) * dt / secpera:6.2f} (a)')
 
