@@ -98,9 +98,9 @@ urlcolor=black
 
     \vfill
     
-    \includegraphics[width=6.0in]{flowline}
+    \includegraphics[width=100mm]{domain}
   
-    \scriptsize \emph{Illustrates the notation used in these notes.  Figure modified from \cite{Schoof2007}.} \normalsize
+    \scriptsize \emph{Some notation used in these notes.} \normalsize
     
     \vspace{1.5in}
   \end{center}
@@ -257,9 +257,7 @@ On the other hand, the \emph{domain} on which the stress balance equations are s
 \end{equation}
 the set of points between the surface and the bed.  In other words, an important feature of glacier equations is that the ice domain is what evolves in time, and the stress balance equations are instantaneous truths which must be solved on this evolving domain.
 
-As show in Figure \ref{fig:domain}, in the planar (2D) case this notation becomes $z=s(t,x)$, $z=b(x)$, and $\left\{(x,z)\,:\,b(x) < z < s(t,x)\right\}$.  The set is labeled \textsf{ice} in the Figure.
-
-\onefig{domain}{Notation for the evolving geometry of a planar (2D) glacier.}
+The figure on the cover page of these notes shows notation in the planar (2D) case, which reduces to $z=s(t,x)$, $z=b(x)$, and $\left\{(x,z)\,:\,b(x) < z < s(t,x)\right\}$ (the set labeled \textsf{ice} in the figure).
 
 \subsection*{Surface mass balance and surface kinematics}  The upper surface evolves in part through the \emph{surface mass balance rate} (SMB), denoted $a(t,x,y)$, or $a(t,x)$ in the planar case.  The SMB is also known as the \emph{climatic} mass balance \cite{Cogleyetal2011}.  By definition this is the balance between accumulating snow and the loss of melt water, by melt of the snow, firn, or ice, through runoff, at the upper surface.\footnote{These notes only consider simulations of land-based glaciers, without floating portions, but ice shelves are also subject to a \emph{basal} mass balance rate.}  As elevations are measured in meters, and time in seconds, in these notes the SMB function $a$ is measured in ice-equivalent meters per second.  Note that ``SMB'' is one of a few abbreviations used in these notes; see Table \ref{tab:abbrev}.
 
@@ -353,9 +351,9 @@ with the stencil in Figure \ref{fig:stencils}, right, at points where $u_j>0$.
 
 \medskip
 \begin{Verbatim}[frame=single, framesep=1.5mm, xleftmargin=4mm]
-def explicitstep(x, s, dt):
-    '''compute a time step of the SKE, assuming u(x)>0 always
-    note left-end value snew[0] = s[0] is unmodified'''
+def explicitupwindstep(x, s, dt):
+    '''compute a time step of the SKE, assuming u(x)>0 always,
+    by upwind scheme; left-end value snew[0] = s[0] is unmodified'''
     dx = x[1] - x[0]
     snew = s.copy()
     snew[1:] -= dt * u(x[1:]) * (s[1:] - s[:-1]) / dx
