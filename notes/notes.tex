@@ -378,7 +378,7 @@ otherwise ($u_j \le 0$).  These formulas have only first-order accuracy, versus 
 \end{equation}
 with the stencil in Figure \ref{fig:stencils}, right, at points where $u_j>0$.
 
-\subsection*{Implementation}  We can now look at the code.  This upwind scheme for the SKE \eqref{skeplanar} becomes a short Python function in the program \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{py/surface1d.py}}:
+\subsection*{Time-stepping implementation}  We can now look at the code.  This upwind scheme for the SKE \eqref{skeplanar} becomes a short Python function in the program \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{py/surface1d.py}}:
 
 \begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
 def explicitupwindstep(x, s, dt):
@@ -415,7 +415,7 @@ The initial condition and final result, at the 50th time step, are shown in Figu
 \label{fig:demo}
 \end{figure}
 
-This looks good (and boring).  However, easily-made modifications reveal stability issues, exposing high-spatial-frequency, rapidly-growing oscillations.  In particular, these modifications, which are a recommended exercise, generate such exploding wiggles:
+\subsection*{Stability and CFL}  The first results look good (and boring).  However, easily-made modifications reveal stability issues, exposing high-spatial-frequency, rapidly-growing oscillations.  In particular, these modifications, which are a recommended exercise, generate such exploding wiggles:
 \begin{itemize}
 \item increase velocity: \quad $u(x)$ \, $\to$ \, $2.5\, u(x)$
 \item increase resolution: \quad $\Delta x=1000$ m \, $\to$ \, $\Delta x=400$ m
@@ -430,7 +430,7 @@ Our destabilizing modifications each pushed this maximum ratio above 1.
 
 In practice, inequality \eqref{cfl} is used to set the time step $\Delta t$ to assure stability.  At run time a program can set $\Delta t = C \frac{\Delta x}{\max_j |u_j|}$, using $C=0.9$ for example, so that \eqref{cfl} holds.
 
-A different type of modification breaks our method for determining the geometry of glaciers.  In the default set-up, the function $a(x)$ in \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{py/surface1d.py}} is linear and decreasing  in $x$, with a zero, an equilibrium line \cite{Cogleyetal2011}, at $1/5$ of the total length $L$.  That is, accumulation occurs over $0<x<L/5$ and ablation over $L/5<x<L$.  The modification
+\subsection*{Admissiblity}  A different type of modification breaks our method for determining the geometry of glaciers.  In the default set-up, the function $a(x)$ in \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{py/surface1d.py}} is linear and decreasing  in $x$, with a zero, an equilibrium line \cite{Cogleyetal2011}, at $1/5$ of the total length $L$.  That is, accumulation occurs over $0<x<L/5$ and ablation over $L/5<x<L$.  The modification
 \begin{itemize}
 \item more aggressive ablation: \quad $a(x)$ \, $\to$ \, $3 a(x)$  
 \end{itemize}
@@ -454,7 +454,7 @@ In this regard, bed elevation data $b$ is needed in modelling glacier surfaces u
 
 Where there is no glacier it makes sense to say (allow) $s(t,x)=b(x)$.  This is compatible with how digital elevation models work in practice, as the surface elevation is the top of the glacier if one is present, but otherwise it is the top of the land.
 
-\subsection*{Steady state glacier geometry}  Here in Section \ref{sec:masscont} we are regarding the SKE as a model which can ``predict'' glacier geometry given ``data'' for SMB and surface velocity.  This concept, which will later use a coupled numerical stress balance solver to compute the velocity fields (Section \ref{sec:numericalsia}), can be applied in \emph{steady state} as well.
+\subsection*{Steady state}  Here in Section \ref{sec:masscont} we are regarding the SKE as a model which can ``predict'' glacier geometry given ``data'' for SMB and surface velocity.  This concept, which will later use a coupled numerical stress balance solver to compute the velocity fields (Section \ref{sec:numericalsia}), can be applied in \emph{steady state} as well.
 
 The SKE in steady-state has $\frac{\partial s}{\partial t}=0$, by definition, so equations \eqref{skeplanar} becomes
 \begin{equation}
