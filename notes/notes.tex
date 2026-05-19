@@ -2,12 +2,42 @@
 
 \usepackage[total={6.1in,9.0in},top=1.1in,left=1.3in]{geometry}
 
-\usepackage{verbatim}
 \usepackage{empheq}
 \usepackage[dvipsnames]{xcolor}
 \usepackage{graphicx}
 \usepackage{fancyvrb}
 \usepackage{tikz}
+
+% for python listings; inspired by https://gist.github.com/YidongQIN/a10dd4f72381362aff4257e7a5541d86 
+\usepackage{listings}
+\usepackage{color}
+\definecolor{darkred}{rgb}{0.6,0.0,0.0}
+\definecolor{darkgreen}{rgb}{0,0.50,0}
+\definecolor{lightblue}{rgb}{0.0,0.42,0.91}
+\definecolor{orange}{rgb}{0.99,0.48,0.13}
+\definecolor{grass}{rgb}{0.18,0.80,0.18}
+\definecolor{pink}{rgb}{0.97,0.15,0.45}
+\lstdefinelanguage{PythonPlus}[]{Python}{
+  morekeywords=[1]{,as,assert,nonlocal,with,yield,self,True,False,None,} % Python builtin
+  morekeywords=[2]{,__init__,__add__,__mul__,__div__,__sub__,__call__,__getitem__,__setitem__,__eq__,__ne__,__nonzero__,__rmul__,__radd__,__repr__,__str__,__get__,__truediv__,__pow__,__name__,__future__,__all__,}, % magic methods
+  morekeywords=[3]{,object,type,isinstance,copy,deepcopy,zip,enumerate,reversed,list,set,len,dict,tuple,range,xrange,append,execfile,real,imag,reduce,str,repr,}, % common functions
+  morekeywords=[4]{,Exception,NameError,IndexError,SyntaxError,TypeError,ValueError,OverflowError,ZeroDivisionError,}, % errors
+  morekeywords=[5]{,ode,fsolve,sqrt,exp,sin,cos,arctan,arctan2,arccos,pi, array,norm,solve,dot,arange,isscalar,max,sum,flatten,shape,reshape,find,any,all,abs,plot,linspace,legend,quad,polyval,polyfit,hstack,concatenate,vstack,column_stack,empty,zeros,ones,rand,vander,grid,pcolor,eig,eigs,eigvals,svd,qr,tan,det,logspace,roll,min,mean,cumsum,cumprod,diff,vectorize,lstsq,cla,eye,xlabel,ylabel,squeeze,}, % numpy / math
+}
+\lstdefinestyle{colorEX}{
+  basicstyle=\ttfamily,
+  backgroundcolor={},
+  commentstyle=\color{darkgreen}\slshape,
+  keywordstyle=\color{blue}\bfseries\itshape,
+  keywordstyle=[2]\color{blue}\bfseries,
+  keywordstyle=[3]\color{grass},
+  keywordstyle=[4]\color{red},
+  keywordstyle=[5]\color{orange},
+  stringstyle=\color{darkred},
+  emphstyle=\color{pink}\underbar,
+}
+\lstset{style=colorEX,
+        basewidth = {.49em}}
 
 % hyperref should be the last package we load
 \usepackage[pdftex,
@@ -109,7 +139,7 @@ urlcolor=black
 \clearpage\newpage
 
 \setcounter{page}{2}
-%\setcounter{section}{1}
+
 \section{Introduction}  \label{sec:intro}
 
 The greatest importance of mathematical and numerical models to science, and glaciology in particular, is \emph{introspection}.  In building and using a model you are asking yourself: When I combine my imperfect and incomplete understanding of glacier processes into this model, does it behave as I expect?  A numerical simulation can only report the consequences of your equations, inadequacies and all, but the approximation can show how processes interact to give overall behavior, and it can sometimes demonstrate flaws in your understanding of those processes.
@@ -137,6 +167,7 @@ $\nabla\cdot$ & (spatial) divergence & m$^{-1}$ \\
 $\mathbf{g}$  & gravity & m s$^{-2}$\phantom{foobar} & 9.81 \\
 $H$           & ice thickness & m \\
 $n$           & exponent in Glen flow law & & 3 \\
+$\bn_s$       & surface-normal vector $\bn_s = \left<-\frac{\partial s}{\partial x},-\frac{\partial s}{\partial y},1\right>$ & \\
 $\nu$         & viscosity & Pa s \\
 $p$           & pressure & Pa \\
 $\bq$         & map-plane ice flux: $\bq = \int_{b}^{h} \bU\,dx$ & $\text{m}^2\,\text{s}^{-1}$ \\
@@ -265,7 +296,7 @@ The figure on the cover page of these notes shows notation in the planar (2D) ca
 \caption{Abbreviations.}
 \begin{tabular}{cll}
 abbreviation & meaning & precise definition \\ \hline
-CFL & numerical stability criterion \cite{CFL1928} & inequality FIXME \\
+CFL & numerical stability criterion \cite{CFL1928} & inequality \eqref{cfl} \\
 FD  & finite difference method \cite{LeVeque2007,MortonMayers2005} & \\
 SIA & shallow ice approximation & equations FIXME \\
 SKE & surface kinematical equation & equation \eqref{ske} \\
@@ -349,8 +380,7 @@ with the stencil in Figure \ref{fig:stencils}, right, at points where $u_j>0$.
 
 \subsection*{Implementation}  We can now look at the code.  This upwind scheme for the SKE \eqref{skeplanar} becomes a short Python function in the program \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{py/surface1d.py}}:
 
-\medskip
-\begin{Verbatim}[frame=single, framesep=1.5mm, xleftmargin=4mm]
+\begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
 def explicitupwindstep(x, s, dt):
     '''compute a time step of the SKE, assuming u(x)>0 always,
     by upwind scheme; left-end value snew[0] = s[0] is unmodified'''
@@ -359,16 +389,18 @@ def explicitupwindstep(x, s, dt):
     snew[1:] -= dt * u(x[1:]) * (s[1:] - s[:-1]) / dx
     snew[1:] += dt * (a(x[1:]) + w(x[1:]))
     return snew
-\end{Verbatim}
+\end{lstlisting}
 
-\noindent In detail, \texttt{x}, \texttt{s}, and \texttt{snew} are one-dimensional NumPy \cite{Harrisetal2020} arrays, and \texttt{x} is assumed to hold an equally-spaced grid.  Separate ``data'' functions must define $a(x)$, $u(x)$, and $w(x)$.  This version requires the formula for $u(x)$ to produce positive numbers, but the two cases in \eqref{fd:upwind} are easily handled by the addition of a conditional statement.  The fact that \texttt{snew[0] = s[0]} is never changed is a \emph{boundary condition} compatible with the fact that the velocity is inward at the left end: \texttt{u(x[0])}$>0$ in the version here.
+\noindent In detail, \texttt{x}, \texttt{s}, and \texttt{snew} are one-dimensional NumPy \cite{Harrisetal2020} arrays, and \texttt{x} is assumed to hold an equally-spaced grid.  Separate ``data'' functions must define $a(x)$, $u(x)$, and $w(x)$.  Here we need the formula for $u(x)$ to produce positive numbers, but the two cases in \eqref{fd:upwind} are easily handled by a conditional statement.  The fact that \texttt{snew[0] = s[0]} is never changed is a \emph{boundary condition} compatible with the fact that the velocity is inward at the left end (\texttt{u(x[0])}$>0$).  Also note that the left end of our glacier has zero thickness, that is, \texttt{s[0] = b(0)} on input into the above function.
 
-The rest of the code is worth a look, but there is no need to print it here.  It contains formulas for the data functions, a time-stepping loop, and calls to the \texttt{matplotlib} library to generate figures.  Various default choices are made for convenience, for example $\Delta t=1$ a and $\Delta x=1$ km, and indeed all choices are merely pedagogical.  Run the code, and view the simulation results using your favorite image viewer, as follows:
+The rest of the code \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{py/surface1d.py}} is worth a look, but there is no need to print it here.  It contains formulas for the data functions, a time-stepping loop, and calls to \texttt{matplotlib} to generate figures.  Various default choices are made for convenience, for example $\Delta t=1$ a and $\Delta x=1$ km; all choices are merely pedagogical.
+
+Run the code, and use an image viewer on the simulation results, as follows:
 \begin{Verbatim}[xleftmargin=4mm]
 $ python3 surface1d.py
 evolution mode ...
   stability constant =   0.5000
-  writing 50 steps to image files output/frameXXX.png
+  writing 50 steps to image files output/frame???.png
 steady state mode ...
   writing to image file output/steady.png
 $ [viewer] output/frame*.png
@@ -379,83 +411,73 @@ The initial condition and final result, at the 50th time step, are shown in Figu
 \includegraphics[width=0.65\textwidth]{figs/frame000.png}
 
 \includegraphics[width=0.65\textwidth]{figs/frame050.png}
-\caption{Initial condition (top) and the final result (bottom) of a boring solution of the SKE \eqref{skeplanar} using scheme \eqref{fd:upwind}.}
+\caption{Initial condition (top) and final result (bottom) of a solution of the SKE \eqref{skeplanar} using scheme \eqref{fd:upwind}. The surface elevation is dotted and the bed elevation solid.}
 \label{fig:demo}
 \end{figure}
 
-All of this looks good and boring.  However, easily-made modifications reveal stability issues with our scheme, exposing high-spatial-frequency, rapidly-growing oscillations.  In particular, these modifications generate such exploding wiggles:
-    \begin{itemize}
-    \item increase velocity: \quad $u(x)$ \, $\to$ \, $2.5\, u(x)$
-    \item increase resolution: \quad $\Delta x=1000$ m \, $\to$ \, $\Delta x=400$ m
-    \item lengthen time-steps: \quad $\Delta t = 1$ a \, $\to$ \, $\Delta t = 2.5$ a    
-    \end{itemize}
-This situation is understood, and in fact the condition for time-stepping stability has been known since 1928 \cite{CFL1928}.  The idea is that in the SKE \eqref{skeplanar}, information about the surface travels at the speeds $\{u_j\}$.  The maximum dimensionless Courant, Friedrichs, \& Lewy (CFL) ratio needs to be less than one so that information does not travel more than one spatial distance $\Delta x$ during the time step $\Delta t$:
+This looks good (and boring).  However, easily-made modifications reveal stability issues, exposing high-spatial-frequency, rapidly-growing oscillations.  In particular, these modifications, which are a recommended exercise, generate such exploding wiggles:
+\begin{itemize}
+\item increase velocity: \quad $u(x)$ \, $\to$ \, $2.5\, u(x)$
+\item increase resolution: \quad $\Delta x=1000$ m \, $\to$ \, $\Delta x=400$ m
+\item lengthen time-steps: \quad $\Delta t = 1$ a \, $\to$ \, $\Delta t = 2.5$ a    
+\end{itemize}
+
+This kind of instability is understood, and in fact the condition to avoid it has been known since 1928 \cite{CFL1928}.  The idea is that in the SKE \eqref{skeplanar}, and similar \emph{advection} equations, information about the surface travels at the speeds $\{u_j\}$.  Therefore, in the discretized simulation, the maximum dimensionless Courant, Friedrichs, \& Lewy (CFL) ratio needs to be less than one so that information does not travel more than one spatial distance $\Delta x$ during the time step $\Delta t$:
 \begin{equation}
-\max_j \frac{|u_j| \Delta t}{\Delta x} \le 1.  \label{cfl}
+\frac{(\max_j |u_j|) \Delta t}{\Delta x} \le 1.  \label{cfl}
 \end{equation}
 Our destabilizing modifications each pushed this maximum ratio above 1.
 
-In practice, one may set the time step $\Delta t$ to assure stability.  For example, a program can, at run time, set $\Delta t = C \frac{\Delta x}{\max |u_j|}$ using $C=0.7$, so that \eqref{cfl} holds.
+In practice, inequality \eqref{cfl} is used to set the time step $\Delta t$ to assure stability.  At run time a program can set $\Delta t = C \frac{\Delta x}{\max_j |u_j|}$, using $C=0.9$ for example, so that \eqref{cfl} holds.
 
-\subsection*{Steady state, and two horizontal dimensions}  FIXME demo: steady state of a glacier surface
-%\begin{center}
-%\includegraphics[width=0.7\textwidth]{steady}
-%\end{center}
-
+A different type of modification breaks our method for determining the geometry of glaciers.  In the default set-up, the function $a(x)$ in \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{py/surface1d.py}} is linear and decreasing  in $x$, with a zero, an equilibrium line \cite{Cogleyetal2011}, at $1/5$ of the total length $L$.  That is, accumulation occurs over $0<x<L/5$ and ablation over $L/5<x<L$.  The modification
 \begin{itemize}
-\item SKE in steady-state ($\frac{\partial s}{\partial t}=0$): \quad $\displaystyle u \frac{\partial s}{\partial x} = a + w$
-\item same run as before, but view steady-state output:
-\begin{verbatim}
-$ eog output/steady.png
-\end{verbatim}
-\item the following modification reveals an admissibility issue:
-    \begin{enumerate}
-    \item triple SMB: \quad $a(x)$ \, $\to$ \, $3 a(x)$
-    \end{enumerate}
+\item more aggressive ablation: \quad $a(x)$ \, $\to$ \, $3 a(x)$  
 \end{itemize}
+therefore strengthens the ablation over most of the domain.  The final-time result is shown in Figure \ref{fig:inadmissdemo}, with a surface which is below the bed, which is not good.
 
-more advanced: 2D steady state of a glacier surface
+\begin{figure}[ht]
+\includegraphics[width=0.65\textwidth]{figs/inadmissframe050.png}
+\caption{An inadmissible state, with $s<b$ in places, from stronger ablation.  See inequality \eqref{admissible}, and compare Figure \ref{fig:demo}.}
+\label{fig:inadmissdemo}
+\end{figure}
 
-\begin{itemize}
-\item code: \href{https://github.com/bueler/mccarthy/blob/master/py/surface2d.py}{py/surface2d.py}
-    \begin{itemize}
-    \item[$\circ$] this example uses \href{https://www.firedrakeproject.org/}{Firedrake}
-    \end{itemize}
-\item solves 2D steady-state SKE:
-\begin{align*}
-&& u \frac{\partial s}{\partial x} + v \frac{\partial s}{\partial y} &= a + w \hspace{45mm}\\
-\text{\emph{or}} && (u,v) \cdot \grad s &= a + w \\
-\text{\emph{or}} && -\bu \cdot \bn_s &= a
-\end{align*}
-    \begin{itemize}
-    \item[$\circ$] where $\bn_s = (-\frac{\partial s}{\partial x},-\frac{\partial s}{\partial y},1) = (-\grad s,1)$
-    \item[$\circ$] compare time-dependent SKE: \quad $\displaystyle \frac{\partial s}{\partial t} - \bu \cdot \bn_s = a$
-    \end{itemize}
-\item but subject to \alert{$s \ge b$}, that is, \alert{admissibility} of surface elevation
-\end{itemize}
+The bed elevation $b$ does not even appear in SKEs \eqref{skeplanar} and \eqref{ske}, so this data would seem to be irrelevant to their solutions.  However, \emph{glaciers end where they have ablated away}, and we need to model this real effect.  From now on we will say that a surface elevation $s(t,x,y)$ at some time $t$ is \emph{admissible} if
+\begin{equation}
+s(t,x,y) \ge b(x,y) \label{admissible}
+\end{equation}
+for every point $x,y$ in the computational domain.  Equivalently, admissibility is $H(t,x,y) \allowbreak\ge 0$; a glacier's thickness $H=s-b$ cannot be negative.
 
-some questions when solving the SKE
+The modified simulation started from an admissible state (Figure \ref{fig:demo}, top), but it evolved to an inadmissible one (Figure \ref{fig:inadmissdemo}), and this must be fixed.  In an explicit solution method as here, the fix is obvious, namely to \emph{truncate} the solution to being admissible, e.g.~$\snew_j = \max\{\snew_j, b_j\}$ in the planar case.
 
-\begin{itemize}
-\item[] \alert{MAJOR modeling questions}
-    \begin{enumerate}
-    \item whence the SMB $a$?
-    \item whence the surface velocity $u,w$? (see sections xx)
-    \end{enumerate}
-\item[] \alert{mathematical questions}
-    \begin{enumerate}\setcounter{enumi}{2}
-    \item is the time-dependent SKE well-posed for (various) initial \& boundary conditions?
-    \item same question for the steady-state SKE
-    \item how do we understand admissibility ($s\ge b$) in the theory?
-    \end{enumerate}
-\item[] \alert{numerical questions}
-    \begin{enumerate}\setcounter{enumi}{5}
-    \item when the surface velocity $u, w$ comes from a stress-balance submodel, is the upwind scheme still conditionally stable?
-    \item are there better explicit schemes?
-    \item is it better to use an implicit scheme?
-    \item how does one enforce admissibility in the right way?
-    \end{enumerate}
-\end{itemize}
+In this regard, bed elevation data $b$ is needed in modelling glacier surfaces using the SKE.  It is also critical data when solving stress balances (Sections \ref{sec:continuum}, \ref{sec:numericalsia}), and in fact admissibility \eqref{admissible} permits definition \eqref{domain} of the stress balance domain to make sense.
+
+Where there is no glacier it makes sense to say (allow) $s(t,x)=b(x)$.  This is compatible with how digital elevation models work in practice, as the surface elevation is the top of the glacier if one is present, but otherwise it is the top of the land.
+
+\subsection*{Steady state glacier geometry}  Here in Section \ref{sec:masscont} we are regarding the SKE as a model which can ``predict'' glacier geometry given ``data'' for SMB and surface velocity.  This concept, which will later use a coupled numerical stress balance solver to compute the velocity fields (Section \ref{sec:numericalsia}), can be applied in \emph{steady state} as well.
+
+The SKE in steady-state has $\frac{\partial s}{\partial t}=0$, by definition, so equations \eqref{skeplanar} becomes
+\begin{equation}
+u \frac{\partial s}{\partial x} = a + w, \label{skeplanarsteady}
+\end{equation}
+and \eqref{ske} becomes $-\bu \cdot \bn_s = a$.  (Recall notation: $\bu = \left<u,v,w\right>$, $\bn_s = \left<-\frac{\partial s}{\partial x},-\frac{\partial s}{\partial y},1\right>$.)
+
+Using the upwind FD idea \eqref{fd:upwind} on the planar problem, with only one spatial dimension, solving the steady state \eqref{skeplanarsteady} is even easier than the time-dependent case.  Specifically, because $u(x)>0$ everywhere, the upwind FD formula is
+\begin{equation}
+u_j \frac{s_{j} - s_{j-1}}{\Delta x} = a_j + w_j \qquad (\text{assumes } u_j>0), \label{fd:upwindsteady}
+\end{equation}
+or $s_{j} = s_{j-1} + (\Delta x/u_j) (a_j + w_j)$ as an update formula.  So we start from the left with $s_0=b(0)$ and have a single \texttt{for} loop:
+\begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
+s = x.copy()
+s[0] = b(0.0)
+for j in range(1, J+1):
+    s[j] = s[j-1] + (dx / u(x[j])) * (a(x[j]) + w(x[j]))
+\end{lstlisting}
+The same program \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{py/surface1d.py}} has done the job already.  Viewing the output image (\texttt{output/steady.png}) shows a result very similar to Figure \ref{fig:demo}, bottom.
+
+However, we have not assured admissibility in the above loop.  In fact, solving the same problem in two horizontal dimensions, for a 3D glacier, requires completely rethinking the solution strategy.  For that we have solved the steady-state problem in a different advanced code \href{https://github.com/bueler/mccarthy/blob/master/py/surface2d.py}{\texttt{py/surface2d.py}} which uses the Firedrake finite element library.  Now the admissibility inequality \eqref{admissible} is integrated into the partial differential equation problem itself as a \emph{variational inequality} \cite[Chapter 12]{Bueler2021}.  However, further explanation would take us far afield.
+
+FIXME FROM HERE
 
 \subsection*{Mass continuity equation}  The most basic shallow assumption made by most ice flow models is that the surface and base of the ice are differentiable functions $z=s(t,x,y)$ and $z=b(t,x,y)$.  That is, though the Stokes theory allows the fluid boundary to be any closed surface in three-dimensional space, ice sheet and glacier models take a map-plane perspective and have a well-defined ice thickness: $H=s-b$.  For example, surface overhang is rarely allowed in models.
 
