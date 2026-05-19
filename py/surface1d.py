@@ -97,8 +97,8 @@ def run_steady():
     # solve for steady s(x)
     s = x.copy()
     s[0] = b(0.0)
-    for j in range(J):
-        s[j+1] = s[j] + (dx / u(x[j+1])) * (a(x[j+1]) + w(x[j+1]))
+    for j in range(1, J+1):
+        s[j] = s[j-1] + (dx / u(x[j])) * (a(x[j]) + w(x[j]))
     # save plot to .png
     xplot = np.linspace(0.0, L, 1001)
     plt.figure(2, figsize=(12,5))
