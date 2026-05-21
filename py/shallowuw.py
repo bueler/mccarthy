@@ -64,9 +64,9 @@ def vert_int_u_stag(j, x, b, s, zb, zs):
     b, s, and surface slope are computed (namely: bjj, sjj,
     dsjj).  SIA formulas convert these to constant values
     alf, bet in the formula for the horizontal velocity:
-                / 0
-      ujj(z) = |  alf * (bet - (sjj - z)^(n+1))
-                \ alf * bet
+               | 0
+      ujj(z) = | alf * (bet - (sjj - z)^(n+1))
+               | alf * bet
     for vertical ranges z <= bjj, bjj < z < sjj, sjj <= z
     respectively.  Note that ujj = 0 below the bed, and
     it is continued above the surface as constant.

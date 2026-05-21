@@ -9,7 +9,7 @@ bed elevation b(x) is shown in these figures, but it does not
 enter into the SKE itself, except through admissibility.
 
 Convenient way to run and view (where "eog" is a .png viewer):
-   $ rm -rf output/;  python3 surface1d.py;  eog output/
+   $ rm -rf output/;  python3 surface.py;  eog output/
 
 Explore using code modifications (for example):
    u(x)    -->  4 * u(x)    instability
@@ -117,7 +117,7 @@ def run_steady():
     plt.xlabel("x (m)")
     plt.ylabel("elevation (m)")
     plt.plot(x, s, "-o")
-    plt.text(1000.0, 700.0, "steady state", name="DejaVu Sans Mono")
+    plt.text(1000.0, 700.0, "steady state")
     mkoutdir(outdir)
     print(f"  writing to image file {outdir}steady.png")
     plt.savefig(f"{outdir}steady.png")
