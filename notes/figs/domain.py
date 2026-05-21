@@ -10,7 +10,7 @@ fsize=18.0
 bigfsize=24.0
 biggerfsize=28.0
 
-def genbasicfig(xshift=0.0):
+def genbasicfig(xshift=0.0, soffset=0.0):
     x = np.linspace(0.0,10.0,1001)
     # bed elevation
     b = 0.07*(x-3.0)**2 + 0.2*np.sin(2.0*x) - 0.1
@@ -22,8 +22,7 @@ def genbasicfig(xshift=0.0):
     thk = np.maximum(0.0, firstshape)
     # surface
     s = b + thk
-    offset = 0.1
-    plt.plot(x + xshift, s + offset, 'k', lw=3.0)
+    plt.plot(x + xshift, s + soffset, 'k', lw=3.0)
     return x + xshift, s, b
 
 def drawclimate(x,s):
@@ -65,7 +64,7 @@ plt.text(x[650], b[650] - 0.5, r'$b(x)$', fontsize=bigfsize, color='k')
 #plt.text(max(x),z0,r'$x$',fontsize=fsize)
 #plt.axis([0.0,10.0,yR-0.8,4.5])
 
-plt.axis([0.0,10.0,min(b),4.5])
+plt.axis([0.0,10.0,min(b)-0.03,4.5])
 
 plt.axis('off')
 writeout('domain.pdf')
