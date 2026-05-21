@@ -3,5 +3,4 @@ all:
 .PHONY: clean
 
 clean:
-	rm -f *~ *.pyc *.pvd *.vtu *.pvtu
-	rm -rf __pycache__/ output/
+	rm -rf __pycache__/ output/ *~ *.pyc *.pvd *.vtu *.pvtu
