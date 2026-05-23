@@ -503,33 +503,62 @@ We have not assured admissibility in the above loop, but this is straightforward
 
 Solving the same steady-state problem in two horizontal dimensions (a 3D glacier), however, requires completely rethinking the solution strategy, because of the admissibility inequality.  For that we have written a very different, and more advanced, code \href{https://github.com/bueler/mccarthy/blob/master/py/surface2d.py}{\texttt{py/surface2d.py}}, which calls the Firedrake finite element library.  Now admissibility \eqref{admissible} is integrated into the partial differential equation problem itself as a \emph{variational inequality} \cite[Chapter 12]{Bueler2021}.  The reader is encouraged to explore this example.
 
-\subsection*{Mass continuity equation}  Equation \eqref{ske}, namely the SKE in the form which we will use from now on, relates more-or-less observable quantities at the ice surface, which is advantageous.  For example, it is a preferred equation for interpreting measurements of surface velocity, as they relate to SMB.  However, incompressibility \eqref{incompressible} says that mass conservation also applies at every point within the ice, and so a different equation is often used to describe the evolution of glacier geometry.  This \emph{mass continuity} equation, derived next, is essentially equivalent to the SKE.
+\subsection*{Mass continuity equation}  Equation \eqref{ske}, the SKE in its cleanest form, relates more-or-less observable quantities on a glacier's surface.  For example, it is a preferred equation for relating measured surface velocity to SMB.  However, a different equation is often used to describe the evolution of glacier geometry, namely the \emph{mass continuity} equation, derived next.  It is essentially equivalent to \eqref{ske} because of incompressibility \eqref{incompressible}, which is mass conservation as it applies within the ice.
 
-The derivation is clearest if we state the \emph{basal kinematical equation} first.  Consider the mass balance $m(t,x,y)$ at the basal surface $z=b(t,x,y)$, the difference between melt and freeze-on.  (Here all quantities can be time-dependent.)  The field $m$, in ice-equivalent meters per second, is positive if there is net melt.  Through thermodynamical effects it can be of either sign, both for grounded glaciers and underneath floating ice shelves.  Similar to \eqref{ske}, this kinematical equation is
+The derivation is clearest if we state the \emph{basal kinematical equation} first.  Consider the mass balance $m(t,x,y)$ at the basal surface $z=b(t,x,y)$, the difference between melt and freeze-on.  (Here all quantities can be time-dependent.)  The field $m$, in ice-equivalent meters per second, is positive if there is net melt.  It can be of either sign for grounded glaciers, and underneath floating ice shelves, often through thermodynamical effects.  Similar to \eqref{ske}, this kinematical equation is
 \begin{equation}
 b_t - \bu \cdot \bn_b = m,  \label{bke}
 \end{equation}
 where $\bn_b = \big<-\frac{\partial b}{\partial x}, -\frac{\partial b}{\partial y}, 1\big>$ is normal to the base and pointing upward, and ``$\bu$'' here denotes $\bu(t,x,y,b(t,x,y))$ (on the base surface).
 
-If $b$ is time-independent ($b_t=0$) then \eqref{bke} relates the ice velocity at the base to the mass balance $m$.  For example, in the case of a grounded glacier with a flat ($\grad b=0$) and stationary bedrock, and a melting base ($m>0$), the vertical ice velocity at the bed surface is downward: $w=-m$.
+If the bed elevation $b$ is time-independent ($b_t=0$) then \eqref{bke} relates the ice velocity at the base to the mass balance $m$.  For example, in the case of a grounded glacier with a flat ($\grad b=\big<\frac{\partial b}{\partial x},\frac{\partial b}{\partial y}\big>=0$) and stationary bedrock, and a melting base ($m>0$), the vertical ice velocity at the bed surface is downward: $w=-m$.
 
-Now consider the vector horizontal velocity $\bU(t,x,y,z) = \left<u,v\right>$.  (Contrast the 3D velocity $\bu=\left<u,v,w\right>$.)  The horizontal \emph{ice flux} is the integral
+Now consider the vector horizontal velocity $\bU = \left<u,v\right>$; contrast notation for the 3D velocity $\bu=\left<u,v,w\right>$.  The horizontal \emph{ice flux} is defined to be the integral
 \begin{equation}
-\bq(t,x,y) = \int_{b(t,x,y)}^{s(t,x,y)} \bU(t,x,y,\zeta)\,d\zeta,  \label{flux}
+\bq(t,x,y) = \int_{b(t,x,y)}^{s(t,x,y)} \bU(t,x,y,z)\,dz,  \label{flux}
 \end{equation}
-or more simply $\bq=\int_b^s\bU\,dz$.  The flux is often written $\bq=\bar\bU H$ where $H=s-b$ is the ice thickness, and $\bar\bU$ is the vertically-averaged horizontal velocity: $\bar\bU=H^{-1} \int_b^s\bU\,dz$.
+or simply $\bq=\int_b^s\bU\,dz$ if we suppress variables.  The flux is a vector with two components, $\bq=\left<q_1,q_2\right>$.  It is often written $\bq=\bar\bU H$ where $H=s-b$ is the ice thickness; it follows that $\bar\bU=H^{-1} \int_b^s\bU\,dz$ is the vertically-averaged horizontal velocity.
 
-FIXME
+Finally we can state the mass continuity equation itself,
+\begin{equation}
+    H_t + \Div \bq = a - m.  \label{masscont}
+\end{equation}
+Note that if the bed is stationary ($b_t=0$) then we can equivalently write ``$s_t$'' on the left, but the most common way to think about this equation is as describing how a layer of ice changes thickness, and thus volume, instead of in terms of elevation.  The divergence here is in horizontal variables, so $\Div\bq= \frac{\partial q_1}{\partial x} + \frac{\partial q_2}{\partial y}$.
 
-An important mathematical fact follows from the assumption of well-defined surface elevations and incompressibility.  Namely, that any \emph{pair} of these three equations implies the third:
-  \begin{itemize}
-  \item the surface kinematical equation \eqref{ske},
-  \item the base kinematical equation \eqref{bke}, and
-  \item the map-plane mass continuity equation \eqref{masscont}.
-  \end{itemize}
-One proves the any-two-implies-the-other implications by using equation \eqref{incompressible} and the Leibniz rule for differentiating integrals (see the Exercises).  Thus the surface kinematical and mass continuity equations are closely-related.
+The net function $a-m$ on the right is the \emph{climatic-basal mass balance} \cite{Cogleyetal2011}.  This combination of the surface mass balances $a,m$ determines how much mass is lost or gained in a column within the glacier.
 
-\subsection*{Understanding planar mass continuity}  Consider any $x,z$-plane flow with variable thickness and velocity, not just slab-on-a-slope.  Define the vertical average of the horizontal velocity:
+Since equation \eqref{masscont} looks rather different from the others, it makes sense to give the brief derivation.  We need the \emph{Leibniz rule} for differentiating integrals,
+\begin{equation}
+\frac{d}{dx}\left(\int_{g(x)}^{f(x)} k(x,y)\,dy\right) = k(x,f(x))\, f'(x) - k(x,g(x)) \, g'(x) + \int_{g(x)}^{f(x)} \frac{\partial k}{\partial x}(x,y)\,dy,  \label{leibniz}
+\end{equation}
+where $x$ should be regarded as a generic independent variable, and $k,f,g$ as generic differentiable functions.  Note that ``$y$'' is an index (variable) of integration, thus the results do not depend on it.
+
+We apply the Leibniz rule to compute the gradient (partial derivatives) of the flux \eqref{flux}, paying attention to which functions depend on which independent variables:
+\begin{align*}
+(\Div \bq) (t,x,y) &= \bU(t,x,y,s(t,x,y)) \cdot \grad s(t,x,y) - \bU(t,x,y,b(t,x,y)) \cdot \grad b(t,x,y) \\
+   &\qquad + \int_{b(t,x,y)}^{s(t,x,y)} (\Div \bU)(t,x,y,z)\,dz.
+\end{align*}
+Divergences $\Div$ here are in the horizontal variables $x,y$.  In fact, by incompressibility \eqref{incompressible} we can write the integrand as a vertical derivative of the vertical velocity:
+    $$\Div \bU = \frac{\partial u}{\partial x} + \frac{\partial v}{\partial y} = - \frac{\partial w}{\partial z}.$$
+Thus, continuing the calculation, indicating surface values by ``$\bU|_s$'' etc., suppressing variables, and applying the fundamental theorem of calculus, we have
+    $$\Div \bq = \bU|_s \cdot \grad s - \bU|_b \cdot \grad b - \int_b^s \frac{\partial w}{\partial z}\,dz = \bU|_s \cdot \grad s - \bU|_b \cdot \grad b - w|_s + w|_b.$$
+The expressions on the right are familiar from the kinematical equations \eqref{ske} and \eqref{bke}, and in fact if we use the 3D velocity $\bu=\left<u,v,w\right>$, and our normal vector notations, and those kinematical equations, then we have
+    $$\Div \bq = -\bu|_s \cdot \bn_s + \bu|_b \cdot \bn_b = a - s_t + b_t - m.$$
+This says $\Div \bq = (a-m) - H_t$, which is mass continuity \eqref{masscont}.
+
+At this point we have three equations which might be used to describe the evolving geometry of a glacier:
+\renewcommand{\labelenumi}{\emph{\roman{enumi})}}
+  \begin{enumerate}
+  \item the surface kinematical equation (SKE) \eqref{ske},
+  \item the basal kinematical equation \eqref{bke}, and
+  \item the mass continuity equation \eqref{masscont}.  
+  \end{enumerate}
+We derived the third using the first two and incompressibility.  Actually, any \emph{pair} of these three equations implies the third, using incompressibility and the Leibniz rule to make the connections.
+
+In designing a numerical glacier simulation, which equations to use for time-dependent geometry is largely a matter of taste and tradition.  The most common choice in the literature is to use mass continuity \eqref{masscont} as the primary equation, and to interpret the basal kinematical relation \eqref{bke} in a somewhat ad hoc manner.  Our main point here is that one can understand these equations as tools, and be free to use them.
+
+\subsection*{Understanding planar mass continuity}  FIXME
+Consider any $x,z$-plane flow with variable thickness and velocity, not just slab-on-a-slope.  Define the vertical average of the horizontal velocity:
 	$$\bar U = \frac{1}{H}\int_0^{H} u\,dz.$$
 The ice flux $q= \int_0^{H} u\,dz$ is the rate of flow input into the side of the area in Figure \ref{fig:slabmasscontfig}.  Ice can be added by climatic (surface) mass balance $M$ or by a difference in the flux $q=\bar U H$ between the left and right sides.
 
@@ -587,7 +616,7 @@ By integrating vertically we get, in the non-sliding case,
 \end{equation}
 Mass continuity in 2D, which generalizes the 1D version \eqref{masscont1D}, says:
 \begin{equation}
-    H_t = M - \Div\left(\bar{\mathbf{U}} H\right)  \label{masscont}
+    H_t = M - \Div\left(\bar{\mathbf{U}} H\right)
 \end{equation}
 Equation \eqref{masscont} may be written $H_t = M - \Div \bq$ in terms of the map-plane flux $\bq = \int_{b}^{h} \mathbf{U}\,dz = \bar{\mathbf{U}}\,H$.  Note $\bar{\mathbf{U}}$ and $\bq$ are functions of 2D coordinates $(x,y)$ only.  Combining equations \eqref{siavelocity} and \eqref{masscont}, we get an equation for the rate of thickness change in terms of mass balance $M$, thickness $H$, and surface gradient $\grad h$:
 \begin{equation}
