@@ -179,13 +179,14 @@ $n$           & exponent in Glen flow law & & 3 \\
 $\bn_s$       & surface-normal vector $\bn_s = \left<-\frac{\partial s}{\partial x},-\frac{\partial s}{\partial y},1\right>$ & \\
 $\nu$         & viscosity & Pa s \\
 $p$           & pressure & Pa \\
-$\bq$         & map-plane ice flux: $\bq = \int_{b}^{h} \bU\,dx$ & $\text{m}^2\,\text{s}^{-1}$ \\
+$\bq$         & map-plane ice flux: $\bq = \int_{b}^{s} \bU\,dz$ & $\text{m}^2\,\text{s}^{-1}$ \\
 $\rho$        & density of ice & kg m$^{-3}$ & 910 \\
 $s$           & surface elevation of the glacier & m \\
 $\sigma$      & Cauchy stress tensor: $\sigma_{ij} = \tau_{ij} - p\, \delta_{ij}$ & Pa \\
 $T$           & temperature & K \\
 $\tau$        & deviatoric stress tensor & Pa \\
 $\bu$         & $\left<u_1,u_2,u_3\right>=\left<u,v,w\right>$ 3D ice velocity & m s$^{-1}$ \\
+$\bU$         & $\left<u_1,u_2\right>=\left<u,v\right>$ horizontal ice velocity & m s$^{-1}$ \\
 $x_i$         & $x_1,x_2,x_3=x,y,z$ coordinates & m
 \end{tabular}
 \label{tab:notation}
@@ -313,7 +314,7 @@ Equation \eqref{skeplanar} says that the ice surface moves up and down at the ra
 
 Vector notation is convenient when extending \eqref{skeplanar} to 3D, so that the surface elevation function $s(t,x,y)$ depends on two horizontal variables.  Let
 \begin{equation}
-\bn_s = \Big(-\frac{\partial s}{\partial x}, -\frac{\partial s}{\partial y}, \,1\Big)  \label{normal}
+\bn_s = \Big<-\frac{\partial s}{\partial x}, -\frac{\partial s}{\partial y}, \,1\Big)> \label{normal}
 \end{equation}
 be an upward-pointing normal vector on the surface.  Then the SKE is
 \begin{equation}
@@ -502,24 +503,28 @@ We have not assured admissibility in the above loop, but this is straightforward
 
 Solving the same steady-state problem in two horizontal dimensions (a 3D glacier), however, requires completely rethinking the solution strategy, because of the admissibility inequality.  For that we have written a very different, and more advanced, code \href{https://github.com/bueler/mccarthy/blob/master/py/surface2d.py}{\texttt{py/surface2d.py}}, which calls the Firedrake finite element library.  Now admissibility \eqref{admissible} is integrated into the partial differential equation problem itself as a \emph{variational inequality} \cite[Chapter 12]{Bueler2021}.  The reader is encouraged to explore this example.
 
-\subsection*{Mass continuity equation}  Kinematical equations, namely the SKE \eqref{ske} and its basal version below, apply on the surfaces of the ice sheet, and they account for mass conservation at those surfaces.  However, mass conservation applies at every point within the ice as well; that is the meaning of incompressibility \eqref{incompressible}.
+\subsection*{Mass continuity equation}  Equation \eqref{ske}, namely the SKE in the form which we will use from now on, relates more-or-less observable quantities at the ice surface, which is advantageous.  For example, it is a preferred equation for interpreting measurements of surface velocity, as they relate to SMB.  However, incompressibility \eqref{incompressible} says that mass conservation also applies at every point within the ice, and so a different equation is often used to describe the evolution of glacier geometry.  This \emph{mass continuity} equation, derived next, is essentially equivalent to the SKE.
+
+The derivation is clearest if we state the \emph{basal kinematical equation} first.  Consider the mass balance $m(t,x,y)$ at the basal surface $z=b(t,x,y)$, the difference between melt and freeze-on.  (Here all quantities can be time-dependent.)  The field $m$, in ice-equivalent meters per second, is positive if there is net melt.  Through thermodynamical effects it can be of either sign, both for grounded glaciers and underneath floating ice shelves.  Similar to \eqref{ske}, this kinematical equation is
+\begin{equation}
+b_t - \bu \cdot \bn_b = m,  \label{bke}
+\end{equation}
+where $\bn_b = \big<-\frac{\partial b}{\partial x}, -\frac{\partial b}{\partial y}, 1\big>$ is normal to the base and pointing upward, and ``$\bu$'' here denotes $\bu(t,x,y,b(t,x,y))$ (on the base surface).
+
+If $b$ is time-independent ($b_t=0$) then \eqref{bke} relates the ice velocity at the base to the mass balance $m$.  For example, in the case of a grounded glacier with a flat ($\grad b=0$) and stationary bedrock, and a melting base ($m>0$), the vertical ice velocity at the bed surface is downward: $w=-m$.
+
+Now consider the vector horizontal velocity $\bU(t,x,y,z) = \left<u,v\right>$.  (Contrast the 3D velocity $\bu=\left<u,v,w\right>$.)  The horizontal \emph{ice flux} is the integral
+\begin{equation}
+\bq(t,x,y) = \int_{b(t,x,y)}^{s(t,x,y)} \bU(t,x,y,\zeta)\,d\zeta,  \label{flux}
+\end{equation}
+or more simply $\bq=\int_b^s\bU\,dz$.  The flux is often written $\bq=\bar\bU H$ where $H=s-b$ is the ice thickness, and $\bar\bU$ is the vertically-averaged horizontal velocity: $\bar\bU=H^{-1} \int_b^s\bU\,dz$.
 
 FIXME
 
-The net map-plane mass balance $M=a-m$, which appears in the mass continuity equation \eqref{masscont}, is the difference of these surface fluxes.  The \emph{(upper) surface kinematical equation} is
-\begin{equation}
-h_t = a - \mathbf{U}\big|_h \cdot \grad h + w\big|_h,  \label{surfkine}
-\end{equation}
-and the \emph{basal kinematical equation} is
-\begin{equation}
-b_t = m - \mathbf{U}\big|_b \cdot \grad b + w\big|_b.  \label{basekine}
-\end{equation}
-In these equations $\mathbf{U}$ is the horizontal ice velocity and $w$ the vertical ice velocity.  Equations \eqref{surfkine} and \eqref{basekine} describe the movement of the ice surfaces caused by the velocity of the ice and the mass balance functions.
-
 An important mathematical fact follows from the assumption of well-defined surface elevations and incompressibility.  Namely, that any \emph{pair} of these three equations implies the third:
   \begin{itemize}
-  \item the surface kinematical equation \eqref{surfkine},
-  \item the base kinematical equation \eqref{basekine}, and
+  \item the surface kinematical equation \eqref{ske},
+  \item the base kinematical equation \eqref{bke}, and
   \item the map-plane mass continuity equation \eqref{masscont}.
   \end{itemize}
 One proves the any-two-implies-the-other implications by using equation \eqref{incompressible} and the Leibniz rule for differentiating integrals (see the Exercises).  Thus the surface kinematical and mass continuity equations are closely-related.
@@ -528,7 +533,7 @@ One proves the any-two-implies-the-other implications by using equation \eqref{i
 	$$\bar U = \frac{1}{H}\int_0^{H} u\,dz.$$
 The ice flux $q= \int_0^{H} u\,dz$ is the rate of flow input into the side of the area in Figure \ref{fig:slabmasscontfig}.  Ice can be added by climatic (surface) mass balance $M$ or by a difference in the flux $q=\bar U H$ between the left and right sides.
 
-\onefigsize{slabmasscontfig}{Mass continuity equation \eqref{masscont1D} follows from considering this domain of ice, which has time-dependent area $A$.}{2.5in}
+\onefigsize{slabmasscontfig}{Mass continuity equation \eqref{masscont1D} follows from considering this domain of ice, which has time-dependent area $A$.}{2.0in}
 
 The area $A$ changes according to the sum of all the boundary contributions:
 \begin{equation}
