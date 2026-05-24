@@ -22,7 +22,7 @@ halfarinitial = False
 # user parameters
 T_a = 40.0  # duration of run in years (a)
 L = 20.0e3  # half-length of domain (m)
-J = 100  # number of spatial subintervals
+J = 80  # number of spatial subintervals
 maxsteps = 1000000  # limit the total number of steps
 outdir = "output/"  # directory name for images
 
@@ -36,7 +36,7 @@ dx = x[1] - x[0]
 b = np.zeros(x.shape)
 
 
-def t0_halfar(x, alpha=1.0 / 11.0, R0=10.0e3, H0=1200.0):
+def t0_halfar(alpha=1.0 / 11.0, R0=10.0e3, H0=1200.0):
     # Halfar time-dependent SIA geometry from
     #   P. Halfar (1981), On the dynamics of the ice sheets,
     #   J. Geophys. Res. 86 (C11), 11065--11072
@@ -47,18 +47,16 @@ def t0_halfar(x, alpha=1.0 / 11.0, R0=10.0e3, H0=1200.0):
     return (7.0 / 4.0) ** 3.0 * (beta / Gamma) * R0**4.0 / H0**7.0
 
 
-def s_halfar(x, alpha=1.0 / 11.0, R0=10.0e3, H0=1200.0):
+def s_halfar(t, x, alpha=1.0 / 11.0, R0=10.0e3, H0=1200.0):
     # Halfar time-dependent SIA geometry from
     #   P. Halfar (1981), On the dynamics of the ice sheets,
     #   J. Geophys. Res. 86 (C11), 11065--11072
     # The solution is evaluated at t = t0.  For the formula for t0 see
     # equations (3)--(9) in Bueler et al (2005), in 1D and for n=3.
-    t0 = t0_halfar(x)
-    print(f"  [Halfar solution has t0 = {t0 / secpera:.4f} a]")
+    t0 = t0_halfar()
     beta = alpha
     pp = 1.0 + 1.0 / 3.0
     rr = 3.0 / (2.0 * 3.0 + 1.0)
-    t = t0  # change this to different ratios  t = c t0  to see Halfar solution behavior
     s0 = (t / t0) ** beta * R0  # margin position at time t
     xsc = (t / t0) ** (-beta) * x[abs(x) < s0] / R0
     s = np.zeros(x.shape)
@@ -68,7 +66,9 @@ def s_halfar(x, alpha=1.0 / 11.0, R0=10.0e3, H0=1200.0):
 
 # initial surface elevation
 if halfarinitial:
-    s = s_halfar(x)
+    t0h = t0_halfar()
+    s = s_halfar(t0h, x)
+    print(f"  [initial state is Halfar solution at t0 = {t0h / secpera:.4f} a]")
 else:
     s = np.zeros(x.shape)
     # make following repeatable pseudo-random by setting seed (for testing)
@@ -113,7 +113,8 @@ plt.plot(x / 1000.0, s, label="initial: t = 0.00 a")
 t = 0.0
 tf = T_a * secpera
 timedata = []
-print("starting time-stepping ...")
+print(f"grid: J={J} points, with spacing dx={dx:.1f} m ...")
+print(f"starting time-stepping ...")
 for k in range(maxsteps):
     u = sia.u(x, b, s)  # surface horizontal velocity at interior points
     w = sia.w(x, b, s)  # surface vertical velocity at interior points
@@ -135,6 +136,13 @@ for k in range(maxsteps):
 print(f"took {k} steps to reach final time {T_a:.4f} a")
 
 plt.plot(x / 1000.0, s, color="C3", label=f"final: t={t / secpera:.2f} a")
+if halfarinitial:
+    sexact = s_halfar(t0h + tf, x)
+    serr = abs(s - sexact)
+    serrav = sum(serr) / len(serr[serr > 0.0])
+    print(f"  [errors at final time: |s - sexact|_max = {serr.max():.1f} m, |s - sexact|_av = {serrav:.1f} m")
+    plt.plot(x / 1000.0, sexact, '.', color="C4", label=f"final exact")
+
 plt.xlabel("x (km)")
 plt.ylabel("elevation (m)")
 plt.legend()
