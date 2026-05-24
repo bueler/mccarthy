@@ -23,8 +23,8 @@ plt.text(2.3,H0*1.05,r"$a$", size=24.0)
 plt.text(-0.6,0.6*H0,r'$H_1$', size=24.0)
 plt.text(5.1,0.6*H0,r'$H_2$', size=24.0)
 
-plt.text(-0.6,0.2*H0,r'$U_1$', size=24.0)
-plt.text(5.1,0.2*H0,r'$U_2$', size=24.0)
+plt.text(-0.6,0.15*H0,r'$\bar U_1$', size=24.0)
+plt.text(5.1,0.15*H0,r'$\bar U_2$', size=24.0)
 
 plt.text(-0.1,-0.15*H0,r'$x_1$', size=24.0)
 plt.text(4.9,-0.15*H0,r'$x_2$', size=24.0)

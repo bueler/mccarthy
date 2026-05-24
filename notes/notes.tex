@@ -557,27 +557,26 @@ We derived the third using the first two and incompressibility.  Actually, any \
 
 In designing a numerical glacier simulation, which equations to use for time-dependent geometry is largely a matter of taste and tradition.  The most common choice in the literature is to use mass continuity \eqref{masscont} as the primary equation, and to interpret the basal kinematical relation \eqref{bke} in a somewhat ad hoc manner.  Our main point here is that one can understand these equations as tools, and be free to use them.
 
-\subsection*{Understanding planar mass continuity}  FIXME
-Consider any $x,z$-plane flow with variable thickness and velocity, not just slab-on-a-slope.  Define the vertical average of the horizontal velocity:
-	$$\bar U = \frac{1}{H}\int_0^{H} u\,dz.$$
-The ice flux $q= \int_0^{H} u\,dz$ is the rate of flow input into the side of the area in Figure \ref{fig:slabmasscontfig}.  Ice can be added by climatic (surface) mass balance $M$ or by a difference in the flux $q=\bar U H$ between the left and right sides.
+\subsection*{Understanding planar mass continuity}  It helps to illustrate mass continuity in the same $x,z$ flow-line plane we used earlier.  Suppose for simplicity that the base is flat ($b=0$), so the thickness and surface elevation are the same thing ($H=s$), and suppose there is no basal mass balance ($m=0$).  In this planar case the horizontal velocity is a scalar function $U$, and its vertical average $\bar U = H^{-1} \int_0^{H} U\,dz$ and the flux $q = \int_0^{H} U\,dz = \bar U\, H$ are also scalar.
 
-\onefigsize{slabmasscontfig}{Mass continuity equation \eqref{masscont1D} follows from considering this domain of ice, which has time-dependent area $A$.}{2.0in}
-
-The area $A$ changes according to the sum of all the boundary contributions:
+The ice flux $q = \bar U\, H$ is the rate of mass flow through the sides of a part of the glacier, for example at locations $x_1$ and $x_2$ as shown in Figure \ref{fig:slabmasscontfig}.  Therefore mass can be added by SMB $a$, distributed along the upper surface, or by a \emph{difference} in the flux between the left and right sides.  That is, the flow-line area $A$ of this part of the glacier changes according to the sum of certain boundary contributions:
 \begin{equation}
-\frac{dA}{dt} = \int_{x_1}^{x_2} M(x,t)\,dx + \bar U_1 H_1 - \bar U_2 H_2. \label{masscontintegrated}
+\frac{dA}{dt} = \int_{x_1}^{x_2} a\,dx + \bar U_1\, H_1 - \bar U_2\, H_2. \label{masscontintegrated}
 \end{equation}
-In three-dimensions, \eqref{masscontintegrated} becomes an equation for $dV/dt$, the ice volume rate of change.
+In three-dimensions, \eqref{masscontintegrated} would become an equation for $dV/dt$, the rate of change of the volume of a part of the glacier, which would have more sides.
 
-If the width $\Delta x=x_2-x_1$ is small then $A\approx \Delta x\, H$.  So we divide by $\Delta x$ and take $\Delta x \to 0$ in \eqref{masscontintegrated} to get
+\onefigsize{slabmasscontfig}{Mass continuity equation \eqref{masscont} can be interpreted as giving the rate of change of the time-dependent area $A$.}{2.0in}
+
+Equation \eqref{masscontintegrated} is an integrated form of mass continuity.  To determine the derivative (and planar) form, suppose the width $\Delta x=x_2-x_1$ is small, thus $A\approx \Delta x\, H$.  If we divide by \eqref{masscontintegrated} by $\Delta x$ and take $\Delta x \to 0$ then we get
 \begin{equation}
-H_t = M - \left(\bar U H\right)_x \label{masscont1D}
+H_t = a - \left(\bar U\, H\right)_x \label{masscontplanar}
 \end{equation}
-This \emph{mass continuity} differential equation describes change in the ice thickness in terms of surface mass balance and ice velocity.  Ice flow simulations can compute the velocity $u$ and then use this equation for the changing glacier geometry.
+because $\lim_{\Delta x \to 0} (\int_{x_1}^{x_2} a\,dx)/\Delta x = a$ is the average value of the SMB over the small interval $[x_1,x_2]$, and $\lim_{\Delta x \to 0} (\bar U_2\, H_2 - \bar U_1\, H_1)/\Delta x = (\bar U\,H)_x$ is a (partial) derivative.  We have re-derived, and perhaps understood better, equation \eqref{masscont} in the planar case.
 
 
-\section{Shallow ice sheets}   \label{sec:sia}
+\section{Shallow ice approximation}   \label{sec:sia}
+
+FIXME
 
 Ice sheet flow has four outstanding properties as a fluids problem.  Ice sheets are
 \renewcommand{\labelenumi}{(\emph{\roman{enumi}})}
@@ -593,7 +592,12 @@ Regarding shallowness (\emph{ii}), Figure \ref{fig:green-transect} shows both a 
 
 \medskip
 
-\onefigsize{green-transect}{A cross-section of the Greenland ice sheet ($71^\circ$ N), with width about 760 km and maximum thickness 3200 m, is shown by the upper two curves.  The thickened horizontal line (bottom) shows the same cross-section without vertical exaggeration.}{3.0in}
+\begin{figure}[ht]
+\centering
+\includegraphics[width=80mm,height=35mm]{green-transect}
+\caption{Cross-section of the Greenland ice sheet ($71^\circ$ N), 760 km wide and (maximum) 3200 m thick.  The slightly-thick horizontal line (bottom; red) shows the true cross-section, without vertical exaggeration.}
+\label{fig:green-transect}
+\end{figure}
 
 Our earlier slab-on-a-slope example can be converted into a rough derivation of the plane-flow SIA.  We vertically integrate velocity formula \eqref{uslab} in the $u_0=0$ case to get
 \begin{equation}
