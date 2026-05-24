@@ -1,14 +1,18 @@
 """
-Compute the surface values of the horizontal and vertical
-velocity using the non-sliding shallow ice approximation (SIA).
-Techniques emphasize robustness, e.g. when ice thickness goes to
-zero.  Plots an example case.
+Compute the surface values of the horizontal and vertical velocity using
+the non-sliding shallow ice approximation (SIA) in one horizontal dimension.
+Techniques emphasize robustness, e.g. when ice thickness goes to zero.
+Plots an example case when run at command line.
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
 
+# physical parameters
 secpera = 31556925.0
+g = 9.81  # acceleration of gravity (m s-2)
+rhoi = 910.0  # density of ice (kg m-3)
+n = 3  # Glen exponent
+A = 3.1689e-24  # EISMINT I value of ice softness (Pa-3 s-1)
 
 # parameters for the plot example
 L = 20.0e3  # length of domain (m)
@@ -18,15 +22,6 @@ wave_amp = 20.0  # amplitude of surface waves; set to 0 for slab
 wave_len = 8.0e3  # wavelength of surface waves
 J = 80  # number of subintervals (in x direction)
 outdir = "output/"  # directory name for image output
-
-# physical parameters
-g = 9.81  # acceleration of gravity (m s-2)
-rhoi = 910.0  # density of ice (kg m-3)
-n = 3  # Glen exponent
-A = 3.1689e-24  # EISMINT I value of ice softness (Pa-3 s-1)
-
-# derived constant from SIA formulas
-C = (2.0 / (n + 1)) * A * (rhoi * g) ** n
 
 
 def b(x):
@@ -48,8 +43,9 @@ def u(x, b, s):
     dx = x[1] - x[0]
     dsdx = (s[1:] - s[:-1]) / dx
     Hstag = ((s[:-1] - b[:-1]) + (s[1:] - b[1:])) / 2.0
-    ult = -C * abs(dsdx[:-1]) ** (n - 1) * dsdx[:-1] * Hstag[:-1] ** (n + 1)
-    urt = -C * abs(dsdx[1:]) ** (n - 1) * dsdx[1:] * Hstag[1:] ** (n + 1)
+    C_u = (2.0 / (n + 1)) * A * (rhoi * g) ** n
+    ult = -C_u * abs(dsdx[:-1]) ** (n - 1) * dsdx[:-1] * Hstag[:-1] ** (n + 1)
+    urt = -C_u * abs(dsdx[1:]) ** (n - 1) * dsdx[1:] * Hstag[1:] ** (n + 1)
     return (ult + urt) / 2.0
 
 
@@ -127,6 +123,16 @@ def w(x, b, s):
     return -(Irt - Ilt) / dx
 
 
+def diffusiveD(x, b, s):
+    """Compute diffusivity D from SIA, at staggered points.
+    Used to determine a stable time step."""
+    dx = x[1] - x[0]
+    dsdx = (s[1:] - s[:-1]) / dx
+    Hstag = ((s[:-1] - b[:-1]) + (s[1:] - b[1:])) / 2.0
+    C_D = (2.0 / (n + 2)) * A * (rhoi * g) ** n
+    return C_D * Hstag ** (n + 2) * abs(dsdx) ** (n - 1)
+
+
 def mkoutdir(dirname):
     try:
         import os
@@ -151,6 +157,8 @@ def compute_velocity():
 
 
 def plot_velocity(x, u, w):
+    import matplotlib.pyplot as plt
+
     xint = x[1:-1]
     fig, (ax1, ax2) = plt.subplots(2, 1)
     ax1.plot(x / 1.0e3, s(x), ".-", color="C1", ms=4.0, label="s")
