@@ -513,7 +513,7 @@ where $\bn_b = \big<-\frac{\partial b}{\partial x}, -\frac{\partial b}{\partial 
 
 If the bed elevation $b$ is time-independent ($b_t=0$) then \eqref{bke} relates the ice velocity at the base to the mass balance $m$.  For example, in the case of a grounded glacier with a flat ($\grad b=\big<\frac{\partial b}{\partial x},\frac{\partial b}{\partial y}\big>=0$) and stationary bedrock, and a melting base ($m>0$), the vertical ice velocity at the bed surface is downward: $w=-m$.
 
-Now consider the vector horizontal velocity $\bU = \left<u,v\right>$; contrast notation for the 3D velocity $\bu=\left<u,v,w\right>$.  The horizontal \emph{ice flux} is defined to be the integral
+Now consider the vector horizontal velocity $\bU = \left<u,v\right>$; contrast notation for the 3D velocity $\bu=\left<u,v,w\right>$.  The horizontal \emph{ice flux}, also called \emph{discharge}, is defined to be the integral
 \begin{equation}
 \bq(t,x,y) = \int_{b(t,x,y)}^{s(t,x,y)} \bU(t,x,y,z)\,dz,  \label{flux}
 \end{equation}
@@ -574,54 +574,57 @@ H_t = a - \left(\bar U\, H\right)_x \label{masscontplanar}
 because $\lim_{\Delta x \to 0} (\int_{x_1}^{x_2} a\,dx)/\Delta x = a$ is the average value of the SMB over the small interval $[x_1,x_2]$, and $\lim_{\Delta x \to 0} (\bar U_2\, H_2 - \bar U_1\, H_1)/\Delta x = (\bar U\,H)_x$ is a (partial) derivative.  We have re-derived, and perhaps understood better, equation \eqref{masscont} in the planar case.
 
 
-\section{Shallow ice approximation}   \label{sec:sia}
+\section{Shallow ice approximation}  \label{sec:sia}
 
-\subsection*{Shallowness}  FIXME  Ice sheet flow has four outstanding properties as a fluids problem.  Ice sheets are
-\renewcommand{\labelenumi}{(\emph{\roman{enumi}})}
-\begin{enumerate}
-\item slow,
-\item shallow,
-\item non-Newtonian (shear-thinning), and
-\item subject to widespread contact slip (basal sliding).
-\end{enumerate}
-The first numerical ice flow model in these notes accounts for the first three properties only.  It is the non-sliding, isothermal \emph{shallow ice approximation} (SIA).
+\subsection*{Shallowness of glaciers and ice sheets}  Glacier ice has several outstanding properties as a fluid.  It is slow (small inertial forces) and non-Newtonian (shear-thinning).  Glaciers are subject to contact slip, i.e.~basal sliding, along a hard-to-observe boundary.  However, it is the distinctive \emph{shallowness} of ice sheets and large glaciers which permits a simpler stress balance model than Glen-Stokes (Section \ref{sec:continuum}), and thus faster simulations.  We consider the non-sliding, isothermal \emph{shallow ice approximation} (SIA), an effective model for sufficiently-large glaciers which are not dominated by basal sliding.
 
-Regarding shallowness (\emph{ii}), Figure \ref{fig:green-transect} shows both a no-vertical-exaggeration cross-section of Greenland at $71^\circ$ and the standard vertically-exaggerated version which is more familiar in the glaciological literature.  Without vertical exaggeration we see the ice sheet as a thin blanket, barely three-dimensional.  This illustrates that ice sheets are shallow.  Note, however, that the portion of an ice sheet which you seek to model may not be shallow.
-
-\medskip
+Figure \ref{fig:green-transect} shows a cross-section of Greenland at $71^\circ$.  The vertically-exaggerated view is more familiar from the glaciological literature, but without such exaggeration the ice sheet is revealed to be a thin blanket, and barely three-dimensional.  Precisely speaking, ice sheets are \emph{shallow} in the sense that the dimensionless ratio $\eps = [H]/[L]$ is small, between typical scales for thickness $[H]$ and horizontal (length) $[L]$.  For Greenland, $[H]=2000$ m and $[L]=1000$ km are representative, so $\eps = 0.002$.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=80mm,height=35mm]{green-transect}
-\caption{Cross-section of the Greenland ice sheet ($71^\circ$ N), 760 km wide and (maximum) 3200 m thick.  The slightly-thick horizontal line (bottom; red) shows the true cross-section, without vertical exaggeration.}
+\caption{Cross-section of the Greenland ice sheet ($71^\circ$ N), 760 km wide and (maximum) 3200 m thick.  The slightly-thick horizontal line (bottom; red) shows the same cross-section as the blue bed and green surface, but without vertical exaggeration.}
 \label{fig:green-transect}
 \end{figure}
 
-\subsection*{Velocity formulas in the SIA}  FIXME Our earlier slab-on-a-slope example can be converted into a rough derivation of the plane-flow SIA.  We vertically integrate velocity formula \eqref{uslab} in the $u_0=0$ case to get
+Mountain glaciers have much larger $\eps$ ratios, though they are often modelled within a SIA framework.  Studying a small fraction of an ice sheet is another situation in which one may not want to regard the geometry as shallow.  If there is basal sliding or the ice is floating then a different shallow model, the \emph{shallow shelf approximation}, is more appropriate than the SIA \cite{SchoofHewitt2013}.  Hybrid shallow models \cite{BuelerBrown2009}, that combine the two approximations, are in widespread use.
+
+\subsection*{Velocity formulas in the SIA}  The label ``SIA'' is put on different equations in glaciology.  First of all it refers to certain simplified horizontal and vertical velocity formulas.  The principled way to derive them starts from the full Glen-Stokes stress balance \eqref{incompressibleagain}--\eqref{flowlaw}, and then applies a small parameter argument \cite[for example]{Fowler1997}, rescaling the variables using $\eps$ and then dropping terms which are small when $\eps$ is small.
+
+However, the same destination is reached by a lazier approach.  The SIA horizontal velocity formula comes from adopting the slab-on-a-slope result \eqref{uslab} as valid even for general glaciers, not just uniform slabs.  Actually, we need two assumptions for this to work: \emph{i)} the surface $s$ and bed $b$ elevation functions are smooth, and \emph{ii)} a small-angle approximation can replace $\sin\alpha$ in \eqref{uslab} with the surface slope $|\grad s|$.  If these hold then we may convert \eqref{uslab} to a general-purpose horizontal velocity formula for $\bU(t,x,y,z)=\left<u,v\right>$.  A key idea is that the shear stresses are linear in depth and proportional to the surface slope, as they are in the slab-on-a-slope case.
+
+Therefore the isothermal, $n=3$ SIA horizontal velocity formula is:
 \begin{equation}
-\bar U H = \int_0^H \frac{1}{2} A (\rho g \sin\alpha)^3  \left(H^4 - (H-z)^4\right)\,dz = \frac{2}{5} A (\rho g \sin\alpha)^3 H^5. \label{siaubar}
+\bU = \bU_0 - \frac{1}{2} A (\rho g)^3 \left((s-b)^4 - (s-z)^4\right) |\grad s|^2 \grad s. \label{sia:ugeneral}
 \end{equation}
-Regarding the surface slope, note $\sin \alpha \approx \tan\alpha = - h_x$ when $\alpha$ is a small angle.
+In the non-sliding case, used from now on, $\bU_0=0$.
 
-Equation FIXME is the SIA equation for nonsliding plane flow.  Noting $h=H+b$, it models the evolution of an ice sheet's thickness $H$.  The model should, however, be solved subject to the constraint that the thickness is positive ($H\ge 0$) \cite{Bueler2016,JouvetBueler2012}.  For careful SIA derivations, which reduce the Stokes equations under a small depth-to-width ratio assumption, follow the Notes and References at the end.
+The overall sign in \eqref{sia:ugeneral} is remembered by noting that ice flows downhill, that is, opposite the $\grad s$ direction.  Regarding the small angle approximation, it is also a small-slope approximation: $\sin \alpha \approx \tan\alpha = - s_x$ when $\alpha$ and $s_x$ are small (Figure \ref{fig:slab}).
 
-FIXME vertical velocity
-
-\subsection*{Evolution of surface elevation in the (geometry) SIA}  FIXME We now state the complete SIA model in preparation for numerical solutions in section FIXME.  Let $\mathbf{U} = (u,v)$ be the vector horizontal velocity; this is a 2D vector-valued function of 3D coordinates $(x,y,z)$.  The SIA shear stress approximation is $(\tau_{13},\tau_{23}) \approx - \rho g (h-z) \nabla h$, and equation \eqref{flowlaw} gives a formula for shear strain rates
-\begin{equation*}
-\mathbf{U}_z = 2 A |(\tau_{13},\tau_{23})|^{n-1} (\tau_{13},\tau_{23}) = - 2 A (\rho g)^n (h-z)^n |\nabla h|^{n-1} \nabla h.
-\end{equation*}
-By integrating vertically we get, in the non-sliding case,
+In numerically solving the SKE \eqref{ske} to evolve a glacier's geometry, which we will do using the non-sliding SIA theory, one needs horizontal velocity at the ice surface:
 \begin{equation}
-\mathbf{U} = - \frac{2 A (\rho g)^n}{n+1} \left[H^{n+1} - (h-z)^{n+1}\right] |\nabla h|^{n-1} \nabla h.  \label{siavelocity}
+\bU|_s = - \frac{1}{2} A (\rho g)^3 (s-b)^4 |\grad s|^2 \grad s. \label{sia:usurface}
 \end{equation}
-In mass continuity \eqref{masscont} note that $\bar{\mathbf{U}}$ and $\bq$ are functions of 2D coordinates $(x,y)$ only.  Combining equations \eqref{siavelocity} and \eqref{masscont}, we get an equation for the rate of thickness change in terms of mass balance $M$, thickness $H$, and surface gradient $\grad h$:
+Derive \eqref{sia:usurface} by substituting $\bU_0=0$ and $z=s$ into \eqref{sia:ugeneral}.
+
+Vertical integration is the key to two additional formulas in the (non-sliding) SIA framework, namely the ice flux $\bq$ and the surface value of the vertical velocity $w|_s$:
+\begin{align}
+\bq &= - \frac{2}{5} A (\rho g)^3 (s-b)^5 |\grad s|^2 \grad s, \label{sia:q} \\
+w|_s &= \bU|_s \cdot \grad s + \Div \left(\frac{2}{5} A (\rho g)^3 (s-b)^5 |\grad s|^2 \grad s\right).  \label{sia:wsurface}
+\end{align}
+Recalling definition \eqref{flux} of $\bq$, equation \eqref{sia:q} is easy to derive by vertical integration of \eqref{sia:ugeneral} and the power rule.  The difficult derivation of \eqref{sia:wsurface} is similar to that for the mass continuity equation \eqref{masscont}; use vertical integration on \eqref{sia:ugeneral}, $w|_b=0$, incompressibility \eqref{incompressibleagain}, and the Leibniz rule \eqref{leibniz}.
+
+\subsection*{Evolution of glacier geometry under the SIA}  FIXME write it down from the SKE
+
+FIXME In mass continuity \eqref{masscont} note that $\bar{\mathbf{U}}$ and $\bq$ are functions of 2D coordinates $(x,y)$ only.  Combining equations \eqref{siavelocity} and \eqref{masscont}, we get an equation for the rate of thickness change in terms of mass balance $M$, thickness $H$, and surface gradient $\grad h$:
 \begin{equation}
 H_t = M + \Div \left(\Gamma H^{n+2} |\grad h|^{n-1} \grad h \right). \label{sia}
 \end{equation}
 We have defined the positive constant $\Gamma = 2 A (\rho g)^n / (n+2)$ only to improve appearance.
 
-Equation \eqref{sia} is the SIA in 2D.  Recalling our earlier promise, if we can solve \eqref{sia} numerically then we have a usable model for certain ice sheets.  Mary-Anne Mahaffy \cite{Mahaffy1976} used it in a 1976 numerical model of the Barnes ice cap in Canada, a particularly-simple ice sheet on a rather flat bed.  This was the start of numerical ice sheet modeling.
+Equation \eqref{sia} is the SIA evolution equation for the glacier thickness.   Historically speaking, it is the start of numerical ice sheet modeling.  Mary-Anne Mahaffy \cite{Mahaffy1976} used it in a 1976 numerical model of the Barnes ice cap in Canada, a particularly-simple ice sheet on a rather flat bed.
+
+The model should, however, be solved subject to the constraint that the thickness is positive ($H\ge 0$) \cite{Bueler2016,JouvetBueler2012}.
 
 \subsection*{Analogy with diffusion equations}  FIXME make 1D  Numerical methods for solving \eqref{sia} are modifications of methods for the better-known heat equation, e.g.~ $T_t = D T_{xx}$ for the temperature of a conducting rod, its simplest 1D form.  This model applies when material properties are constant and there are no heat sources.  The positive constant $D$ is the ``diffusivity,'' with SI units which can be read from comparing sides of the equation: $D\sim \text{m}^2 \text{s}^{-1}$.  This equation has a smoothing effect on the solution $T(t,x)$ as it evolves in time, because any local maximum or minimum in the temperature is flattened: $T_{xx}<0$ implies $T_t<0$, so $T$ decreases near a maximum, while $T_{xx}>0$ implies $T_t>0$, so $T$ increases near a minimum.  All extrema of the temperature diffuse away.
 
