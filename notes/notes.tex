@@ -576,49 +576,51 @@ because $\lim_{\Delta x \to 0} (\int_{x_1}^{x_2} a\,dx)/\Delta x = a$ is the ave
 
 \section{Shallow ice approximation}  \label{sec:sia}
 
-\subsection*{Shallowness of glaciers and ice sheets}  Glacier ice has several outstanding properties as a fluid.  It is slow (small inertial forces) and non-Newtonian (shear-thinning).  Glaciers are subject to contact slip, i.e.~basal sliding, along a hard-to-observe boundary.  However, it is the distinctive \emph{shallowness} of ice sheets and large glaciers which permits a simpler stress balance model than Glen-Stokes (Section \ref{sec:continuum}), and thus faster simulations.  We consider the non-sliding, isothermal \emph{shallow ice approximation} (SIA), an effective model for sufficiently-large glaciers which are not dominated by basal sliding.
+\subsection*{Shallowness of glaciers and ice sheets}  Glacier ice has several outstanding properties as a fluid.  It is slow (relatively-small inertial forces) and non-Newtonian (shear-thinning).  Glaciers are subject to contact slip, i.e.~basal sliding, along a hard-to-observe boundary.  However, it is the \emph{shallowness} of glacier geometry, at least for the largest glaciers (\emph{ice sheets}), which permits a simpler stress balance model than Glen-Stokes (Section \ref{sec:continuum}), and thus faster simulations.  Ice sheet geometry shares such shallowness with the ocean and sea ice, but the slowness of the fluid gives the problem a distinctive character, a \emph{diffusive} character as we will see.
 
-Figure \ref{fig:green-transect} shows a cross-section of Greenland at $71^\circ$.  The vertically-exaggerated view is more familiar from the glaciological literature, but without such exaggeration the ice sheet is revealed to be a thin blanket, and barely three-dimensional.  Precisely speaking, ice sheets are \emph{shallow} in the sense that the dimensionless ratio $\eps = [H]/[L]$ is small, between typical scales for thickness $[H]$ and horizontal (length) $[L]$.  For Greenland, $[H]=2000$ m and $[L]=1000$ km are representative, so $\eps = 0.002$.
+Figure \ref{fig:green-transect} shows a cross-section of the Greenland ice sheet.  The vertically-exaggerated view is more familiar from the glaciological literature, but without such exaggeration the ice sheet is revealed to be a thin blanket, and barely three-dimensional.  Precisely speaking, ice sheets are \emph{shallow} in the sense that the dimensionless ratio $\eps = [H]/[L]$ is small, between typical scales for thickness $[H]$ and horizontal (length) $[L]$.  For Greenland, $[H]=2000$ m and $[L]=1000$ km are representative, so $\eps = 0.002$.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=80mm,height=35mm]{green-transect}
-\caption{Cross-section of the Greenland ice sheet ($71^\circ$ N), 760 km wide and (maximum) 3200 m thick.  The slightly-thick horizontal line (bottom; red) shows the same cross-section as the blue bed and green surface, but without vertical exaggeration.}
+\caption{A cross-section of the Greenland ice sheet at $71^\circ$ N latitude, 760 km wide by 3200 m thick.  The slightly-thick horizontal line (bottom; red) shows the same cross-section as the blue and green surfaces, but without the vertical exaggeration.}
 \label{fig:green-transect}
 \end{figure}
 
-Mountain glaciers have much larger $\eps$ ratios, though they are often modelled within a SIA framework.  Studying a small fraction of an ice sheet is another situation in which one may not want to regard the geometry as shallow.  If there is basal sliding or the ice is floating then a different shallow model, the \emph{shallow shelf approximation}, is more appropriate than the SIA \cite{SchoofHewitt2013}.  Hybrid shallow models \cite{BuelerBrown2009}, that combine the two approximations, are in widespread use.
+The non-sliding, isothermal \emph{shallow ice approximation} (SIA; \cite{Bueler2016,GreveBlatter2009,SchoofHewitt2013}) is an effective model for such large and shallow glaciers, as long as they are not dominated by basal sliding.  Mountain glaciers have much larger $\eps$ ratios, but they too are often modelled within an SIA framework.  A model of a small region of an ice sheet often should \emph{not} use the SIA, and if there is basal sliding or the ice is floating then a different shallow model, the \emph{shallow shelf approximation}, is more appropriate than the SIA \cite{SchoofHewitt2013}.  Hybrid shallow models \cite{BuelerBrown2009}, that combine the two approximations, are in widespread use.
 
-\subsection*{Velocity formulas in the SIA}  The label ``SIA'' is put on different equations in glaciology.  First of all it refers to certain simplified horizontal and vertical velocity formulas.  The principled way to derive them starts from the full Glen-Stokes stress balance \eqref{incompressibleagain}--\eqref{flowlaw}, and then applies a small parameter argument \cite[for example]{Fowler1997}, rescaling the variables using $\eps$ and then dropping terms which are small when $\eps$ is small.
+\subsection*{Velocity formulas in the SIA}  The label ``SIA'' is put on different equations in glaciology.  First of all it refers to certain simplified horizontal and vertical velocity formulas.  The principled way to derive them starts from the full Glen-Stokes stress balance \eqref{incompressibleagain}--\eqref{flowlaw}, and then applies a small parameter argument \cite[for example]{Fowler1997}, rescaling the variables using $\eps$, and then dropping terms which are small when $\eps$ is small.
 
-However, the same destination is reached by a lazier approach.  The SIA horizontal velocity formula comes from adopting the slab-on-a-slope result \eqref{uslab} as valid even for general glaciers, not just uniform slabs.  Actually, we need two assumptions for this to work: \emph{i)} the surface $s$ and bed $b$ elevation functions are smooth, and \emph{ii)} a small-angle approximation can replace $\sin\alpha$ in \eqref{uslab} with the surface slope $|\grad s|$.  If these hold then we may convert \eqref{uslab} to a general-purpose horizontal velocity formula for $\bU(t,x,y,z)=\left<u,v\right>$.  A key idea is that the shear stresses are linear in depth and proportional to the surface slope, as they are in the slab-on-a-slope case.
+However, the same destination is reached by a lazier approach.  The first formula comes from adopting the slab-on-a-slope result \eqref{uslab} as valid even for general glaciers, not just uniform slabs.  Actually, we need two assumptions for this to work: \emph{i)} the surface $s$ and bed $b$ elevation functions must be smooth, and \emph{ii)} a small-angle approximation is adequate to replace $\sin\alpha$ in \eqref{uslab} with the surface slope $|\grad s|$.  If these hold then we may convert \eqref{uslab} to a general-purpose horizontal velocity formula for $\bU(t,x,y,z)$, which is $\bU=\left<u,v\right>$ in components.  A key idea is that the shear stresses are linear in depth and proportional to the surface slope, as they are in the slab-on-a-slope case.
 
-Therefore the isothermal, $n=3$ SIA horizontal velocity formula is:
+The isothermal, $n=3$ SIA horizontal velocity formula is:
 \begin{equation}
 \bU = \bU_0 - \frac{1}{2} A (\rho g)^3 \left((s-b)^4 - (s-z)^4\right) |\grad s|^2 \grad s. \label{sia:ugeneral}
 \end{equation}
-In the non-sliding case, used from now on, $\bU_0=0$.
+The overall minus sign in \eqref{sia:ugeneral} is remembered by noting that ice flows downhill, that is, opposite the $\grad s$ direction.  Regarding the small angle approximation, it is also a small-slope approximation: $\sin \alpha \approx \tan\alpha = - s_x$ when $\alpha$ and $s_x$ are small (Figure \ref{fig:slab}).
 
-The overall sign in \eqref{sia:ugeneral} is remembered by noting that ice flows downhill, that is, opposite the $\grad s$ direction.  Regarding the small angle approximation, it is also a small-slope approximation: $\sin \alpha \approx \tan\alpha = - s_x$ when $\alpha$ and $s_x$ are small (Figure \ref{fig:slab}).
-
-In numerically solving the SKE \eqref{ske} to evolve a glacier's geometry, which we will do using the non-sliding SIA theory, one needs horizontal velocity at the ice surface:
+When using the SKE \eqref{ske} to evolve a glacier's geometry, which we will do using the non-sliding SIA theory, only the surface velocity is needed:
 \begin{equation}
 \bU|_s = - \frac{1}{2} A (\rho g)^3 (s-b)^4 |\grad s|^2 \grad s. \label{sia:usurface}
 \end{equation}
 Derive \eqref{sia:usurface} by substituting $\bU_0=0$ and $z=s$ into \eqref{sia:ugeneral}.
 
-Vertical integration is the key to two additional formulas in the (non-sliding) SIA framework, namely the ice flux $\bq$ and the surface value of the vertical velocity $w|_s$:
+Vertical integration is the key to two additional formulas in the (non-sliding) SIA framework, namely the ice flux $\bq$ and the surface vertical velocity $w|_s$:
 \begin{align}
 \bq &= - \frac{2}{5} A (\rho g)^3 (s-b)^5 |\grad s|^2 \grad s, \label{sia:q} \\
 w|_s &= \bU|_s \cdot \grad s + \Div \left(\frac{2}{5} A (\rho g)^3 (s-b)^5 |\grad s|^2 \grad s\right).  \label{sia:wsurface}
 \end{align}
-Recalling definition \eqref{flux} of $\bq$, equation \eqref{sia:q} is easy to derive by vertical integration of \eqref{sia:ugeneral} and the power rule.  The difficult derivation of \eqref{sia:wsurface} is similar to that for the mass continuity equation \eqref{masscont}; use vertical integration on \eqref{sia:ugeneral}, $w|_b=0$, incompressibility \eqref{incompressibleagain}, and the Leibniz rule \eqref{leibniz}.
+Recalling definition \eqref{flux} of $\bq$, equation \eqref{sia:q} is easy to derive by vertical integration of \eqref{sia:ugeneral} and the power rule.  The difficult derivation of \eqref{sia:wsurface} is like that for the mass continuity equation \eqref{masscont} done earlier: use incompressibility \eqref{incompressibleagain}, $w|_b=0$, and vertical integration to express $w$ at the surface, and then apply the Leibniz rule \eqref{leibniz}.
 
-\subsection*{Evolution of glacier geometry under the SIA}  FIXME write it down from the SKE
+\subsection*{Numerically computing SIA velocities for a given geometry}  FIXME document \texttt{shallowuw.py}; see slides
 
-FIXME In mass continuity \eqref{masscont} note that $\bar{\mathbf{U}}$ and $\bq$ are functions of 2D coordinates $(x,y)$ only.  Combining equations \eqref{siavelocity} and \eqref{masscont}, we get an equation for the rate of thickness change in terms of mass balance $M$, thickness $H$, and surface gradient $\grad h$:
+\subsection*{Evolution of glacier geometry in the SIA}  Section \ref{sec:masscont} emphasized that there are two concepts for modelling the evolution of a glacier, either using the surface elevation $s$ and the SKE \eqref{ske}, or using the thickness $H$ and mass continuity \eqref{masscont}.  We will write down both of these using the non-sliding SIA velocity formulas.  These approaches yield essentially the same \emph{diffusion} equation, for $s$ or $H$ according to taste.
+
+FIXME write it down for the SKE
+
+FIXME from mass continuity \eqref{masscont}, we get an equation for the rate of thickness change in terms of mass balance $M$, thickness $H$, and surface gradient $\grad h$:
 \begin{equation}
-H_t = M + \Div \left(\Gamma H^{n+2} |\grad h|^{n-1} \grad h \right). \label{sia}
+H_t = a + \Div \left(\Gamma H^{n+2} |\grad s|^{n-1} \grad s \right). \label{sia:Hevolve}
 \end{equation}
 We have defined the positive constant $\Gamma = 2 A (\rho g)^n / (n+2)$ only to improve appearance.
 
@@ -723,40 +725,6 @@ Runs of FIXME are unstable if the time step $\Delta t$ is too large relative to 
 is an $O(\Delta t + (\Delta x)^2)$ implicit scheme for the 1D heat equation $T_t = D T_{xx}$.  This implicit \emph{backward Euler} scheme is stable for any positive time step $\Delta t>0$; it is \emph{unconditionally stable} \cite{LeVeque2007,MortonMayers2005}.  Another well-known implicit scheme for the heat equation is \emph{Crank-Nicolson}, an unconditionally-stable scheme with smaller error $O((\Delta t)^2 +(\Delta x)^2)$.
 
 Implicit schemes are more difficult to implement because the unknown solution at time step $t_{n+1}$ must be treated as a vector, and a (large) linear or nonlinear system of equations must be formed and solved at each time step.  Though the SIA is a highly-nonlinear diffusion equation, implicit schemes are indeed implementable when appropriate solver tools are used \cite{Bueler2016}.  However, for these notes, in the tradeoff between the easy implementability of adaptive explicit schemes and the improved stability of implicit schemes, we choose the former. 
-
-
-\subsection*{Numerically solving the SIA for surface elevation}  As already noted, we compute the SIA diffusivity $D$ on a staggered grid.  Various schemes for staggered-grid diffusivity have been proposed, but all involve averaging $H$ and differencing $h$ in a ``balanced'' way onto the staggered grid.  In the code FIXME, which only works for a flat bed and zero surface mass balance.
-
-For non-flat beds and actual climates, namely when the surface mass balance term $a$ can take either sign, FIXME does not suffice.  Its deficiences can be corrected in a few lines.
-
-FIXME
-
-Addressing ablation ($M<0$) requires a small modification which deserves exposure.  Note that the grounded ice margin occurs in areas of ablation where the SIA thickness solution $H$ goes to zero.  However, the thickness of ice must obviously be greater than or equal to zero everywhere: $H(t,x)\ge 0$.  It follows that geometry-evolving numerical glacier and ice sheet models are solving a \emph{free-boundary problem}.  For an explicit time-stepping scheme it suffices to make the following rule:
-\begin{quote}
-\emph{If the numerical computation generates an updated thickness which is negative then it is reset to zero:} \, $H_{j,k}^{n+1} \gets \max\{0,H_{j,k}^{n+1}\}$.
-\end{quote}
-Determining glacier-covered area is a major glaciological purpose for modeling, thus this seemingly-small complication is ubiquitous and unavoidable in explicit time-stepping glacier models if the margin is allowed to move.  Modelers often implement and then overlook the above rule; it violates conservation of mass \cite{Bueler2021conservation}.
-
-
-\subsection*{Prognostic models}  Consider an explicit, geometry-evolving, isothermal ice sheet model, called a \emph{prognostic} model in glaciology.  Each time step follows this recipe:
-  \begin{itemize}
-  \item numerically solve an incompressible stress balance, yielding velocity $\mathbf{u}=(u,v,w)$,
-    \begin{itemize}
-    \item[$\circ$] the ice geometry and the stress boundary conditions determine $\mathbf{u}$
-    \item[$\circ$] if the stress balance yields $\mathbf{U}=(u,v)$ then $w$ comes from equation \eqref{incompressible}
-    \end{itemize}
-  \item decide on a time step $\Delta t$ for \eqref{masscont} based on velocities and/or diffusivities,
-  \item from the horizontal velocity $\mathbf{U}=(u,v)$, compute the flux $\bq = \int_b^h \bU dz = \bar{\bU} H$
-  \item update mass balance $M=a-s$ and do a time-step of \eqref{masscont} to get $H_t$
-  \item update the upper surface elevation and thickness, and repeat.
-  \end{itemize}
-The last step uses the rules $H \mapsto H + H_t \Delta t$ and $h \mapsto h + H_t \Delta t$, but it also enforces $H\ge 0$ and $h\ge b$ as mentioned above.  Most ice sheet models use the mass continuity equation \eqref{masscont} to describe changes in ice sheet geometry, but \eqref{ske} may be used instead.
-
-The above ``standard explicit ice sheet model'' has many variations.  Some glaciological questions are answered just by solving the stress balance for the velocity, so the geometry does not evolve.  Sometimes the goal is the steady-state configuration of the glacier, both geometry and velocity, in which case the constraint $H\ge 0$ should be regarded as a part of the continuum formulation and the solver \cite{Bueler2016,JouvetBueler2012}.
-
-Other processes are often simulated at each time step, such as the conservation of energy within the ice, or subglacial and supraglacial processes.  Understanding the diverse time scales associated to these processes is always an important step in designing a model which extends our ``introductory'' isothermal SIA model.
-
-It may seem that when using SIA equation \eqref{sia} one bypasses the computation of the ice velocity.  That is because the mass continuity equation can be written as a diffusion, with $\bq=-D\nabla h$ for the flux.  Fast flow in ice sheets is associated with sliding and floating ice, however, and for these flows the ice geometry evolution is not a diffusion.  A complete ice flow model will be neither diffusive nor wave-like (hyperbolic), but the general formula $\bq = \bar{\bU} H$ will apply everywhere.  The ice velocity is always related in some way to the local surface gradient, but usually one must solve membrane-stress-balancing equations.  Solving the stress balance for the velocity field is both a generally-nontrivial and obligatory step in a numerical ice flow model.  The next section explores one important case.
 
 
 \subsection*{Exact solutions and verification}  Program FIXME is a complicated code.  How can we make sure that such an implemented numerical scheme is correct?  Here are three proposed techniques in the modeling community:
