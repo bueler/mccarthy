@@ -1,11 +1,13 @@
 """
 Solves the time-dependent shallow ice approximation model in one dimension,
 for s(t,x), under zero surface mass balance a(x)=0.  The dynamics model is
-nonsliding, isothermal SIA with n=3, on a flat bed.  Initial surface
-elevation is either random bumps (default) or the Halfar (1981) dome exact
-solution.  Surface values of the horizontal u(t,x) and vertical w(t,x)
-velocity are computed by shallowuw.py.  Applies adaptive time-stepping
-based on diffusive and CFL conditions.
+nonsliding, isothermal SIA with n=3, on a flat bed.  The SIA diffusivity is
+computed by a function in shallowuw.py.  Applies adaptive time-stepping
+based on the diffusive stability condition.
+
+The initial surface elevation is either random bumps (the default) or the
+Halfar (1981) dome exact solution.  In the later case we report the numerical
+error in surface elevation.
 
 Runs produce two .png figures in the output/ directory.  Here is a
 convenient way to run and view (where "eog" is an image viewer):
@@ -70,40 +72,33 @@ if halfarinitial:
     s = s_halfar(t0h, x)
     print(f"  [initial state is Halfar solution at t0 = {t0h / secpera:.4f} a]")
 else:
+    # put random bumps in middle third of domain
     s = np.zeros(x.shape)
-    # make following repeatable pseudo-random by setting seed (for testing)
-    rng = np.random.default_rng()
+    rng = np.random.default_rng()  # set seed for repeatable pseudo-random
     bumps = 800.0 * rng.random(x.shape)
     s[abs(x) < L / 3] = 800.0 + bumps[abs(x) < L / 3]
 
 
-def getdt(t, tf, maxu, maxD):
-    """Determine time step using CFL and diffusive stability conditions,
-    and final time.  Returns a very conservative time step."""
+def getdt(t, tf, maxD):
+    """Determine stable time step using diffusive stability condition,
+    and final time."""
     c_D = 1.0 / 6.0  # coefficient from Hindmarsh (2001), for n=3
     dt_D = c_D * dx**2 / maxD  # apply diffusive condition
-    c_CFL = 0.9  # go close to CFL limit
-    dt_CFL = c_CFL * dx / maxu  # apply CFL condition
-    dt_end = tf - t  # do not step past end of [0,tf]
-    dts = np.array([dt_D, dt_CFL, dt_end])
-    return min(dts), np.argmin(dts)
+    return min([dt_D, tf - t])  # do not step past end of [0,tf]
 
 
-def skestep(x, s, dt, u, w):
-    """Compute a time step of the SKE using the upwind scheme in space
-    and forward Euler in time.  The end-point values of s are left unmodified.
-    The input values of u and w are for interior points only.  The time step
+def geometrystep(x, b, s, D, dt):
+    """Compute a time step of the SKE, in its planar a=0 diffusion form
+        s_t = (D s_x)_x,
+    using forward Euler in time and the centered-difference in space.
+    The end-point values of s are left unmodified.  The time step
     dt must be set before calling this."""
+    assert len(x) == len(b) == len(s)
+    assert len(D) == len(x) - 1
     dx = x[1] - x[0]
-    J = len(x) - 1
-    assert len(s) == J + 1 and len(u) == J - 1 and len(w) == J - 1
+    dsdx = (s[1:] - s[:-1]) / dx
     snew = s.copy()
-    for j in range(J - 1):
-        if u[j] > 0.0:
-            snew[j + 1] -= dt * u[j] * (s[j + 1] - s[j]) / dx
-        else:
-            snew[j + 1] -= dt * u[j] * (s[j + 2] - s[j + 1]) / dx
-        snew[j + 1] += dt * w[j]
+    snew[1:-1] += dt * (D[1:] * dsdx[1:] - D[:-1] * dsdx[:-1]) / dx
     return snew
 
 
@@ -116,21 +111,18 @@ timedata = []
 print(f"grid: J={J} points, with spacing dx={dx:.1f} m ...")
 print(f"starting time-stepping ...")
 for k in range(maxsteps):
-    u = sia.u(x, b, s)  # surface horizontal velocity at interior points
-    w = sia.w(x, b, s)  # surface vertical velocity at interior points
-    maxD = sia.diffusiveD(x, b, s).max()
-    dt, reason = getdt(t, tf, abs(u).max(), maxD)
-    timedata.append([t, dt, reason])
-    # print(f"  step {k}: t = {t / secpera:.4f} a, dt = {dt / secpera:.3e} a")
+    D = sia.diffusiveD(x, b, s)
+    dt = getdt(t, tf, D.max())
+    timedata.append([t, dt])
     if tf - t < 1.0e-6:  # normal stopping criterion
         break
     if dt < 1.0e-6:  # time step less than millionth of second is small
-        print(f"HALTING because time step is too small")
+        print(f"HALTING EARLY because time step is too small")
         break
-    snew = skestep(x, s, dt, u, w)  # take a candidate step
-    if np.any(snew < b):
-        print(f"[warning: admissibility fails at {sum(snew < b)} locations]")
-    s = np.maximum(snew, b)  # now force admissibility
+    s = geometrystep(x, b, s, D, dt)  # take a candidate step
+    if np.any(s < b):
+        print(f"WARNING admissibility fails at t={t / secpera}, {sum(snew < b)} locations")
+        s = np.maximum(s, b)  # now force admissibility
     plt.plot(x / 1000.0, s, lw=0.2, color="C2", alpha=0.2)
     t += dt
 print(f"took {k} steps to reach final time {T_a:.4f} a")
@@ -153,15 +145,10 @@ plt.savefig(f"{outdir}dome.png")
 plt.close()
 
 plt.figure
-td = np.array(timedata[:-1])
-tdD = td[td[:, 2] == 0, 0:2] / secpera
-plt.semilogy(tdD[:, 0], tdD[:, 1], ".", color="C1", label="diffusive")
-tdC = td[td[:, 2] == 1, 0:2] / secpera
-plt.semilogy(tdC[:, 0], tdC[:, 1], ".", color="C2", label="CFL")
-tdE = td[td[:, 2] == 2, 0:2] / secpera
-plt.semilogy(tdE[:, 0], tdE[:, 1], ".", color="C4", label="final time")
-plt.legend()
+td = np.array(timedata[:-1]) / secpera
+plt.semilogy(td[:, 0], td[:, 1], ".")
 plt.grid("on")
+plt.axis([0.0, T_a, td[:, 1].min(), 1.0])
 plt.xlabel("t (a)")
 plt.ylabel("time step (a)")
 # plt.show()
