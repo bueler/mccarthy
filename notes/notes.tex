@@ -122,9 +122,10 @@ urlcolor=black
 
     International Summer School in Glaciology
 
-    McCarthy Alaska
+    McCarthy, Alaska
 
-    2010, 2012, 2014, 2016, 2018, 2022, 2024, 2026
+    %2010, 2012, 2014, 2016, 2018, 2022, 2024, 2026  (not 2020)
+    2010--2026
 
     \vfill
     
@@ -347,7 +348,7 @@ The plan is to numerically solve the planar SKE \eqref{skeplanar} for the surfac
 
 This first numerical model is in a short Python program \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{py/surface1d.py}}.  (See the Download part of Section \ref{sec:intro}.)  It generates an approximation to the surface elevation $s(t,x)$, over intervals of space $0<x<L$ and time $0<t<T$, according to \eqref{skeplanar}, by an \emph{explicit} time-dependent numerical method.  We'll use this first program to consider questions of accuracy and stability, and practicalities like verification.
 
-\subsection*{Finite differences}  The program is based on \emph{finite difference} (FD) approximations \cite{LeVeque2007, MortonMayers2005}, which need an introduction on their own.
+\subsection*{Finite differences}  The program \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{py/surface1d.py}} is based on \emph{finite difference} (FD) approximations \cite{LeVeque2007, MortonMayers2005}, which need an introduction on their own.
 
 From calculus, Taylor's theorem says that for a smooth function $f(x)$ and a real number $\Delta$, we have an expansion:
 \begin{equation}
@@ -418,6 +419,7 @@ The rest of the code \href{https://github.com/bueler/mccarthy/blob/master/py/sur
 
 Please run the code, and use an image viewer on the simulation results, as follows:
 \begin{Verbatim}[xleftmargin=4mm]
+$ cd py/
 $ python3 surface1d.py
 evolution mode ...
   stability constant =   0.5000
@@ -501,7 +503,7 @@ We have not assured admissibility in the above loop, but this is straightforward
     s[j] = max(b(x[j]), s[j-1] + (dx / u(x[j])) * (a(x[j]) + w(x[j])))
 \end{lstlisting}
 
-Solving the same steady-state problem in two horizontal dimensions (a 3D glacier), however, requires completely rethinking the solution strategy, because of the admissibility inequality.  For that we have written a very different, and more advanced, code \href{https://github.com/bueler/mccarthy/blob/master/py/surface2d.py}{\texttt{py/surface2d.py}}, which calls the Firedrake finite element library.  Now admissibility \eqref{admissible} is integrated into the partial differential equation problem itself as a \emph{variational inequality} \cite[Chapter 12]{Bueler2021}.  The reader is encouraged to explore this example.
+Solving the same steady-state problem in the two horizontal dimensions of a realistic glacier requires completely rethinking the solution strategy.  For that we have written a very different, and more advanced, program \href{https://github.com/bueler/mccarthy/blob/master/py/surface2d.py}{\texttt{py/surface2d.py}} which calls the Firedrake finite element library.  Now the admissibility \eqref{admissible} inequality is integrated into the weak form of the partial differential equation problem itself, as a \emph{variational inequality} \cite[Chapter 12, and references therein]{Bueler2021}.  The reader is encouraged to explore this example, but we will not pursue this further in these notes.
 
 \subsection*{Mass continuity equation}  Equation \eqref{ske}, the SKE in its cleanest form, relates more-or-less observable quantities on a glacier's surface.  For example, it is a preferred equation for relating measured surface velocity to SMB.  However, a different equation is often used to describe the evolution of glacier geometry, namely the \emph{mass continuity} equation, derived next.  It is essentially equivalent to \eqref{ske} because of incompressibility \eqref{incompressible}, which is mass conservation as it applies within the ice.
 
