@@ -1,7 +1,12 @@
 """
-Compute the surface values of the horizontal and vertical velocity using
-the non-sliding shallow ice approximation (SIA) in one horizontal dimension.
-Techniques emphasize robustness, e.g. when ice thickness goes to zero.
+This module contains functions which compute the surface values
+of the horizontal and vertical velocity using the non-sliding
+shallow ice approximation (SIA) in the planar case (one horizontal
+dimension).  Inputs are the gridded values of the bed and surface
+elevation, as piecewise-linear functions, so analytical gradients
+are not required; finite differencing determines gradients.  There
+is also a function which computes the diffusivity function.
+
 Plots an example case when run at command line.
 """
 
@@ -13,26 +18,6 @@ g = 9.81  # acceleration of gravity (m s-2)
 rhoi = 910.0  # density of ice (kg m-3)
 n = 3  # Glen exponent
 A = 3.1689e-24  # EISMINT I value of ice softness (Pa-3 s-1)
-
-# parameters for the plot example
-L = 20.0e3  # length of domain (m)
-H0 = 400.0  # reference ice thickness (m)
-alpha = -0.04  # slope of bed
-wave_amp = 25.0  # amplitude of surface waves; set to 0 for slab
-wave_len = 8.0e3  # wavelength of surface waves
-J = 80  # number of subintervals (in x direction)
-outdir = "output/"  # directory name for image output
-
-
-def b(x):
-    "Compute b(x), a slope."
-    return alpha * (x - L)
-
-
-def s(x):
-    "Compute s(x), a sine wave, but satisfying s(x) >= b(x)."
-    stmp = H0 + wave_amp * np.sin(2.0 * np.pi * x / wave_len)
-    return b(x) + np.maximum(stmp, 0.0)
 
 
 def u(x, b, s):
@@ -49,88 +34,49 @@ def u(x, b, s):
     return (ult + urt) / 2.0
 
 
-def vert_int_u_stag(j, x, b, s, zb, zs):
-    """Vertically integrate the horizontal velocity, at a
-    staggered location jj = j+1/2, from level zb up to level zs.
-    Inputs are a horizontal index j, three vectors x, b, s
-    (functions of x), and two scalars zb, zs.
-
-    This code integrates ujj(z), which is defined piecewise as
-    follows.  For a given j the staggered-location values of
-    b, s, and surface slope are computed (namely: bjj, sjj,
-    dsjj).  SIA formulas convert these to constant values
-    alf, bet in the formula for the horizontal velocity:
-               | 0
-      ujj(z) = | alf * (bet - (sjj - z)^(n+1))
-               | alf * bet
-    for vertical ranges z <= bjj, bjj < z < sjj, sjj <= z
-    respectively.  Note that ujj = 0 below the bed, and
-    it is continued above the surface as constant.
-    The returned value is the exact integral of ujj(z):
-      I = int_zb^zs ujj(z) dz.
-    Six cases are needed to compute this integral.
-    """
-    assert zb <= zs
-    dx = x[1] - x[0]
-    bjj = (b[j] + b[j + 1]) / 2.0
-    sjj = (s[j] + s[j + 1]) / 2.0
-    assert bjj <= sjj
-    dsjj = (s[j + 1] - s[j]) / dx
-    alf = -0.5 * A * (rhoi * g) ** n * abs(dsjj) ** (n - 1) * dsjj
-    bet = (sjj - bjj) ** (n + 1)
-    if zb <= bjj:
-        if zs <= bjj:
-            I = 0.0
-        elif zs < sjj:
-            I = alf * bet * (zs - bjj) - (alf / (n + 2)) * (
-                (sjj - zs) ** (n + 2) - (sjj - bjj) ** (n + 2)
-            )
-        else:
-            I = (
-                alf * bet * (sjj - bjj)
-                - (alf / (n + 2)) * (0.0 - (sjj - bjj) ** (n + 2))
-                + alf * bet * (zs - sjj)
-            )
-    elif zb < sjj:
-        if zs < sjj:
-            I = alf * bet * (zs - zb) - (alf / (n + 2)) * (
-                (sjj - zs) ** (n + 2) - (sjj - zb) ** (n + 2)
-            )
-        else:
-            I = (
-                alf * bet * (sjj - zb)
-                - (alf / (n + 2)) * (0.0 - (sjj - zb) ** (n + 2))
-                + alf * bet * (zs - sjj)
-            )
-    else:
-        I = alf * bet * (zs - zb)
-    return I
-
-
-def w(x, b, s):
-    """Compute the surface value of the vertical velocity w_j
-    at *interior* regular grid locations, by vertically-integrating
-    the incompressibility condition, using staggered-grid values
-    of the horizontal velocity u_{j+1/2}.  If input vectors have
-    length N then output has length N-2."""
-    dx = x[1] - x[0]
-    J = len(x) - 1
-    Ilt = np.zeros(shape=(J - 1,))
-    Irt = np.zeros(shape=(J - 1,))
-    for j in range(J - 1):
-        Ilt[j] = vert_int_u_stag(j, x, b, s, b[j + 1], s[j + 1])
-        Irt[j] = vert_int_u_stag(j + 1, x, b, s, b[j + 1], s[j + 1])
-    return -(Irt - Ilt) / dx
-
-
 def diffusiveD(x, b, s):
-    """Compute diffusivity D from SIA, at staggered points.
-    Used to determine a stable time step."""
+    """Compute diffusivity D from SIA, at staggered points.  Used in
+    computing the vertical velocity, and to determine a stable time step."""
     dx = x[1] - x[0]
     dsdx = (s[1:] - s[:-1]) / dx
     Hstag = ((s[:-1] - b[:-1]) + (s[1:] - b[1:])) / 2.0
     C_D = (2.0 / (n + 2)) * A * (rhoi * g) ** n
     return C_D * Hstag ** (n + 2) * abs(dsdx) ** (n - 1)
+
+
+def w(x, b, s):
+    """Compute the surface value of the vertical velocity w_j at *interior*
+    regular grid locations using centered finite differences.  Applies
+    second-order FD formulas to evaluate the divergence of the flux.  If
+    input vectors have length N then output has length N-2."""
+    dx = x[1] - x[0]
+    dsdx = (s[1:] - s[:-1]) / dx
+    Hstag = ((s[:-1] - b[:-1]) + (s[1:] - b[1:])) / 2.0
+    C_Uds = (2.0 / (n + 1)) * A * (rhoi * g) ** n
+    tmp = - C_Uds * (Hstag * abs(dsdx)) ** (n + 1)  # staggered U . ds
+    D = diffusiveD(x, b, s)
+    return (tmp[:-1] + tmp[1:]) / 2.0 + (D[1:] * dsdx[1:] - D[:-1] * dsdx[:-1]) / dx
+
+
+# parameters for the plot example
+L = 20.0e3  # length of domain (m)
+H0 = 400.0  # reference ice thickness (m)
+alpha = -0.04  # slope of bed
+wave_amp = 25.0  # amplitude of surface waves; set to 0 for slab
+wave_len = 8.0e3  # wavelength of surface waves
+J = 80  # number of subintervals (in x direction)
+outdir = "output/"  # directory name for image output
+
+
+def b(x):
+    "Compute b(x) for the plot example, a slope."
+    return alpha * (x - L)
+
+
+def s(x):
+    "Compute s(x) for the plot example, a sine wave on a slope."
+    stmp = H0 + wave_amp * np.sin(2.0 * np.pi * x / wave_len)
+    return b(x) + np.maximum(stmp, 0.0)
 
 
 def mkoutdir(dirname):
