@@ -75,6 +75,7 @@ urlcolor=black
 \newcommand{\devstress}{\tau}
 
 \newcommand{\snew}{s^{\text{new}}}
+\newcommand{\Dsia}{D_{\text{\textrm{sia}}}}
 
 \newcommand{\alert}[1]{\emph{#1}}
 
@@ -578,9 +579,9 @@ because $\lim_{\Delta x \to 0} (\int_{x_1}^{x_2} a\,dx)/\Delta x = a$ is the ave
 
 \section{Shallow ice approximation}  \label{sec:sia}
 
-\subsection*{Shallowness of glaciers and ice sheets}  Glacier ice has several outstanding properties as a fluid.  It is slow (relatively-small inertial forces) and non-Newtonian (shear-thinning).  Glaciers are subject to contact slip, i.e.~basal sliding, along a hard-to-observe boundary.  However, it is the \emph{shallowness} of glacier geometry, at least for the largest glaciers (\emph{ice sheets}), which permits a simpler stress balance model than Glen-Stokes (Section \ref{sec:continuum}), and thus faster simulations.  Ice sheet geometry shares such shallowness with the ocean and sea ice, but the slowness of the fluid gives the problem a distinctive character, a \emph{diffusive} character as we will see.
+\subsection*{Shallowness of glaciers and ice sheets}  Glacier ice has several outstanding properties as a fluid.  As explained in Section \ref{sec:continuum}, it is slow and non-Newtonian.  Also, glaciers are subject to contact slip, i.e.~basal sliding, along a hard-to-observe boundary.  However, it is the typical \emph{shallowness} of glacier geometry, at least for large glaciers and ice sheets, which permits a simpler stress balance model than the full Glen-Stokes system, and thus faster simulations.  Ice sheet geometry is shallow like the ocean and sea ice, but slowness gives the problem a distinctive \emph{diffusive} character, as we will see.
 
-Figure \ref{fig:green-transect} shows a cross-section of the Greenland ice sheet.  The vertically-exaggerated view is more familiar from the glaciological literature, but without such exaggeration the ice sheet is revealed to be a thin blanket, and barely three-dimensional.  Precisely speaking, ice sheets are \emph{shallow} in the sense that the dimensionless ratio $\eps = [H]/[L]$ is small, between typical scales for thickness $[H]$ and horizontal (length) $[L]$.  For Greenland, $[H]=2000$ m and $[L]=1000$ km are representative, so $\eps = 0.002$.
+Figure \ref{fig:green-transect} shows a cross-section of the Greenland ice sheet.  The vertically-exaggerated view is more familiar from the glaciological literature, but without such exaggeration the ice sheet is revealed to be a thin blanket, barely three-dimensional.  Precisely speaking, ice sheets are \emph{shallow} in the sense that the dimensionless ratio $\eps = [H]/[L]$, between typical scales for thickness $[H]$ and horizontal (length) $[L]$, is small.  For this Greenland example, $[H]=2000$ m and $[L]=1000$ km are representative, so $\eps = 0.002$.
 
 \begin{figure}[ht]
 \centering
@@ -589,44 +590,59 @@ Figure \ref{fig:green-transect} shows a cross-section of the Greenland ice sheet
 \label{fig:green-transect}
 \end{figure}
 
-The non-sliding, isothermal \emph{shallow ice approximation} (SIA; \cite{Bueler2016,GreveBlatter2009,SchoofHewitt2013}) is an effective model for such large and shallow glaciers, as long as they are not dominated by basal sliding.  Mountain glaciers have much larger $\eps$ ratios, but they too are often modelled within an SIA framework.  A model of a small region of an ice sheet often should \emph{not} use the SIA, and if there is basal sliding or the ice is floating then a different shallow model, the \emph{shallow shelf approximation}, is more appropriate than the SIA \cite{SchoofHewitt2013}.  Hybrid shallow models \cite{BuelerBrown2009}, that combine the two approximations, are in widespread use.
+The non-sliding, isothermal \emph{shallow ice approximation} (SIA; \cite{Bueler2016,GreveBlatter2009,SchoofHewitt2013}) is an effective model for shallow glaciers, as long as they are not dominated by basal sliding.  Mountain glaciers have much larger $\eps$ ratios, but they too are often modelled within an SIA framework.  A model of a small region of an ice sheet often should \emph{not} use the SIA, and if there is basal sliding or the ice is floating then a different shallow model, the \emph{shallow shelf} or \emph{membrane} approximation \cite{SchoofHewitt2013}, is more appropriate.  Hybrid shallow models \cite{BuelerBrown2009}, that combine the two approximations, are in widespread use.
 
-\subsection*{Velocity formulas in the SIA}  The label ``SIA'' is put on different equations in glaciology.  First of all it refers to certain simplified horizontal and vertical velocity formulas.  The principled way to derive them starts from the full Glen-Stokes stress balance \eqref{incompressibleagain}--\eqref{flowlaw}, and then applies a small parameter argument \cite[for example]{Fowler1997}, rescaling the variables using $\eps$, and then dropping terms which are small when $\eps$ is small.
+\subsection*{Velocity formulas in the SIA}  The label ``SIA'' is put on several equations.  First of all it refers to certain simplified velocity formulas.  The principled way to derive them starts from the full Glen-Stokes stress balance \eqref{incompressibleagain}--\eqref{flowlaw}, and then applies a small parameter argument \cite[for example]{Fowler1997}, rescaling the variables using $\eps$, and then dropping terms which are small when $\eps$ is small.
 
-However, the same destination is reached by a lazier approach.  The first formula comes from adopting the slab-on-a-slope result \eqref{uslab} as valid even for general glaciers, not just uniform slabs.  Actually, we need two assumptions for this to work: \emph{i)} the surface $s$ and bed $b$ elevation functions must be smooth, and \emph{ii)} a small-angle approximation is adequate to replace $\sin\alpha$ in \eqref{uslab} with the surface slope $|\grad s|$.  If these hold then we may convert \eqref{uslab} to a general-purpose horizontal velocity formula for $\bU(t,x,y,z)$, which is $\bU=\left<u,v\right>$ in components.  A key idea is that the shear stresses are linear in depth and proportional to the surface slope, as they are in the slab-on-a-slope case.
+However, the same destination can be reached by a lazier approach.  The SIA adopts the slab-on-a-slope result \eqref{uslab} as valid even for general glaciers, not just uniform slabs.  Actually, we need two assumptions for this to work: \emph{i)} the surface $s$ and bed $b$ elevation functions must be smooth, and \emph{ii)} a small-angle approximation must be adequate to replace $\sin\alpha$ in \eqref{uslab} with the surface slope $|\grad s|$.  Regarding the small-angle approximation, $|\sin \alpha| \approx |\tan\alpha| = |\grad s|$ when $\alpha$ is small (Figure \ref{fig:slab}).  A key idea is that the shear stresses are linear in depth and proportional to $|\grad s|$.
 
-The isothermal, $n=3$ SIA horizontal velocity formula is:
+Equation \eqref{uslab} becomes this isothermal, $n=3$ SIA formula for the horizontal velocity $\bU(t,x,y,z)$, which is $\bU=\left<u,v\right>$ in components:
 \begin{equation}
 \bU = \bU_0 - \frac{1}{2} A (\rho g)^3 \left((s-b)^4 - (s-z)^4\right) |\grad s|^2 \grad s. \label{sia:ugeneral}
 \end{equation}
-The overall minus sign in \eqref{sia:ugeneral} is remembered by noting that ice flows downhill, that is, opposite the $\grad s$ direction.  Regarding the small angle approximation, it is also a small-slope approximation: $\sin \alpha \approx \tan\alpha = - s_x$ when $\alpha$ and $s_x$ are small (Figure \ref{fig:slab}).
+The first minus sign in \eqref{sia:ugeneral} is remembered by noting that ice flows downhill, that is, opposite the $\grad s$ direction.
 
-When using the SKE \eqref{ske} to evolve a glacier's geometry, which we will do using the non-sliding SIA theory, only the surface velocity is needed:
+When using SKE \eqref{ske} to evolve a glacier's geometry, which we will do using the non-sliding SIA theory, only the surface velocity is needed:
 \begin{equation}
 \bU|_s = - \frac{1}{2} A (\rho g)^3 (s-b)^4 |\grad s|^2 \grad s. \label{sia:usurface}
 \end{equation}
 Derive \eqref{sia:usurface} by substituting $\bU_0=0$ and $z=s$ into \eqref{sia:ugeneral}.
 
-Vertical integration is the key to two additional formulas in the (non-sliding) SIA framework, namely the ice flux $\bq$ and the surface vertical velocity $w|_s$:
+Vertical integration yields two additional formulas in this non-sliding SIA framework.  First, vertical integration of \eqref{sia:ugeneral} using the power rule ($\int t^4\,dt = t^5/5 + c$) yields a formula for the ice flux $\bq$, defined by \eqref{flux}:
+\begin{equation}
+\bq = - \frac{2}{5} A (\rho g)^3 (s-b)^5 |\grad s|^2 \grad s. \label{sia:q:early}
+\end{equation}
+We can also evaluate the surface value of the vertical velocity:
 \begin{align}
-\bq &= - \frac{2}{5} A (\rho g)^3 (s-b)^5 |\grad s|^2 \grad s, \label{sia:q} \\
-w|_s &= \bU|_s \cdot \grad s + \Div \left(\frac{2}{5} A (\rho g)^3 (s-b)^5 |\grad s|^2 \grad s\right).  \label{sia:wsurface}
+w|_s &= \bU|_s \cdot \grad s - \Div \bq \notag \\
+  &= - \frac{1}{2} A (\rho g)^3 (s-b)^4 |\grad s|^4 + \Div \left(\frac{2}{5} A (\rho g)^3 (s-b)^5 |\grad s|^2 \grad s\right).  \label{sia:wsurface:early}
 \end{align}
-Recalling definition \eqref{flux} of $\bq$, equation \eqref{sia:q} is easy to derive by vertical integration of \eqref{sia:ugeneral} and the power rule.  The difficult derivation of \eqref{sia:wsurface} is like that for the mass continuity equation \eqref{masscont} done earlier: use incompressibility \eqref{incompressibleagain}, $w|_b=0$, and vertical integration to express $w$ at the surface, and then apply the Leibniz rule \eqref{leibniz}.
+The derivation is like that for the mass continuity equation \eqref{masscont} earlier.  One uses incompressibility \eqref{incompressibleagain}, $w|_b=0$, and vertical integration to express $w$ at the surface, and then the Leibniz rule \eqref{leibniz} and $\bU_0=0$.  The second form follows from \eqref{sia:usurface} and \eqref{sia:q:early}.
 
-\subsection*{Example: Computing SIA velocities for a given geometry}  The SIA formulas so far allow one to compute velocities and fluxes just from knowing the geometry of the glacier, that is, the surface $s$ and bed $b$ elevation functions.  This can be done analytically, from the algebraically-computed gradient of $s$ in particular, or approximately using finite differences (FD; Section \ref{sec:masscont}), which we will do here.  FD formulas will also be needed in the time-dependent SIA simulations to follow.
+The formulas for $\bq$ and $w|_s$ have a common form.  Define the positive scalar \emph{diffusivity} function
+\begin{equation}
+\Dsia = \frac{2}{5} A (\rho g)^3 (s-b)^5 |\grad s|^2. \label{sia:D}
+\end{equation}
+This is a coefficient in both formulas \eqref{sia:q:early} and \eqref{sia:wsurface:early}, which are now clean:
+\begin{align}
+\bq  &= - \Dsia \grad s. \label{sia:q} \\
+w|_s &= \bU|_s \cdot \grad s + \Div \left(\Dsia \grad s\right).  \label{sia:wsurface}
+\end{align}
+In the remainder of this section we will try to understand the above formulas, and see how they might be applied in examples and for simulations of evolving glaciers.
 
-For geometry given by $b(x)$ and $s(x)$, we may apply the planar case of \eqref{sia:usurface} to compute the horizontal surface velocity:
+\subsection*{Example: Computing SIA velocities for a given geometry}    If the glacier geometry is known then the above formulas compute the surface velocity and the flux.  This can be done analytically, from the gradient of the surface elevation function $s$, or approximately using finite differences (FD; Section \ref{sec:masscont}).  We will use the later approach here; it will appear in the time-dependent SIA simulations to follow.
+
+For planar geometry given by known functions $b(x)$ and $s(x)$, either steady or a snapshot in time, \eqref{sia:usurface} simplifies to this formula for horizontal surface velocity:
 \begin{equation}
 u|_s(x) = - \frac{1}{2} A (\rho g)^3 (s(x)-b(x))^4 \left|\frac{\partial s}{\partial x}(x)\right|^2 \frac{\partial s}{\partial x}(x). \label{sia:usurface:planar}
 \end{equation}
-For example, suppose $b$ is a simple incline and $s$ gives a gently-oscillating slab-like geometry as shown in Figure \ref{fig:uw} (top).  Note that there are parts of the surface that are nearly flat, thus $u|_s\approx 0$ there, while on the steeper parts we expect flow.  This is what the formula produces, as shown in the bottom panel of the Figure.
+For example, suppose $b$ is a simple incline and $s$ describes a gently-oscillating surface, as shown in Figure \ref{fig:uw} (top).  Parts of this surface are nearly flat, thus we expect $u|_s\approx 0$, while on the steeper parts we expect significant rightward ($u|_s>0$) flow.  This is what the formula produces, as shown in the bottom panel of the Figure.  The vertical velocity is computed by the planar version of equation \eqref{sia:wsurface:early}.
 
-\onefigsize{uw}{Top panel: glacier geometry.  Bottom panel: horizontal ($\circ$) and vertical ($+$) surface velocity from the SIA model.}{4.0in}
+\onefigsize{uw}{Top panel: glacier geometry.  Bottom panel: horizontal ($\circ$; equation \eqref{sia:usurface:planar}) and vertical ($+$) surface velocity from the SIA model.}{4.0in}
 
-FIXME FD for horizontal
+FIXME in more detail, FD for horizontal
 
-FIXME FE generic vertical integration for vertical velocity (method would apply to any incompressible stress balance, including Glen-Stokes \eqref{incompressibleagain}--\eqref{flowlaw}, the hydrostatic approximation \eqref{hydrostaticitself}, and Blatter-Pattyn \eqref{stressblatter}
+FIXME FD for horizontal uses centered difference of $(D s_x)_x$
 
 FIXME document \texttt{shallowuw.py}
 
