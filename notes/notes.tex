@@ -429,9 +429,9 @@ $ [viewer] output/frame*.png
 The initial condition and final result (50th time step) are shown in Figure \ref{fig:demo}.
 
 \begin{figure}[ht]
-\includegraphics[width=0.65\textwidth]{figs/frame000.png}
+\includegraphics[width=0.75\textwidth]{figs/frame000.png}
 
-\includegraphics[width=0.65\textwidth]{figs/frame050.png}
+\includegraphics[width=0.75\textwidth]{figs/frame050.png}
 \caption{Initial condition (top) and final result (bottom) for an SKE simulation using scheme \eqref{fd:upwind}. The solution surface elevation is dotted.}
 \label{fig:demo}
 \end{figure}
@@ -458,7 +458,7 @@ In practice, inequality \eqref{cfl} is used to set the time step $\Delta t$ to a
 therefore strengthens the ablation over most of the domain.  The final-time result is shown in Figure \ref{fig:inadmissdemo}, with a glacier surface which goes below the bed.  This is not good.
 
 \begin{figure}[ht]
-\includegraphics[width=0.65\textwidth]{figs/inadmissframe050.png}
+\includegraphics[width=0.75\textwidth]{figs/inadmissframe050.png}
 \caption{An inadmissible state, with $s<b$ in places, from stronger ablation.  See inequality \eqref{admissible}, and compare Figure \ref{fig:demo}.}
 \label{fig:inadmissdemo}
 \end{figure}
@@ -612,7 +612,21 @@ w|_s &= \bU|_s \cdot \grad s + \Div \left(\frac{2}{5} A (\rho g)^3 (s-b)^5 |\gra
 \end{align}
 Recalling definition \eqref{flux} of $\bq$, equation \eqref{sia:q} is easy to derive by vertical integration of \eqref{sia:ugeneral} and the power rule.  The difficult derivation of \eqref{sia:wsurface} is like that for the mass continuity equation \eqref{masscont} done earlier: use incompressibility \eqref{incompressibleagain}, $w|_b=0$, and vertical integration to express $w$ at the surface, and then apply the Leibniz rule \eqref{leibniz}.
 
-\subsection*{Numerically computing SIA velocities for a given geometry}  FIXME document \texttt{shallowuw.py}; see slides
+\subsection*{Example: Computing SIA velocities for a given geometry}  The SIA formulas so far allow one to compute velocities and fluxes just from knowing the geometry of the glacier, that is, the surface $s$ and bed $b$ elevation functions.  This can be done analytically, from the algebraically-computed gradient of $s$ in particular, or approximately using finite differences (FD; Section \ref{sec:masscont}), which we will do here.  FD formulas will also be needed in the time-dependent SIA simulations to follow.
+
+For geometry given by $b(x)$ and $s(x)$, we may apply the planar case of \eqref{sia:usurface} to compute the horizontal surface velocity:
+\begin{equation}
+u|_s(x) = - \frac{1}{2} A (\rho g)^3 (s(x)-b(x))^4 \left|\frac{\partial s}{\partial x}(x)\right|^2 \frac{\partial s}{\partial x}(x). \label{sia:usurface:planar}
+\end{equation}
+For example, suppose $b$ is a simple incline and $s$ gives a gently-oscillating slab-like geometry as shown in Figure \ref{fig:uw} (top).  Note that there are parts of the surface that are nearly flat, thus $u|_s\approx 0$ there, while on the steeper parts we expect flow.  This is what the formula produces, as shown in the bottom panel of the Figure.
+
+\onefigsize{uw}{Top panel: glacier geometry.  Bottom panel: horizontal ($\circ$) and vertical ($+$) surface velocity from the SIA model.}{4.0in}
+
+FIXME FD for horizontal
+
+FIXME FE generic vertical integration for vertical velocity (method would apply to any incompressible stress balance, including Glen-Stokes \eqref{incompressibleagain}--\eqref{flowlaw}, the hydrostatic approximation \eqref{hydrostaticitself}, and Blatter-Pattyn \eqref{stressblatter}
+
+FIXME document \texttt{shallowuw.py}
 
 \subsection*{Evolution of glacier geometry in the SIA}  Section \ref{sec:masscont} emphasized that there are two concepts for modelling the evolution of a glacier, either using the surface elevation $s$ and the SKE \eqref{ske}, or using the thickness $H$ and mass continuity \eqref{masscont}.  We will write down both of these using the non-sliding SIA velocity formulas.  These approaches yield essentially the same \emph{diffusion} equation, for $s$ or $H$ according to taste.
 
@@ -724,7 +738,9 @@ Runs of FIXME are unstable if the time step $\Delta t$ is too large relative to 
 \end{equation}
 is an $O(\Delta t + (\Delta x)^2)$ implicit scheme for the 1D heat equation $T_t = D T_{xx}$.  This implicit \emph{backward Euler} scheme is stable for any positive time step $\Delta t>0$; it is \emph{unconditionally stable} \cite{LeVeque2007,MortonMayers2005}.  Another well-known implicit scheme for the heat equation is \emph{Crank-Nicolson}, an unconditionally-stable scheme with smaller error $O((\Delta t)^2 +(\Delta x)^2)$.
 
-Implicit schemes are more difficult to implement because the unknown solution at time step $t_{n+1}$ must be treated as a vector, and a (large) linear or nonlinear system of equations must be formed and solved at each time step.  Though the SIA is a highly-nonlinear diffusion equation, implicit schemes are indeed implementable when appropriate solver tools are used \cite{Bueler2016}.  However, for these notes, in the tradeoff between the easy implementability of adaptive explicit schemes and the improved stability of implicit schemes, we choose the former. 
+Implicit schemes are more difficult to implement because the unknown solution at time step $t_{n+1}$ must be treated as a vector, and a (large) linear or nonlinear system of equations must be formed and solved at each time step.  Though the SIA is a highly-nonlinear diffusion equation, implicit schemes are indeed implementable when appropriate solver tools are used \cite{Bueler2016}.  However, for these notes, in the tradeoff between the easy implementability of adaptive explicit schemes and the improved stability of implicit schemes, we choose the former.
+
+FIXME whether benefits from implicitness happen depends in part on the not completely understood diffusivity of the Stokes flow in various circumstances \cite{Bueler2023}
 
 
 \subsection*{Exact solutions and verification}  Program FIXME is a complicated code.  How can we make sure that such an implemented numerical scheme is correct?  Here are three proposed techniques in the modeling community:
