@@ -17,8 +17,8 @@ A = 3.1689e-24  # EISMINT I value of ice softness (Pa-3 s-1)
 # parameters for the plot example
 L = 20.0e3  # length of domain (m)
 H0 = 400.0  # reference ice thickness (m)
-alpha = -0.02  # slope of bed
-wave_amp = 20.0  # amplitude of surface waves; set to 0 for slab
+alpha = -0.04  # slope of bed
+wave_amp = 25.0  # amplitude of surface waves; set to 0 for slab
 wave_len = 8.0e3  # wavelength of surface waves
 J = 80  # number of subintervals (in x direction)
 outdir = "output/"  # directory name for image output
@@ -156,7 +156,7 @@ def compute_velocity():
     return x, uu, ww
 
 
-def plot_velocity(x, u, w):
+def plot_geometry_velocity(x, u, w):
     import matplotlib.pyplot as plt
 
     xint = x[1:-1]
@@ -165,9 +165,9 @@ def plot_velocity(x, u, w):
     ax1.plot(x / 1.0e3, b(x), "-", color="C0", label="b")
     ax1.legend(loc="lower left")
     ax1.set_xticklabels([])
-    ax2.set_ylabel("elevation (m)")
-    ax2.plot(xint / 1.0e3, u, "o", ms=6.0, mfc="w", label="u")
-    ax2.plot(xint / 1.0e3, w, "+", ms=8.0, label="w")
+    ax1.set_ylabel("elevation (m)")
+    ax2.plot(xint / 1.0e3, u, "o", ms=6.0, mfc="w", label="u", color="C2")
+    ax2.plot(xint / 1.0e3, w, "+", ms=8.0, label="w", color="C3")
     ax2.legend(loc="upper right")
     ax2.set_xticks(np.linspace(0.0, 20.0, 5))
     ax2.set_xticklabels(["0", "5", "10", "15", "20"])
@@ -175,10 +175,10 @@ def plot_velocity(x, u, w):
     ax2.grid(visible=True)
     plt.xlabel("x (km)")
     mkoutdir(outdir)
-    print(f"  writing to image file {outdir}uw.png")
-    plt.savefig(f"{outdir}uw.png")
+    print(f"  writing to image file {outdir}uw.pdf")
+    plt.savefig(f"{outdir}uw.pdf")
 
 
 if __name__ == "__main__":
     x, u, w = compute_velocity()
-    plot_velocity(x, u, w)
+    plot_geometry_velocity(x, u, w)
