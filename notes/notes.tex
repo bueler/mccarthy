@@ -162,7 +162,7 @@ For the topics we cover there is a constructive approach:
 \end{quote}
 \noindent The programs are in the \texttt{py/} subdirectory.
 
-\subsection*{Notation}  Our notation, which generally follows references \cite{GreveBlatter2009,SchoofHewitt2013}, is in Table \ref{tab:notation}.  Cartesian coordinates are $x,y,z$ and time $t$, with $z$ positive-upward.  When these coordinates appear as subscripts they denote partial derivatives, so $u_x = \partial u/\partial x$ for example.  Tensor notation uses subscripts from the list $\{1,2,3,i,j\}$, so $\tau_{ij}$ and $\tau_{13}$ each denote entries of the deviatoric stress tensor.  After the first few pages we will use a few abbreviations; they appear in Table \ref{tab:abbrev} on page \pageref{tab:abbrev}.
+\subsection*{Notation}  Our notation, which generally follows references \cite{GreveBlatter2009,SchoofHewitt2013}, is in Table \ref{tab:notation}.  Cartesian coordinates are $x,y,z$ and time $t$, with $z$ positive-upward.  Tensor notation uses subscripts from the list $\{1,2,3,i,j\}$, so $\tau_{ij}$ and $\tau_{13}$ each denote entries of the deviatoric stress tensor.  After the first few pages we will use a few abbreviations; they appear in Table \ref{tab:abbrev} on page \pageref{tab:abbrev}.
 
 \begin{table}[ht]
 \caption{Notation used in these notes.}
@@ -329,12 +329,12 @@ The SKE is described in glaciers literature as a mere boundary condition \cite{G
 \begin{table}[t]
 \caption{Abbreviations.}
 \begin{tabular}{cll}
-abbreviation & meaning & precise definition \\ \hline
-CFL & numerical stability criterion \cite{CFL1928} & inequality \eqref{cfl} \\
-FD  & finite difference method \cite{LeVeque2007,MortonMayers2005} & \\
-SIA & shallow ice approximation & equations FIXME \\
-SKE & surface kinematical equation & equation \eqref{ske} \\
-SMB & surface mass balance \cite{Cogleyetal2011} & 
+abbreviation & meaning & definition/citation \\ \hline
+CFL & numerical stability criterion & inequality \eqref{cfl}; \cite{CFL1928} \\
+FD  & finite difference (method) & \cite{LeVeque2007,MortonMayers2005} \\
+SIA & shallow ice approximation & equations \eqref{sia:ugeneral}, \eqref{sia:sevolve}; \cite{GreveBlatter2009} \\
+SKE & surface kinematical equation & equation \eqref{ske}; \cite{GreveBlatter2009} \\
+SMB & surface mass balance & \cite{Cogleyetal2011}
 \end{tabular}
 \label{tab:abbrev}
 \end{table}
@@ -405,8 +405,6 @@ The stencil in Figure \ref{fig:stencils} right shows the $u_j>0$ case.  In this 
 
 \begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
 def explicitupwindstep(x, s, dt):
-    '''compute a time step of the SKE, assuming u(x)>0 always,
-    by upwind scheme; left-end value snew[0] = s[0] is unmodified'''
     dx = x[1] - x[0]
     snew = s.copy()
     snew[1:] -= dt * u(x[1:]) * (s[1:] - s[:-1]) / dx
@@ -416,9 +414,9 @@ def explicitupwindstep(x, s, dt):
 
 \noindent In detail, \texttt{x}, \texttt{s}, and \texttt{snew} are one-dimensional NumPy \cite{Harrisetal2020} arrays, and \texttt{x} is assumed to hold an equally-spaced grid.  Separate ``data'' functions must define $a(x)$, $u(x)$, and $w(x)$.  In this implementation we need the formula for $u(x)$ to be positive, but the two cases in \eqref{fd:upwind} would be easily handled by a conditional statement.  The fact that \texttt{snew[0] = s[0]} never changes is a \emph{boundary condition} compatible with the fact that the velocity is inward at the left end (\texttt{u(x[0])}$>0$).  Also note that the left end of our glacier has zero thickness, that is, \texttt{s[0] = b(0)}.
 
-The rest of the code \href{https://github.com/bueler/mccarthy/blob/master/py/surface.py}{\texttt{py/surface.py}} is worth a look, but there is no need to print it here.  It contains formulas for the data functions, a time-stepping loop, and calls to \texttt{matplotlib} to generate figures.  Various default choices are made for convenience and illustration, for example $\Delta t=1$ a and $\Delta x=1$ km.
+The rest of the code \href{https://github.com/bueler/mccarthy/blob/master/py/surface.py}{\texttt{py/surface.py}} is worth a look, but there is no need to print it here.  It contains formulas for the data functions, a time-stepping loop, calls to \texttt{matplotlib} to generate figures, and generous comments.  Various default choices are made for convenience and illustration, for example $\Delta t=1$ a and $\Delta x=1$ km.
 
-Please run the code, and use an image viewer on the simulation results, as follows:
+Run the code, and use an image viewer on the simulation results, as follows:
 \begin{Verbatim}[xleftmargin=4mm]
 $ cd py/
 $ python3 surface.py
@@ -477,7 +475,7 @@ for every point $x,y$ in the computational domain.  Equivalently, admissibility 
 
 The above strengthened-SMB simulation started from an admissible state (Figure \ref{fig:demo}, top), but it evolved to an inadmissible one (Figure \ref{fig:inadmissdemo}).  Avoiding this possibility, at least in an explicit solution method, is quite easy.  Namely, we should \emph{truncate} the solution, $\snew_j = \max\{b_j, \snew_j\}$ (planar case), to force admissibility.
 
-Inequality \eqref{admissible} complements definition \eqref{domain} of the ice domain, and it implies the \emph{free-boundary} nature of the glacier geometry problem \cite{Bueler2016,Bueler2021conservation}.  Bed elevation data $b$ can be needed even when modelling glacier surfaces using the SKE, and it is necessary when solving stress balances (Sections \ref{sec:continuum} and FIXME).  Note that in unglaciated areas it makes sense to say (allow) $s(t,x)=b(x)$, and this is compatible with how digital elevation models work in practice; the surface elevation is the top of the glacier if one is present, otherwise it is the top of the land.
+Inequality \eqref{admissible} complements definition \eqref{domain} of the ice domain, and it implies the \emph{free-boundary} nature of the glacier geometry problem \cite{Bueler2016,Bueler2021conservation}.  Bed elevation data $b$ can be needed even when modelling glacier surfaces using the SKE, and it is necessary when solving stress balances (Sections \ref{sec:continuum} and \ref{sec:sia}).  Note that in unglaciated areas it makes sense to say (allow) $s(t,x)=b(x)$, and this is compatible with how digital elevation models work in practice; the surface elevation is the top of the glacier if one is present, otherwise it is the top of the land.
 
 \subsection*{Steady state}  We are regarding the SKE as a minimal model which can predict glacier geometry given data for SMB and surface velocity, and this approach works in \emph{steady state} as well.  Equation \eqref{skeplanar} with $\partial s/\partial t=0$ becomes
 \begin{equation}
@@ -511,7 +509,7 @@ Solving the same steady-state problem in the two horizontal dimensions of a real
 
 The derivation is clearest if we state the \emph{basal kinematical equation} first.  Consider the mass balance $m(t,x,y)$ at the basal surface $z=b(t,x,y)$, the difference between melt and freeze-on.  (Here all quantities can be time-dependent.)  The field $m$, in ice-equivalent meters per second, is positive if there is net melt.  It can be of either sign for grounded glaciers, and underneath floating ice shelves, often through thermodynamical effects.  Similar to \eqref{ske}, this kinematical equation is
 \begin{equation}
-b_t - \bu \cdot \bn_b = m,  \label{bke}
+\frac{\partial b}{\partial t} - \bu \cdot \bn_b = m,  \label{bke}
 \end{equation}
 where $\bn_b = \big<-\frac{\partial b}{\partial x}, -\frac{\partial b}{\partial y}, 1\big>$ is normal to the base and pointing upward, and ``$\bu$'' here denotes $\bu(t,x,y,b(t,x,y))$ (on the base surface).
 
@@ -525,9 +523,9 @@ or simply $\bq=\int_b^s\bU\,dz$ if we suppress variables.  The flux is a vector 
 
 Finally we can state the mass continuity equation itself,
 \begin{equation}
-    H_t + \Div \bq = a - m.  \label{masscont}
+    \frac{\partial H}{\partial t} + \Div \bq = a - m.  \label{masscont}
 \end{equation}
-Note that if the bed is stationary ($b_t=0$) then we can equivalently write ``$s_t$'' on the left, but the most common way to think about this equation is as describing how a layer of ice changes thickness, and thus volume, instead of in terms of elevation.  The divergence here is in horizontal variables, so $\Div\bq= \frac{\partial q_1}{\partial x} + \frac{\partial q_2}{\partial y}$.
+Note that if the bed is stationary ($\partial b/\partial t=0$) then we can equivalently write ``$\partial s/\partial t$'' on the left, but the most common way to think about this equation is as describing how a layer of ice changes thickness, and thus volume, instead of in terms of elevation.  The divergence here is in horizontal variables, so $\Div\bq= \frac{\partial q_1}{\partial x} + \frac{\partial q_2}{\partial y}$.
 
 The net function $a-m$ on the right is the \emph{climatic-basal mass balance} \cite{Cogleyetal2011}.  This combination of the surface mass balances $a,m$ determines how much mass is lost or gained in a column within the glacier.
 
@@ -547,8 +545,8 @@ Divergences $\Div$ here are in the horizontal variables $x,y$.  In fact, by inco
 Thus, continuing the calculation, indicating surface values by ``$\bU|_s$'' etc., suppressing variables, and applying the fundamental theorem of calculus, we have
     $$\Div \bq = \bU|_s \cdot \grad s - \bU|_b \cdot \grad b - \int_b^s \frac{\partial w}{\partial z}\,dz = \bU|_s \cdot \grad s - \bU|_b \cdot \grad b - w|_s + w|_b.$$
 The expressions on the right are familiar from the kinematical equations \eqref{ske} and \eqref{bke}, and in fact if we use the 3D velocity $\bu=\left<u,v,w\right>$, and our normal vector notations, and those kinematical equations, then we have
-    $$\Div \bq = -\bu|_s \cdot \bn_s + \bu|_b \cdot \bn_b = a - s_t + b_t - m.$$
-This says $\Div \bq = (a-m) - H_t$, which is mass continuity \eqref{masscont}.
+    $$\Div \bq = -\bu|_s \cdot \bn_s + \bu|_b \cdot \bn_b = a - \frac{\partial s}{\partial t} + \frac{\partial b}{\partial t} - m.$$
+This says $\Div \bq = (a-m) - \partial H/\partial t$, which is mass continuity \eqref{masscont}.
 
 At this point we have three equations which might be used to describe the evolving geometry of a glacier:
 \renewcommand{\labelenumi}{\emph{\roman{enumi})}}
@@ -573,9 +571,9 @@ In three-dimensions, \eqref{masscontintegrated} would become an equation for $dV
 
 Equation \eqref{masscontintegrated} is an integrated form of mass continuity.  To determine the derivative (and planar) form, suppose the width $\Delta x=x_2-x_1$ is small, thus $A\approx \Delta x\, H$.  If we divide by \eqref{masscontintegrated} by $\Delta x$ and take $\Delta x \to 0$ then we get
 \begin{equation}
-H_t = a - \left(\bar U\, H\right)_x \label{masscontplanar}
+\frac{\partial H}{\partial t} = a - \frac{\partial}{\partial x}\left(\bar U\, H\right) \label{masscontplanar}
 \end{equation}
-because $\lim_{\Delta x \to 0} (\int_{x_1}^{x_2} a\,dx)/\Delta x = a$ is the average value of the SMB over the small interval $[x_1,x_2]$, and $\lim_{\Delta x \to 0} (\bar U_2\, H_2 - \bar U_1\, H_1)/\Delta x = (\bar U\,H)_x$ is a (partial) derivative.  We have re-derived, and perhaps understood better, equation \eqref{masscont} in the planar case.
+because $\lim_{\Delta x \to 0} (\int_{x_1}^{x_2} a\,dx)/\Delta x = a$ is the average value of the SMB over the small interval $[x_1,x_2]$, and $\lim_{\Delta x \to 0} (\bar U_2\, H_2 - \bar U_1\, H_1)/\Delta x = \partial(\bar U\,H)/\partial x$ is a (partial) derivative.  We have re-derived, and perhaps understood better, equation \eqref{masscont} in the planar case.
 
 
 \section{Shallow ice approximation}  \label{sec:sia}
@@ -620,24 +618,68 @@ w|_s &= \bU|_s \cdot \grad s - \Div \bq   \label{sia:wsurface:early} \\
 \end{align}
 The derivation is like that for the mass continuity equation \eqref{masscont} earlier.  One uses incompressibility \eqref{incompressibleagain}, $w|_b=0$, and vertical integration to express $w$ at the surface, and then the Leibniz rule \eqref{leibniz} and $\bU_0=0$.  The second form follows from \eqref{sia:usurface} and \eqref{sia:q:early}.
 
-The formulas for $\bq$ and $w|_s$ have a common form.  Define the positive scalar \emph{diffusivity} function
+The formulas for $\bq$ and $w|_s$ have a common scalar \emph{diffusivity} coefficient function:
 \begin{equation}
 \Dsia = \frac{2}{n+2} A (\rho g)^n (s-b)^{n+2} |\grad s|^{n-1}. \label{sia:D}
 \end{equation}
-This is a coefficient in both formulas \eqref{sia:q:early} and \eqref{sia:wsurface:early}, which are now clean:
+This positive coefficient appears in both formulas \eqref{sia:q:early} and \eqref{sia:wsurface:early}, which are now clean:
 \begin{align}
 \bq  &= - \Dsia \grad s. \label{sia:q} \\
 w|_s &= \bU|_s \cdot \grad s + \Div \left(\Dsia \grad s\right).  \label{sia:wsurface}
 \end{align}
 In the remainder of this section we will try to understand the above formulas, and see how they might be applied in examples, and in simulations of evolving glaciers.
 
-\subsection*{Example: Computing SIA velocities for a given geometry}    If the glacier geometry is known then the above formulas compute the surface velocity and the flux.  This can be done analytically, from the gradient of the surface elevation function $s$, or approximately using finite differences (FD; Section \ref{sec:masscont}).  We will use the later approach here; it will appear in the time-dependent SIA simulations to follow.
+\subsection*{Example: Computing SIA velocities for a given geometry}    If the glacier geometry is known then the above formulas compute the surface velocity and the flux.  We will do this approximately using finite differences (FD; Section \ref{sec:masscont}), as needed for the time-dependent SIA simulations to follow, but it can be done analytically by differentiating the surface elevation function.
 
 For planar geometry given by known functions $b(x)$ and $s(x)$, either steady or a snapshot in time, \eqref{sia:usurface} simplifies to this formula for horizontal surface velocity:
 \begin{equation}
 u|_s = - \frac{2}{n+1} A (\rho g)^n (s-b)^{n+1} \left|\frac{\partial s}{\partial x}\right|^{n-1} \frac{\partial s}{\partial x}. \label{sia:usurface:planar}
 \end{equation}
-For example, suppose $b$ is a simple incline and $s$ is a gently-oscillating surface, as shown in Figure \ref{fig:uw} (top).  Where this surface is (nearly) flat we expect $u|_s\approx 0$, while on the steeper parts we expect significant rightward flow $u|_s>0$.  This is what the formula produces, as shown in the bottom panel of the Figure, which is generated by running \href{https://github.com/bueler/mccarthy/blob/master/py/shallow.py}{\texttt{py/shallow.py}}:
+For example, suppose $b$ is a simple incline and $s$ is a gently-oscillating surface, as shown in Figure \ref{fig:uw} (top).  Where this surface is (nearly) flat we expect $u|_s\approx 0$, while on the steeper parts we expect significant rightward flow $u|_s>0$.
+
+\onefigsize{uw}{Top panel: glacier geometry.  Bottom panel: FD approximations of the horizontal ($\circ$) and vertical ($+$) surface velocity in the SIA.}{4.0in}
+
+Our FD approximation of \eqref{sia:usurface:planar} computes the surface slope at the \emph{staggered grid} points $x_{j+1/2}$, which are half-way between the regular grid locations $\{x_j\}$; see Section \ref{sec:masscont} for this notation.  Using the staggered point achieves second-order accuracy because the function evaluations are centered around the point:
+\begin{equation}
+\frac{\partial s}{\partial x}(x_{j+1/2}) = \frac{s(x_{j+1})-s(x_j)}{\Delta x} + O((\Delta x)^2).  \label{fd:slope}
+\end{equation}
+Averaging the ice thicknesses, symmetrically to the staggered point, is needed to maintain the second-order accuracy, so the approximation is
+\begin{equation}
+u_{j+1/2} = - \frac{2}{n+1} A (\rho g)^n \left(\frac{H_j + H_{j+1}}{2}\right)^{n+1} \left|\frac{s_{j+1}-s_j}{\Delta x}\right|^{n-1} \frac{s_{j+1}-s_j}{\Delta x} \label{fd:usurface:planar}
+\end{equation}
+where $H_j = s_j - b_j$.  So here is the function which computes \eqref{fd:usurface:planar}:
+
+\begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
+def u(x, b, s):
+    dx = x[1] - x[0]
+    dsdx = (s[1:] - s[:-1]) / dx
+    Hstag = ((s[:-1] - b[:-1]) + (s[1:] - b[1:])) / 2.0
+    C_u = (2.0 / (n + 1)) * A * (rhoi * g) ** n
+    return -C_u * Hstag ** (n + 1) * abs(dsdx) ** (n - 1) * dsdx
+\end{lstlisting}
+
+The surface vertical velocity $w|_s$ are approximated by a similar strategy.  First we compute $\Dsia$ from \eqref{sia:D} at staggered points,
+\begin{equation}
+\Dsia_{j+1/2} = \frac{2}{n+2} A (\rho g)^n \left(\frac{H_j + H_{j+1}}{2}\right)^{n+2} \left|\frac{s_{j+1}-s_j}{\Delta x}\right|^{n-1}, \label{fd:Dsia:planar}
+\end{equation}
+via a very similar short function:
+\begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
+def diffusiveD(x, b, s):
+    dx = x[1] - x[0]
+    dsdx = (s[1:] - s[:-1]) / dx
+    Hstag = ((s[:-1] - b[:-1]) + (s[1:] - b[1:])) / 2.0
+    C_D = (2.0 / (n + 2)) * A * (rhoi * g) ** n
+    return C_D * Hstag ** (n + 2) * abs(dsdx) ** (n - 1)
+\end{lstlisting}
+The method to compute $\bq$ at staggered grid points is a small extension of this, but we do not specifically need it, so it was not implemented.
+
+For the vertical velocity, we evaluate \eqref{sia:wsurface} using another centered difference, which yields values on the (interior) regular grid points:
+\begin{equation}
+w_j = \frac{\phi_{j-1/2} + \phi_{j+1/2}}{2} + \frac{\Dsia_{j+1/2} (s_{j+1}-s_j) - \Dsia_{j-1/2} (s_{j}-s_{j-1})}{\Delta x^2}, \label{fd:wsurface:planar}
+\end{equation}
+where
+	$$\phi_{j+1/2} = u_{j+1/2} \frac{s_{j+1}-s_j}{\Delta x} \approx \left(u|_s \frac{\partial s}{\partial x}\right)_{j+1/2}.$$
+This Python function which computes \eqref{fd:wsurface:planar} is not shown, but run  \href{https://github.com/bueler/mccarthy/blob/master/py/shallow.py}{\texttt{py/shallow.py}} as follows to generate Figure \ref{fig:uw}:
 
 \smallskip
 \begin{Verbatim}[xleftmargin=4mm]
@@ -649,53 +691,9 @@ writing to image file output/uw.pdf
 \end{Verbatim}
 %$
 
-\onefigsize{uw}{Top panel: glacier geometry.  Bottom panel: FD approximations of the horizontal ($\circ$) and vertical ($+$) surface velocity in the SIA.}{4.0in}
+After all this detail on how computations work, let us return to what Figure \ref{fig:uw} actually shows.  Because of gravity the flow is faster where the surface is steeper, so the horizontal velocity is as expected.  The vertical velocity, however, is more interesting.  Through incompressibility, the vertical velocity causes the surface to rise in surface dips and fall where the surface has a hump.  This is a key feature of ice flow: it is \emph{smoothing}, at least at the large scales covered by the SIA.
 
-\medskip
-In more detail, our FD approximation of \eqref{sia:usurface:planar} computes the surface slope at the \emph{staggered grid} points $x_{j+1/2}$, which are half-way between the regular grid locations.  (Recall the grid notation from Section \ref{sec:masscont}.)  Using the staggered point achieves second-order accuracy because the function evaluations are centered around the point:
-\begin{equation}
-\frac{\partial s}{\partial x}(x_{j+1/2}) = \frac{s_{j+1}-s_j}{\Delta x} + O((\Delta x)^2).  \label{fd:slope}
-\end{equation}
-Averaging the ice thicknesses to the staggered point is needed to maintain the second-order accuracy, so the approximation is
-\begin{equation}
-u_{j+1/2} = - \frac{2}{n+1} A (\rho g)^n \left(\frac{H_j + H_{j+1}}{2}\right)^{n+1} \left|\frac{s_{j+1}-s_j}{\Delta x}\right|^{n-1} \frac{s_{j+1}-s_j}{\Delta x} \label{fd:usurface:planar}
-\end{equation}
-where $H_j = s_j - b_j$.  The function which computes \eqref{fd:usurface:planar} is shown below.
-
-\begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
-def u(x, b, s):
-    dx = x[1] - x[0]
-    dsdx = (s[1:] - s[:-1]) / dx
-    Hstag = ((s[:-1] - b[:-1]) + (s[1:] - b[1:])) / 2.0
-    C_u = (2.0 / (n + 1)) * A * (rhoi * g) ** n
-    return -C_u * Hstag ** (n + 1) * abs(dsdx) ** (n - 1) * dsdx
-\end{lstlisting}
-
-The vertical velocity shown in Figure \ref{fig:uw} is computed by a related strategy.  First we compute $\Dsia$ from \eqref{sia:D} at staggered points:
-\begin{equation}
-\Dsia_{j+1/2} = \frac{2}{n+2} A (\rho g)^n \left(\frac{H_j + H_{j+1}}{2}\right)^{n+2} \left|\frac{s_{j+1}-s_j}{\Delta x}\right|^{n-1}. \label{fd:Dsia:planar}
-\end{equation}
-This is computed by a very similar short function:
-\begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
-def diffusiveD(x, b, s):
-    dx = x[1] - x[0]
-    dsdx = (s[1:] - s[:-1]) / dx
-    Hstag = ((s[:-1] - b[:-1]) + (s[1:] - b[1:])) / 2.0
-    C_D = (2.0 / (n + 2)) * A * (rhoi * g) ** n
-    return C_D * Hstag ** (n + 2) * abs(dsdx) ** (n - 1)
-\end{lstlisting}
-
-Then we evaluate \eqref{sia:wsurface} using another centered difference, which yields values on the (interior) regular grid points:
-\begin{equation}
-w_j = \frac{\phi_{j-1/2} + \phi_{j+1/2}}{2} + \frac{\Dsia_{j+1/2} (s_{j+1}-s_j) - \Dsia_{j-1/2} (s_{j}-s_{j-1})}{\Delta x^2}, \label{fd:wsurface:planar}
-\end{equation}
-where
-	$$\phi_{j+1/2} = u_{j+1/2} \frac{s_{j+1}-s_j}{\Delta x} \approx \left(u|_s \frac{\partial s}{\partial x}\right)_{j+1/2}.$$
-This code which computes \eqref{fd:wsurface:planar} is not shown.
-
-After all this detail on how the surface velocity components are computed, let us emphasize what Figure \ref{fig:uw} shows.  The horizontal velocity is as expected; because of gravity the flow is faster where the surface is steeper.  The vertical velocity, however, is more interesting.  Through incompressibility, the vertical velocity causes the surface to rise in surface dips and fall where the surface has a hump.  This is a key feature of ice flow: it is \emph{smoothing}, at least at the large scales covered by the SIA.
-
-Figure \ref{fig:green-transect} shows the effect for a real ice sheet; the surface is much smoother than the base.  In the 21st century, widespread use of ice-penetrating radar has revealed rough bedrock topography under ice sheets, emphasizing that their surfaces can be much smoother than their beds.  The reason is that gravity and incompressibility combine to generate a surface vertical velocity component which removes bumps.  Simulating the time-dependent SIA, our next task, will make the smoothing effect very clear.
+Figure \ref{fig:green-transect} shows the effect for a real ice sheet; the surface is much smoother than the base.  Widespread use of ice-penetrating radar in the 21st century has revealed rough bedrock topography under ice sheets, making it more obvious that their surfaces are smoother than their beds.  The reason is that gravity and incompressibility combine to generate a surface vertical velocity component which removes bumps.  Simulating the time-dependent SIA, our next task, will again make the smoothing effect very clear.
 
 \subsection*{Evolution of glacier geometry in the SIA}  Section \ref{sec:masscont} emphasized that there are two concepts for modelling the evolution of a glacier, either using the surface elevation $s$ and the SKE \eqref{ske}, or using the thickness $H$ and mass continuity \eqref{masscont}.  We will write down both of these using the non-sliding SIA velocity formulas.  These approaches yield essentially the same \emph{diffusion} equation, for $s$ or $H$ according to taste.
 
