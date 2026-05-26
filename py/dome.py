@@ -16,7 +16,7 @@ convenient way to run and view (where "eog" is an image viewer):
 
 import numpy as np
 import matplotlib.pyplot as plt
-import shallowuw as sia
+import shallow as sia
 
 # choose initial condition
 halfarinitial = False
@@ -108,7 +108,7 @@ plt.plot(x / 1000.0, s, label="initial: t = 0.00 a")
 t = 0.0
 tf = T_a * secpera
 timedata = []
-print(f"grid: J={J} points, with spacing dx={dx:.1f} m ...")
+print(f"grid: J={J} intervals, spacing dx={dx:.1f} m")
 print(f"starting time-stepping ...")
 for k in range(maxsteps):
     D = sia.diffusiveD(x, b, s)
