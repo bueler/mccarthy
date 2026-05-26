@@ -227,7 +227,7 @@ the ice surface moves up and down according to
     \end{itemize}
 \item \alert{numerical modeling goal:} build a computer program which evolves the glacier surface $z=s(t,x)$ according to the SKE
     \begin{itemize}
-    \item[$\circ$] one short Python program in 1D: \quad \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{py/surface1d.py}
+    \item[$\circ$] one short Python program in 1D: \quad \href{https://github.com/bueler/mccarthy/blob/master/py/surface.py}{py/surface.py}
     \end{itemize}
 \item \alert{to address:}
      \begin{enumerate}
@@ -345,9 +345,9 @@ def explicitupwindstep(x, s, dt):
 \bigskip
 \begin{block}{live demo}
 \begin{itemize}
-\item run \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{py/surface1d.py}:
+\item run \href{https://github.com/bueler/mccarthy/blob/master/py/surface.py}{py/surface.py}:
 \begin{verbatim}
-$ python3 surface1d.py
+$ python3 surface.py
 $ eog output/frame*.png          # view images
 \end{verbatim}
 \item the following modifications reveal stability issues:
@@ -388,7 +388,7 @@ $$|u_j| \Delta t \le \Delta x \quad \text{for every } j \hspace{40mm}$$
 $$\Delta t \le \frac{\Delta x}{\max |u_j|} \hspace{40mm}$$
 
     \begin{itemize}
-    \item[$\circ$] exercise \textbf{12}: add this to \texttt{surface1d.py} for $u(t,x)$
+    \item[$\circ$] exercise \textbf{12}: add this to \texttt{surface.py} for $u(t,x)$
     \end{itemize}
 \end{itemize}
 \end{frame}
@@ -763,7 +763,7 @@ from inclinometry (Savage \& Paterson 1963)]
   \begin{itemize}
   \item[$\circ$] finite difference computations of surface velocity $u(x)$, $w(x)$
   \item[$\circ$] staggered grid points
-  \item[$\circ$] one short Python code: \quad \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{py/shallowuw.py}
+  \item[$\circ$] one short Python code: \quad \href{https://github.com/bueler/mccarthy/blob/master/py/shallow.py}{py/shallow.py}
   \end{itemize}
 \item \alert{to address:}
      \begin{enumerate}
@@ -884,7 +884,7 @@ w_j &= - \int_{b_j}^{s_j} \frac{u_{j+1/2}(z) - u_{j-1/2}(z)}{\Delta x}\,dz \\
   \begin{itemize}
   \item[$\circ$] see robustness aspect: integrate $u_{j\pm 1/2}(z)$ from $b_j$ to $s_j$, even if that puts you above or below the ice
   \end{itemize}
-\item see the code \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{py/shallowuw.py}
+\item see the code \href{https://github.com/bueler/mccarthy/blob/master/py/shallow.py}{py/shallow.py}
   \begin{itemize}
   \item[$\circ$] result: visualization of $u(x),w(x)$ at the surface
   \end{itemize}
@@ -901,7 +901,7 @@ w_j &= - \int_{b_j}^{s_j} \frac{u_{j+1/2}(z) - u_{j-1/2}(z)}{\Delta x}\,dz \\
 
 \begin{block}{demo}
 \begin{verbatim}
-      $ python3 shallowuw.py
+      $ python3 shallow.py
       $ eog output/uw.png
 \end{verbatim}
 \end{block}
@@ -919,7 +919,7 @@ w &= - \int_{b}^{s} \frac{\partial u}{\partial x}(x,z)\,dz
 \end{align*}
 \item implementing is exercise \textbf{16}
   \begin{itemize}
-  \item[$\circ$] combine my codes \href{https://github.com/bueler/mccarthy/blob/master/py/surace1d.py}{py/surface1d.py} and \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{py/shallowuw.py}
+  \item[$\circ$] combine my codes \href{https://github.com/bueler/mccarthy/blob/master/py/surace1d.py}{py/surface.py} and \href{https://github.com/bueler/mccarthy/blob/master/py/shallow.py}{py/shallow.py}
   \end{itemize}
 
 \bigskip
