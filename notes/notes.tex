@@ -753,13 +753,13 @@ The two models \eqref{diffusion:ske} and \eqref{diffusion:masscont} are similar 
 
 Historically-speaking, recognizing the diffusion form of the mass continuity equation allowed numerical ice sheet modelling to get started.  Diffusion equations, especially the \emph{heat equation}, are clich\'ed topics in numerical analysis textbooks, for example in \cite{LeVeque2007,MortonMayers2005}.  Specifically, Mary-Anne Mahaffy \cite{Mahaffy1976} started the subject with a 1976 numerical (FD) model of the Barnes ice cap (Baffin Island, Canada) based on equation \eqref{diffusion:masscont}.
 
-\subsection*{Highly-nonlinear diffusivity}  Equation \eqref{sia:D} gives the form of the diffusivity $\Dsia$, which appears in the diffusion equations \eqref{diffusion:ske} and \eqref{diffusion:masscont}:
+\subsection*{Nonlinear and degenerate diffusivity}  Equation \eqref{sia:D} gives the form of the diffusivity $\Dsia$, which appears in the diffusion equations \eqref{diffusion:ske} and \eqref{diffusion:masscont}:
 \begin{equation}
 \Dsia = \frac{2}{n+2} A (\rho g)^n (s-b)^{n+2} |\grad s|^{n-1}. \label{sia:Dagain}
 \end{equation}
 Independent of the power $n$, the units of $\Dsia$ must reduce to square meters per second---otherwise equations \eqref{diffusion:ske} and \eqref{diffusion:masscont} would not be dimensionally correct---and it follows that the units of the ice softness $A$ will depend on $n$ (Table \ref{tab:notation}).
 
-Equation \eqref{sia:Dagain} expresses the dominant macroscopic effects of the ice flow law \eqref{flowlaw}, and it is at the heart of why glaciology is a \emph{nonlinear} science.  The diffusivity is not a constant, nor a known-in-advance function, as in most textbook presentations \cite[for example]{LeVeque2007,MortonMayers2005}.  If $n=3$ it scales with the $5$th power of thickness and the $2$nd power of surface slope, but even when $n=1$ (Newtonian case), so that diffusivity is independent of surface slope, it still depends on the $3$rd power of thickness.
+Equation \eqref{sia:Dagain} expresses the dominant macroscopic effects of the ice flow law \eqref{flowlaw}, and it is at the heart of why glaciology is a (highly!) \emph{nonlinear} science.  The diffusivity is not a constant, nor a known-in-advance function, as in most textbook presentations \cite[for example]{LeVeque2007,MortonMayers2005}.  If $n=3$ it scales with the $5$th power of thickness and the $2$nd power of surface slope, but even when $n=1$ (Newtonian case), so that diffusivity is independent of surface slope, it still depends on the $3$rd power of thickness.
 
 The local value of diffusivity $\Dsia$ is the rate of smoothing over adjacent areas, and formula \eqref{sia:Dagain} returns a large value when the ice is both thick and steep.  Intuitively this makes sense because ice flows downhill, away from surface maxima, and converging toward surface minima, most-strongly in that case.
 
@@ -772,7 +772,9 @@ It is worth noting some conceptual and practical concerns when treating equation
 \end{enumerate}
 Item \emph{i)} concerns a deficiency of the SIA model, not just our diffusion understanding of it.  All of these concerns are research topics in mathematical glaciology.
 
-\subsection*{Explicit scheme for the geometry SIA}  FIXME Our simplest scheme approximates the 1D heat equation $T_t=D T_{xx}$ \emph{explicitly}.  It is based on the fact that because $T_t$ and $D T_{xx}$ are equal, these two FD expressions are nearly equal:
+\subsection*{Explicit scheme for the geometry SIA}  FIXME after all this thinking on the form of our partial differential equations, lets write some code
+
+Our simplest scheme approximates the 1D heat equation $T_t=D T_{xx}$ \emph{explicitly}.  It is based on the fact that because $T_t$ and $D T_{xx}$ are equal, these two FD expressions are nearly equal:
 \begin{equation}
 \frac{T(t+\Delta t,x) - T(t,x)}{\Delta t} \approx D\,\frac{T(t,x+\Delta x) - 2\, T(t,x) + T(t,x-\Delta x)}{\Delta x^2}.  \label{heat1Dapproximated}
 \end{equation}
