@@ -701,7 +701,7 @@ What does Figure \ref{fig:uw} show?  Because of gravity the flow is faster where
 Figure \ref{fig:green-transect} shows the result for a real ice sheet; the surface is much smoother than the base.  Ice-penetrating radar in the 21st century has revealed widespread rough bedrock topography under ice sheets, making it even more obvious that their surfaces are smoother than their beds.  Numerically solving the time-dependent SIA, our next task, will also make the smoothing effect clear.
 
 
-\section{Time-dependent glacier simulations in the SIA}  \label{sec:evolution}
+\section{Time-dependent glacier simulations from the SIA}  \label{sec:evolution}
 
 \subsection*{Diffusion equations for geometry}  Section \ref{sec:masscont} presented two equations which model the evolution of a glacier's shape: the surface kinematical equation (SKE) \eqref{ske} for the surface elevation $s$, and the mass continuity equation \eqref{masscont} for the thickness $H$.  If we decide to compute velocities and fluxes from the non-sliding shallow ice approximation (SIA; Section \ref{sec:sia}), which approximates the Glen-Stokes system of Section \ref{sec:continuum}, then these evolution equations become time-dependent glacier models.  Unlike the minimal SKE-based ``model'' in Section \ref{sec:masscont}, these SIA geometry-evolution models are self-contained.
 
@@ -750,9 +750,9 @@ These (non-sliding) SIA substitutions create very-similar diffusion equations, t
 \end{center}
 
 \medskip
-Such similar forms is not a surprise, actually.  Section \ref{sec:masscont} showed that our starting equations \eqref{skeagain} and \eqref{masscontagain} are equivalent if we assume incompressibility \eqref{incompressibleagain} and a basal kinematical equation \eqref{bke}.    Both equations \eqref{diffusion:ske} and \eqref{diffusion:masscont} refer to surface elevation, for the surface slope, and ice thickness in the form of $\Dsia$ (equation \eqref{sia:D}).  The apparent $s$-vs-$H$ distinction is not that important.
+Such similar forms is not a surprise, actually.  Section \ref{sec:masscont} showed that our starting equations \eqref{skeagain} and \eqref{masscontagain} are equivalent if we assume incompressibility \eqref{incompressibleagain} and a basal kinematical equation \eqref{bke}.    Both equations \eqref{diffusion:ske} and \eqref{diffusion:masscont} refer to surface elevation, for the surface slope, and ice thickness in the form of $\Dsia$ (equation \eqref{sia:D}).  The apparent $s$-vs-$H$ distinction is not that important, but the surface elevation $s$ tends to be a smoother geometry function in time and space than the thickness $H$ (e.g.~Figure \ref{fig:green-transect}).
 
-An apparent difference between the boxed equations is that \eqref{diffusion:ske} does not refer to the \emph{basal} mass balance $m$ (Section \ref{sec:masscont}).  The original SKE \eqref{ske} isolates the surface evolution, while the mass continuity equation \eqref{masscont} always involves the whole ice column.  On the other hand, the derivation of \eqref{diffusion:ske} used \eqref{sia:D}, via an assumption of zero basal velocity, and if that were generalized then the basal mass balance would re-appear.  An actual difference is that the surface elevation $s$ tends to be a smoother geometry function in time and space than the thickness $H$ (e.g.~Figure \ref{fig:green-transect}).
+An apparent difference between the boxed equations is that \eqref{diffusion:ske} does not refer to the \emph{basal} mass balance $m$ (Section \ref{sec:masscont}).  The original SKE \eqref{ske} isolates the surface evolution, while the mass continuity equation \eqref{masscont} always involves the whole ice column.  On the other hand, the derivation of \eqref{diffusion:ske} used \eqref{sia:D}, via an assumption of zero basal velocity, and if that derivation were generalized appropriately then the basal mass balance $m$ would re-appear.
 
 The two models \eqref{diffusion:ske} and \eqref{diffusion:masscont} are similar in another respect: they must be solved subject to a geometrical inequality constraint.  That is, the surface must remain above the bed ($s\ge b$) and the thickness must not be negative ($H\ge 0$).
 
@@ -762,25 +762,39 @@ Historically-speaking, the diffusion form \eqref{diffusion:masscont} of the mass
 \begin{equation}
 \Dsia = \frac{2}{n+2} A (\rho g)^n (s-b)^{n+2} |\grad s|^{n-1}. \label{sia:Dagain}
 \end{equation}
-Independent of the power $n$, the units of $\Dsia$ must reduce to square meters per second---otherwise equations \eqref{diffusion:ske} and \eqref{diffusion:masscont} would not be dimensionally correct---and it follows that the units of the ice softness $A$ will depend on $n$ (Table \ref{tab:notation}).
+Independent of the power $n$, the units of $\Dsia$ reduce to square meters per second, as otherwise equations \eqref{diffusion:ske} and \eqref{diffusion:masscont} would not be dimensionally correct.  It follows that the units of the ice softness $A$ will depend on $n$ (Table \ref{tab:notation}).
 
-Equation \eqref{sia:Dagain} expresses the dominant macroscopic effects of the ice flow law \eqref{flowlaw}, and it is at the heart of why glaciology is a (highly!) \emph{nonlinear} science.  The diffusivity is not a constant, nor a known-in-advance function, as it is in textbook examples \cite[for example]{LeVeque2007,MortonMayers2005}.  Instead, for $n=3$ it scales with the $5$th power of thickness and the $2$nd power of surface slope.  Even when $n=1$, the Newtonian case where diffusivity is independent of surface slope, it still depends on the $3$rd power of thickness.
+Equation \eqref{sia:Dagain} expresses the dominant macroscopic effect of the Glen flow law \eqref{flowlaw}, and it is at the heart of why glaciology is a (highly!) \emph{nonlinear} science.  The diffusivity is not a constant, nor a known-in-advance function, as it is in linear textbook examples \cite{LeVeque2007,MortonMayers2005}.  Instead, for $n=3$ it scales with the $5$th power of thickness and the $2$nd power of surface slope.  Even when $n=1$, which is the Newtonian fluid case where diffusivity is independent of surface slope, it still depends on the $3$rd power of thickness.
 
-The local value of diffusivity $\Dsia$ is the rate of smoothing of the surface elevation, over adjacent areas, from ice flow.  Formula \eqref{sia:Dagain} returns a large value when the ice is both thick and steep.  In fact ice will flow downhill, away from surface maxima, and it will converge toward surface minima, most-strongly in that case.
+The local value of diffusivity $\Dsia$ is the rate of smoothing of the surface elevation, over adjacent areas, caused by ice flow.  Formula \eqref{sia:Dagain} returns a large value when the ice is both thick and steep.  In fact ice will flow downhill, away from surface maxima, and it will converge toward surface minima, most-strongly at such locations.
 
 However, it is worth noting some conceptual and practical concerns about \eqref{diffusion:ske} or \eqref{diffusion:masscont} as diffusion PDEs, given the nonlinearities in formula \eqref{sia:Dagain}:
 \renewcommand{\labelenumi}{\emph{\roman{enumi})}}
 \begin{enumerate}
-\item The derivation of the SIA model is inaccurate when significant longitudinal (membrane) stresses are present.  This is distinctly true when ice is floating or sliding, but also over shorter ranges when the flow is significantly confined by terrain.  In such cases the SIA approximation of the true solution of the Glen-Stokes model equations \eqref{incompressibleagain}--\eqref{flowlaw} may be completely inadequate.
+\item The derivation of the SIA model is inaccurate when significant longitudinal (membrane) stresses are present.  This is distinctly true when ice is floating or sliding, but also over shorter ranges when the flow is confined by terrain.  In such cases the SIA approximation of the true solution of the Glen-Stokes model equations \eqref{incompressibleagain}--\eqref{flowlaw} may be completely inadequate.
 \item The diffusivity $\Dsia$ depends on the solution, and thus PDEs \eqref{diffusion:ske} and \eqref{diffusion:masscont} are nonlinear.  Numerical methods are therefore more difficult to implement, and harder to analyze and debug.
-\item The diffusivity $\Dsia$ goes to zero at margins, where $H=s-b\to 0$, and at divides and domes, where $|\grad s|\to 0$.  That is, the diffusion process \emph{degenerates}.  The solutions $s$ and $H$ of \eqref{diffusion:ske} or \eqref{diffusion:masscont} are generally not smooth at these locations, though will be continuous everywhere (if $b$ is).  Smoothness of $s$ and $H$ is lost even when the bed $b$ and SMB $a$ data are smooth, and the largest numerical geometry errors arise where these solutions are not smooth.
+\item The diffusivity $\Dsia$ goes to zero at margins, where $H=s-b\to 0$, and at divides and domes, where $|\grad s|\to 0$.  That is, the diffusion process \emph{degenerates}.  The solutions $s$ and $H$ of \eqref{diffusion:ske} or \eqref{diffusion:masscont} are generally not smooth at these locations, though they will be continuous everywhere if $b$ is.  Smoothness of $s$ and $H$ is lost at margins and domes even when the bed $b$ and SMB $a$ data are smooth.  The largest numerical geometry errors arise at such locations.
 \end{enumerate}
-Item \emph{i)} concerns a deficiency of the SIA model, not just our diffusion understanding of it.  All of these concerns are research topics in mathematical glaciology.
+Item \emph{i)} concerns a deficiency of the SIA model, not just our diffusion-based understanding of it.  All of these concerns are research topics in mathematical glaciology.
 
-\subsection*{Explicit scheme for the geometry SIA}  FIXME after all this thinking on the form of our PDEs, lets do some FD and write some code
+\subsection*{Explicit scheme for the geometry SIA}  Let us stop thinking about the form and validity of our PDEs, and instead apply finite differences (FD) and write code.
 
-FIXME explicit Euler and centered
+Consider the planar and SMB-free ($a=0$) case of equation \eqref{diffusion:ske}.  That is, consider the simplest form of the SKE within the SIA stress balance model:
+\begin{equation}
+\frac{\partial s}{\partial t} = \frac{\partial}{\partial x} \left(\Dsia \frac{\partial s}{\partial x}\right).  \label{diffusion:ske:planar}
+\end{equation}
+We may regard the diffusivity as a generic coefficient which varies in time and space: $\Dsia \sim D(t,x)$.  Like the first FD scheme in Section \ref{sec:masscont}, the simplest scheme for \eqref{diffusion:ske:planar} applies forward differences in time (Euler method) and centered differences in space:
+\begin{equation}
+\frac{\snew_j - s_j}{\Delta t} = \frac{D_{j+1/2} (s_{j+1} - s_j)/\Delta x - D_{j-1/2} (s_j - s_{j-1})/\Delta x}{\Delta x}.  \label{fd:diffusion:planar:early}
+\end{equation}
 
+Unlike the advection problem in Section \ref{sec:masscont}, for a diffusion \eqref{diffusion:ske:planar} the forward-time centered-space scheme is a ``good'' choice, or at least \emph{conditionally stable} \cite{MortonMayers2005}.  Note that the centered-difference approximation of the divergence in \eqref{diffusion:ske:planar} differences $D\, \partial s/\partial x$ values on the staggered grid.  That is, the flux $\bq=-\Dsia \grad s$ is approximated on the staggered grid; this concept definitely extends to two horizontal variables \cite{Bueler2016,MortonMayers2005}.
+
+Equation \eqref{fd:diffusion:planar:early} needs to be rewritten as an update of the surface elevation:
+\begin{equation}
+\snew_j = s_j + \frac{\Delta t}{\Delta x} \left[D_{j+1/2}\, s'_{j+1/2} - D_{j-1/2}\, s'_{j-1/2}\right].  \label{fd:diffusion:planar}
+\end{equation}
+The staggered-grid slopes $s'_{j+1/2}$ are defined by the same approximation \eqref{fd:slope} which appeared in Section \ref{sec:sia}.  Furthermore, the staggered-grid diffusivities $D_{j+1/2}$ are exactly the values of $\Dsia$ computed in Section \ref{sec:sia} by \texttt{diffusiveD()}, so we will re-use (call) that Python function.  Now Equation \eqref{fd:diffusion:planar} becomes this Python function:
 \begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
 def geometrystep(x, b, s, D, dt):
     dx = x[1] - x[0]
@@ -789,8 +803,22 @@ def geometrystep(x, b, s, D, dt):
     snew[1:-1] += dt * (D[1:] * dsdx[1:] - D[:-1] * dsdx[:-1]) / dx
     return snew
 \end{lstlisting}
+Similar to what happened in Section \ref{sec:masscont} for our advection version of the SKE, here both ends of the spatial interval have frozen values of surface elevation, \texttt{snew[0]=s[0]} and \texttt{snew[J+1]=s[J+1]}.  Which is to say, we have chosen Dirichlet boundary values \cite{MortonMayers2005} for this diffusion problem.
 
-FIXME but stability to determine $\Delta t$
+The time axis is $t\in [0,t_f]$, where the final time $t_f$ is chosen as 40 years in the example below.  The time-stepping loop is \emph{adaptive} in the sense that $\Delta t$ is re-computed at every time step based on the current state of the solution.  Therefore we must explain the call to \texttt{getdt()}, but otherwise the loop is unsurprising:
+\begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
+t = 0
+for k in range(maxsteps):
+    D = diffusiveD(x, b, s)
+    dt = getdt(t, tf, D.max())  # adaptive time step length
+    if tf - t < 1.0e-6:  # normal stopping criterion
+        break
+    s = geometrystep(x, b, s, D, dt)
+    t += dt
+\end{lstlisting}
+Note that \texttt{maxsteps} merely protects against an infinite loop; normal termination is when we get within a millionth of a second of the user's chosen final time \texttt{tf}.
+
+\subsection*{Adaptive time-stepping for stability} FIXME stability determines $\Delta t$
 
 FIXME for a linear diffusion stability would be
 \begin{equation}
@@ -805,16 +833,6 @@ def getdt(t, tf, maxD):
     return min([dt_D, tf - t])  # do not step past end of [0,tf]
 \end{lstlisting}
 
-FIXME the actual time-stepping loop
-
-\begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
-for k in range(maxsteps):
-    D = diffusiveD(x, b, s)
-    dt = getdt(t, tf, D.max())
-    s = geometrystep(x, b, s, D, dt)
-    t += dt
-\end{lstlisting}
-
 
 \subsection*{Example: A very rough start} FIXME
 
@@ -823,12 +841,21 @@ FIXME run as follows
 \smallskip
 \begin{Verbatim}[xleftmargin=4mm]
 $ python3 dome.py 
-...
+grid: J=80 intervals, spacing dx=500.0 m
+starting time-stepping ...
+took 1814 steps to reach final time 40.0000 a
+writing simulation result to output/dome.png
+writing time steps graph to output/timesteps.png
 \end{Verbatim}
 %$
 
 \medskip
-FIXME figure
+FIXME figures
+
+\onefigsize{dome}{FIXME}{4.0in}
+
+\onefigsize{timesteps}{FIXME}{4.0in}
+
 
 FIXME robustness
 

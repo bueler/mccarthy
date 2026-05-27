@@ -148,7 +148,7 @@ plt.figure
 td = np.array(timedata[:-1]) / secpera
 plt.semilogy(td[:, 0], td[:, 1], ".")
 plt.grid("on")
-plt.axis([0.0, T_a, td[:, 1].min(), 1.0])
+plt.axis([-0.01*T_a, 1.01*T_a, td[:, 1].min(), 1.0])
 plt.xlabel("t (a)")
 plt.ylabel("time step (a)")
 # plt.show()
