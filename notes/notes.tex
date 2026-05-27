@@ -7,6 +7,7 @@
 \usepackage{graphicx}
 \usepackage{fancyvrb}
 \usepackage{tikz}
+\usetikzlibrary{arrows.meta}
 
 % for python listings; inspired by https://gist.github.com/YidongQIN/a10dd4f72381362aff4257e7a5541d86 
 \usepackage{listings}
@@ -75,9 +76,9 @@ urlcolor=black
 \newcommand{\devstress}{\tau}
 
 \newcommand{\snew}{s^{\text{new}}}
-\newcommand{\Dsia}{D^{\text{\textrm{sia}}}}
+\newcommand{\Dsia}{D^{\text{\textrm{SIA}}}}
 
-\newcommand{\alert}[1]{\emph{#1}}
+\newcommand{\ds}{\displaystyle}
 
 % usage:  \onefigsize{name}{caption}{width}
 \newcommand{\onefigsize}[3]{
@@ -211,15 +212,17 @@ The space of solutions to \eqref{incompressible} and \eqref{navierstokes} is ric
 \begin{align}
 \nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \label{incompressibleagain} \\
 - \nabla \cdot \tau + \nabla p &= \rho \mathbf{g} &&\text{\emph{stress balance}} \label{forcebalance} \\
-D\bu &= A |\tau|^2 \tau &&\text{\emph{$n$=3 Glen-Steinemann-Nye flow law}} \label{flowlaw}
+D\bu &= A |\tau|^{n-1} \tau &&\text{\emph{Glen-Steinemann-Nye flow law}} \label{flowlaw}
 \end{align}
-Note that $\rho>0$ and $\bg$ are constant, and the \emph{ice softness} $A>0$ is constant for the purposes of our simplified treatment, but the other fields depend on $t,x,y,z$.
+Note that $\rho>0$ and $\bg$ are constant, and the \emph{ice softness} $A>0$ is constant for the purposes of our simplified treatment, and $n$ is often taken to be three, but the other fields depend on $t,x,y,z$.
 
-Equations \eqref{incompressibleagain}--\eqref{flowlaw} are commonly called the \emph{Stokes model} in glaciology.  In \eqref{flowlaw} the deviatoric stress $\tau$ and strain rate $D\bu$ tensors are proportional, with a scalar power-law coefficient $A|\tau|^2$.  (This is Nye's contribution to the flow law form.)  Note that $|\tau|^2 = (1/2) \tau_{ij} \tau_{ij}$, using the summation convention, which defines the \emph{effective deviatoric stress} $|\tau|$.  Also, by definition $D\bu = \frac{1}{2}(\grad \bu + \grad \bu^\top)$, thus $(D\bu)_{ij} = \frac{1}{2} \left((u_i)_{x_j}+(u_j)_{x_i}\right)$ in components.  Since $D\bu$ is symmetric, by definition, it follows from \eqref{incompressibleagain} and \eqref{flowlaw} that both tensors $\tau$, $D\bu$ have trace zero.  At an abstract level, the many possible solutions of \eqref{forcebalance}--\eqref{flowlaw} are constrained by incompressibility \eqref{incompressibleagain}, and the pressure $p$ serves as a Lagrange multiplier for this constraint.
+Equations \eqref{incompressibleagain}--\eqref{flowlaw} are commonly called the \emph{Stokes model} in glaciology.  Note that $|\tau|^2 = (1/2) \tau_{ij} \tau_{ij}$, using the summation convention, which defines the \emph{effective deviatoric stress} $|\tau|$.  Also, by definition $D\bu = \frac{1}{2}(\grad \bu + \grad \bu^\top)$, thus $(D\bu)_{ij} = \frac{1}{2} \left((u_i)_{x_j}+(u_j)_{x_i}\right)$ in components.  Thus in \eqref{flowlaw} the deviatoric stress $\tau$ and strain rate $D\bu$ tensors are proportional, with a scalar power-law coefficient $A|\tau|^{n-1}$, which is Nye's contribution to the flow law form.  Since $D\bu$ is symmetric, by definition, it follows from \eqref{incompressibleagain} and \eqref{flowlaw} that both tensors $\tau$, $D\bu$ have trace zero.
+
+At an abstract level, the many possible solutions of \eqref{forcebalance}--\eqref{flowlaw} are constrained by incompressibility \eqref{incompressibleagain}.  In this way of thinking, the pressure $p$ serves as a Lagrange multiplier for this constraint.
 
 Observe that equations \eqref{incompressibleagain}--\eqref{flowlaw} do not contain any time derivatives!  This implies that the combined effect of glacier geometry, boundary stresses, and gravity will determine the solution velocity and stress fields ($\bu$, $p$, $\tau$)  at each instant \cite{JouvetRappaz2011}.\footnote{Ice flow simulation codes need no memory of prior momentum or velocity.  Said another way, velocity is a ``diagnostic'' output of ice flow models.  Unlike in a Navier-Stokes-based simulation, velocity is not needed for (re)starting a simulation.}  The equations apply at every time, but as the glacier interacts with the climate its geometry and basal stresses will be changing, and thus the Stokes solution fields will also be changing.  In other words, though these equations have no time derivatives, the modelled glacier is  \emph{not} in steady state just because we use them.
 
-Consider the $x,z$-coordinates \emph{planar} (or \emph{flow line}) case.  Now one velocity component in equations \eqref{incompressibleagain}--\eqref{flowlaw} is zero, $v=0$, and derivatives with respect to $y$ are also zero:
+Consider the $x,z$-coordinates \emph{planar} (or \emph{flow line}) and $n=3$ case.  The out-of-plane velocity component in equations \eqref{incompressibleagain}--\eqref{flowlaw} is zero, i.e.~$v=0$, and derivatives with respect to $y$ are also zero:
 \begin{align}
 u_x + w_z &= 0 &&\text{\emph{incompressibility}} \label{incompressiblexz} \\
 - \tau_{11,x} - \tau_{13,z} + p_x &= 0 &&\text{\emph{stress balance} ($x$)} \label{stokespx} \\
@@ -254,15 +257,17 @@ Do we believe formula \eqref{uslab}, which makes a specific prediction about the
 
 In Section \ref{sec:sia} we will convert the severe simplifications of the slab-on-a-slope model into the \emph{shallow ice approximation}.
 
-\subsection*{Forms of the flow law}  Returning to the general case, flow law \eqref{flowlaw} has another important form.  Recall $|\tau|^2 = (1/2) \tau_{ij} \tau_{ij}$, and define $|D\bu|^2 = (1/2) (D\bu)_{ij} (D\bu)_{ij}$.  The scalars $|\tau|$ and $|D\bu|$ are tensor \emph{norms}.  From \eqref{flowlaw} we get $|D\bu| = A |\tau|^3$ so $|\tau| = A^{-1/3} |D\bu|^{1/3}$.  Thus \eqref{flowlaw} can be rewritten
+\subsection*{Forms of the flow law}  Returning to the general case, flow law \eqref{flowlaw} has another important form.  Recall $|\tau|^2 = (1/2) \tau_{ij} \tau_{ij}$, and define $|D\bu|^2 = (1/2) (D\bu)_{ij} (D\bu)_{ij}$.  The scalars $|\tau|$ and $|D\bu|$ are tensor \emph{norms}.
+
+In the $n=3$ case, for simplicity, we get $|D\bu| = A |\tau|^3$ from \eqref{flowlaw}.  Thus $|\tau| = A^{-1/3} |D\bu|^{1/3}$, and \eqref{flowlaw} can be rewritten
 \begin{equation}
 \tau = 2 \nu\, D\bu  \qquad \text{\emph{viscosity form of a flow law}} \label{viscosityflowlaw}
 \end{equation}
-where for the $n=3$ case the (nonlinear) \emph{effective viscosity} $\nu$ has this form:
+where the (nonlinear) \emph{effective viscosity} $\nu$ has this form:
 \begin{equation}
-\nu = \frac{1}{2} A^{-1/3} |D\bu|^{-2/3} \label{viscositypowerlaw}
+\nu = \frac{1}{2} A^{-1/3} |D\bu|^{-2/3}. \label{viscositypowerlaw}
 \end{equation}
-Often $B = A^{-1/3}$ is called the \emph{ice hardness}.  Equations \eqref{viscosityflowlaw} and \eqref{viscositypowerlaw} eliminate the stress tensor $\tau$ from the stress balance \eqref{forcebalance}, so that the Stokes formulas may use only velocity $\bu$, pressure $p$, and strain rates $D\bu$.
+Often $B = A^{-1/3}$ is called the \emph{ice hardness}.  Equations \eqref{viscosityflowlaw} and \eqref{viscositypowerlaw} eliminate the stress tensor $\tau$ from the stress balance \eqref{forcebalance}, so that the Stokes formulas only need velocity $\bu$, pressure $p$, and strain rates $D\bu$ as major variables.
 
 \subsection*{Hydrostatic and Blatter-Pattyn approximations}  A relatively-mild simplification of the Glen-Stokes equations comes from assuming that horizontal variation in the vertical shear stress is small compared to the other terms.  This removes the single term $\tau_{13,x}$ from the $z$-component of the (planar) stress balance \eqref{stokespz}, giving
 \begin{equation}
@@ -316,7 +321,7 @@ Equation \eqref{skeplanar} says that the ice surface moves up and down at the ra
 
 Vector notation is convenient when extending \eqref{skeplanar} to 3D, so that the surface elevation function $s(t,x,y)$ depends on two horizontal variables.  Let
 \begin{equation}
-\bn_s = \Big<-\frac{\partial s}{\partial x}, -\frac{\partial s}{\partial y}, \,1\Big)> \label{normal}
+\bn_s = \Big<-\frac{\partial s}{\partial x}, -\frac{\partial s}{\partial y}, \,1\Big> \label{normal}
 \end{equation}
 be an upward-pointing normal vector on the surface.  Then the SKE is
 \begin{equation}
@@ -578,7 +583,7 @@ because $\lim_{\Delta x \to 0} (\int_{x_1}^{x_2} a\,dx)/\Delta x = a$ is the ave
 
 \section{Shallow ice approximation}  \label{sec:sia}
 
-\subsection*{Shallowness of glaciers and ice sheets}  Glacier ice has several outstanding properties as a fluid.  As explained in Section \ref{sec:continuum}, it is slow and non-Newtonian.  Also, glaciers are subject to contact slip, i.e.~basal sliding, along a hard-to-observe boundary.  However, it is the typical \emph{shallowness} of glacier geometry, at least for large glaciers and ice sheets, which permits a simpler stress balance model than the full Glen-Stokes system, and thus faster simulations.  Ice sheet geometry is shallow like the ocean and sea ice, but slowness gives the problem a distinctive \emph{diffusive} character, as we will see.
+\subsection*{Shallowness of glaciers and ice sheets}  Glacier ice has several outstanding properties as a fluid.  As explained in Section \ref{sec:continuum}, it is slow and non-Newtonian.  Also, glaciers are subject to contact slip, i.e.~basal sliding, along a hard-to-observe boundary.  However, it is the typical \emph{shallowness} of glacier geometry, at least for large glaciers and ice sheets, which enables a simpler stress balance model, an approximation to the full Glen-Stokes system, which then permits faster simulations.  Because ice sheet geometry is shallow \emph{and slow}, the problem has a distinctive \emph{diffusive} character.
 
 Figure \ref{fig:green-transect} shows a cross-section of the Greenland ice sheet.  The vertically-exaggerated view is more familiar from the glaciological literature, but without such exaggeration the ice sheet is revealed to be a thin blanket, barely three-dimensional.  Precisely speaking, ice sheets are \emph{shallow} in the sense that the dimensionless ratio $\eps = [H]/[L]$, between typical scales for thickness $[H]$ and horizontal (length) $[L]$, is small.  For this Greenland example, $[H]=2000$ m and $[L]=1000$ km are representative, so $\eps = 0.002$.
 
@@ -589,40 +594,38 @@ Figure \ref{fig:green-transect} shows a cross-section of the Greenland ice sheet
 \label{fig:green-transect}
 \end{figure}
 
-The non-sliding, isothermal \emph{shallow ice approximation} (SIA; \cite{Bueler2016,GreveBlatter2009,SchoofHewitt2013}) is an effective model for shallow glaciers, as long as they are not dominated by basal sliding.  Mountain glaciers have much larger $\eps$ ratios, but they too are often modelled within an SIA framework.  A model of a small region of an ice sheet often should \emph{not} use the SIA, and if there is basal sliding or the ice is floating then a different shallow model, the \emph{shallow shelf} or \emph{membrane} approximation \cite{SchoofHewitt2013}, is more appropriate.  Hybrid shallow models \cite{BuelerBrown2009}, that combine the two approximations, are in widespread use.
+The non-sliding, isothermal \emph{shallow ice approximation} (SIA; \cite{Bueler2016,GreveBlatter2009,SchoofHewitt2013}) is an effective model for shallow glaciers, as long as they are not dominated by basal sliding.  Mountain glaciers have much larger $\eps$ ratios, but they too are often modelled within an SIA framework.  A model of a small region of an ice sheet often should \emph{not} use the SIA, and if there is basal sliding or the ice is floating then a different shallow model, the \emph{shallow shelf} or \emph{membrane} approximation \cite{SchoofHewitt2013}, is more appropriate.  Hybrid shallow models \cite{BuelerBrown2009}, that combine the two approximations, are in widespread use, and serious models should couple these with conservation of energy \cite{Aschwandenetal2012}.  However, these notes will not plunge into that thicket of modern modeling choices.
 
-\subsection*{Velocity formulas in the SIA}  The label ``SIA'' is put on several equations.  First of all it refers to certain simplified velocity formulas.  The principled way to derive them starts from the full Glen-Stokes stress balance \eqref{incompressibleagain}--\eqref{flowlaw}, and then applies a small parameter argument \cite[for example]{Fowler1997}, rescaling the variables using $\eps$, and then dropping terms which are small when $\eps$ is small.
+\subsection*{Velocity formulas in the SIA}  The label ``SIA'' is put on several equations.  First of all it refers to certain simplified velocity formulas.  The principled way to derive them starts from the full Glen-Stokes stress balance \eqref{incompressibleagain}--\eqref{flowlaw}, and then applies a small parameter argument \cite[for example]{Fowler1997}, rescaling the variables using $\eps = [H]/[L]$, and then dropping terms which are small when $\eps$ is small.
 
-However, the same destination can be reached by a lazier approach.  The SIA adopts the slab-on-a-slope result \eqref{uslab} as valid even for general glaciers, not just uniform slabs.  Actually, we need two assumptions for this to work: \emph{i)} the surface $s$ and bed $b$ elevation functions must be smooth, and \emph{ii)} a small-angle approximation must be adequate to replace $\sin\alpha$ in \eqref{uslab} with the surface slope $|\grad s|$.  Regarding the small-angle approximation, $|\sin \alpha| \approx |\tan\alpha| = |\grad s|$ when $\alpha$ is small (Figure \ref{fig:slab}).  A key idea is that the shear stresses are linear in depth and proportional to $|\grad s|$.
+However, the same destination can be reached by a lazier approach, now adopted.  The SIA can be regarded as using the slab-on-a-slope result \eqref{uslab}, as valid even for general glaciers, not just uniform slabs.  Actually, we need two assumptions for this to work: \emph{i)} the surface $s$ and bed $b$ elevation functions must be smooth, and \emph{ii)} a small-angle approximation must be adequate to replace $\sin\alpha$ in \eqref{uslab} with the surface slope $|\grad s|$.  Regarding \emph{ii)}, $|\sin \alpha| \approx |\tan\alpha| = |\grad s|$ when $\alpha$ is small (Figure \ref{fig:slab}).  A key idea is that the shear stresses are linear in depth and proportional to $|\grad s|$.
 
-Equation \eqref{uslab} becomes this SIA formula for the horizontal velocity $\bU(t,x,y,z)$, which is $\bU=\left<u,v\right>$ in components:
+For general Glen exponent $n$, equation \eqref{uslab} becomes this SIA formula for the horizontal velocity $\bU(t,x,y,z)$, which is $\bU=\left<u,v\right>$ in components:
 \begin{equation}
 \bU = \bU_0 - \frac{2}{n+1} A (\rho g)^n \left((s-b)^{n+1} - (s-z)^{n+1}\right) |\grad s|^{n-1} \grad s. \label{sia:ugeneral}
 \end{equation}
-The first minus sign in \eqref{sia:ugeneral} is remembered by noting that ice flows downhill, that is, opposite the $\grad s$ direction.
-
-When using SKE \eqref{ske} to evolve a glacier's geometry, which we will do using the non-sliding SIA theory, only the surface velocity is needed:
+The first minus sign in \eqref{sia:ugeneral} is remembered by noting that ice flows downhill, that is, opposite the $\grad s$ direction.  When using SKE \eqref{ske} to evolve geometry under the non-sliding SIA theory---see the next Section---only the surface value is needed:
 \begin{equation}
 \bU|_s = - \frac{2}{n+1} A (\rho g)^n (s-b)^{n+1} |\grad s|^{n-1} \grad s. \label{sia:usurface}
 \end{equation}
 Derive \eqref{sia:usurface} by substituting $\bU_0=0$ and $z=s$ into \eqref{sia:ugeneral}.
 
-Vertical integration yields two additional formulas in this non-sliding SIA framework.  First, vertical integration of \eqref{sia:ugeneral}, using the power rule $\int t^{n+1}\,dt = t^{n+2}/(n+2) + c$, yields a formula for the ice flux $\bq$, defined by \eqref{flux}:
+Vertical integration yields two additional formulas.  First, vertical integration of \eqref{sia:ugeneral}, using the power rule $\int z^{n+1}\,dz = z^{n+2}/(n+2) + c$, yields a formula for the ice flux:
 \begin{equation}
 \bq = - \frac{2}{n+2} A (\rho g)^n (s-b)^{n+2} |\grad s|^{n-1} \grad s. \label{sia:q:early}
 \end{equation}
-We can also evaluate the surface value of the vertical velocity:
+(Compare equation \eqref{flux}.)  Second, we get the surface value of the vertical velocity:
 \begin{align}
 w|_s &= \bU|_s \cdot \grad s - \Div \bq   \label{sia:wsurface:early} \\
   &= - \frac{2}{n+1} A (\rho g)^n (s-b)^{n+1} |\grad s|^{n+1} + \Div \left(\frac{2}{n+2} A (\rho g)^n (s-b)^{n+2} |\grad s|^{n-1} \grad s\right).  \notag
 \end{align}
-The derivation is like that for the mass continuity equation \eqref{masscont} earlier.  One uses incompressibility \eqref{incompressibleagain}, $w|_b=0$, and vertical integration to express $w$ at the surface, and then the Leibniz rule \eqref{leibniz} and $\bU_0=0$.  The second form follows from \eqref{sia:usurface} and \eqref{sia:q:early}.
+Equation \eqref{sia:wsurface:early} is derived like the mass continuity equation \eqref{masscont}.  One uses incompressibility \eqref{incompressibleagain}, $w|_b=0$, and vertical integration to express $w$ at the surface, and then the Leibniz rule \eqref{leibniz} and $\bU_0=0$.  The second line follows from \eqref{sia:usurface} and \eqref{sia:q:early}.
 
 The formulas for $\bq$ and $w|_s$ have a common scalar \emph{diffusivity} coefficient function:
 \begin{equation}
 \Dsia = \frac{2}{n+2} A (\rho g)^n (s-b)^{n+2} |\grad s|^{n-1}. \label{sia:D}
 \end{equation}
-This positive coefficient appears in both formulas \eqref{sia:q:early} and \eqref{sia:wsurface:early}, which are now clean:
+This positive coefficient appears in \eqref{sia:q:early} and \eqref{sia:wsurface:early}, and now we can write them cleanly:
 \begin{align}
 \bq  &= - \Dsia \grad s. \label{sia:q} \\
 w|_s &= \bU|_s \cdot \grad s + \Div \left(\Dsia \grad s\right).  \label{sia:wsurface}
@@ -639,15 +642,15 @@ For example, suppose $b$ is a simple incline and $s$ is a gently-oscillating sur
 
 \onefigsize{uw}{Top panel: glacier geometry.  Bottom panel: FD approximations of the horizontal ($\circ$) and vertical ($+$) surface velocity in the SIA.}{4.0in}
 
-Our FD approximation of \eqref{sia:usurface:planar} computes the surface slope at the \emph{staggered grid} points $x_{j+1/2}$, which are half-way between the regular grid locations $\{x_j\}$; see Section \ref{sec:masscont} for this notation.  Using the staggered point achieves second-order accuracy because the function evaluations are centered around the point:
+Our FD approximation of \eqref{sia:usurface:planar} will compute the surface slope at the \emph{staggered grid} points $x_{j+1/2}$, which are half-way between the regular grid locations $\{x_j\}$; see Section \ref{sec:masscont} for grid notation.  Using the staggered point achieves second-order accuracy because the function evaluations are centered around it:
 \begin{equation}
 \frac{\partial s}{\partial x}(x_{j+1/2}) = \frac{s(x_{j+1})-s(x_j)}{\Delta x} + O((\Delta x)^2).  \label{fd:slope}
 \end{equation}
-Averaging the ice thicknesses, symmetrically to the staggered point, is needed to maintain the second-order accuracy, so the approximation is
+Averaging the ice thicknesses, symmetrically to the staggered point, is also needed, to maintain the second-order accuracy.  The velocity approximation is
 \begin{equation}
 u_{j+1/2} = - \frac{2}{n+1} A (\rho g)^n \left(\frac{H_j + H_{j+1}}{2}\right)^{n+1} \left|\frac{s_{j+1}-s_j}{\Delta x}\right|^{n-1} \frac{s_{j+1}-s_j}{\Delta x} \label{fd:usurface:planar}
 \end{equation}
-where $H_j = s_j - b_j$.  So here is the function which computes \eqref{fd:usurface:planar}:
+where $H_j = s_j - b_j$.  So here is our Python function for \eqref{fd:usurface:planar}:
 
 \begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
 def u(x, b, s):
@@ -658,11 +661,11 @@ def u(x, b, s):
     return -C_u * Hstag ** (n + 1) * abs(dsdx) ** (n - 1) * dsdx
 \end{lstlisting}
 
-The surface vertical velocity $w|_s$ are approximated by a similar strategy.  First we compute $\Dsia$ from \eqref{sia:D} at staggered points,
+The surface vertical velocity $w|_s$ is approximated similarly.  First we compute $\Dsia$ from \eqref{sia:D} at staggered points,
 \begin{equation}
-\Dsia_{j+1/2} = \frac{2}{n+2} A (\rho g)^n \left(\frac{H_j + H_{j+1}}{2}\right)^{n+2} \left|\frac{s_{j+1}-s_j}{\Delta x}\right|^{n-1}, \label{fd:Dsia:planar}
+\Dsia_{j+1/2} = \frac{2}{n+2} A (\rho g)^n \left(\frac{H_j + H_{j+1}}{2}\right)^{n+2} \left|\frac{s_{j+1}-s_j}{\Delta x}\right|^{n-1}. \label{fd:Dsia:planar}
 \end{equation}
-via a very similar short function:
+The Python is short and similar:
 \begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
 def diffusiveD(x, b, s):
     dx = x[1] - x[0]
@@ -671,15 +674,15 @@ def diffusiveD(x, b, s):
     C_D = (2.0 / (n + 2)) * A * (rhoi * g) ** n
     return C_D * Hstag ** (n + 2) * abs(dsdx) ** (n - 1)
 \end{lstlisting}
-The method to compute $\bq$ at staggered grid points is a small extension of this, but we do not specifically need it, so it was not implemented.
-
-For the vertical velocity, we evaluate \eqref{sia:wsurface} using another centered difference, which yields values on the (interior) regular grid points:
+(Computing $\bq$ at staggered grid points would be a small modification, but as it is not specifically needed we do not bother.)  Next we evaluate \eqref{sia:wsurface} using another centered difference, which yields values on the (interior) regular grid points:
 \begin{equation}
 w_j = \frac{\phi_{j-1/2} + \phi_{j+1/2}}{2} + \frac{\Dsia_{j+1/2} (s_{j+1}-s_j) - \Dsia_{j-1/2} (s_{j}-s_{j-1})}{\Delta x^2}, \label{fd:wsurface:planar}
 \end{equation}
 where
 	$$\phi_{j+1/2} = u_{j+1/2} \frac{s_{j+1}-s_j}{\Delta x} \approx \left(u|_s \frac{\partial s}{\partial x}\right)_{j+1/2}.$$
-This Python function which computes \eqref{fd:wsurface:planar} is not shown, but run  \href{https://github.com/bueler/mccarthy/blob/master/py/shallow.py}{\texttt{py/shallow.py}} as follows to generate Figure \ref{fig:uw}:
+The short Python function which computes \eqref{fd:wsurface:planar} is not shown.
+
+Run \href{https://github.com/bueler/mccarthy/blob/master/py/shallow.py}{\texttt{py/shallow.py}} as follows.  It calls the above functions, for a particular geometry, and it generates Figure \ref{fig:uw}:
 
 \smallskip
 \begin{Verbatim}[xleftmargin=4mm]
@@ -691,75 +694,85 @@ writing to image file output/uw.pdf
 \end{Verbatim}
 %$
 
-After all this detail on how computations work, let us return to what Figure \ref{fig:uw} actually shows.  Because of gravity the flow is faster where the surface is steeper, so the horizontal velocity is as expected.  The vertical velocity, however, is more interesting.  Through incompressibility, the vertical velocity causes the surface to rise in surface dips and fall where the surface has a hump.  This is a key feature of ice flow: it is \emph{smoothing}, at least at the large scales covered by the SIA.
+\medskip
+What does Figure \ref{fig:uw} show?  Because of gravity the flow is faster where the surface is steeper, and perhaps the horizontal velocity is as expected.  The vertical velocity at the surface, however, is more interesting.  Through incompressibility, it causes the surface to rise in dips and fall at humps.  This is a key feature of ice flow: it is \emph{smoothing}, and it tends to remove details of surface topography, at least at the large scales covered by the SIA.  That is, gravity and incompressibility combine to generate ice surface motion, especially through the vertical component, which removes bumps under SKE evolution.
 
-Figure \ref{fig:green-transect} shows the effect for a real ice sheet; the surface is much smoother than the base.  Widespread use of ice-penetrating radar in the 21st century has revealed rough bedrock topography under ice sheets, making it more obvious that their surfaces are smoother than their beds.  The reason is that gravity and incompressibility combine to generate a surface vertical velocity component which removes bumps.  Simulating the time-dependent SIA, our next task, will again make the smoothing effect very clear.
+Figure \ref{fig:green-transect} shows the result for a real ice sheet; the surface is much smoother than the base.  Ice-penetrating radar in the 21st century has revealed widespread rough bedrock topography under ice sheets, making it even more obvious over time that their surfaces are smoother than their beds.
 
-\subsection*{Evolution of glacier geometry in the SIA}  Section \ref{sec:masscont} emphasized that there are two concepts for modelling the evolution of a glacier, either using the surface elevation $s$ and the SKE \eqref{ske}, or using the thickness $H$ and mass continuity \eqref{masscont}.  We will write down both of these using the non-sliding SIA velocity formulas.  These approaches yield essentially the same \emph{diffusion} equation, for $s$ or $H$ according to taste.
+Simulating the time-dependent SIA, our next task, will also make the smoothing effect clear.
 
-FIXME write it down for the SKE
 
-FIXME from mass continuity \eqref{masscont}, we get an equation for the rate of thickness change in terms of mass balance $M$, thickness $H$, and surface gradient $\grad h$:
+\section{Time-dependent glacier simulations in the SIA}  \label{sec:evolution}
+
+\subsection*{Diffusion equations for geometry}  In Section \ref{sec:masscont} we saw two equations which model the evolution of a glacier's shape: the surface kinematical equation (SKE) \eqref{ske} for the surface elevation $s$, and the mass continuity equation \eqref{masscont} for the thickness $H$.  If we decide to compute velocities and fluxes, respectively, from the non-sliding shallow ice approximation (SIA; Section \ref{sec:sia}) then these equations become time-dependent glacier models.  Unlike the minimal SKE-based ``model'' in Section \ref{sec:masscont}, these self-contained SIA geometry equations do not need the surface velocities to be given by an outside (magical?) agent.  On the other hand, SIA-generated velocities do not solve the full Glen-Stokes system, but only a shallow approximation of it.
+
+In the current Section we will demonstrate this strategy, combining Sections \ref{sec:masscont} and \ref{sec:sia} to get the simplest well-posed (mostly; \cite{JouvetBueler2012}) evolution model in glaciology.  Simulations built this way start from a known glacier geometry and apply a (generally) time-dependent climate, specifically an SMB function.  They generate the geometry at future times, which can be regarded as predictions.
+
+In SIA-based flow models, however, both geometry-evolution equations simplify to essentially the same \emph{diffusion equation}.  On the one hand, recall the SKE \eqref{ske},
 \begin{equation}
-H_t = a + \Div \left(\Gamma H^{n+2} |\grad s|^{n-1} \grad s \right). \label{sia:Hevolve}
+\frac{\partial s}{\partial t} - \bu|_s \cdot \bn_s = a.  \label{skeagain}
 \end{equation}
-We have defined the positive constant $\Gamma = 2 A (\rho g)^n / (n+2)$ only to improve appearance.
-
-Equation \eqref{sia} is the SIA evolution equation for the glacier thickness.   Historically speaking, it is the start of numerical ice sheet modeling.  Mary-Anne Mahaffy \cite{Mahaffy1976} used it in a 1976 numerical model of the Barnes ice cap in Canada, a particularly-simple ice sheet on a rather flat bed.
-
-The model should, however, be solved subject to the constraint that the thickness is positive ($H\ge 0$) \cite{Bueler2016,JouvetBueler2012}.
-
-\subsection*{Analogy with diffusion equations}  FIXME make 1D  Numerical methods for solving \eqref{sia} are modifications of methods for the better-known heat equation, e.g.~ $T_t = D T_{xx}$ for the temperature of a conducting rod, its simplest 1D form.  This model applies when material properties are constant and there are no heat sources.  The positive constant $D$ is the ``diffusivity,'' with SI units which can be read from comparing sides of the equation: $D\sim \text{m}^2 \text{s}^{-1}$.  This equation has a smoothing effect on the solution $T(t,x)$ as it evolves in time, because any local maximum or minimum in the temperature is flattened: $T_{xx}<0$ implies $T_t<0$, so $T$ decreases near a maximum, while $T_{xx}>0$ implies $T_t>0$, so $T$ increases near a minimum.  All extrema of the temperature diffuse away.
-
-The 2D heat equation, which describes the temperature $T(t,x,y)$ of a planar object, is a closer analog of \eqref{sia}.  Recall that Fourier's law for conduction is the formula $\mathbf{Q} = - \kappa \grad T$ for heat flux $\mathbf{Q}$, where $\kappa$ is conductivity.  We will assume, so as to help the analogy to the SIA, that $\kappa(x,y)$ may vary in space, and we suppose the heat source $f(t,x,y)$ is variable.  Adding conservation of internal energy, we find the equation
+Here $\bu|_s=\left<u|_s,v|_s,w|_s\right>$ is the 3D surface velocity and $\bn_s = \left<-\frac{\partial s}{\partial x}, -\frac{\partial s}{\partial y}, \,1\right>$ is a normal vector.  From equation \eqref{sia:wsurface} the surface motion term has a divergence form:
+	$$\bu|_s \cdot \bn_s = -\bU|_s \cdot \grad s + w|_s = \Div\left(\Dsia \grad s\right).$$
+(Note $\bU|_s \cdot \grad s$ is a 2D dot product.)  Recall that $\Dsia$ is given by equation \eqref{sia:D}, and Section \ref{sec:sia} provides a Python function which computes it.  On the other hand, recall mass continuity equation \eqref{masscont} for the thickness $H=s-b$:
 \begin{equation}
-\rho c T_t = f + \Div (\kappa \grad T). \label{heatearly}
+\frac{\partial H}{\partial t} + \Div \bq = a - m.  \label{masscontagain}
 \end{equation}
-Here $\rho$ is density and $c$ is specific heat capacity.  Assuming $\rho c$ is constant, define the diffusivity $D=\kappa/(\rho c)$.  Defining $F = f/(\rho c)$, a rescaled source term, \eqref{heatearly} becomes
-\begin{equation}
-T_t = F + \Div (D\, \grad T). \label{heat}
-\end{equation}
-This 2D heat equation is similar to the above 1D equation $T_t = D T_{xx}$, but now with variable diffusivity and an additional heat source.
+The SIA ice flux $\bq$ was given in equation \eqref{sia:q}, namely $\bq = - \Dsia \grad s$.  These (non-sliding) SIA stress balance model substitutions create very-similar diffusion equations, namely the boxed equations in the following diagram.
 
-Solutions of the heat equation always involve the spreading, in all directions, of any local concentration of heat; this is diffusion.
-
-FIXME
-
-The SIA equation \eqref{sia} and the heat equation \eqref{heat} are each diffusive, time-evolving partial differential equations (PDEs).  A side-by-side comparison is appropriate:
+\medskip
 \begin{center}
-\begin{tabular}{cc}
-\vspace{1mm}
-SIA:\, $H$ is ice thickness & \phantom{foo bar} heat: $T$ is temperature\phantom{foo bar}  \\
-\vspace{1mm}
-	$H_t = M + \Div \left(\Gamma H^{n+2} |\grad h|^{n-1}\, \grad h \right)$  &  $T_t = F + \Div (D\, \grad T)$
-\end{tabular}
+\begin{tikzpicture}[scale=1.0]
+% --- left half ---
+\node (TL) at (0, 3.0)  {\underline{SKE\strut}};
+\node (AL) at (0, 2)  {$\ds \frac{\partial s}{\partial t} - \bu|_s \cdot \bn_s = a$};
+\node (BL) at (0, -1)  {%
+    \refstepcounter{equation}\label{diffusion:ske}%
+    $\ds \boxed{\frac{\partial s}{\partial t} - \Div\left(\Dsia \grad s\right) = a}$%
+    \quad (\theequation)};
+\draw[->, thick] (AL) -- node[right] {\small \begin{tabular}{l} \emph{SIA says:} \\ \quad $\bu|_s \cdot \bn_s = \Div\left(\Dsia \grad s\right)$\end{tabular}} (BL);
+% --- right half ---
+\node (TR) at (9, 3.04)  {\underline{mass continuity\strut}};
+\node (AR) at (9, 2)  {$\ds \frac{\partial H}{\partial t} + \Div \bq = a - m$};
+\node (BR) at (9, -1)  {%
+    \refstepcounter{equation}\label{diffusion:masscont}%
+    $\ds \boxed{\frac{\partial H}{\partial t} - \Div\left(\Dsia \grad s\right) = a - m}$%
+    \quad (\theequation)};
+\draw[->, thick] (AR) -- node[right] {\small \begin{tabular}{l} \emph{SIA says:} \\ \quad $\bq = - \Dsia \grad s$\end{tabular}} (BR);
+% bottom middle
+\node (BM) at (4.0, -2.5)  {\small \emph{diffusion equations}};
+\draw[->, thick] (BM.north west) -- (BL);
+\draw[->, thick] (BM.north east) -- (BR);
+\end{tikzpicture}
 \end{center}
-\vspace{1mm}
-Notice that the number of derivatives (one time and two space) and the signs of the various terms are the same.  Surface mass balance $M$ is analogous to heat source $F$.  The analogy suggests that we identify the \emph{SIA diffusivity} as:
+
+\medskip
+Similar form is not a surprise, actually.  Section \ref{sec:masscont} showed that our starting equations \eqref{skeagain} and \eqref{masscontagain} are equivalent if we assume incompressibility \eqref{incompressibleagain} and a basal kinematical equation \eqref{bke}.  In fact, the main difference between the boxed equations \eqref{diffusion:ske} and \eqref{diffusion:masscont} is that the former does not refer to the \emph{basal} mass balance $m$ (Section \ref{sec:masscont}) at all.  Note that both boxed equations refer to surface elevation (for the surface slope, at least) and ice thickness (for the form of $\Dsia$, at least); the different geometry variables is not that big a difference.  Roughly-speaking, the SKE isolates the surface evolution while the mass continuity equation involves the whole ice column, and the surface elevation tends to be the smoother geometry function (e.g.~Figure \ref{fig:green-transect}).
+
+The two models \eqref{diffusion:ske} and \eqref{diffusion:masscont} are similar in another respect: they must be solved subject to a geometrical inequality constraint.  That is, either that the surface must remain above the bed ($s\ge b$) or the thickness must not be negative ($H\ge 0$).
+
+Historically-speaking, recognizing the diffusion form of the mass continuity equation allowed numerical ice sheet modelling to get started.  Diffusion equations, especially the \emph{heat equation}, are clich\'ed topics in numerical analysis textbooks, for example in \cite{LeVeque2007,MortonMayers2005}.  Specifically, Mary-Anne Mahaffy \cite{Mahaffy1976} started the subject with a 1976 numerical (FD) model of the Barnes ice cap (Baffin Island, Canada) based on equation \eqref{diffusion:masscont}.
+
+\subsection*{Highly-nonlinear diffusivity}  Equation \eqref{sia:D} gives the form of the diffusivity $\Dsia$, which appears in the diffusion equations \eqref{diffusion:ske} and \eqref{diffusion:masscont}:
 \begin{equation}
-	D = \Gamma H^{n+2} |\grad h|^{n-1}.  \label{siadiffusivity}
+\Dsia = \frac{2}{n+2} A (\rho g)^n (s-b)^{n+2} |\grad s|^{n-1}. \label{sia:Dagain}
 \end{equation}
+Independent of the power $n$, the units of $\Dsia$ must reduce to square meters per second---otherwise equations \eqref{diffusion:ske} and \eqref{diffusion:masscont} would not be dimensionally correct---and it follows that the units of the ice softness $A$ will depend on $n$ (Table \ref{tab:notation}).
 
-Diffusion acts quickly where $D$ is large.  SIA diffusivity formula \eqref{siadiffusivity} gives a large value when the ice is thick and steep, because ice flows downhill most-strongly in that case.  Our analogy also explains why the surfaces of ice sheets are smooth, at least once we overlook non-fluid processes like crevassing.
+Equation \eqref{sia:Dagain} expresses the dominant macroscopic effects of the ice flow law \eqref{flowlaw}, and it is at the heart of why glaciology is a \emph{nonlinear} science.  The diffusivity is not a constant, nor a known-in-advance function, as in most textbook presentations \cite[for example]{LeVeque2007,MortonMayers2005}.  If $n=3$ it scales with the $5$th power of thickness and the $2$nd power of surface slope, but even when $n=1$ (Newtonian case), so that diffusivity is independent of surface slope, it still depends on the $3$rd power of thickness.
 
-There are, however, conceptual and practical concerns about the \eqref{sia}$\leftrightarrow$\eqref{heat} analogy:
-\begin{itemize}
-\item The letters ``$H$'' and ``$h$'' generally denote different quantities in \eqref{sia}.  Are we allowed to regard \eqref{sia} as a diffusion anyway, even when the bed is not flat?
-\item The diffusivity $D$ in \eqref{siadiffusivity} depends on the solution---both on thickness $H$ and surface slope $|\grad h|$---so equation \eqref{sia} is a nonlinear PDE.  Numerical solutions for nonlinear equations are, at least, more difficult to implement and analyze.
-\item The diffusivity $D$ in \eqref{siadiffusivity} goes to zero at margins, where $H\to 0$, and at divides and domes, where $|\grad h|\to 0$.  Thus the solution ($h$ or $H$) is not smooth at these locations, though it is continuous everywhere.  The solution is not smooth even if the bed $b$ and surface mass balance $M$ \emph{are} smooth.  Large numerical errors will arise where the solution is not smooth.
-\end{itemize}
+The local value of diffusivity $\Dsia$ is the rate of smoothing over adjacent areas, and formula \eqref{sia:Dagain} returns a large value when the ice is both thick and steep.  Intuitively this makes sense because ice flows downhill, away from surface maxima, and converging toward surface minima, most-strongly in that case.
 
-Just as important is a physical deficiency of the SIA model, namely
-\begin{itemize}
-\item Ice flow is not very diffusive when significant longitudinal (membrane) stresses are present, as when ice is floating or sliding, or when the flow is significantly confined by terrain.
-\end{itemize}
-This concerns a deficiency of the SIA model, not just our analogy to explain it.
+It is worth noting some conceptual and practical concerns when treating equations \eqref{diffusion:ske} or \eqref{diffusion:masscont} as ``like'' classical linear diffusion, given the nonlinearities in formula \eqref{sia:Dagain}:
+\renewcommand{\labelenumi}{\emph{\roman{enumi})}}
+\begin{enumerate}
+\item The derivation of the SIA diffusion model is inaccurate when significant longitudinal (membrane) stresses are present.  This is distinctly true when ice is floating or sliding, but also if the flow is significantly confined by terrain.  In such cases the SIA approximation of the true solution of the Glen-Stokes model equations \eqref{incompressibleagain}--\eqref{flowlaw} may be completely inadequate.
+\item The diffusivity $\Dsia$ goes to zero at margins, where $H=s-b\to 0$, and at divides and domes, where $|\grad s|\to 0$.  It \emph{degenerates}.  Thus the solution of \eqref{diffusion:ske} or \eqref{diffusion:masscont} is not smoothed at these locations, though it will be continuous everywhere.  Smoothness is lost even when the bed $b$ and SMB $a$ data are smooth.  Large numerical errors often arise where a solution is not smooth.
+\item The diffusivity $\Dsia$ depends on the solution, so partial differential equations \eqref{diffusion:ske} and \eqref{diffusion:masscont} are nonlinear.  Numerical methods are therefore more difficult to implement, and they are harder to analyze and debug.
+\end{enumerate}
+Item \emph{i)} concerns a deficiency of the SIA model, not just our diffusion understanding of it.  All of these concerns are research topics in mathematical glaciology.
 
-All four concerns are areas of active research in mathematical glaciology; see the Notes and References.
-
-The above diffusion analogy suggests that numerical schemes for the heat equation are a good starting point for solving the SIA.  The analogy will lead us to a verified numerical scheme for \eqref{sia}.  We demonstrate only finite difference (FD) schemes, which replace derivatives by difference quotients.
-
-\subsection*{Explicit scheme for the geometry SIA}  Our simplest scheme approximates the 1D heat equation $T_t=D T_{xx}$ \emph{explicitly}.  It is based on the fact that because $T_t$ and $D T_{xx}$ are equal, these two FD expressions are nearly equal:
+\subsection*{Explicit scheme for the geometry SIA}  FIXME Our simplest scheme approximates the 1D heat equation $T_t=D T_{xx}$ \emph{explicitly}.  It is based on the fact that because $T_t$ and $D T_{xx}$ are equal, these two FD expressions are nearly equal:
 \begin{equation}
 \frac{T(t+\Delta t,x) - T(t,x)}{\Delta t} \approx D\,\frac{T(t,x+\Delta x) - 2\, T(t,x) + T(t,x-\Delta x)}{\Delta x^2}.  \label{heat1Dapproximated}
 \end{equation}
