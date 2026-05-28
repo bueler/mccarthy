@@ -39,22 +39,21 @@ b = np.zeros(x.shape)
 
 
 def t0_halfar(alpha=1.0 / 11.0, R0=10.0e3, H0=1200.0):
-    # Halfar time-dependent SIA geometry from
-    #   P. Halfar (1981), On the dynamics of the ice sheets,
-    #   J. Geophys. Res. 86 (C11), 11065--11072
-    # For the formula for t0 see equations (3)--(9) in Bueler et al
-    # (2005), in 1D and for n=3.
+    # For the formula for t0 see equations (3)--(9) in
+    #   E. Bueler, C. S. Lingle, J. A. Kallen-Brown, D. N. Covey,
+    #   & L. N. Bowman (2005). Exact solutions and verification of
+    #   numerical models for isothermal ice sheets. J. Glaciol. 51
+    #   (173), 291--306
     beta = alpha
     Gamma = 2.0 * sia.A * (sia.rhoi * sia.g) ** 3.0 / 5.0
     return (7.0 / 4.0) ** 3.0 * (beta / Gamma) * R0**4.0 / H0**7.0
 
 
 def s_halfar(t, x, alpha=1.0 / 11.0, R0=10.0e3, H0=1200.0):
-    # Halfar time-dependent SIA geometry from
-    #   P. Halfar (1981), On the dynamics of the ice sheets,
+    # Halfar time-dependent SIA geometry (surface elevation) from
+    #   P. Halfar (1981). On the dynamics of the ice sheets,
     #   J. Geophys. Res. 86 (C11), 11065--11072
-    # The solution is evaluated at t = t0.  For the formula for t0 see
-    # equations (3)--(9) in Bueler et al (2005), in 1D and for n=3.
+    # This exact solution is evaluated at an arbitrary time t.
     t0 = t0_halfar()
     beta = alpha
     pp = 1.0 + 1.0 / 3.0
@@ -140,7 +139,7 @@ plt.ylabel("elevation (m)")
 plt.legend()
 # plt.show()
 sia.mkoutdir(outdir)
-print(f"writing simulation result to {outdir}dome.png")
+print(f"writing results to {outdir}dome.png and {outdir}timesteps.png")
 plt.savefig(f"{outdir}dome.png")
 plt.close()
 
@@ -152,6 +151,5 @@ plt.axis([-0.01*T_a, 1.01*T_a, td[:, 1].min(), 1.0])
 plt.xlabel("t (a)")
 plt.ylabel("time step (a)")
 # plt.show()
-print(f"writing time steps graph to {outdir}timesteps.png")
 plt.savefig(f"{outdir}timesteps.png")
 plt.close()
