@@ -778,9 +778,9 @@ However, it is worth noting some conceptual and practical concerns about \eqref{
 \end{enumerate}
 Item \emph{i)} concerns a deficiency of the SIA model, not just our diffusion-based understanding of it.  All of these concerns are research topics in mathematical glaciology.
 
-\subsection*{Explicit scheme for the geometry SIA}  Let us stop thinking about the form and validity of our PDEs, and instead apply finite differences (FD) and write code.
+\subsection*{Explicit scheme for the geometry SIA}  Let us stop thinking about the form and meaning of these equations, and instead apply finite differences (FD) and write code.
 
-Consider the planar and SMB-free ($a=0$) case of equation \eqref{diffusion:ske}.  That is, consider the simplest form of the SKE within the SIA stress balance model:
+Consider the planar and SMB-free ($a=0$) case of equation \eqref{diffusion:ske}.  This is the simplest combination of the SKE and the SIA stress balance:
 \begin{equation}
 \frac{\partial s}{\partial t} = \frac{\partial}{\partial x} \left(\Dsia \frac{\partial s}{\partial x}\right).  \label{diffusion:ske:planar}
 \end{equation}
@@ -788,14 +788,15 @@ We may regard the diffusivity as a generic coefficient which varies in time and 
 \begin{equation}
 \frac{\snew_j - s_j}{\Delta t} = \frac{D_{j+1/2} (s_{j+1} - s_j)/\Delta x - D_{j-1/2} (s_j - s_{j-1})/\Delta x}{\Delta x}.  \label{fd:diffusion:planar:early}
 \end{equation}
+Recall that $s_j \approx s(t_n,x_j)$ is at the current time, $\snew_j\approx s(t_{n+1},x_j)$ as at the updated time, and now we write $D_{j+1/2} \approx \Dsia(t_n,x_j)$.  The staggered-grid slopes $(s_{j+1} - s_j)/\Delta x$, denoted by $s'_{j+1/2}$ below, are defined by the same approximation \eqref{fd:slope} which appeared in Section \ref{sec:sia}.
 
-Unlike the advection problem in Section \ref{sec:masscont}, for a diffusion \eqref{diffusion:ske:planar} the forward-time centered-space scheme is a ``good'' choice, or at least \emph{conditionally stable} \cite{MortonMayers2005}.  Note that the centered-difference approximation of the divergence in \eqref{diffusion:ske:planar} differences $D\, \partial s/\partial x$ values on the staggered grid.  That is, the flux $\bq=-\Dsia \grad s$ is approximated on the staggered grid; this concept definitely extends to two horizontal variables \cite{Bueler2016,MortonMayers2005}.
+Unlike the advection problem in Section \ref{sec:masscont}, the forward-time centered-space scheme acceptable for a diffusion equation like \eqref{diffusion:ske:planar}; at least it is \emph{conditionally stable} \cite{MortonMayers2005}.  The centered-difference approximation of the outer derivative in \eqref{diffusion:ske:planar} subtracts $D\, \partial s/\partial x$ values on the staggered grid.  Equivalently, the flux $\bq=-\Dsia \grad s$ is on the staggered grid, which is fundamental when extending to two horizontal variables \cite{Bueler2016,MortonMayers2005}.
 
-Equation \eqref{fd:diffusion:planar:early} needs to be rewritten as an update of the surface elevation:
+An implementation of equation \eqref{fd:diffusion:planar:early} needs it as an update of the surface elevation:
 \begin{equation}
 \snew_j = s_j + \frac{\Delta t}{\Delta x} \left[D_{j+1/2}\, s'_{j+1/2} - D_{j-1/2}\, s'_{j-1/2}\right].  \label{fd:diffusion:planar}
 \end{equation}
-The staggered-grid slopes $s'_{j+1/2}$ are defined by the same approximation \eqref{fd:slope} which appeared in Section \ref{sec:sia}.  Furthermore, the staggered-grid diffusivities $D_{j+1/2}$ are exactly the values of $\Dsia$ computed in Section \ref{sec:sia} by \texttt{diffusiveD()}, so we will re-use (call) that Python function.  Now Equation \eqref{fd:diffusion:planar} becomes this Python function:
+The staggered-grid diffusivities $D_{j+1/2}$ are exactly the values of $\Dsia$ computed in Section \ref{sec:sia} by \texttt{diffusiveD()}, so we will re-use that Python function.  Now Equation \eqref{fd:diffusion:planar} becomes this bit of Python:
 \begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
 def geometrystep(x, b, s, D, dt):
     dx = x[1] - x[0]
@@ -804,9 +805,9 @@ def geometrystep(x, b, s, D, dt):
     snew[1:-1] += dt * (D[1:] * dsdx[1:] - D[:-1] * dsdx[:-1]) / dx
     return snew
 \end{lstlisting}
-Similar to what happened in Section \ref{sec:masscont} for our advection version of the SKE, here both ends of the spatial interval have frozen values of surface elevation, \texttt{snew[0]=s[0]} and \texttt{snew[J+1]=s[J+1]}.  Which is to say, we have chosen Dirichlet boundary values \cite{MortonMayers2005} for this diffusion problem.
+Compared to the single boundary condition applied to the SKE in Section \ref{sec:masscont}, here both ends of the spatial interval have frozen values of surface elevation, \texttt{snew[0]=s[0]} and \texttt{snew[J+1]=s[J+1]}.  Which is to say, we have chosen Dirichlet boundary values \cite{MortonMayers2005} for this second-order (in space) diffusion problem.
 
-The time axis is $t\in [0,t_f]$, where the final time $t_f$ is chosen as 40 years in the example below.  The time-stepping loop is \emph{adaptive} in the sense that $\Delta t$ is re-computed at every time step based on the current state of the solution.  Therefore we must explain the call to \texttt{getdt()}, but otherwise the loop is unsurprising:
+The time axis is $t\in [0,t_f]$, to a final time $t_f$.  (The example below uses $t_f=40$ a.)  As explained momentarily, the time-stepping loop is \emph{adaptive} in the sense that $\Delta t$ is re-computed at every time step based on the current state of the solution, but otherwise the loop is unsurprising:
 \begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
 t = 0
 for k in range(maxsteps):
@@ -817,7 +818,7 @@ for k in range(maxsteps):
     s = geometrystep(x, b, s, D, dt)
     t += dt
 \end{lstlisting}
-Note that \texttt{maxsteps} merely protects against an infinite loop; normal termination is when we get within a millionth of a second of the user's chosen final time \texttt{tf}.
+Note that \texttt{maxsteps} merely protects against an infinite loop; normal termination is the \texttt{break} when $t$ is within a $10^{-6}$ second of the user's chosen final time \texttt{tf}, to allow for a little rounding error.
 
 \subsection*{Adaptive time-stepping for stability} FIXME stability determines $\Delta t$
 
