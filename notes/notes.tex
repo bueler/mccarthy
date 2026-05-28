@@ -205,9 +205,9 @@ $x_i$         & $x_1,x_2,x_3=x,y,z$ coordinates & m
 \rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) &= \nabla \cdot (\nu \nabla \mathbf{u}) - \nabla p + \rho \mathbf{g} &&\text{\emph{stress balance}} \label{navierstokes}
 \end{align}
 
-Besides the velocity $\bu$, the other symbols in these equations are the ice density $\rho$, the viscosity $\nu$, the pressure $p$, and the acceleration of gravity $\bg$.  The velocity field $\bu$ is divergence-free (equation \eqref{incompressible}), thus no fluid is created or lost within the domain, which is one aspect of mass conservation.  Equation \eqref{navierstokes} is a form of ``$ma=F$'', Newton's second law.  The left side of \eqref{navierstokes} has the acceleration following the fluid, $\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}$, while the right-hand side is the total force per unit volume, the sum of viscous, pressure, and gravity ($\rho \mathbf{g} = \left<0,0,-\rho g\right>$) forces, respectively.  Using $\sigma$ to denote the Cauchy stress tensor, the right side can be written $\nabla \cdot \sigma + \rho \mathbf{g}$.
+Besides the velocity $\bu$, the other symbols in these equations are the ice density $\rho$, the viscosity $\nu$, the pressure $p$, and the acceleration of gravity $\bg$.  The velocity field $\bu$ is divergence-free (equation \eqref{incompressible}); thus no fluid is created or lost within the domain, which is one aspect of mass conservation.  Equation \eqref{navierstokes} is a form of ``$ma=F$'', Newton's second law.  The left side of \eqref{navierstokes} has the acceleration following the fluid, $\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}$, while the right-hand side is the total force per unit volume, the sum of viscous, pressure, and gravity ($\rho \mathbf{g} = \left<0,0,-\rho g\right>$) forces, respectively.  Using $\sigma$ to denote the Cauchy stress tensor, the right side can be written $\nabla \cdot \sigma + \rho \mathbf{g}$.
 
-The space of solutions to \eqref{incompressible} and \eqref{navierstokes} is rich.  It includes turbulent flows, which we will not need here.  In fact, reading a book-length introduction to fluids such as \cite{Acheson1990}, or their numerical solution (\emph{computational fluid dynamics}) such as \cite{Wesseling2001}, may not even be helpful for glacier modeling.  One might ask: is glacier modeling really computational fluid dynamics at all?  The answer is \emph{yes}.  Glacier ice flow is a large-scale, climate-relevant fluid problem, comparable to ocean circulation for example.  However, the phenomena which make ocean flows exciting, including turbulence, convection, coriolis force, and density stratification, are all absent.  What could be interesting about the slow flow of ice?  How does it work, anyway?
+The space of solutions to \eqref{incompressible} and \eqref{navierstokes} is rich.  It includes turbulent flows, which we will not need here.  Reading a book-length introduction to fluids such as \cite{Acheson1990}, or their numerical solution (\emph{computational fluid dynamics}) such as \cite{Wesseling2001}, may not even be helpful for glacier modeling.  One might ask: is glacier modeling really computational fluid dynamics at all?  The answer is \emph{yes}.  Glacier ice flow is a large-scale, climate-relevant fluid problem, comparable to ocean circulation for example.  However, the phenomena which make ocean flows exciting, including turbulence, convection, Coriolis force, and density stratification, are all absent.  What could be interesting about the slow flow of ice?  How does it work, anyway?
 
 \subsection*{Glen-Stokes equations}  We have said that glacier ice is a ``slow'' fluid.  In terms of equation \eqref{navierstokes}, this means that $\rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) \approx 0$, which is to say the forces (stresses) of inertia are negligible, and Newton's second law becomes a \emph{stress balance}.  However, ice is also a shear-thinning fluid, with \emph{non-Newtonian} behavior; larger strain rates imply smaller viscosity.  The nonlinear viscosity $\nu$ is thus not constant, and an empirically-based flow law is needed.  Combining these ideas gives the canonical ice flow model:
 \begin{align}
@@ -221,7 +221,7 @@ Equations \eqref{incompressibleagain}--\eqref{flowlaw} are commonly called the \
 
 At an abstract level, the many possible solutions of \eqref{forcebalance}--\eqref{flowlaw} are constrained by incompressibility \eqref{incompressibleagain}.  In this way of thinking, the pressure $p$ serves as a Lagrange multiplier for this constraint.
 
-Observe that equations \eqref{incompressibleagain}--\eqref{flowlaw} do not contain any time derivatives!  This implies that the combined effect of glacier geometry, boundary stresses, and gravity will determine the solution velocity and stress fields ($\bu$, $p$, $\tau$)  at each instant \cite{JouvetRappaz2011}.\footnote{Ice flow simulation codes need no memory of prior momentum or velocity.  Said another way, velocity is a ``diagnostic'' output of ice flow models.  Unlike in a Navier-Stokes-based simulation, velocity is not needed for (re)starting a simulation.}  The equations apply at every time, but as the glacier interacts with the climate its geometry and basal stresses will be changing, and thus the Stokes solution fields will also be changing.  In other words, though these equations have no time derivatives, the modeled glacier is  \emph{not} in steady state just because we use them.
+Observe that equations \eqref{incompressibleagain}--\eqref{flowlaw} do not contain any time derivatives!  This implies that the combined effect of glacier geometry, boundary stresses, and gravity will determine the solution velocity and stress fields ($\bu$, $p$, $\tau$) at each instant \cite{JouvetRappaz2011}.\footnote{Ice flow simulation codes need no memory of prior momentum or velocity.  Said another way, velocity is a ``diagnostic'' output of ice flow models.  Unlike in a Navier-Stokes-based simulation, velocity is not needed for (re)starting a simulation.}  The equations apply at every time, but as the glacier interacts with the climate its geometry and basal stresses will be changing, and thus the Stokes solution fields will also be changing.  In other words, though these equations have no time derivatives, the modeled glacier is  \emph{not} in steady state just because we use them.
 
 Consider the $x,z$-coordinates \emph{planar} (or \emph{flow line}) and $n=3$ case.  The out-of-plane velocity component in equations \eqref{incompressibleagain}--\eqref{flowlaw} is zero, i.e.~$v=0$, and derivatives with respect to $y$ are also zero:
 \begin{align}
@@ -233,7 +233,7 @@ u_z + w _x &= 2 A \tau^2 \tau_{13} &&\text{\emph{flow law (off-diagonal)}} \labe
 \end{align}
 Here $\tau_{13}$ is a shear stress while $\tau_{11},\tau_{33}$ are deviatoric longitudinal stresses.  In this planar case it follows that $\tau_{33}=-\tau_{11}$, by incompressibility and the flow law, which explains why we can write \eqref{stokespz} without $\tau_{33}$.  Also, a short calculation shows $\tau^2 = \tau_{11}^2+\tau_{13}^2$.  Observe that equations \eqref{incompressiblexz}--\eqref{forceflowz} form a system of 5 nonlinear equations in 5 unknown scalar fields ($u,w,p,\tau_{11},\tau_{13}$).
 
-\subsection*{Slab-on-a-slope solution}  However, equations \eqref{incompressiblexz}--\eqref{forceflowz} are still quite complicated and difficult to understand!  Before jumping into numerical solution methods we consider a simplified situation, a uniform slab of ice on an incline.  Here we can exactly solve the Stokes equations, and the same calculation motivates a later shallow model.
+\subsection*{Slab-on-a-slope solution}  However, equations \eqref{incompressiblexz}--\eqref{forceflowz} are still complicated and difficult to understand!  Before jumping into numerical solution methods we consider a simplified situation, a uniform slab of ice on an incline.  Here we can exactly solve the Stokes equations, and the same calculation motivates a later shallow model.
 
 \onefig{slab}{Rotated axes for the slab-on-a-slope calculation.}
 
@@ -280,7 +280,7 @@ Because $\sigma_{ij} = \tau_{ij} - p \delta_{ij}$, so that $\tau_{11}+p = - \tau
 \end{equation}
 where $z=s(t,x)$ is the \emph{surface elevation}.
 
-Equation \eqref{hydrostaticitself} allows us to eliminate the pressure $p$ from the model equations \eqref{incompressiblexz}--\eqref{forceflowz}.  In fact, taking the $x$-derivative of \eqref{hydrostaticitself}, then substituting into \eqref{stokespx} to eliminate $p_x$, and then using the viscosity form \eqref{viscosityflowlaw} leads to this equation \cite{GreveBlatter2009}:
+Equation \eqref{hydrostaticitself} allows us to eliminate the pressure $p$ from the model equations \eqref{incompressiblexz}--\eqref{forceflowz}.  Taking the $x$-derivative of \eqref{hydrostaticitself}, substituting into \eqref{stokespx} to eliminate $p_x$, and using the viscosity form \eqref{viscosityflowlaw} leads to this equation \cite{GreveBlatter2009}:
 \begin{equation}
 \left(4 \nu u_x\right)_x + \left(\nu (u_z+w_x)\right)_z = \rho g s_x \qquad\text{\emph{hydrostatic stress balance}} \label{stresshydrostatic}
 \end{equation}
@@ -290,7 +290,7 @@ We get the even-simpler Blatter-Pattyn model by dropping $w_x$ from equation \eq
 \begin{equation}
 \left(4 \nu u_x\right)_x + \left(\nu u_z\right)_z = \rho g s_x \qquad\text{\emph{Blatter-Pattyn stress balance}} \label{stressblatter}
 \end{equation}
-Now solving \eqref{viscositypowerlaw}, \eqref{stressblatter} as a boundary value problem yields the scalar horizontal velocity $u$.  One may then recover $w$ using integration in $z$ on incompressibility \eqref{incompressiblexz}.
+Now solving \eqref{viscositypowerlaw}, \eqref{stressblatter} as a boundary value problem yields the scalar horizontal velocity $u$.  We can then recover $w$ using integration in $z$ on incompressibility \eqref{incompressiblexz}.
 
 Because it has a form similar to the well-understood Poisson equation $u_{xx} + u_{zz} = f$ \cite{LeVeque2007,MortonMayers2005}, the process of solving equation \eqref{stressblatter} may be more familiar than \eqref{stresshydrostatic}.  However, the omission of $w_x$ from the stress balance, a mechanism which smooths the surface of a glacier once the model is made time-dependent (next!), is significant.  The hydrostatic and Blatter-Pattyn stress balances give different predictions.
 
@@ -318,7 +318,7 @@ The upper surface evolves according to the \emph{surface kinematical equation} (
 
 Regarding the notation, the planar ice velocity is $\bu=\left<u,w\right>$, and the variables $u,w$ in \eqref{skeplanar} are these component values at the upper surface, namely $u=u(t,x,s(t,x))$ and $w=w(t,x,s(t,x))$, i.e.~at $z=s(t,x)$.
 
-Equation \eqref{skeplanar} says that the ice surface moves up and down at the rate $\partial s/\partial t$ according to three contributions, the SMB $a$, the vertical ice velocity $w$, and the product of horizontal ice velocity $u$ with the surface slope $\partial s/\partial x$.  Dimensionally, at least, this is correct; $\partial s/\partial x$ is unit-less, and all terms in \eqref{skeplanar} are in meters per second.
+Equation \eqref{skeplanar} says that the ice surface moves up and down at the rate $\partial s/\partial t$ according to three contributions, the SMB $a$, the vertical ice velocity $w$, and the product of horizontal ice velocity $u$ with the surface slope $\partial s/\partial x$.  Dimensionally, at least, this is correct; $\partial s/\partial x$ is unitless, and all terms in \eqref{skeplanar} are in meters per second.
 
 Vector notation is convenient when extending \eqref{skeplanar} to 3D, so that the surface elevation function $s(t,x,y)$ depends on two horizontal variables.  Let
 \begin{equation}
@@ -330,7 +330,7 @@ be an upward-pointing normal vector on the surface.  Then the SKE is
 \end{equation}
 where $\bu=\left<u,v,w\right>$ (Table \ref{tab:notation}) is evaluated at the surface.  With all terms involving the unknown surface elevation $s$ on the left, form \eqref{ske} suggests we might think of the climate $a$ as given data, and we might try to solve the SKE for $s$, which is exactly what we are about to do.
 
-The SKE is described in glaciers literature as a mere boundary condition \cite{GreveBlatter2009,SchoofHewitt2013}, but it is actually the most important statement of mass conservation in a glacier model.  It can be derived from conservation by a standard ``pillbox'' calculus argument \cite{Aschwandenetal2012}.
+The SKE is described in the glacier literature as a mere boundary condition \cite{GreveBlatter2009,SchoofHewitt2013}, but it is actually the most important statement of mass conservation in a glacier model.  It can be derived from conservation by a standard ``pillbox'' calculus argument \cite{Aschwandenetal2012}.
 
 \begin{table}[t]
 \caption{Abbreviations.}
@@ -379,9 +379,9 @@ The first formula is called a \emph{forward difference} and the second a \emph{c
 
 Our numerical solution will use a spatial grid $\{x_j\}$, with equal spacing $\Delta x$ and an integer index $j$.  It will use a temporal grid $\{t_n\}$ with (possibly unequal) spacing $\Delta t$.  We seek a new surface elevation $s(t_{n+1},x_j)$ from some current values $s(t_n,x_{\bullet})$.
 
-Actually, one should distinguish between the continuum solution value $s(t_n,x_j)$, by evaluating the exact solution of the continuum SKE \eqref{skeplanar} at a grid point, and our numerical approximation of it at the same point, now denoted $s_j^n$.  Conceptually, $s_j^n \approx s(t_n,x_j)$, but the values $s_j^n$ are the ones we actually get by computation.  Finally, we will declutter the grid notation by writing $s_j$ for $s_j^n$ and $\snew_j$ for $s_j^{n+1}$.
+We should distinguish between the continuum solution value $s(t_n,x_j)$, by evaluating the exact solution of the continuum SKE \eqref{skeplanar} at a grid point, and our numerical approximation of it at the same point, now denoted $s_j^n$.  Conceptually, $s_j^n \approx s(t_n,x_j)$, but the values $s_j^n$ are the ones we actually get by computation.  Finally, we will declutter the grid notation by writing $s_j$ for $s_j^n$ and $\snew_j$ for $s_j^{n+1}$.
 
-We all these conventions, consider replacements \eqref{fd:partials}, the FD approximations
+With all these conventions, consider replacements \eqref{fd:partials}, the FD approximations
     $$\frac{\partial s}{\partial t} \approx \frac{\snew_j - s_j}{\Delta t}, \qquad \frac{\partial s}{\partial x} \approx \frac{s_{j+1} - s_{j-1}}{2\Delta x}.$$
 They convert the SKE \eqref{skeplanar} into a discrete and algebraic equation:
 \begin{equation*}
@@ -480,7 +480,7 @@ s(t,x,y) \ge b(x,y) \label{admissible}
 \end{equation}
 for every point $x,y$ in the computational domain.  Equivalently, admissibility says that $H(t,x,y) \ge 0$; a glacier's thickness $H=s-b$ cannot be negative.
 
-The above strengthened-SMB simulation started from an admissible state (Figure \ref{fig:demo}, top), but it evolved to an inadmissible one (Figure \ref{fig:inadmissdemo}).  Avoiding this possibility, at least in an explicit solution method, is quite easy.  Namely, we should \emph{truncate} the solution, $\snew_j = \max\{b_j, \snew_j\}$ (planar case), to force admissibility.
+The above strengthened-SMB simulation started from an admissible state (Figure \ref{fig:demo}, top), but it evolved to an inadmissible one (Figure \ref{fig:inadmissdemo}).  Avoiding this possibility, at least in an explicit solution method, is straightforward.  Namely, we should \emph{truncate} the solution, $\snew_j = \max\{b_j, \snew_j\}$ (planar case), to force admissibility.
 
 Inequality \eqref{admissible} complements definition \eqref{domain} of the ice domain, and it implies the \emph{free-boundary} nature of the glacier geometry problem \cite{Bueler2016,Bueler2021conservation}.  Bed elevation data $b$ can be needed even when modeling glacier surfaces using the SKE, and it is necessary when solving stress balances (Sections \ref{sec:continuum} and \ref{sec:sia}).  Note that in unglaciated areas it makes sense to say (allow) $s(t,x)=b(x)$, and this is compatible with how digital elevation models work in practice; the surface elevation is the top of the glacier if one is present, otherwise it is the top of the land.
 
@@ -503,7 +503,7 @@ for j in range(1, J+1):
     s[j] = s[j-1] + (dx / u(x[j])) * (a(x[j]) + w(x[j]))
 \end{lstlisting}
 
-\noindent In fact, the same program \href{https://github.com/bueler/mccarthy/blob/master/py/surface.py}{\texttt{py/surface.py}} has done the job already.  Viewing the output image (\texttt{output/steady.png}) shows a result very similar to Figure \ref{fig:demo}, bottom.
+\noindent The same program \href{https://github.com/bueler/mccarthy/blob/master/py/surface.py}{\texttt{py/surface.py}} has done the job already.  Viewing the output image (\texttt{output/steady.png}) shows a result very similar to Figure \ref{fig:demo}, bottom.
 
 We have not assured admissibility in the above loop, but this is straightforward using truncation.  The update formula inside the loop becomes
 \begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
@@ -534,9 +534,9 @@ Finally we can state the mass continuity equation itself,
 \end{equation}
 Note that if the bed is stationary ($\partial b/\partial t=0$) then we can equivalently write ``$\partial s/\partial t$'' on the left, but the most common way to think about this equation is as describing how a layer of ice changes thickness, and thus volume, instead of in terms of elevation.  The divergence here is in horizontal variables, so $\Div\bq= \frac{\partial q_1}{\partial x} + \frac{\partial q_2}{\partial y}$.
 
-The net function $a-m$ on the right is the \emph{climatic-basal mass balance} \cite{Cogleyetal2011}.  This combination of the surface mass balances $a,m$ determines how much mass is lost or gained in a column within the glacier.
+The net function $a-m$ on the right is the \emph{climatic-basal mass balance} \cite{Cogleyetal2011}.  This combination of the surface and basal mass balances $a$ and $m$ determines how much mass is lost or gained in a column within the glacier.
 
-Since equation \eqref{masscont} looks rather different from the others, it makes sense to give the brief derivation.  We need the \emph{Leibniz rule} for differentiating integrals,
+Since equation \eqref{masscont} looks different from the others, we give a brief derivation.  We need the \emph{Leibniz rule} for differentiating integrals,
 \begin{equation}
 \frac{d}{dx}\left(\int_{g(x)}^{f(x)} k(x,y)\,dy\right) = k(x,f(x))\, f'(x) - k(x,g(x)) \, g'(x) + \int_{g(x)}^{f(x)} \frac{\partial k}{\partial x}(x,y)\,dy,  \label{leibniz}
 \end{equation}
@@ -547,7 +547,7 @@ We apply the Leibniz rule to compute the gradient (partial derivatives) of the f
 (\Div \bq) (t,x,y) &= \bU(t,x,y,s(t,x,y)) \cdot \grad s(t,x,y) - \bU(t,x,y,b(t,x,y)) \cdot \grad b(t,x,y) \\
    &\qquad + \int_{b(t,x,y)}^{s(t,x,y)} (\Div \bU)(t,x,y,z)\,dz.
 \end{align*}
-Divergences $\Div$ here are in the horizontal variables $x,y$.  In fact, by incompressibility \eqref{incompressible} we can write the integrand as a vertical derivative of the vertical velocity:
+Divergences $\Div$ here are in the horizontal variables $x,y$.  By incompressibility \eqref{incompressible} we can write the integrand as a vertical derivative of the vertical velocity:
     $$\Div \bU = \frac{\partial u}{\partial x} + \frac{\partial v}{\partial y} = - \frac{\partial w}{\partial z}.$$
 Thus, continuing the calculation, indicating surface values by ``$\bU|_s$'' etc., suppressing variables, and applying the fundamental theorem of calculus, we have
     $$\Div \bq = \bU|_s \cdot \grad s - \bU|_b \cdot \grad b - \int_b^s \frac{\partial w}{\partial z}\,dz = \bU|_s \cdot \grad s - \bU|_b \cdot \grad b - w|_s + w|_b.$$
@@ -564,7 +564,7 @@ At this point we have three equations which might be used to describe the evolvi
   \end{enumerate}
 We derived the third using the first two and incompressibility.  Actually, any \emph{pair} of these three equations implies the third, using incompressibility and the Leibniz rule to make the connections.
 
-In designing a numerical glacier simulation, which equations to use for time-dependent geometry is largely a matter of taste and tradition.  The most common choice in the literature is to use mass continuity \eqref{masscont} as the primary equation, and to interpret the basal kinematical relation \eqref{bke} in a somewhat ad hoc manner.  Our main point here is that one can understand these equations as tools, and be free to use them.
+In designing a numerical glacier simulation, which equations to use for time-dependent geometry is largely a matter of taste and tradition.  The most common choice in the literature is to use mass continuity \eqref{masscont} as the primary equation, and to interpret the basal kinematical relation \eqref{bke} in a somewhat ad hoc manner.  Our main point here is that we can treat these equations as tools, and be free to use them.
 
 \subsection*{Understanding planar mass continuity}  It helps to illustrate mass continuity in the same $x,z$ flow-line plane we used earlier.  Suppose for simplicity that the base is flat ($b=0$), so the thickness and surface elevation are the same thing ($H=s$), and suppose there is no basal mass balance ($m=0$).  In this planar case the horizontal velocity is a scalar function $U$, and its vertical average $\bar U = H^{-1} \int_0^{H} U\,dz$ and the flux $q = \int_0^{H} U\,dz = \bar U\, H$ are also scalar.
 
@@ -576,7 +576,7 @@ In three-dimensions, \eqref{masscontintegrated} would become an equation for $dV
 
 \onefigsize{slabmasscontfig}{Mass continuity equation \eqref{masscont} can be interpreted as giving the rate of change of the time-dependent area $A$.}{2.0in}
 
-Equation \eqref{masscontintegrated} is an integrated form of mass continuity.  To determine the derivative (and planar) form, suppose the width $\Delta x=x_2-x_1$ is small, thus $A\approx \Delta x\, H$.  If we divide by \eqref{masscontintegrated} by $\Delta x$ and take $\Delta x \to 0$ then we get
+Equation \eqref{masscontintegrated} is an integrated form of mass continuity.  To determine the derivative (and planar) form, suppose the width $\Delta x=x_2-x_1$ is small, thus $A\approx \Delta x\, H$.  If we divide \eqref{masscontintegrated} by $\Delta x$ and take $\Delta x \to 0$ then we get
 \begin{equation}
 \frac{\partial H}{\partial t} = a - \frac{\partial}{\partial x}\left(\bar U\, H\right) \label{masscontplanar}
 \end{equation}
@@ -587,7 +587,7 @@ because $\lim_{\Delta x \to 0} (\int_{x_1}^{x_2} a\,dx)/\Delta x = a$ is the ave
 
 \subsection*{Shallowness of glaciers and ice sheets}  Glacier ice has several outstanding properties as a fluid.  As explained in Section \ref{sec:continuum}, it is slow and non-Newtonian.  Also, glaciers are subject to contact slip, i.e.~basal sliding, along a hard-to-observe boundary.  However, it is the typical \emph{shallowness} of glacier geometry, at least for large glaciers and ice sheets, which allows us to use a simpler stress balance model, an approximation to the full Glen-Stokes system, which enables faster simulations.  Because ice sheet geometry is both shallow and slow, the problem has a distinctive \emph{diffusive} character.
 
-Figure \ref{fig:green-transect} shows a cross-section of the Greenland ice sheet.  This vertically-exaggerated view is more familiar from the glaciological literature, but without such exaggeration the ice sheet is revealed to be a thin blanket, barely three-dimensional.  Precisely speaking, ice sheets are \emph{shallow} in the sense that the dimensionless ratio $\eps = [H]/[L]$, between typical scales for thickness $[H]$ and horizontal (length) $[L]$, is small.  For this Greenland example, $[H]=2000$ m and $[L]=1000$ km are representative, so $\eps = 0.002$.
+Figure \ref{fig:green-transect} shows a cross-section of the Greenland ice sheet.  This vertically-exaggerated view is more familiar from the glaciological literature, but without such exaggeration the ice sheet is revealed to be a thin blanket, barely three-dimensional.  More precisely, ice sheets are \emph{shallow} in the sense that the dimensionless ratio $\eps = [H]/[L]$, between typical scales for thickness $[H]$ and horizontal (length) $[L]$, is small.  For this Greenland example, $[H]=2000$ m and $[L]=1000$ km are representative, so $\eps = 0.002$.
 
 \begin{figure}[ht]
 \centering
@@ -751,9 +751,9 @@ These (non-sliding) SIA substitutions create very-similar diffusion equations, t
 \end{center}
 
 \medskip
-Such similar forms is not a surprise, actually.  Section \ref{sec:masscont} showed that our starting equations \eqref{skeagain} and \eqref{masscontagain} are equivalent if we assume incompressibility \eqref{incompressibleagain} and a basal kinematical equation \eqref{bke}.    Both equations \eqref{diffusion:ske} and \eqref{diffusion:masscont} refer to surface elevation, for the surface slope, and ice thickness in the form of $\Dsia$ (equation \eqref{sia:D}).  The apparent $s$-vs-$H$ distinction is not that important, but the surface elevation $s$ tends to be a smoother geometry function in time and space than the thickness $H$ (e.g.~Figure \ref{fig:green-transect}).
+Such similar forms are not a surprise, actually.  Section \ref{sec:masscont} showed that our starting equations \eqref{skeagain} and \eqref{masscontagain} are equivalent if we assume incompressibility \eqref{incompressibleagain} and a basal kinematical equation \eqref{bke}.    Both equations \eqref{diffusion:ske} and \eqref{diffusion:masscont} involve the surface elevation (via the slope $\grad s$) and the ice thickness (through $\Dsia$, equation \eqref{sia:D}).  The apparent $s$-vs-$H$ distinction is not that important, but the surface elevation $s$ tends to be a smoother geometry function in time and space than the thickness $H$ (e.g.~Figure \ref{fig:green-transect}).
 
-An apparent difference between the boxed equations is that \eqref{diffusion:ske} does not refer to the \emph{basal} mass balance $m$ (Section \ref{sec:masscont}).  The original SKE \eqref{ske} isolates the surface evolution, while the mass continuity equation \eqref{masscont} always involves the whole ice column.  On the other hand, the derivation of \eqref{diffusion:ske} used \eqref{sia:D}, via an assumption of zero basal velocity, and if that derivation were generalized appropriately then the basal mass balance $m$ would re-appear.
+An apparent difference between the boxed equations is that \eqref{diffusion:ske} does not refer to the \emph{basal} mass balance $m$ (Section \ref{sec:masscont}).  The original SKE \eqref{ske} isolates the surface evolution, while the mass continuity equation \eqref{masscont} always involves the whole ice column.  On the other hand, the derivation of \eqref{diffusion:ske} used \eqref{sia:D}, via an assumption of zero basal velocity, and if that derivation were generalized appropriately then the basal mass balance $m$ would reappear.
 
 The two models \eqref{diffusion:ske} and \eqref{diffusion:masscont} are similar in another respect: they must be solved subject to a geometrical inequality constraint.  That is, the surface must remain above the bed ($s\ge b$) and the thickness must not be negative ($H\ge 0$).
 
@@ -767,7 +767,7 @@ Independent of the power $n$, the units of $\Dsia$ reduce to square meters per s
 
 Equation \eqref{sia:Dagain} expresses the dominant macroscopic effect of the Glen flow law \eqref{flowlaw}, and it is at the heart of why glaciology is a (highly!) \emph{nonlinear} science.  The diffusivity is not a constant, nor a known-in-advance function, as it is in linear textbook examples \cite{LeVeque2007,MortonMayers2005}.  Instead, for $n=3$ it scales with the $5$th power of thickness and the $2$nd power of surface slope.  Even when $n=1$, which is the Newtonian fluid case where diffusivity is independent of surface slope, it still depends on the $3$rd power of thickness.
 
-The local value of diffusivity $\Dsia$ is the rate of smoothing of the surface elevation, over adjacent areas, caused by ice flow.  Formula \eqref{sia:Dagain} returns a large value when the ice is both thick and steep.  In fact ice will flow downhill, away from surface maxima, and it will converge toward surface minima, most-strongly at such locations.
+The local value of diffusivity $\Dsia$ is the rate of smoothing of the surface elevation, over adjacent areas, caused by ice flow.  Formula \eqref{sia:Dagain} returns a large value when the ice is both thick and steep.  Ice will flow downhill, away from surface maxima, and it will converge toward surface minima, most strongly at such locations.
 
 However, it is worth noting some conceptual and practical concerns about \eqref{diffusion:ske} or \eqref{diffusion:masscont} as diffusion PDEs, given the nonlinearities in formula \eqref{sia:Dagain}:
 \renewcommand{\labelenumi}{\emph{\roman{enumi})}}
@@ -789,7 +789,7 @@ The simplest scheme for \eqref{diffusion:ske:planar} applies forward differences
 \begin{equation}
 \frac{\snew_j - s_j}{\Delta t} - \frac{D_{j+1/2} (s_{j+1} - s_j)/\Delta x - D_{j-1/2} (s_j - s_{j-1})/\Delta x}{\Delta x} = a_j.  \label{fd:diffusion:planar:early}
 \end{equation}
-Recall from Section \ref{sec:masscont} that $s_j \approx s(t_n,x_j)$ and $\snew_j\approx s(t_{n+1},x_j)$, and now we write $a_j= a(t_n,x_j)$.  The staggered-grid diffusivities $D_{j+1/2}$ are exactly the values of $\Dsia$ computed in Section \ref{sec:sia} by \texttt{diffusiveD()}, so we will re-use that Python function, and the slopes $(s_{j+1} - s_j)/\Delta x$ use approximation \eqref{fd:slope}.  In fact, our centered-difference approximation of the outer derivative in \eqref{diffusion:ske:planar} can be regarded as differencing staggered-grid values\footnote{This idea nicely generalizes to two horizontal dimensions \cite{Bueler2016}.} of the flux $\bq=-\Dsia \grad s$.
+Recall from Section \ref{sec:masscont} that $s_j \approx s(t_n,x_j)$ and $\snew_j\approx s(t_{n+1},x_j)$, and now we write $a_j= a(t_n,x_j)$.  The staggered-grid diffusivities $D_{j+1/2}$ are exactly the values of $\Dsia$ computed in Section \ref{sec:sia} by \texttt{diffusiveD()}, so we will re-use that Python function, and the slopes $(s_{j+1} - s_j)/\Delta x$ use approximation \eqref{fd:slope}.  Note that our centered-difference approximation of the outer derivative in \eqref{diffusion:ske:planar} can be regarded as differencing staggered-grid values\footnote{This idea nicely generalizes to two horizontal dimensions \cite{Bueler2016}.} of the flux $\bq=-\Dsia \grad s$.
 
 Unlike the advection problem in Section \ref{sec:masscont}, our forward-time centered-space scheme \eqref{fd:diffusion:planar:early} is acceptable for a diffusion equation like \eqref{diffusion:ske:planar}; it is \emph{conditionally stable} \cite{MortonMayers2005}, about which more below.  For implementation we write \eqref{fd:diffusion:planar:early} as a surface elevation update,
 \begin{equation}
@@ -818,7 +818,7 @@ for k in range(maxsteps):
     s = geometrystep(x, b, s, D, dt)
     t += dt
 \end{lstlisting}
-Normal termination is by the \texttt{break}, once $t$ is within $10^{-6}$ second of the final time, to allow for rounding error, while \texttt{maxsteps} merely protects against an infinite loop.
+Normal termination is by the \texttt{break}, once $t$ is within $10^{-6}$ seconds of the final time, to allow for rounding error, while \texttt{maxsteps} merely protects against an infinite loop.
 
 \subsection*{Adaptive time-stepping for stability}  If \eqref{diffusion:ske:planar} were a linear PDE, so that the staggered-grid diffusivities $D_{j+1/2}$ did not depend on the solution $s$, then it is well-known \cite{LeVeque2007,MortonMayers2005} that a sufficient condition for scheme stability is
 \begin{equation}
@@ -850,17 +850,17 @@ writing results to output/dome.png and output/timesteps.png
 %$
 
 \medskip
-The evolving geometry is shown in Figure \ref{fig:dome}.  The initial surface generates very large stresses in the SIA model, and thus strain rates, and so the geometry change rate $|\partial s/\partial t|$ is large at the beginning.  Recall that the SIA formula \eqref{sia:Dagain}, for $\Dsia$, generates large values when the ice is thick and the surface slope is steep, which certainly applies during the early part of the simulation.  However, the ice flow is aggressively smoothing and the final surface elevation is a surprisingly symmetric and smooth dome shape, to which we will return soon.  Also note that, because of conserved mass, the \emph{glacier margin}, advances as the central heights fall; the free boundary moves.
+The evolving geometry is shown in Figure \ref{fig:dome}.  The initial surface generates very large stresses in the SIA model, and thus strain rates, and so the geometry change rate $|\partial s/\partial t|$ is large at the beginning.  Recall that the SIA formula \eqref{sia:Dagain}, for $\Dsia$, generates large values when the ice is thick and the surface slope is steep, which certainly applies during the early part of the simulation.  However, the ice flow is aggressively smoothing and the final surface elevation is a surprisingly symmetric and smooth dome shape, to which we will return soon.  Also note that, because of conserved mass, the \emph{glacier margin} advances as the central heights fall; the free boundary moves.
 
 \onefigsize{dome}{Evolution of surface elevation (and thickness) under the SIA model, from a very rough start.}{4.0in}
 
-The other output from the run is a graph of the time step $\Delta t$ over time (Figure \ref{fig:timesteps}).  At the start the computed diffusivities are enormous, so by \eqref{linearstabcrit}, with corrected coefficient $1/6$, the time steps are correspondingly short.  This example also demonstrates the \emph{robustness} of the adaptive time-stepping idea, base on our diffusion understanding of the stability.
+The other output from the run is a graph of the time step $\Delta t$ over time (Figure \ref{fig:timesteps}).  At the start the computed diffusivities are enormous, so by \eqref{linearstabcrit}, with corrected coefficient $1/6$, the time steps are correspondingly short.  This example also demonstrates the \emph{robustness} of the adaptive time-stepping idea, based on our diffusion understanding of the stability.
 
 \onefigsize{timesteps}{Time step length $\Delta t$, over time, from the simulation which produced Figure \ref{fig:dome}.}{4.0in}
 
 Modifications of the program \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}} are recommended.  It is easy to see that the runs become unstable if the time step $\Delta t$ is too large, for instance if the magical value $1/6$ is increased to $1/2$.  One could try fixing the time step for the whole run, i.e.~throwing-out the adaptive time-stepping scheme, but this is not recommended because the use of a sufficiently short time step to permit stability will generate orders of magnitude more time steps (and thus run time).
 
-On can also increase the spatial resolution, e.g.~repeatedly doubling the number $J$ of subintervals, to see how the adaptive scheme decreases $\Delta t$ accordingly.  Each time step does $O(J)$ arithmetic, so of course the simulation gets more computationally expensive, but also the number of time steps increases.  In fact, an easy exercise is to see that, from a stability criterion like \eqref{linearstabcrit}, we expect that doubling $J$ will increase the arithmetic (\emph{flops}) for the whole simulation, to a fixed final time $t_f$, by a factor of eight!
+One can also increase the spatial resolution, e.g.~repeatedly doubling the number $J$ of subintervals, to see how the adaptive scheme decreases $\Delta t$ accordingly.  Each time step does $O(J)$ arithmetic, so the simulation gets more computationally expensive, but also the number of time steps increases.  Indeed, an easy exercise is to see that, from a stability criterion like \eqref{linearstabcrit}, we expect that doubling $J$ will increase the arithmetic (\emph{flops}) for the whole simulation, to a fixed final time $t_f$, by a factor of eight!
 
 \subsection*{Implicit schemes for glacier evolution}  FIXME \emph{Implicitness} is an alternative stability fix to adaptivity.  The implicit \emph{backward Euler} scheme, for example is stable for any positive time step $\Delta t>0$; it is \emph{unconditionally stable} \cite{LeVeque2007,MortonMayers2005}.  Implicit schemes are more difficult to implement because the unknown solution at time step $t_{n+1}$ must be treated as a vector, and a (large) linear or nonlinear system of equations must be formed and solved at each time step.
 
