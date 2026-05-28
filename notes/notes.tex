@@ -778,25 +778,24 @@ However, it is worth noting some conceptual and practical concerns about \eqref{
 \end{enumerate}
 Item \emph{i)} concerns a deficiency of the SIA model, not just our diffusion-based understanding of it.  All of these concerns are research topics in mathematical glaciology.
 
-\subsection*{Explicit scheme for the geometry SIA}  Let us stop thinking about the form and meaning of these equations, and instead apply finite differences (FD) and write code.
+\subsection*{Explicit scheme for the geometry SIA}  Having thought about the form and meaning of these equations, let us apply finite differences (FD) and write code.
 
-Consider the planar and SMB-free ($a=0$) case of equation \eqref{diffusion:ske}.  This is the simplest combination of the SKE and the SIA stress balance:
+Consider the planar case of equation \eqref{diffusion:ske}.  This is the simplest combination of the SKE and the SIA stress balance:
 \begin{equation}
-\frac{\partial s}{\partial t} = \frac{\partial}{\partial x} \left(\Dsia \frac{\partial s}{\partial x}\right).  \label{diffusion:ske:planar}
+\frac{\partial s}{\partial t} - \frac{\partial}{\partial x} \left(\Dsia \frac{\partial s}{\partial x}\right) = a.  \label{diffusion:ske:planar}
 \end{equation}
-We may regard the diffusivity as a generic coefficient which varies in time and space: $\Dsia \sim D(t,x)$.  Like the first FD scheme in Section \ref{sec:masscont}, the simplest scheme for \eqref{diffusion:ske:planar} applies forward differences in time (Euler method) and centered differences in space:
-\begin{equation}
-\frac{\snew_j - s_j}{\Delta t} = \frac{D_{j+1/2} (s_{j+1} - s_j)/\Delta x - D_{j-1/2} (s_j - s_{j-1})/\Delta x}{\Delta x}.  \label{fd:diffusion:planar:early}
-\end{equation}
-Recall that $s_j \approx s(t_n,x_j)$ is at the current time, $\snew_j\approx s(t_{n+1},x_j)$ as at the updated time, and now we write $D_{j+1/2} \approx \Dsia(t_n,x_j)$.  The staggered-grid slopes $(s_{j+1} - s_j)/\Delta x$, denoted by $s'_{j+1/2}$ below, are defined by the same approximation \eqref{fd:slope} which appeared in Section \ref{sec:sia}.
 
-Unlike the advection problem in Section \ref{sec:masscont}, the forward-time centered-space scheme acceptable for a diffusion equation like \eqref{diffusion:ske:planar}; at least it is \emph{conditionally stable} \cite{MortonMayers2005}.  The centered-difference approximation of the outer derivative in \eqref{diffusion:ske:planar} subtracts $D\, \partial s/\partial x$ values on the staggered grid.  Equivalently, the flux $\bq=-\Dsia \grad s$ is on the staggered grid, which is fundamental when extending to two horizontal variables \cite{Bueler2016,MortonMayers2005}.
-
-An implementation of equation \eqref{fd:diffusion:planar:early} needs it as an update of the surface elevation:
+The simplest scheme for \eqref{diffusion:ske:planar} applies forward differences in time (Euler method) and centered differences in space.  We will treat the diffusivity as a generic coefficient which varies in time and space, and we evaluate it on the staggered grid, denoted $D_{j+1/2} = \Dsia(t_n,x_{j+1/2})$.  Here is the scheme:
 \begin{equation}
-\snew_j = s_j + \frac{\Delta t}{\Delta x} \left[D_{j+1/2}\, s'_{j+1/2} - D_{j-1/2}\, s'_{j-1/2}\right].  \label{fd:diffusion:planar}
+\frac{\snew_j - s_j}{\Delta t} - \frac{D_{j+1/2} (s_{j+1} - s_j)/\Delta x - D_{j-1/2} (s_j - s_{j-1})/\Delta x}{\Delta x} = a_j.  \label{fd:diffusion:planar:early}
 \end{equation}
-The staggered-grid diffusivities $D_{j+1/2}$ are exactly the values of $\Dsia$ computed in Section \ref{sec:sia} by \texttt{diffusiveD()}, so we will re-use that Python function.  Now Equation \eqref{fd:diffusion:planar} becomes this bit of Python:
+Recall from Section \ref{sec:masscont} that $s_j \approx s(t_n,x_j)$ and $\snew_j\approx s(t_{n+1},x_j)$, and now we write $a_j= a(t_n,x_j)$.  The staggered-grid diffusivities $D_{j+1/2}$ are exactly the values of $\Dsia$ computed in Section \ref{sec:sia} by \texttt{diffusiveD()}, so we will re-use that Python function, and the slopes $(s_{j+1} - s_j)/\Delta x$ use approximation \eqref{fd:slope}.  In fact, our centered-difference approximation of the outer derivative in \eqref{diffusion:ske:planar} can be regarded as differencing staggered-grid values\footnote{This idea nicely generalizes to two horizontal dimensions \cite{Bueler2016}.} of the flux $\bq=-\Dsia \grad s$.
+
+Unlike the advection problem in Section \ref{sec:masscont}, our forward-time centered-space scheme \eqref{fd:diffusion:planar:early} is acceptable for a diffusion equation like \eqref{diffusion:ske:planar}; it is \emph{conditionally stable} \cite{MortonMayers2005}, about which more below.  For implementation we write \eqref{fd:diffusion:planar:early} as a surface elevation update,
+\begin{equation}
+\snew_j = s_j + \frac{\Delta t}{\Delta x^2} \left[D_{j+1/2}\, (s_{j+1} - s_j) - D_{j-1/2}\, (s_j - s_{j-1})\right] + \Delta t\,a_j,  \label{fd:diffusion:planar}
+\end{equation}
+which becomes a bit of Python in the $a=0$ case we will be testing:
 \begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
 def geometrystep(x, b, s, D, dt):
     dx = x[1] - x[0]
@@ -805,9 +804,10 @@ def geometrystep(x, b, s, D, dt):
     snew[1:-1] += dt * (D[1:] * dsdx[1:] - D[:-1] * dsdx[:-1]) / dx
     return snew
 \end{lstlisting}
-Compared to the single boundary condition applied to the SKE in Section \ref{sec:masscont}, here both ends of the spatial interval have frozen values of surface elevation, \texttt{snew[0]=s[0]} and \texttt{snew[J+1]=s[J+1]}.  Which is to say, we have chosen Dirichlet boundary values \cite{MortonMayers2005} for this second-order (in space) diffusion problem.
 
-The time axis is $t\in [0,t_f]$, to a final time $t_f$.  (The example below uses $t_f=40$ a.)  As explained momentarily, the time-stepping loop is \emph{adaptive} in the sense that $\Delta t$ is re-computed at every time step based on the current state of the solution, but otherwise the loop is unsurprising:
+The above code freezes the surface elevation at both ends, that is, \texttt{snew[0]=s[0]} and \texttt{snew[J+1]=s[J+1]}.  In Section \ref{sec:masscont} we needed a single boundary condition for the SKE, which was a one-way advection (velocity-is-given paradigm).  Now our velocities are from the SIA, and we have a second-order (in space) diffusion problem, so these Dirichlet boundary values are appropriate \cite{MortonMayers2005}.
+
+The time axis is $t\in [0,t_f]$, with final time $t_f$.  The example below uses $t_f=40$ a.  As explained momentarily, the following time-stepping loop is \emph{adaptive} in the sense that $\Delta t$ is re-computed at each step, based on the current state of the solution:
 \begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
 t = 0
 for k in range(maxsteps):
@@ -818,16 +818,15 @@ for k in range(maxsteps):
     s = geometrystep(x, b, s, D, dt)
     t += dt
 \end{lstlisting}
-Note that \texttt{maxsteps} merely protects against an infinite loop; normal termination is the \texttt{break} when $t$ is within a $10^{-6}$ second of the user's chosen final time \texttt{tf}, to allow for a little rounding error.
+Normal termination is by the \texttt{break}, once $t$ is within $10^{-6}$ second of the final time, to allow for rounding error, while \texttt{maxsteps} merely protects against an infinite loop.
 
-\subsection*{Adaptive time-stepping for stability} FIXME stability determines $\Delta t$
-
-FIXME for a linear diffusion stability would be
+\subsection*{Adaptive time-stepping for stability}  If \eqref{diffusion:ske:planar} were a linear PDE, so that the staggered-grid diffusivities $D_{j+1/2}$ did not depend on the solution $s$, then it is well-known \cite{LeVeque2007,MortonMayers2005} that a sufficient condition for scheme stability is
 \begin{equation}
-   1 - 2 \mu \ge 0 \quad \iff \quad \frac{D\Delta t}{\Delta x^2} \le \frac{1}{2} \quad \iff \quad \Delta t \le \frac{\Delta x^2}{2 D}.  \label{stabcrit}
+   \frac{(\max_j D_{j+1/2})\,\Delta t}{\Delta x^2} \le \frac{1}{2} \quad \iff \quad \Delta t \le \frac{\Delta x^2}{2 (\max_j D_{j+1/2})}.  \label{linearstabcrit}
 \end{equation}
-but in fact it is more subtle than that and Hindmarsh derived $1/6$ instead \cite{Hindmarsh2001}
+This criterion is comparable\footnote{Condition \eqref{linearstabcrit} is sometimes called ``CFL'' also, but it applies to a different problem.} to the CFL condition \eqref{cfl}, which was for the explicit upwind scheme applied to the advection problem in Section \ref{sec:masscont}.
 
+However, using condition \eqref{linearstabcrit} in an adaptive time-stepping scheme will not give stability for a glacier simulation.  PDE \eqref{diffusion:ske:planar} is actually nonlinear, because of the dependence of $\Dsia$ on the solution, equation \eqref{sia:Dagain}, and a different analysis is needed.  That analysis \cite{Hindmarsh2001} concludes that $1/(2n)$ should replace ``$1/2$'' in \eqref{linearstabcrit}, so we compute the time-step as follows:
 \begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
 def getdt(t, tf, maxD):
     c_D = 1.0 / 6.0  # coefficient from Hindmarsh (2001), for n=3
@@ -836,9 +835,9 @@ def getdt(t, tf, maxD):
 \end{lstlisting}
 
 
-\subsection*{Example: A very rough start} FIXME
+\subsection*{Example: A very rough start}  These pieces go into a Python program \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}} which simulates a time-dependent glacier using the SIA.  The data (climate) is highly-simplified: the bed is flat ($b=0$) and the SMB is zero ($a=0$; also $m=0$).  A flat bed means that $H=s$ and diffusion equations \eqref{diffusion:ske} and \eqref{diffusion:masscont} are identical.  The focus in this simulation is on how SIA ice flow evolves glacier shape.
 
-FIXME run as follows
+On the other hand we generate the initial surface elevation \emph{randomly}.  The geometry is initially horrible, compared to real glaciers.  Run this experiment as follows:
 
 \smallskip
 \begin{Verbatim}[xleftmargin=4mm]
@@ -846,29 +845,43 @@ $ python3 dome.py
 grid: J=80 intervals, spacing dx=500.0 m
 starting time-stepping ...
 took 1814 steps to reach final time 40.0000 a
-writing simulation result to output/dome.png
-writing time steps graph to output/timesteps.png
+writing results to output/dome.png and output/timesteps.png
 \end{Verbatim}
 %$
 
 \medskip
-FIXME figures
+The evolving geometry is shown in Figure \ref{fig:dome}.  The initial surface generates very large stresses in the SIA model, and thus strain rates, and so the geometry change rate $|\partial s/\partial t|$ is large at the beginning.  Recall that the SIA formula \eqref{sia:Dagain}, for $\Dsia$, generates large values when the ice is thick and the surface slope is steep, which certainly applies during the early part of the simulation.  However, the ice flow is aggressively smoothing and the final surface elevation is a surprisingly symmetric and smooth dome shape, to which we will return soon.  Also note that, because of conserved mass, the \emph{glacier margin}, advances as the central heights fall; the free boundary moves.
 
-\onefigsize{dome}{FIXME}{4.0in}
+\onefigsize{dome}{Evolution of surface elevation (and thickness) under the SIA model, from a very rough start.}{4.0in}
 
-\onefigsize{timesteps}{FIXME}{4.0in}
+The other output from the run is a graph of the time step $\Delta t$ over time (Figure \ref{fig:timesteps}).  At the start the computed diffusivities are enormous, so by \eqref{linearstabcrit}, with corrected coefficient $1/6$, the time steps are correspondingly short.  This example also demonstrates the \emph{robustness} of the adaptive time-stepping idea, base on our diffusion understanding of the stability.
 
+\onefigsize{timesteps}{Time step length $\Delta t$, over time, from the simulation which produced Figure \ref{fig:dome}.}{4.0in}
 
-FIXME robustness
+Modifications of the program \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}} are recommended.  It is easy to see that the runs become unstable if the time step $\Delta t$ is too large, for instance if the magical value $1/6$ is increased to $1/2$.  One could try fixing the time step for the whole run, i.e.~throwing-out the adaptive time-stepping scheme, but this is not recommended because the use of a sufficiently short time step to permit stability will generate orders of magnitude more time steps (and thus run time).
 
-FIXME Runs are unstable if the time step $\Delta t$ is too large.  FIXME try this, both increasing the magi $1/6$ up to $1/2$, for example, or disabling the adaptive time-stepping scheme
+On can also increase the spatial resolution, e.g.~repeatedly doubling the number $J$ of subintervals, to see how the adaptive scheme decreases $\Delta t$ accordingly.  Each time step does $O(J)$ arithmetic, so of course the simulation gets more computationally expensive, but also the number of time steps increases.  In fact, an easy exercise is to see that, from a stability criterion like \eqref{linearstabcrit}, we expect that doubling $J$ will increase the arithmetic (\emph{flops}) for the whole simulation, to a fixed final time $t_f$, by a factor of eight!
 
-FIXME adaptive codes can be stable even if the diffusivity $D$ varies in space or time.  On the other hand, if the diffusivity $D$ is large, or if grid spacings $\Delta x$, $\Delta y$ are small, then adaptive explicit implementations must take many short time steps to assure stability; they become inefficient on spatially-refined grids.
-
-\emph{Implicitness} is an alternative stability fix to adaptivity.  The implicit \emph{backward Euler} scheme, for example is stable for any positive time step $\Delta t>0$; it is \emph{unconditionally stable} \cite{LeVeque2007,MortonMayers2005}.  Implicit schemes are more difficult to implement because the unknown solution at time step $t_{n+1}$ must be treated as a vector, and a (large) linear or nonlinear system of equations must be formed and solved at each time step.
+\subsection*{Implicit schemes for glacier evolution}  FIXME \emph{Implicitness} is an alternative stability fix to adaptivity.  The implicit \emph{backward Euler} scheme, for example is stable for any positive time step $\Delta t>0$; it is \emph{unconditionally stable} \cite{LeVeque2007,MortonMayers2005}.  Implicit schemes are more difficult to implement because the unknown solution at time step $t_{n+1}$ must be treated as a vector, and a (large) linear or nonlinear system of equations must be formed and solved at each time step.
 
 Though the SIA is a highly-nonlinear diffusion equation, implicit schemes are indeed implementable when appropriate solver tools are used \cite{Bueler2016}.  However, there is a tradeoff between the easy implementability of adaptive explicit schemes and the improved stability of implicit schemes.  FIXME whether benefits from implicitness will happen, especially for Stokes-type models, depends on the poorly understood character of geometry evolution in such model \cite{Bueler2023}; the jury is out
 
+
+\subsection*{Halfar's exact time-dependent solution}   FIXME Halfar \cite{Halfar1981} published a similarity solution of the SIA, at least for flat bed and zero surface mass balance:
+\begin{equation}
+FIXME s = t^{-1/18} r, \qquad \qquad H(t,r)=t^{-1/9} \phi(s), \label{halfarscalings}
+\end{equation}
+These scalings are related to each other by the constancy of total mass/volume, because no mass is gained or lost through the surface (see the Exercises). Scalings \eqref{halfarscalings} imply that the diffusion of ice slows down dramatically as the shape flattens out.  That is, the powers $t^{-1/9}$ and $t^{-1/18}$ change very slowly for large times $t$.
+
+FIXME The Halfar solution formula is remarkably simple given all that it accomplishes:
+\begin{equation}
+FIXME H(t,r) = H_0 \left(\frac{t_0}{t}\right)^{1/9} \left[1 - \left(\left(\frac{t_0}{t}\right)^{1/18} \frac{r}{R_0}\right)^{4/3}\right]^{3/7}. \label{halfar}
+\end{equation}
+Here the characteristic time $t_0$ which depends on the radius $R_0$ and the center height $H_0$ (see the code).
+
+FIXME \cite{Halfar1983} for 2D
+
+The final shape in Figure \ref{fig:dome} is close to a Halfar solution, illustrating what he proved \cite{Halfar1981,Halfar1983}, namely that \emph{all} solutions of the zero-mass-balance SIA on a flat bed asymptotically approach his solution.  The Halfar solution is attracting and thus worth knowing.
 
 \subsection*{Convergence and verification} FIXME we intend our FD scheme to \emph{converge} under \emph{grid refinement}.  Proving that such convergence happens is a main topic in numerical textbooks \cite{LeVeque2007,MortonMayers2005}.  Even if we expect convergence to happen, this needs checking for the actual computer program which is our implementation \emph{verification}.
 
@@ -883,27 +896,12 @@ Program FIXME is a complicated code.  How can we make sure that such an implemen
   \item compare your numerical results to an exact solution.   \end{enumerate}
 The first two approaches, \emph{infallibility} and \emph{intercomparison} respectively, should be less common than they are.  The last one, preferred by the CFD community generally \cite{Wesseling2001}, is \emph{verification}.  It is a simple idea:  A computer code should be tested in cases where we know the right answer.  To do this we must return to the PDE itself.  We must seek-out useful exact solutions.
 
-Halfar \cite{Halfar1981} published a similarity solution of the SIA, at least for flat bed and zero surface mass balance:
-\begin{equation}
-FIXME s = t^{-1/18} r, \qquad \qquad H(t,r)=t^{-1/9} \phi(s), \label{halfarscalings}
-\end{equation}
-These scalings are related to each other by the constancy of total mass/volume, because no mass is gained or lost through the surface (see the Exercises). Scalings \eqref{halfarscalings} imply that the diffusion of ice slows down dramatically as the shape flattens out.  That is, the powers $t^{-1/9}$ and $t^{-1/18}$ change very slowly for large times $t$.
-
-FIXME The Halfar solution formula is remarkably simple given all that it accomplishes:
-\begin{equation}
-FIXME H(t,r) = H_0 \left(\frac{t_0}{t}\right)^{1/9} \left[1 - \left(\left(\frac{t_0}{t}\right)^{1/18} \frac{r}{R_0}\right)^{4/3}\right]^{3/7}. \label{halfar}
-\end{equation}
-Here the characteristic time $t_0$ which depends on the radius $R_0$ and the center height $H_0$ (see the code).
-
-FIXME \cite{Halfar1983} for 2D
-
 Formula \eqref{halfar} is simple to use for verifying time-dependent SIA models. FIXME demo
 
 The average numerical thickness error decreases with increasing grid resolution, as expected for a correctly-implemented code.  What is less obvious is that almost any numerical implementation mistake will break such convergence.  That is, the reported errors will not shrink if there is any meaningful bug (see the Exercises).  The fragility of verification is its essential benefit!  One must implement the model correctly, not just generate good-looking results, to get convergence as above.
 
 Are exact solutions like Halfar's always available when needed?  No, of course not.  However, many ice flow models have exact solutions which are relevant to verification; see the Notes and References.  For example, we will use an exact solution for ice shelves in a later section.  An apparent absence of exact solutions to a given model may actually show that not enough thought has gone into the continuum model itself.
 
-The final shape in FIXME (figure from rough start) is close to a Halfar solution, illustrating what he proved \cite{Halfar1981,Halfar1983}, namely that \emph{all} solutions of the zero-mass-balance SIA on a flat bed asymptotically approach his solution.  The Halfar solution is attracting and thus worth knowing.
 
 
 \footnotesize
