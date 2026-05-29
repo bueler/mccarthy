@@ -86,13 +86,13 @@ def getdt(t, tf, maxD):
     return min([dt_D, tf - t])  # do not step past end of [0,tf]
 
 
-def geometrystep(x, b, s, D, dt):
+def geometrystep(x, s, D, dt):
     """Compute a time step of the SKE, in its planar a=0 diffusion form
         s_t = (D s_x)_x,
     using forward Euler in time and the centered-difference in space.
     The end-point values of s are left unmodified.  The time step
     dt must be set before calling this."""
-    assert len(x) == len(b) == len(s)
+    assert len(x) == len(s)
     assert len(D) == len(x) - 1
     dx = x[1] - x[0]
     dsdx = (s[1:] - s[:-1]) / dx
@@ -118,10 +118,10 @@ for k in range(maxsteps):
     if dt < 1.0e-6:  # time step less than millionth of second is small
         print(f"HALTING EARLY because time step is too small")
         break
-    s = geometrystep(x, b, s, D, dt)  # take a candidate step
-    if np.any(s < b):
-        print(f"WARNING admissibility fails at t={t / secpera}, {sum(snew < b)} locations")
-        s = np.maximum(s, b)  # now force admissibility
+    s = geometrystep(x, s, D, dt)  # take a candidate step
+    #if np.any(s < b):
+    #    print(f"[admissibility fails at t={t / secpera}, {sum(snew < b)} locations]")
+    s = np.maximum(s, b)  # force admissibility
     plt.plot(x / 1000.0, s, lw=0.2, color="C2", alpha=0.2)
     t += dt
 print(f"took {k} steps to reach final time {T_a:.4f} a")
