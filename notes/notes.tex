@@ -1,6 +1,6 @@
 \documentclass[letterpaper,final,12pt,reqno]{amsart}
 
-\usepackage[total={6.1in,9.0in},top=1.1in,left=1.3in]{geometry}
+\usepackage[total={6.3in,9.1in},top=1.1in,left=1.3in]{geometry}
 
 \usepackage{empheq}
 \usepackage[dvipsnames]{xcolor}
@@ -877,37 +877,41 @@ Note that scheme \eqref{fd:diffusion:planar:beuler} is really only \emph{semi-im
 
 Despite the strong nonlinearities, fully implicit schemes are implementable when appropriate high-performance solver tools are used \cite{Bueler2016}.  Because there is a tradeoff between easy implementability, for adaptive explicit schemes, versus improved stability, implicit evolution schemes have not made it into widely-used glacier models.  Especially for Stokes-type models, the tradeoff depends on the poorly-understood character of geometry evolution, and the jury is still out on whether they are the better choice \cite{Bueler2023}.  Most present-day numerical glacier and ice sheet models use explicit time-stepping.
 
+\subsection*{Halfar's exact, attracting solution}   The final shape in Figure \ref{fig:dome} is a smooth and symmetrical dome.  This is not an accident!  It turns out that \emph{any} flat-bed ($b=0$) and zero SMB ($a=0$) glacier will asymptotically approach this dome shape.
 
-\subsection*{Halfar's exact, attracting solution}   The final shape in Figure \ref{fig:dome} is a smooth and symmetrical dome.  It turns out that \emph{any} flat-bed ($b=0$) and zero SMB ($a=0$) glacier will asymptotically evolve into this dome shape.  This fact is one of the earlier discoveries of mathematical glaciology.  In 1981 Peter Halfar published a time-dependent exact solution of this SIA model \cite{Halfar1981}, showing that any rough surface will converge toward a particular dome shape.\footnote{The proof, a linear asymptotic analysis, applies to any surface that is not too far from the solution, but numerical results show that large perturbations will also converge to the Halfar dome solution.}  His second paper \cite{Halfar1983} extends the solution to two horizontal dimensions.  The Halfar solution is both an exact solution and \emph{attracting}, and thus worth knowing.
+In 1981 Peter Halfar published a time-dependent SIA solution \cite{Halfar1981}.  He showed that any rough surface will approach this solution.\footnote{The proof, a linear asymptotic analysis, applies to any surface that is not too far from the solution, but numerical results show that large perturbations will also converge to the Halfar dome solution.}  A second paper \cite{Halfar1983} extended the result to two horizontal dimensions.  The Halfar solution is both exact and \emph{attracting}, and thus worth knowing.
 
-Halfar's discovery is a \emph{similarity solution} of the planar SIA, which can be derived by scaling arguments.  The specific equation it solves is what you get by combining \eqref{diffusion:ske:planar} and \eqref{sia:Dagain} in the case where $b=0$ and $a=0$.  Because $a=0$ the ice mass is conserved, and so in one horizontal dimension the input ($x$) and output ($s$) lengths are scaled by the same unknown power of $t$.  Therefore one substitutes new variables
+Consider the SIA equation you get by inserting \eqref{sia:Dagain} into \eqref{diffusion:ske}.  Then set $a=b=0$ and combine constants ($\Gamma = \frac{2}{n+2} A (\rho g)^n$):
+\begin{equation}
+\frac{\partial s}{\partial t} = \Div \left(\Gamma s^{n+2} |\grad s|^{n-1}\right).  \label{sia:pureforhalfar}
+\end{equation}
+Halfar found the \emph{similarity solution} of this equation by applying scaling arguments.  Consider the planar case.  Because $a=0$ the ice mass is conserved, so the input ($x$) and output ($s$) lengths can be re-scaled by the same unknown power of $t$:
 \begin{equation}
 x = t^{\alpha} \tilde x, \qquad s(t,x)=t^{-\alpha} \phi(\tilde x) \label{halfarscalings}
 \end{equation}
-into the equation.  Note that the dome grows laterally ($x$ increases) as its height falls ($s$ decreases).  After a nontrivial amount of calculus one finds that the powers on $t$ cancel if $\alpha=1/(3n+2)$, which is $\alpha=1/11$ when $n=3$, and an exact formula for $\phi(\tilde x)$ can be derived, the invariant shape of the dome.  These formulas, plus a characteristic time $t_0$ which depends on the dome's half-width $R_0$ and the center height $H_0$, appear in the program \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}}.
+These are substituted into \eqref{sia:pureforhalfar}.  Note that the dome grows laterally ($x$ increases) as its height falls ($s$ decreases), which explains the signs.  After much calculus one finds that the powers on $t$ cancel if $\alpha=1/(3n+2)$, which is $\alpha=1/11$ when $n=3$.  Then an exact formula for $\phi(\tilde x)$ can be derived, which gives the invariant shape of the dome.  These formulas appear in the program \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}}.
 
-FIXME flip boolean.  Figure \ref{fig:halfardome}.  we want to discuss its use for verification
+Figure \ref{fig:halfardome} was generated by changing a boolean flag in \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}}, so that the initial condition is equal to the Halfar dome formula at an earlier time $t_0$.  The simulation goes to a later time $t_f+t_0$, and the program plots both the numerical and exact solutions at that time.  The fit is very close.
 
-\onefigsize{halfardome}{From an initial Halfar dome shape, the same program generates the Halfar shape at the final time, to high accuracy.}{4.0in}
+\onefigsize{halfardome}{From an initial Halfar dome, \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}} does a numerical simulation to the final time; compare the exact Halfar shape (dotted).}{4.0in}
 
-\subsection*{Convergence and verification} FIXME we intend our FD scheme to \emph{converge} under \emph{grid refinement}.  Proving that such convergence happens is a main topic in numerical textbooks \cite{LeVeque2007,MortonMayers2005}.  Even if we expect convergence to happen, this needs checking for the actual computer program which is our implementation \emph{verification}.
-
-How accurate is the scheme?  Our construction tells us $O(\Delta t) + O((\Delta x)^2)$.  This difference goes to zero as we refine the grid in space and time, a scheme property called \emph{consistency}.  However, to get convergence the scheme must be \emph{stable}, addressed above.  The main theorem for numerical PDE schemes asserts that ``consistency plus stability implies convergence'' \cite{MortonMayers2005}
-
-Instead of pursuing theory, in these notes we emphasize something practical, namely verification using exact solutions.  We will find PDE problems for which we already know an exact solution, then compute differences, and confirm that they go to zero under grid refinement.  This demonstrates directly that our actual implementation converges, not just that it should do so in theory.  A verified code can be confidently applied to real situations.
-
-Program FIXME is a complicated code.  How can we make sure that such an implemented numerical scheme is correct?  Here are three proposed techniques in the modeling community:
+\subsection*{Convergence and verification}  Our program \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}} calls \href{https://github.com/bueler/mccarthy/blob/master/py/shallow.py}{\texttt{py/shallow.py}}.  It is already complicated.  Are we sure that this implemented numerical scheme is correct?  Here are three justifications for numerical correctness which appear in the literature:
 \begin{enumerate}
-  \item don't make any mistakes, or
-  \item compare your numerical results with results from other researchers, and hope the outliers are in error, or
-  \item compare your numerical results to an exact solution.   \end{enumerate}
-The first two approaches, \emph{infallibility} and \emph{intercomparison} respectively, should be less common than they are.  The last one, preferred by the CFD community generally \cite{Wesseling2001}, is \emph{verification}.  It is a simple idea:  A computer code should be tested in cases where we know the right answer.  To do this we must return to the PDE itself.  We must seek-out useful exact solutions.
+  \item The author made no mistakes.
+  \item The numerical results are close to those from other researchers.
+  \item The numerical results are close to an exact solution.
+\end{enumerate}
+The first two approaches, \emph{infallibility} and \emph{intercomparison}, should be less common than they are.  The third, preferred by the CFD community \cite{Wesseling2001}, is the simple idea of \emph{verification}: an implementation should be tested in cases where the correct answer is known.  Here ``correct answer'' means an exact solution to the PDE itself.
 
-Formula \eqref{halfar} is simple to use for verifying time-dependent SIA models. FIXME demo
+In technical terms, we intend our numerical schemes to \emph{converge} under \emph{grid refinement}.  Proving such convergence is a main topic in numerical textbooks \cite{LeVeque2007,MortonMayers2005}, but even if we expect convergence to happen in theory, we still need to check it, i.e.~verify it, for the actual computer program which implements the scheme.  Verification also involves measuring the accuracy of the scheme, to find the rate of convergence.
 
-The average numerical thickness error decreases with increasing grid resolution, as expected for a correctly-implemented code.  What is less obvious is that almost any numerical implementation mistake will break such convergence.  That is, the reported errors will not shrink if there is any meaningful bug (see the Exercises).  The fragility of verification is its essential benefit!  One must implement the model correctly, not just generate good-looking results, to get convergence as above.
+For SIA geometry evolution equation \eqref{diffusion:ske:planar}, scheme \eqref{fd:diffusion:planar} makes $O(\Delta t) + O((\Delta x)^2)$ errors just by applying the FD formulas.  This is called its \emph{local truncation error} \cite{MortonMayers2005}; it is the best rate we can expect when measuring the \emph{numerical error} compared to the exact solution.  
 
-Are exact solutions like Halfar's always available when needed?  No, of course not.  However, many ice flow models have exact solutions which are relevant to verification; see the Notes and References.  For example, we will use an exact solution for ice shelves in a later section.  An apparent absence of exact solutions to a given model may actually show that not enough thought has gone into the continuum model itself.
+FIXME running dome.py with J=40,80,160,320,640 gives the errors shown in this figure
+
+The average numerical surface elevation error decreases with increasing grid resolution, as expected for a correctly-implemented code.  This strongly suggests that our actual implementation converges.  Less obvious is that almost any numerical implementation mistake will break such convergence.  That is, the reported errors will not shrink if there is any meaningful bug (see the Exercises).  This fragility of verification is its strongest feature.
+
+The Halfar solution is quite simple to use for verifying time-dependent SIA models, but are exact solutions like Halfar's always available when needed?  No, of course not.  However, many ice flow models have exact solutions which are relevant to verification; see the Notes and References.  For example, we will use an exact solution for ice shelves in a later section.  An apparent absence of exact solutions to a given model may actually show that not enough thought has gone into the continuum model itself.
 
 
 
