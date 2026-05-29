@@ -146,24 +146,24 @@ urlcolor=black
 
 \section{Introduction}  \label{sec:intro}
 
-\subsection*{Purpose}  The greatest importance of mathematical and numerical models to science, and glaciology in particular, is \emph{introspection}.  In building and using a model you are asking yourself: When I combine my imperfect and incomplete understanding of glacier processes into this model, does it behave as I expect?  A numerical simulation can only report the consequences of your equations, inadequacies and all, but the approximation can show how processes interact to give overall behavior, and it can sometimes demonstrate flaws in your understanding of those processes.  In any case, while all computer programs produce numbers, we want numbers that closely-approximate our intended continuum equations.  Therefore the differential equations, and not the programs themselves, will be a primary focus of these notes.
+\subsection*{Purpose}  The greatest importance of mathematical and numerical models to science, and glaciology in particular, is \emph{introspection}.  In building and using a model you are asking yourself: When I combine my imperfect and incomplete understanding of glacier processes into this model, does it behave as I expect?  A numerical simulation can only report the consequences of your equations, inadequacies and all, but the approximation can show how processes interact to give overall behavior, and it can sometimes demonstrate flaws in your understanding of those processes.  In any case, while all computer programs produce numbers, we want numbers that closely-approximate our intended continuum equations.  Therefore the differential equations, not just the Python programs, will be a primary focus of these notes.
 
-\subsection*{Scope}  These notes have a deliberately limited scope:
+\subsection*{Scope}  These notes are deliberately limited in scope:
   \begin{quote}\emph{surface kinematics and shallow approximations of ice flow.}\end{quote}
 Defining these technical terms is a big part of our agenda.  This scope includes a surface kinematical equation, and the equations of the shallow ice approximation.
 
-In truth, we start the presentation with the non-shallow Glen-Stokes model.  There is a Firedrake-based \cite{Rathgeberetal2016} Stokes solver in \texttt{py/stokes/}, documented by \texttt{doc.pdf} in the same directory, and it is a technical appendix to these notes.  However, these notes do not explore the numerical solutions of a Stokes model.
-
-For the topics we cover there is a constructive approach:
+For these topics there is a constructive approach:
   \begin{quote}\emph{understandable and short Python codes that do particular jobs.}\end{quote}
 
-\subsection*{Download and Python codes}  These notes, some slides, additional exercises, and  the several Python programs are all distributed by cloning the \texttt{git} repository at
+In truth, we start the presentation with the non-shallow Glen-Stokes model.  There is a Firedrake-based \cite{Rathgeberetal2016} Stokes solver in \texttt{py/stokes/}; its documentation \texttt{doc.pdf} is a technical appendix to these notes.  However, these notes do not explore the numerical solutions of a Stokes model.
+
+\subsection*{Download and Python codes}  These notes, some slides, additional exercises, and  the Python programs are all distributed by cloning the \texttt{git} repository at
 \begin{quote}
 \url{https://github.com/bueler/mccarthy}
 \end{quote}
 \noindent The programs are in the \texttt{py/} subdirectory.
 
-\subsection*{Notation}  Our notation, which generally follows references \cite{GreveBlatter2009,SchoofHewitt2013}, is in Table \ref{tab:notation}.  Cartesian coordinates are $x,y,z$ and time $t$, with $z$ positive-upward.  Tensor notation uses subscripts from the list $\{1,2,3,i,j\}$, so $\tau_{ij}$ and $\tau_{13}$ each denote entries of the deviatoric stress tensor.  After the first few pages we will use a few abbreviations; they appear in Table \ref{tab:abbrev} on page \pageref{tab:abbrev}.
+\subsection*{Notation}  Our notation, which generally follows references \cite{GreveBlatter2009,SchoofHewitt2013}, is in Table \ref{tab:notation}.  Cartesian coordinates are $x,y,z$ and time $t$, with $z$ positive-upward.  Tensor notation uses subscripts from $\{1,2,3,i,j\}$, so $\tau_{ij}$ and $\tau_{13}$ denote entries of the deviatoric stress tensor.  We will use a few abbreviations later on; they appear in Table \ref{tab:abbrev} on page \pageref{tab:abbrev}.
 
 \begin{table}[ht]
 \caption{Notation used in these notes.}
@@ -199,7 +199,7 @@ $x_i$         & $x_1,x_2,x_3=x,y,z$ coordinates & m
 
 \section{Ice flow equations}  \label{sec:continuum}
 
-\subsection*{Glacier ice is a weird fluid}  Ice in glaciers behaves as a viscous fluid \cite{GreveBlatter2009}, and we describe its motion by a velocity field $\mathbf{u}$.  It is incompressible.  If the ice were faster-moving than it is in reality, and if furthermore it were linearly-viscous like liquid water, then it would be a ``typical'' fluid and we would use the Navier-Stokes partial differential equations as the model \cite{Wesseling2001}:
+\subsection*{Glacier ice is a weird fluid}  Ice in glaciers behaves as a viscous fluid \cite{GreveBlatter2009}, and we describe its motion by a velocity field $\mathbf{u}$.  It is incompressible.  If the ice were faster-moving than it is in reality, and linearly-viscous like liquid water, then we would use the Navier-Stokes partial differential equations as the model for this typical fluid \cite{Wesseling2001}:
 \begin{align}
 \nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \label{incompressible} \\
 \rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) &= \nabla \cdot (\nu \nabla \mathbf{u}) - \nabla p + \rho \mathbf{g} &&\text{\emph{stress balance}} \label{navierstokes}
@@ -207,9 +207,11 @@ $x_i$         & $x_1,x_2,x_3=x,y,z$ coordinates & m
 
 Besides the velocity $\bu$, the other symbols in these equations are the ice density $\rho$, the viscosity $\nu$, the pressure $p$, and the acceleration of gravity $\bg$.  The velocity field $\bu$ is divergence-free (equation \eqref{incompressible}); thus no fluid is created or lost within the domain, which is one aspect of mass conservation.  Equation \eqref{navierstokes} is a form of ``$ma=F$'', Newton's second law.  The left side of \eqref{navierstokes} has the acceleration following the fluid, $\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}$, while the right-hand side is the total force per unit volume, the sum of viscous, pressure, and gravity ($\rho \mathbf{g} = \left<0,0,-\rho g\right>$) forces, respectively.  Using $\sigma$ to denote the Cauchy stress tensor, the right side can be written $\nabla \cdot \sigma + \rho \mathbf{g}$.
 
-The space of solutions to \eqref{incompressible} and \eqref{navierstokes} is rich.  It includes turbulent flows, which we will not need here.  Reading a book-length introduction to fluids such as \cite{Acheson1990}, or their numerical solution (\emph{computational fluid dynamics}) such as \cite{Wesseling2001}, may not even be helpful for glacier modeling.  One might ask: is glacier modeling really computational fluid dynamics at all?  The answer is \emph{yes}.  Glacier ice flow is a large-scale, climate-relevant fluid problem, comparable to ocean circulation for example.  However, the phenomena which make ocean flows exciting, including turbulence, convection, Coriolis force, and density stratification, are all absent.  What could be interesting about the slow flow of ice?  How does it work, anyway?
+The space of solutions to \eqref{incompressible} and \eqref{navierstokes} is rich.  It includes turbulent flows, which we will not need here.  However, reading a book-length introduction to fluids such as \cite{Acheson1990}, or their numerical solution (\emph{computational fluid dynamics}; e.g.~\cite{Wesseling2001}), may not even be helpful for glacier modeling.
 
-\subsection*{Glen-Stokes equations}  We have said that glacier ice is a ``slow'' fluid.  In terms of equation \eqref{navierstokes}, this means that $\rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) \approx 0$, which is to say the forces (stresses) of inertia are negligible, and Newton's second law becomes a \emph{stress balance}.  However, ice is also a shear-thinning fluid, with \emph{non-Newtonian} behavior; larger strain rates imply smaller viscosity.  The nonlinear viscosity $\nu$ is thus not constant, and an empirically-based flow law is needed.  Combining these ideas gives the canonical ice flow model:
+One might ask: is glacier modeling really computational fluid dynamics at all?  The answer is \emph{yes}.  Glacier ice flow is a large-scale, climate-relevant fluid problem, comparable to ocean circulation, for example.  However, phenomena which make ocean flows exciting, including turbulence, convection, Coriolis force, and density stratification, are all absent.  What could be interesting about the slow flow of ice?  How does it work, anyway?
+
+\subsection*{Glen-Stokes equations}  We have said that glacier ice is a ``slow'' fluid.  In terms of equation \eqref{navierstokes}, this means that $\rho \left(\mathbf{u}_t + \mathbf{u}\cdot\nabla \mathbf{u}\right) \approx 0$, the forces (stresses) of inertia are negligible, so Newton's second law becomes a \emph{stress balance}.  Ice is also a shear-thinning fluid, with \emph{non-Newtonian} behavior; larger strain rates imply smaller viscosity.  The nonlinear viscosity $\nu$ is thus not constant, and an empirically-based flow law is needed.  Combining these few ideas gives the canonical ice flow model:
 \begin{align}
 \nabla \cdot \mathbf{u} &= 0 &&\text{\emph{incompressibility}} \label{incompressibleagain} \\
 - \nabla \cdot \tau + \nabla p &= \rho \mathbf{g} &&\text{\emph{stress balance}} \label{forcebalance} \\
@@ -217,13 +219,13 @@ D\bu &= A |\tau|^{n-1} \tau &&\text{\emph{Glen-Steinemann-Nye flow law}} \label{
 \end{align}
 Note that $\rho>0$ and $\bg$ are constant, and the \emph{ice softness} $A>0$ is constant for the purposes of our simplified treatment, and $n$ is often taken to be three, but the other fields depend on $t,x,y,z$.
 
-Equations \eqref{incompressibleagain}--\eqref{flowlaw} are commonly called the \emph{Stokes model} in glaciology.  Note that $|\tau|^2 = (1/2) \tau_{ij} \tau_{ij}$, using the summation convention, which defines the \emph{effective deviatoric stress} $|\tau|$.  Also, by definition $D\bu = \frac{1}{2}(\grad \bu + \grad \bu^\top)$, thus $(D\bu)_{ij} = \frac{1}{2} \left((u_i)_{x_j}+(u_j)_{x_i}\right)$ in components.  Thus in \eqref{flowlaw} the deviatoric stress $\tau$ and strain rate $D\bu$ tensors are proportional, with a scalar power-law coefficient $A|\tau|^{n-1}$, which is Nye's contribution to the flow law form.  Since $D\bu$ is symmetric, by definition, it follows from \eqref{incompressibleagain} and \eqref{flowlaw} that both tensors $\tau$, $D\bu$ have trace zero.
+Equations \eqref{incompressibleagain}--\eqref{flowlaw} are commonly called the \emph{Stokes model} in glaciology.  Regarding the details, note that $|\tau|^2 = (1/2) \tau_{ij} \tau_{ij}$, using the summation convention, which defines the \emph{effective deviatoric stress} $|\tau|$.  By definition $D\bu = \frac{1}{2}(\grad \bu + \grad \bu^\top)$, thus $(D\bu)_{ij} = \frac{1}{2} \left((u_i)_{x_j}+(u_j)_{x_i}\right)$ in components.  In \eqref{flowlaw} the deviatoric stress $\tau$ and strain rate $D\bu$ tensors are proportional, with a scalar power-law coefficient $A|\tau|^{n-1}$; this was Nye's contribution to the flow law form.  Since $D\bu$ is symmetric, it follows from \eqref{incompressibleagain} and \eqref{flowlaw} that both tensors $\tau$, $D\bu$ have trace zero.
 
-At an abstract level, the many possible solutions of \eqref{forcebalance}--\eqref{flowlaw} are constrained by incompressibility \eqref{incompressibleagain}.  In this way of thinking, the pressure $p$ serves as a Lagrange multiplier for this constraint.
+There are many aspects of the Stokes model one might learn.  For example, the many possible solutions of \eqref{forcebalance}--\eqref{flowlaw} are constrained by incompressibility \eqref{incompressibleagain}, and in this way of thinking the pressure $p$ serves as a Lagrange multiplier for this constraint.
 
-Observe that equations \eqref{incompressibleagain}--\eqref{flowlaw} do not contain any time derivatives!  This implies that the combined effect of glacier geometry, boundary stresses, and gravity will determine the solution velocity and stress fields ($\bu$, $p$, $\tau$) at each instant \cite{JouvetRappaz2011}.  Velocity is therefore a \emph{diagnostic} variable: ice flow codes need no stored velocity to restart, unlike in a Navier-Stokes simulation.  The equations apply at every time, but as the glacier interacts with the climate its geometry and basal stresses will be changing, and thus the Stokes solution fields will also be changing.  In other words, though these equations have no time derivatives, the modeled glacier is  \emph{not} in steady state just because we use them.
+However, note something simple: equations \eqref{incompressibleagain}--\eqref{flowlaw} do not contain any time derivatives!  This implies that the combined effect of glacier geometry, boundary stresses, and gravity will determine the solution velocity and stress fields ($\bu$, $p$, $\tau$) at each instant \cite{JouvetRappaz2011}.  Velocity is therefore a \emph{diagnostic} variable: ice flow codes need no stored velocity to restart, unlike in a Navier-Stokes simulation.  The equations apply at every time, but as the glacier interacts with the climate its geometry and basal stresses are changing, and thus the Stokes solution fields are also changing.  In other words, though these equations have no time derivatives, the modeled glacier is \emph{not} generally in steady state.
 
-Consider the $x,z$-coordinates \emph{planar} (or \emph{flow line}) and $n=3$ case.  The out-of-plane velocity component in equations \eqref{incompressibleagain}--\eqref{flowlaw} is zero, i.e.~$v=0$, and derivatives with respect to $y$ are also zero:
+\subsection*{Planar Stokes model}  Consider the $x,z$-coordinates \emph{planar} (or \emph{flow line}) and $n=3$ case.  The out-of-plane velocity component in equations \eqref{incompressibleagain}--\eqref{flowlaw} is zero, i.e.~$v=0$, and derivatives with respect to $y$ are also zero:
 \begin{align}
 u_x + w_z &= 0 &&\text{\emph{incompressibility}} \label{incompressiblexz} \\
 - \tau_{11,x} - \tau_{13,z} + p_x &= 0 &&\text{\emph{stress balance} ($x$)} \label{stokespx} \\
@@ -231,36 +233,35 @@ u_x + w_z &= 0 &&\text{\emph{incompressibility}} \label{incompressiblexz} \\
 u_x &= A \tau^2 \tau_{11} &&\text{\emph{flow law (diagonal)}}  \label{forceflowx} \\
 u_z + w _x &= 2 A \tau^2 \tau_{13} &&\text{\emph{flow law (off-diagonal)}} \label{forceflowz}
 \end{align}
-Here $\tau_{13}$ is a shear stress while $\tau_{11},\tau_{33}$ are deviatoric longitudinal stresses.  In this planar case it follows that $\tau_{33}=-\tau_{11}$, by incompressibility and the flow law, which explains why we can write \eqref{stokespz} without $\tau_{33}$.  Also, a short calculation shows $\tau^2 = \tau_{11}^2+\tau_{13}^2$.  Observe that equations \eqref{incompressiblexz}--\eqref{forceflowz} form a system of 5 nonlinear equations in 5 unknown scalar fields ($u,w,p,\tau_{11},\tau_{13}$).
 
-\subsection*{Slab-on-a-slope solution}  However, equations \eqref{incompressiblexz}--\eqref{forceflowz} are still complicated and difficult to understand!  Before jumping into numerical solution methods we consider a simplified situation, a uniform slab of ice on an incline.  Here we can exactly solve the Stokes equations, and the same calculation motivates a later shallow model.
+Here $\tau_{13}$ is a shear stress while $\tau_{11},\tau_{33}$ are deviatoric longitudinal stresses.  In this planar case it follows that $\tau_{33}=-\tau_{11}$, by incompressibility \eqref{incompressiblexz} and the flow law \eqref{forceflowx}--\eqref{forceflowz}, which explains why we can write \eqref{stokespz} without $\tau_{33}$.  Also, a short calculation shows $\tau^2 = \tau_{11}^2+\tau_{13}^2$.
+
+Observe that equations \eqref{incompressiblexz}--\eqref{forceflowz} form a system of 5 nonlinear equations in 5 unknown scalar fields ($u,w,p,\tau_{11},\tau_{13}$).
+
+\subsection*{Slab-on-a-slope solution}  However, these 5 equations are still complicated and difficult to understand!  Before jumping into numerical solution methods we consider a simplified situation, a uniform slab of ice on an incline.  Here we can exactly solve the Stokes equations.  The same calculation motivates a later shallow model.
 
 \onefig{slab}{Rotated axes for the slab-on-a-slope calculation.}
 
-We rotate our coordinates only for this example.  The $x,z$ axes shown in Figure \ref{fig:slab} are rotated clockwise at angle $\alpha>0$ so that the gravity vector now has components $\mathbf{g} = (g \sin\alpha,- g \cos \alpha)$.  Equations \eqref{stokespx} and \eqref{stokespz} have the new form
+We rotate our coordinates only for this calculation.  The $x,z$ axes shown in Figure \ref{fig:slab} are rotated clockwise at angle $\alpha>0$ so that the gravity vector now has components $\mathbf{g} = (g \sin\alpha,- g \cos \alpha)$.  Equations \eqref{stokespx} and \eqref{stokespz} have the new form
 \begin{align}
 - \tau_{11,x} - \tau_{13,z} + p_x &= \rho g \sin\alpha, \label{stokespxrot} \\
 - \tau_{13,x} + \tau_{11,z} + p_z &= - \rho g \cos\alpha. \label{stokespzrot}
 \end{align}
 
-For this uniform slab, assume further that there is no variation with $x$. Then the system of Stokes equations \eqref{incompressiblexz}, \eqref{forceflowx}, \eqref{forceflowz}, \eqref{stokespxrot}, \eqref{stokespzrot} simplifies greatly:
+For this uniform slab we assume further that there is no variation with $x$. Then the system of 5 equations simplifies greatly:
 \begin{equation}
 w_z = 0, \quad \tau_{11} = 0, \quad u_z = 2 A \tau^2 \tau_{13}, \quad \tau_{13,z} = - \rho g \sin\alpha, \quad p_z = - \rho g \cos\alpha. \label{stokesslab}
 \end{equation}
-Each unknown is now a function of $z$ only.  Boundary conditions come from assuming that the ice is not crossing the bed and the stress-free ice surface is moving parallel to the $x$-axis.  Thus: $w(0)=0$, $p(H)=0$, $\tau_{13}(H)=0$.  By integrating 3 of the equations in \eqref{stokesslab} with respect to $z$, we get $w(z)=0$, $p(z) = (\rho g \cos\alpha) (H-z)$, and $\tau_{13}(z) = (\rho g \sin\alpha) (H-z)$, and we already have $\tau_{11}(z)=0$.  Note that $H-z$ is the depth below the ice surface; pressure and shear stress are proportional to depth.  Integrating the remaining equation yields the horizontal velocity function, using notation $u(0)=u_0$:
+Each unknown is now a function of $z$ only.  Boundary conditions come from assuming that the ice is not crossing the bed and that the stress-free ice surface is moving parallel to the $x$-axis.  Thus: $w(0)=0$, $p(H)=0$, $\tau_{13}(H)=0$.  We already have $\tau_{11}(z)=0$, and by integrating 3 equations in \eqref{stokesslab} with respect to $z$, we get $w(z)=0$, $p(z) = (\rho g \cos\alpha) (H-z)$, and $\tau_{13}(z) = (\rho g \sin\alpha) (H-z)$.  Note that $H-z$ is the depth below the ice surface; pressure and shear stress are proportional to depth.  Integrating the remaining equation yields the horizontal velocity function, using notation $u(0)=u_0$:
 \begin{align}
 u(z) &= u_0 + \frac{1}{2} A (\rho g \sin\alpha)^3  \left(H^4 - (H-z)^4\right)  \label{uslab}
 \end{align}
 
-Do we believe formula \eqref{uslab}, which makes a specific prediction about the profile of flow in a glacier?  Figure \ref{fig:slabvel} compares observations of a mountain glacier, showing that this model does a credible job of capturing deformation flow in this case.  However, the basal velocity $u_0=u(0)$ is generally unknown.  For simplicity we will assume in these notes that there is no sliding ($u_0=0$), for example because the ice is frozen to the bed, but effective models for glacier sliding are available \cite{BuelerBrown2009}.
+Do we believe formula \eqref{uslab}, which makes a specific prediction about the profile of flow in a glacier?  Figure \ref{fig:slabvel} compares observations of a mountain glacier, showing that this model does a credible job of capturing deformation flow in this case.  However, the basal velocity $u_0=u(0)$ is generally unknown.  For simplicity we will assume in these notes that there is no sliding ($u_0=0$), for example because the ice is frozen to the bed.  (However, effective models for glacier sliding are available \cite{BuelerBrown2009}.)  In Section \ref{sec:sia} we will convert the severe simplifications of this slab-on-a-slope model into the \emph{shallow ice approximation}.
 
 \twofigsizes{slabvel}{athabasca-deform}{Left:  Velocity from formula \eqref{uslab}.  Right:  Measured velocity in a glacier (Athabasca Glacier \cite{SavagePaterson1963}).}{2.0in}{1.8in}
 
-In Section \ref{sec:sia} we will convert the severe simplifications of the slab-on-a-slope model into the \emph{shallow ice approximation}.
-
-\subsection*{Forms of the flow law}  Returning to the general case, flow law \eqref{flowlaw} has another important form.  Recall $|\tau|^2 = (1/2) \tau_{ij} \tau_{ij}$, and define $|D\bu|^2 = (1/2) (D\bu)_{ij} (D\bu)_{ij}$.  The scalars $|\tau|$ and $|D\bu|$ are tensor \emph{norms}.
-
-In the $n=3$ case, for simplicity, we get $|D\bu| = A |\tau|^3$ from \eqref{flowlaw}.  Thus $|\tau| = A^{-1/3} |D\bu|^{1/3}$, and \eqref{flowlaw} can be rewritten
+\subsection*{Forms of the flow law}  Returning to the general case, flow law \eqref{flowlaw} has another important form.  Let us consider the $n=3$ case for simplicity.  Recall that $|\tau|^2 = (1/2) \tau_{ij} \tau_{ij}$, and define $|D\bu|^2 = (1/2) (D\bu)_{ij} (D\bu)_{ij}$; the scalars $|\tau|$ and $|D\bu|$ are tensor \emph{norms}.  From \eqref{flowlaw} we get $|D\bu| = A |\tau|^3$.  Thus $|\tau| = A^{-1/3} |D\bu|^{1/3}$, and \eqref{flowlaw} can be rewritten
 \begin{equation}
 \tau = 2 \nu\, D\bu  \qquad \text{\emph{viscosity form of a flow law}} \label{viscosityflowlaw}
 \end{equation}
@@ -268,7 +269,8 @@ where the (nonlinear) \emph{effective viscosity} $\nu$ has this form:
 \begin{equation}
 \nu = \frac{1}{2} A^{-1/3} |D\bu|^{-2/3}. \label{viscositypowerlaw}
 \end{equation}
-Often $B = A^{-1/3}$ is called the \emph{ice hardness}.  Equations \eqref{viscosityflowlaw} and \eqref{viscositypowerlaw} eliminate the stress tensor $\tau$ from the stress balance \eqref{forcebalance}, so that the Stokes formulas only need velocity $\bu$, pressure $p$, and strain rates $D\bu$ as major variables.
+
+Equations \eqref{viscosityflowlaw} and \eqref{viscositypowerlaw} eliminate the stress tensor $\tau$ from the stress balance \eqref{forcebalance}, so that the Stokes formulas only need velocity $\bu$, pressure $p$, and strain rates $D\bu$ as major variables.  Often $B = A^{-1/3}$ is called the \emph{ice hardness}.
 
 \subsection*{Hydrostatic and Blatter-Pattyn approximations}  A relatively-mild simplification of the Glen-Stokes equations comes from assuming that horizontal variation in the vertical shear stress is small compared to the other terms.  This removes the single term $\tau_{13,x}$ from the $z$-component of the (planar) stress balance \eqref{stokespz}, giving
 \begin{equation}
@@ -877,41 +879,67 @@ Note that scheme \eqref{fd:diffusion:planar:beuler} is really only \emph{semi-im
 
 Despite the strong nonlinearities, fully implicit schemes are implementable when appropriate high-performance solver tools are used \cite{Bueler2016}.  Because there is a tradeoff between easy implementability, for adaptive explicit schemes, versus improved stability, implicit evolution schemes have not made it into widely-used glacier models.  Especially for Stokes-type models, the tradeoff depends on the poorly-understood character of geometry evolution, and the jury is still out on whether they are the better choice \cite{Bueler2023}.  Most present-day numerical glacier and ice sheet models use explicit time-stepping.
 
-\subsection*{Halfar's exact, attracting solution}   The final shape in Figure \ref{fig:dome} is a smooth and symmetrical dome.  This is not an accident!  It turns out that \emph{any} flat-bed ($b=0$) and zero SMB ($a=0$) glacier will asymptotically approach this dome shape.
+\subsection*{Halfar's exact, attracting solution}   The final shape in Figure \ref{fig:dome} is a smooth and symmetrical dome, but this is no accident.  It turns out that \emph{any} flat-bed ($b=0$) and zero SMB ($a=0$) glacier will asymptotically approach this dome shape.
 
-In 1981 Peter Halfar published a time-dependent SIA solution \cite{Halfar1981}.  He showed that any rough surface will approach this solution.\footnote{The proof, a linear asymptotic analysis, applies to any surface that is not too far from the solution, but numerical results show that large perturbations will also converge to the Halfar dome solution.}  A second paper \cite{Halfar1983} extended the result to two horizontal dimensions.  The Halfar solution is both exact and \emph{attracting}, and thus worth knowing.
+In 1981 Peter Halfar published a time-dependent SIA solution \cite{Halfar1981}, and he showed that any rough surface will evolve toward this solution.\footnote{The proof, a linear asymptotic analysis, applies to any surface that is not too far from the solution, but numerical results show that large perturbations will also converge to the Halfar dome solution.}  A second paper \cite{Halfar1983} extended these results to two horizontal dimensions.  The Halfar solutions are both exact and \emph{attracting}, and thus worth knowing.
 
-Consider the SIA equation you get by inserting \eqref{sia:Dagain} into \eqref{diffusion:ske}.  Then set $a=b=0$ and combine constants ($\Gamma = \frac{2}{n+2} A (\rho g)^n$):
+Consider the PDE you get by inserting \eqref{sia:Dagain} into \eqref{diffusion:ske}.  Then setting $a=b=0$, and naming the constant $\Gamma = \frac{2}{n+2} A (\rho g)^n$, we have this simplified nonlinear diffusion equation:
 \begin{equation}
-\frac{\partial s}{\partial t} = \Div \left(\Gamma s^{n+2} |\grad s|^{n-1}\right).  \label{sia:pureforhalfar}
+\frac{\partial s}{\partial t} = \Div \left(\Gamma s^{n+2} |\grad s|^{n-1} \grad s\right).  \label{sia:pureforhalfar}
 \end{equation}
-Halfar found the \emph{similarity solution} of this equation by applying scaling arguments.  Consider the planar case.  Because $a=0$ the ice mass is conserved, so the input ($x$) and output ($s$) lengths can be re-scaled by the same unknown power of $t$:
+
+Halfar found the \emph{similarity solution} of this SIA equation by applying scaling arguments, as follows for the planar case.  Because $a=0$ the ice mass is conserved, so the input ($x$) and output ($s$) lengths can be re-scaled by the same unknown power of $t$:
 \begin{equation}
 x = t^{\alpha} \tilde x, \qquad s(t,x)=t^{-\alpha} \phi(\tilde x) \label{halfarscalings}
 \end{equation}
-These are substituted into \eqref{sia:pureforhalfar}.  Note that the dome grows laterally ($x$ increases) as its height falls ($s$ decreases), which explains the signs.  After much calculus one finds that the powers on $t$ cancel if $\alpha=1/(3n+2)$, which is $\alpha=1/11$ when $n=3$.  Then an exact formula for $\phi(\tilde x)$ can be derived, which gives the invariant shape of the dome.  These formulas appear in the program \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}}.
+These variables are substituted into \eqref{sia:pureforhalfar}.  Note that the dome grows laterally ($x$ increases) as its height falls ($s$ decreases), which explains the signs of the powers.  After much calculus one finds that $t$ cancels from the equation if $\alpha=1/(3n+2)$, which is $\alpha=1/11$ when $n=3$.  Then an exact formula for $\phi(\tilde x)$ can be derived, which gives the invariant shape of the dome.  These formulas feature in the program \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}}.
 
-Figure \ref{fig:halfardome} was generated by changing a boolean flag in \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}}, so that the initial condition is equal to the Halfar dome formula at an earlier time $t_0$.  The simulation goes to a later time $t_f+t_0$, and the program plots both the numerical and exact solutions at that time.  The fit is very close.
+Figure \ref{fig:halfardome} was generated by changing a boolean flag in \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}}, so that the initial condition is equal to the Halfar dome formula, evaluated at its characteristic time $t_0$ \cite{Bueleretal2005}.  The simulation runs for the same duration as before, and then the program plots both the numerical and exact solutions at that time.  The fit is very close.
 
-\onefigsize{halfardome}{From an initial Halfar dome, \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}} does a numerical simulation to the final time; compare the exact Halfar shape (dotted).}{4.0in}
+\onefigsize{halfardome}{Just like Figure \ref{fig:dome}, but starting from an initial Halfar dome.  The numerical and exact final states are very close.}{4.0in}
 
-\subsection*{Convergence and verification}  Our program \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}} calls \href{https://github.com/bueler/mccarthy/blob/master/py/shallow.py}{\texttt{py/shallow.py}}.  It is already complicated.  Are we sure that this implemented numerical scheme is correct?  Here are three justifications for numerical correctness which appear in the literature:
+The power $\alpha=1/(3n+2)$ is a manifestation of shear-thinning water ice flow \cite{Nyeetal2000}.  The Halfar solution solves the problem of putting a Dirac delta mass of ice at the origin, at some conceptual starting time, and evolving its shape only through flow.  The dome expands laterally at $t^\alpha$ rate, which starts very fast when the dome is tall, but becomes agonizingly slow as $t$ gets large.  The geometry never reaches steady state.
+
+\subsection*{Convergence and verification}  Our program \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}} calls \href{https://github.com/bueler/mccarthy/blob/master/py/shallow.py}{\texttt{py/shallow.py}}, so the code is already complicated.  Are we sure that our implementation is correct?
+
+These three justifications for numerical correctness appear in the modeling literature:
 \begin{enumerate}
   \item The author made no mistakes.
   \item The numerical results are close to those from other researchers.
   \item The numerical results are close to an exact solution.
 \end{enumerate}
-The first two approaches, \emph{infallibility} and \emph{intercomparison}, should be less common than they are.  The third, preferred by the CFD community \cite{Wesseling2001}, is the simple idea of \emph{verification}: an implementation should be tested in cases where the correct answer is known.  Here ``correct answer'' means an exact solution to the PDE itself.
+The first two justifications, \emph{infallibility} and \emph{intercomparison}, should be less common than they are.  The third, preferred by the CFD community \cite{Wesseling2001}, is the simple idea of \emph{verification}: the numerical error should be measured in cases where the correct answer is known.  Here ``correct answer'' means an exact solution to the PDE itself.
 
-In technical terms, we intend our numerical schemes to \emph{converge} under \emph{grid refinement}.  Proving such convergence is a main topic in numerical textbooks \cite{LeVeque2007,MortonMayers2005}, but even if we expect convergence to happen in theory, we still need to check it, i.e.~verify it, for the actual computer program which implements the scheme.  Verification also involves measuring the accuracy of the scheme, to find the rate of convergence.
+In technical terms, we intend our numerical schemes to \emph{converge} to the exact (but usually unknown) solution of the continuum problem under \emph{grid refinement}.  Proving such convergence is a main topic in numerical textbooks \cite{LeVeque2007,MortonMayers2005}.  However, even if we expect convergence to happen in theory, we still need to \emph{verify} it for the actual computer program which implements the scheme.  This involves measuring the accuracy of the scheme by finding its empirical rate of convergence in particular cases.  Almost any implementation mistake will break convergence, or drastically reduce its rate; the fragility of the verification process is its strongest feature.
 
-For SIA geometry evolution equation \eqref{diffusion:ske:planar}, scheme \eqref{fd:diffusion:planar} makes $O(\Delta t) + O((\Delta x)^2)$ errors just by applying the FD formulas.  This is called its \emph{local truncation error} \cite{MortonMayers2005}; it is the best rate we can expect when measuring the \emph{numerical error} compared to the exact solution.  
+In theory, if we had a linear diffusion equation like \eqref{diffusion:ske:planar} then scheme \eqref{fd:diffusion:planar} would make $O(\Delta t) + O((\Delta x)^2)$ numerical errors.  That is, one finds these rates for the \emph{local truncation error} \cite{MortonMayers2005} just from examining the FD formulas.  This is the best rate we can expect when measuring the \emph{numerical error} compared to the exact solution.  However, the convergence rate for glacier equations is reduced because of the singular-gradient margin shape.
 
-FIXME running dome.py with J=40,80,160,320,640 gives the errors shown in this figure
+For an experiment, set the resolution $J$ in \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}} to five values $J=40$, $80$, $160$, $320$, $640$.  The measured errors against the Halfar solution (Figure \ref{fig:halfardome}) are as follows:
 
-The average numerical surface elevation error decreases with increasing grid resolution, as expected for a correctly-implemented code.  This strongly suggests that our actual implementation converges.  Less obvious is that almost any numerical implementation mistake will break such convergence.  That is, the reported errors will not shrink if there is any meaningful bug (see the Exercises).  This fragility of verification is its strongest feature.
+\smallskip
+\begin{center}
+\begin{tabular}{r|c|c|c}
+$J$ & $\Delta x$ (m) & maximum (m) & average (m) \\ \hline
+40 & 1000 & 66.52 & 6.94 \\
+80 & 500 & 7.24 & 1.79 \\
+160 & 250 & 8.57 & 0.77 \\
+320 & 125 & 15.63 & 0.36 \\
+640 & 62.5 & 9.42 & 0.12
+\end{tabular}
+\end{center}
+% >> dx = [1000, 500, 250, 125, 62.5];
+%>> ave = [6.94, 1.79, 0.77, 0.36, 0.12];
+%>> p = polyfit(log(dx), log(ave), 1)
+%p =
+%   1.4022  -7.9187
+% >> exp(p(2)) * dx.^p(1)
+%ans =
+%   5.8535   2.2148   0.8380   0.3171   0.1200
 
-The Halfar solution is quite simple to use for verifying time-dependent SIA models, but are exact solutions like Halfar's always available when needed?  No, of course not.  However, many ice flow models have exact solutions which are relevant to verification; see the Notes and References.  For example, we will use an exact solution for ice shelves in a later section.  An apparent absence of exact solutions to a given model may actually show that not enough thought has gone into the continuum model itself.
+\smallskip
+The two columns are the maximum and average numerical elevation errors at the final time.  The average error decreases with improved grid resolution, as expected for a correctly-implemented code, at a measured rate $O((\Delta x)^{1.40})$.  By contrast, because the numerical error in margin location will never be better than about one grid space \cite{Bueler2021conservation}, and because the margin gradient is unbounded,  the maximum error behaves erratically \cite{Bueleretal2005}.
+
+The Halfar solution is simple to use for verification, but such elegant exact solutions are rare.  However, exact solutions for verification can actually be constructed at will, by the \emph{method of manufactured solutions} \cite{Wesseling2001}; it is worthwhile to learn this trick.
 
 
 
