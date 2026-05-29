@@ -272,11 +272,11 @@ where the (nonlinear) \emph{effective viscosity} $\nu$ has this form:
 
 Equations \eqref{viscosityflowlaw} and \eqref{viscositypowerlaw} eliminate the stress tensor $\tau$ from the stress balance \eqref{forcebalance}, so that the Stokes formulas only need velocity $\bu$, pressure $p$, and strain rates $D\bu$ as major variables.  Often $B = A^{-1/3}$ is called the \emph{ice hardness}.
 
-\subsection*{Hydrostatic and Blatter-Pattyn approximations}  A relatively-mild simplification of the Glen-Stokes equations comes from assuming that horizontal variation in the vertical shear stress is small compared to the other terms.  This removes the single term $\tau_{13,x}$ from the $z$-component of the (planar) stress balance \eqref{stokespz}, giving
+\subsection*{Hydrostatic and Blatter-Pattyn approximations}  One way to simplify the Glen-Stokes equations comes from assuming that horizontal variation in the vertical shear stress is small compared to the other terms.  This removes the single term $\tau_{13,x}$ from the $z$-component of the (planar) stress balance \eqref{stokespz}, giving
 \begin{equation}
 \tau_{11,z} + p_z = - \rho g. \label{hydrostaticpz}
 \end{equation}
-Because $\sigma_{ij} = \tau_{ij} - p \delta_{ij}$, so that $\tau_{11}+p = - \tau_{33}+p = - \sigma_{33}$, equation \eqref{hydrostaticpz} says that the vertical normal stress $\sigma_{33}$ is linear in depth, that is, it is \emph{hydrostatic}.\footnote{The pressure $p$ itself is not generally hydrostatic in this model.}  Also taking a surface value of $\sigma_{33}=0$ we get
+Because $\sigma_{ij} = \tau_{ij} - p \delta_{ij}$, so that $\tau_{11}+p = - \tau_{33}+p = - \sigma_{33}$, equation \eqref{hydrostaticpz} says that the vertical normal stress $\sigma_{33}$ is linear in depth, that is, it is \emph{hydrostatic}.\footnote{The pressure $p$ itself is not generally hydrostatic in this model.}  Taking a surface value of $\sigma_{33}=0$ we get
 \begin{equation}
 \tau_{11}+p = \rho g (s-z), \label{hydrostaticitself}
 \end{equation}
@@ -286,7 +286,7 @@ Equation \eqref{hydrostaticitself} allows us to eliminate the pressure $p$ from 
 \begin{equation}
 \left(4 \nu u_x\right)_x + \left(\nu (u_z+w_x)\right)_z = \rho g s_x \qquad\text{\emph{hydrostatic stress balance}} \label{stresshydrostatic}
 \end{equation}
-Equations \eqref{incompressiblexz}, \eqref{viscositypowerlaw}, \eqref{stresshydrostatic}, plus appropriate boundary conditions, determine $u$ and $w$, without the simultaneous need to solve for $p$.  (The remaining unknowns can be determined by differentiation and/or integration in $z$.)  However, while $p$ is gone, \eqref{stresshydrostatic} remains non-trivially coupled to incompressibility \eqref{incompressiblexz} through the vertical velocity $w$.
+Equations \eqref{incompressiblexz}, \eqref{viscositypowerlaw}, \eqref{stresshydrostatic}, plus appropriate boundary conditions, determine $u$ and $w$, without the need to simultaneously solve for $p$.  (The remaining unknowns can be determined by differentiation and/or integration in $z$.)  However, while $p$ is gone, \eqref{stresshydrostatic} remains non-trivially coupled to incompressibility \eqref{incompressiblexz} through the vertical velocity $w$.
 
 We get the even-simpler Blatter-Pattyn model by dropping $w_x$ from equation \eqref{stresshydrostatic}:
 \begin{equation}
@@ -294,48 +294,49 @@ We get the even-simpler Blatter-Pattyn model by dropping $w_x$ from equation \eq
 \end{equation}
 Now solving \eqref{viscositypowerlaw}, \eqref{stressblatter} as a boundary value problem yields the scalar horizontal velocity $u$.  We can then recover $w$ using integration in $z$ on incompressibility \eqref{incompressiblexz}.
 
-Because it has a form similar to the well-understood Poisson equation $u_{xx} + u_{zz} = f$ \cite{LeVeque2007,MortonMayers2005}, the process of solving equation \eqref{stressblatter} may be more familiar than \eqref{stresshydrostatic}.  However, the omission of $w_x$ from the stress balance, a mechanism which smooths the surface of a glacier once the model is made time-dependent (next!), is significant.  The hydrostatic and Blatter-Pattyn stress balances give different predictions.
+Because it has a form similar to the well-understood Poisson equation $u_{xx} + u_{zz} = f$ \cite{LeVeque2007,MortonMayers2005}, the process of solving equation \eqref{stressblatter} may be more familiar than \eqref{stresshydrostatic}.  However, the omission of $w_x$ from the stress balance, a mechanism which smooths the surface of a glacier once the model is made time-dependent (next Section), may be significant.
 
 
-\section{Surface kinematical equation (evolution of glaciers)}   \label{sec:masscont}
+\section{Surface kinematical equation, and the evolution of glaciers}   \label{sec:masscont}
 
-\subsection*{Time-dependent ice domain}  The Glen-Stokes stress balance model for ice flow, and its approximations, are incomplete as models for glacier behavior in a very important sense.  They describe the ice flow at every instant but they give no direct clue about how glaciers \emph{change}.  The stress balance equations contain no time derivatives, and they can not directly ``see'' the climate around the glacier,\footnote{In fact the stress balance ``sees'' basal stress as a boundary condition, and this is sometimes regarded as a climate input, but via highly-nontrivial additional models.} other than gravity.
+\subsection*{Time-dependent ice domain}  The Glen-Stokes stress balance model for ice flow, and its approximations, are incomplete as models for glacier behavior in a very important sense.  They describe the ice flow at every instant but they give no direct clue about how glaciers \emph{change}.  The stress balance equations contain no time derivatives, and they can not directly ``see'' the climate around the glacier,\footnote{In fact the stress balance ``sees'' basal stress as a boundary condition, and this is sometimes regarded as a climate input.  However, it acts via highly-nontrivial additional models.} other than gravity.
 
-On the other hand, the \emph{domain} on which the stress balance equations are solved evolves in time.  We need notation for this time-dependent geometry.  Let $s(t,x,y)$ be the ice surface elevation in 3D; the mathematical surface itself is $z=s(t,x,y)$.  We assume for now that the glacier bed elevation $b(x,y)$ is time-independent.\footnote{Erosion and earth deformation (e.g.~glacial isostasy) processes would make the bed elevation time-dependent, in which case a \emph{basal kinematical equation} \eqref{bke} is also needed.}  Our preferred stress balance differential equations are then solved on the 3D set
+On the other hand, the \emph{domain} on which the stress balance equations are solved evolves in time.  We need notation for this time-dependent geometry.  Let $s(t,x,y)$ be the ice surface elevation in 3D; the surface itself is $z=s(t,x,y)$.  We assume for now that the glacier bed elevation $b(x,y)$ is time-independent.\footnote{Erosion or earth deformation (e.g.~glacial isostasy) would make the bed elevation time-dependent, in which case a \emph{basal kinematical equation} \eqref{bke} is also needed.}  The stress balance differential equations, whichever Section \ref{sec:continuum} model is chosen, are then solved on the 3D set
 \begin{equation}
-\left\{(x,y,z)\,:\,b(x,y) < z < s(t,x,y)\right\}, \label{domain}
+\left\{(x,y,z)\,:\,b(x,y) < z < s(t,x,y)\right\}. \label{domain}
 \end{equation}
-the changing set of points between the surface and the bed.  In glacier equations it is primarily the ice domain \eqref{domain} that evolves in time, while the stress balance equations are instantaneous truths which hold on this evolving domain.
+This is the changing set of 3D points between the surface and the bed.  In glacier equations it is primarily the ice domain \eqref{domain} that evolves in time, while the stress balance equations are instantaneous truths which hold on this evolving domain.
 
-The figure on the cover page shows notation in the planar (2D) case: $z=s(t,x)$, $z=b(x)$, and $\left\{(x,z)\,:\,b(x) < z < s(t,x)\right\}$ (labeled \textsf{ice} in the figure).
+The Figure on the cover shows this notation in the planar (2D) case, including $z=s(t,x)$ and $z=b(x)$.  The 2D domain $\left\{(x,z)\,:\,b(x) < z < s(t,x)\right\}$ is labeled \textsf{ice}.
 
-\subsection*{Surface kinematics}  The upper surface evolves in part through the \emph{surface mass balance} (SMB) rate, which is denoted $a(t,x,y)$ or $a(t,x)$ and is also known as the \emph{climatic} mass balance \cite{Cogleyetal2011}.  (``SMB'' is one of a few abbreviations used in these notes; see Table \ref{tab:abbrev}.)  By definition this is the balance between accumulating snow and the comparatively-rapid\footnote{In these notes, and in much of the glacier literature, the velocity of liquid runoff is assumed to be so much larger than the ice flow velocity that the runoff acts instantaneously.} loss of liquid water, by melt and runoff of the snow, firn, or ice, from the upper surface.  Our elevations are in meters, and time is in seconds, so the SMB function $a$ here is in ice-equivalent meters per second.
+\subsection*{Surface mass rates}  The upper surface evolves in part through the \emph{surface mass balance} (SMB) rate, which we denote as $a(t,x,y)$ or $a(t,x)$.  (``SMB'' is one of a few abbreviations used in these notes; see Table \ref{tab:abbrev}.)  It is also known as the \emph{climatic} mass balance \cite{Cogleyetal2011}.
 
-These notes only consider simulations of land-based glaciers, and we omit models of basal melt, but such melt would contribute to an additional \emph{basal} mass balance rate.  It can be of either sign because of \emph{freeze-on}, e.g.~in floating ice shelves.
+By definition, the SMB is the balance between accumulating snow and the loss of water, by melt and runoff of the snow, firn, or ice, and by sublimation, from the upper surface.  In these notes, and in typical glacier literature, the velocity of liquid runoff is assumed to be so much larger than the ice flow velocity that the runoff acts instantaneously.  Our elevations are in meters, and time in seconds, so the SMB function $a$ is in ice-equivalent meters per second.
 
-The upper surface evolves according to the \emph{surface kinematical equation} (SKE; \cite{SchoofHewitt2013}), which in the planar case is the equation
+These notes only consider simulations of land-based glaciers, and we omit models of basal melt.  However, basal melt would contribute to a \emph{basal mass balance} rate.  It can be of either sign because of \emph{freeze-on}, e.g.~in floating ice shelves.
+
+\subsection*{Surface kinematics}  The upper surface evolves according to the \emph{surface kinematical equation} (SKE; \cite{SchoofHewitt2013}), which in the planar case is the equation
 \begin{equation}
 \frac{\partial s}{\partial t} = a + w -u \frac{\partial s}{\partial x}. \label{skeplanar}
 \end{equation}
+Regarding the notation, the planar ice velocity is $\bu=\left<u,w\right>$ in components.  Equation \eqref{skeplanar} uses the component values at the upper surface $z=s(t,x)$, i.e.~$u=u(t,x,s(t,x))$ and $w=w(t,x,s(t,x))$.
 
-Regarding the notation, the planar ice velocity is $\bu=\left<u,w\right>$, and the variables $u,w$ in \eqref{skeplanar} are these component values at the upper surface, namely $u=u(t,x,s(t,x))$ and $w=w(t,x,s(t,x))$, i.e.~at $z=s(t,x)$.
+Equation \eqref{skeplanar} says that the ice surface moves up and down at rate $\partial s/\partial t$ according to three contributions, the SMB $a$, the vertical ice velocity $w$, and the product of horizontal ice velocity $u$ with the surface slope $\partial s/\partial x$.  Dimensionally, at least, this is correct; $\partial s/\partial x$ is unitless, and all terms in \eqref{skeplanar} are in meters per second.
 
-Equation \eqref{skeplanar} says that the ice surface moves up and down at the rate $\partial s/\partial t$ according to three contributions, the SMB $a$, the vertical ice velocity $w$, and the product of horizontal ice velocity $u$ with the surface slope $\partial s/\partial x$.  Dimensionally, at least, this is correct; $\partial s/\partial x$ is unitless, and all terms in \eqref{skeplanar} are in meters per second.
-
-Vector notation is convenient when extending \eqref{skeplanar} to 3D, so that the surface elevation function $s(t,x,y)$ depends on two horizontal variables.  Let
+Vector notation is convenient when extending \eqref{skeplanar} to 3D.  Here the surface elevation function $s(t,x,y)$ depends on two horizontal variables, and we define
 \begin{equation}
-\bn_s = \Big<-\frac{\partial s}{\partial x}, -\frac{\partial s}{\partial y}, \,1\Big> \label{normal}
+\bn_s = \left<-\frac{\partial s}{\partial x}, -\frac{\partial s}{\partial y}, \,1\right>, \label{normal}
 \end{equation}
-be an upward-pointing normal vector on the surface.  Then the SKE is
+an upward-pointing normal vector on the surface.  Then the SKE is
 \begin{equation}
 \frac{\partial s}{\partial t} - \bu \cdot \bn_s = a  \label{ske}
 \end{equation}
-where $\bu=\left<u,v,w\right>$ (Table \ref{tab:notation}) is evaluated at the surface.  With all terms involving the unknown surface elevation $s$ on the left, form \eqref{ske} suggests we might think of the climate $a$ as given data, and we might try to solve the SKE for $s$, which is exactly what we are about to do.
+where $\bu=\left<u,v,w\right>$ is evaluated at the surface.
 
-The SKE is described in the glacier literature as a mere boundary condition \cite{GreveBlatter2009,SchoofHewitt2013}, but it is actually the most important statement of mass conservation in a glacier model.  It can be derived from conservation by a standard ``pillbox'' calculus argument \cite{Aschwandenetal2012}.
+The SKE is described in the glacier literature as a mere boundary condition \cite{GreveBlatter2009,SchoofHewitt2013}, but it is actually the dominant statement of mass conservation in a glacier model.  It can be derived from conservation by a standard ``pillbox'' calculus argument \cite{Aschwandenetal2012}.  In any case, with all terms involving the unknown surface elevation $s$ on the left, equation \eqref{ske} suggests we might think of the climate $a$ as given data, and we might try to solve it for $s$.  This is exactly what we are about to do.
 
 \begin{table}[t]
-\caption{Abbreviations.}
+\caption{Abbreviations, listed alphabetically.}
 \begin{tabular}{cll}
 abbreviation & meaning & definition/citations \\ \hline
 CFL & numerical stability criterion & inequality \eqref{cfl}; \cite{CFL1928,LeVeque2007,MortonMayers2005} \\
@@ -348,27 +349,25 @@ SMB & surface mass balance & \cite{Cogleyetal2011}
 \label{tab:abbrev}
 \end{table}
 
-\subsection*{First numerical glacier model}  Regarding equation \eqref{skeplanar} or \eqref{ske} one might say:
+\subsection*{First numerical glacier model}  Regarding equation \eqref{ske} one might say:
 \begin{center}
 \emph{by numerically solving this equation for $s$, one has a model for a glacier.}
 \end{center}
-Perhaps it is better to say that the SKE is \emph{correct} in a physical sense and can be \emph{understood} as a glacier model.  We will demonstrate it as a minimal model.
+Perhaps it is better to say that the SKE is \emph{correct} in a physical sense and can be \emph{understood} as a minimal glacier model.
 
-The plan is to numerically solve the planar SKE \eqref{skeplanar} for the surface elevation $s(t,x)$.  To do this we make the bold assumptions that the SMB function $a(t,x)$, \emph{and} the surface values of the velocity components, denoted $u(t,x)$ and $w(t,x)$, are given by other agents.  In practice the SMB could be the output of a sub-model, such as a mass/energy process model coupled to atmosphere physics and data \cite{vanderVeen2013}.  The surface velocity components $u,w$ would likewise be the output of a stress balance sub-model (Sections \ref{sec:continuum} and \ref{sec:sia}).  However, the stress balance sub-model depends on the surface elevation $s$ itself, which determines the ice domain geometry,\footnote{The SMB could also depend on $s$, another form of coupling.} and so in fact the whole problem is non-trivially \emph{coupled}, but we must start somewhere.
+The plan is to numerically solve the planar SKE \eqref{skeplanar} for the surface elevation $s(t,x)$.  For this we make the bold assumptions that the SMB function $a(t,x)$, \emph{and} the velocity surface components $u(t,x)$ and $w(t,x)$, are given by other agents.  In practice the SMB could be the output of a mass/energy process sub-model, coupled to atmosphere physics and data \cite{vanderVeen2013}.  The surface velocity components $u,w$ would likewise be the output of a stress balance sub-model (Sections \ref{sec:continuum} and \ref{sec:sia}).  However, the latter sub-model depends strongly on the surface elevation $s$, which determines the domain geometry,\footnote{The SMB could also depend on $s$, another form of coupling.} and so in fact the whole problem is non-trivially \emph{coupled}.  But we must start somewhere.
 
-This first numerical model is in a short Python program \href{https://github.com/bueler/mccarthy/blob/master/py/surface.py}{\texttt{py/surface.py}}.  (See the Download part of Section \ref{sec:intro}.)  It generates an approximation to the surface elevation $s(t,x)$, over intervals of space $0<x<L$ and time $0<t<T$, according to \eqref{skeplanar}, by an \emph{explicit} time-dependent numerical method.  We'll use this first program to consider questions of accuracy and stability, and practicalities like verification.
+This first numerical model is in a short Python program \href{https://github.com/bueler/mccarthy/blob/master/py/surface.py}{\texttt{py/surface.py}}.  (See the Download part of Section \ref{sec:intro}.)  It generates a finite difference approximation to the surface elevation $s(t,x)$, over intervals of space $0<x<L$ and time $0<t<T$, according to \eqref{skeplanar}, by an \emph{explicit} time-dependent numerical method.  We'll use this first program to consider questions of accuracy and stability, and practicalities like verification.
 
-\subsection*{Finite differences}  The program \href{https://github.com/bueler/mccarthy/blob/master/py/surface.py}{\texttt{py/surface.py}} is based on \emph{finite difference} (FD) approximations \cite{LeVeque2007, MortonMayers2005}, which need an introduction on their own.
-
-From calculus, Taylor's theorem says that for a smooth function $f(x)$ and a real number $\Delta$, we have an expansion:
+\subsection*{Finite differences}  \emph{Finite difference} (FD) approximations need an introduction on their own, though textbooks \cite{LeVeque2007, MortonMayers2005} are recommended.  From calculus, Taylor's theorem says that for a smooth function $f(x)$ and a real number $\Delta$, we have an expansion:
 \begin{equation}
 f(x+\Delta) = f(x) + f'(x) \Delta + \frac{1}{2} f''(x) \Delta^2 + \frac{1}{3!} f'''(x) \Delta^3 + \dots  \label{taylor}
 \end{equation}
-(The precise theorem uses a finite sum and estimates the remainder, but a loose version will suffice here.)  One may replace ``$\Delta$'' by its negative, or other multiples, to get related forms such as $f(x-\Delta) = f(x) - f'(x) \Delta + \frac{1}{2} f''(x) \Delta^2 - \dots$  FD numerical models are constructed by combining such expressions to approximate the derivatives in the continuum equations.  The resulting algebraic equations relate unknown gridded values via mere arithmetic, which digital computers can do well.
+(The precise theorem uses a finite sum and a remainder formula, but a loose version will suffice here.)  One may replace ``$\Delta$'' by its negative, or other multiples, to get related forms such as $f(x-\Delta) = f(x) - f'(x) \Delta + \frac{1}{2} f''(x) \Delta^2 - \dots$ 
 
-As a simple example, subtract $f(x)$ from both sides of expansion \eqref{taylor}, then divide by $\Delta$, to find an approximation of the first derivative,
+FD numerical models are constructed by combining expressions like \eqref{taylor} to approximate the derivatives in the continuum equations.  The resulting algebraic equations relate unknown gridded values via mere arithmetic, which digital computers can do well.  As a simple example, subtract $f(x)$ from both sides of \eqref{taylor}, then divide by $\Delta$, to find an approximation of the first derivative,
 	$$\frac{f(x+\Delta) - f(x)}{\Delta} \approx f'(x).$$
-This is usually written to emphasize the size of the remaining terms in the expansion, or more precisely the size of the remainder in Taylor's theorem:
+This is usually written to emphasize the size of the remaining terms in the expansion, i.e.~the size of the remainder in Taylor's theorem:
 	$$f'(x) = \frac{f(x+\Delta) - f(x)}{\Delta} + O(\Delta).$$
 Here $O(\Delta)$ denotes a quantity with magnitude smaller than a fixed multiple of $\Delta$, asymptotically as $\Delta \to 0$.
 
@@ -377,11 +376,9 @@ To apply this FD approach to a \emph{partial} differential equation (PDE) like S
 \frac{\partial s}{\partial t}(t,x) &= \frac{s(t+\Delta t,x) - s(t,x)}{\Delta t} + O(\Delta t), \label{fd:partials} \\
 \frac{\partial s}{\partial x}(t,x) &= \frac{s(t,x+\Delta x) - s(t,x-\Delta x)}{2\Delta x} + O((\Delta x)^2). \notag
 \end{align}
-The first formula is called a \emph{forward difference} and the second a \emph{centered difference}.
+The first formula is a \emph{forward difference} and the second a \emph{centered difference}.
 
-Our numerical solution will use a spatial grid $\{x_j\}$, with equal spacing $\Delta x$ and an integer index $j$.  It will use a temporal grid $\{t_n\}$ with (possibly unequal) spacing $\Delta t$.  We seek a new surface elevation $s(t_{n+1},x_j)$ from some current values $s(t_n,x_{\bullet})$.
-
-We should distinguish between the continuum solution value $s(t_n,x_j)$, by evaluating the exact solution of the continuum SKE \eqref{skeplanar} at a grid point, and our numerical approximation of it at the same point, now denoted $s_j^n$.  Conceptually, $s_j^n \approx s(t_n,x_j)$, but the values $s_j^n$ are the ones we actually get by computation.  Finally, we will declutter the grid notation by writing $s_j$ for $s_j^n$ and $\snew_j$ for $s_j^{n+1}$.
+Our numerical solution will use a spatial grid $\{x_j\}$, with equal spacing $\Delta x$ and an integer index $j$.  It will use a temporal grid $\{t_n\}$ with (possibly unequal) spacing $\Delta t$.  We seek a new surface elevation $s(t_{n+1},x_j)$ from some current values $s(t_n,x_{\bullet})$.  However, we should distinguish between $s(t_n,x_j)$, a value of the continuum exact solution at a grid point, and our numerical approximation of it at the same point, now denoted $s_j^n$.  Conceptually, $s_j^n \approx s(t_n,x_j)$, but the values $s_j^n$ are the ones we actually get by computation.  Finally, we will declutter the grid notation by writing $s_j$ for $s_j^n$ and $\snew_j$ for $s_j^{n+1}$.
 
 With all these conventions, consider replacements \eqref{fd:partials}, the FD approximations
     $$\frac{\partial s}{\partial t} \approx \frac{\snew_j - s_j}{\Delta t}, \qquad \frac{\partial s}{\partial x} \approx \frac{s_{j+1} - s_{j-1}}{2\Delta x}.$$
@@ -408,7 +405,7 @@ This is called \emph{upwind} differencing.  These formulas have only first-order
 \begin{equation}
 \snew_j = s_j - \Delta t\, \frac{u_j}{\Delta x} \left\{\begin{matrix} s_j-s_{j-1}, & u_j > 0 \\ s_{j+1}-s_j, & u_j \le 0 \end{matrix}\right\} + \Delta t (a_j + w_j).  \label{fd:upwind}
 \end{equation}
-The stencil in Figure \ref{fig:stencils} right shows the $u_j>0$ case.  In this case the velocity feeds the ice from the left, which explains the ``upwind'' naming.
+The stencil in Figure \ref{fig:stencils} right shows the $u_j>0$ case in which the velocity feeds the ice from the left, which explains the ``upwind'' naming.
 
 \subsection*{Time-stepping implementation}  We can now look at the code.  Upwind scheme \eqref{fd:upwind} for SKE \eqref{skeplanar} is a short Python function in the program \href{https://github.com/bueler/mccarthy/blob/master/py/surface.py}{\texttt{py/surface.py}}:
 
@@ -447,20 +444,20 @@ The initial condition and final result (50th time step) are shown in Figure \ref
 \label{fig:demo}
 \end{figure}
 
-\subsection*{Stability and CFL}  These first results look good (and boring).  However, easily-made modifications reveal stability issues, exposing high-spatial-frequency, rapidly-growing oscillations.  In particular, each of these separate modifications, which are a recommended exercise, generate such exploding wiggles:
+\subsection*{Stability and CFL}  These first results look good (and boring).  However, easy modifications reveal stability issues, exposing high-spatial-frequency, rapidly-growing oscillations.  In particular, each of these separate modifications, a recommended exercise, generate such exploding wiggles:
 \begin{itemize}
 \item increase velocity: \quad $u(x)$ \, $\to$ \, $2.5\, u(x)$
 \item increase resolution: \quad $\Delta x=1000$ m \, $\to$ \, $\Delta x=400$ m
 \item lengthen time-steps: \quad $\Delta t = 1$ a \, $\to$ \, $\Delta t = 2.5$ a    
 \end{itemize}
 
-This kind of instability is well understood, and in fact the condition to avoid it has been known for 100 years.  The idea is that in the SKE \eqref{skeplanar}, and similar \emph{advection} equations, information about the surface travels at the speeds $\{u_j\}$.  Therefore we need to make sure that information does not travel more than one spatial distance $\Delta x$ during the time step $\Delta t$.  Equivalently, the maximum dimensionless Courant, Friedrichs, \& Lewy (CFL; \cite{CFL1928}) ratio should be at most one:
+This kind of instability is well understood, and in fact the condition to avoid it has been known for 100 years.  The idea is that in the SKE \eqref{skeplanar}, and similar \emph{advection} equations, information about the surface travels at the speeds $\{u_j\}$.  Therefore we need to make sure that information does not travel more than one spatial distance $\Delta x$ during the time step $\Delta t$.  Equivalently, the maximum dimensionless Courant, Friedrichs, \& Lewy (CFL; \cite{CFL1928}) ratio should not exceed one:
 \begin{equation}
 \frac{(\max_j |u_j|) \Delta t}{\Delta x} \le 1.  \label{cfl}
 \end{equation}
-The above destabilizing modifications each pushed this ratio over the limit.
+The destabilizing modifications each pushed this ratio over the limit.
 
-In practice, inequality \eqref{cfl} is used to set the time step $\Delta t$ to assure stability.  At run time a simulation program sets $\Delta t = C \frac{\Delta x}{\max_j |u_j|}$, using $C=0.9$ for example, so that \eqref{cfl} holds, even when the surface velocities $u_j$ are changing in time.
+In practice, inequality \eqref{cfl} is used to set the time step $\Delta t$ to assure stability.  At run time a simulation program sets $\Delta t = C \frac{\Delta x}{\max_j |u_j|}$, using $C=0.9$ for example.  The step $\Delta t$ is adjusted so that \eqref{cfl} holds even if the velocities $u_j$ were changing in time.
 
 \subsection*{Admissibility}  A different type of modification also breaks our method.  In the default set-up, the function $a(x)$ in \href{https://github.com/bueler/mccarthy/blob/master/py/surface.py}{\texttt{py/surface.py}} is linear and decreasing  in $x$, with a zero, i.e.~an equilibrium line \cite{Cogleyetal2011}, at $1/5$ of the total length $L$.  That is, accumulation occurs over $0<x<L/5$ and ablation over $L/5<x<L$.  The modification
 \begin{itemize}
