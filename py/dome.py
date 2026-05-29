@@ -131,7 +131,7 @@ if halfarinitial:
     sexact = s_halfar(t0h + tf, x)
     serr = abs(s - sexact)
     serrav = sum(serr) / len(serr[serr > 0.0])
-    print(f"  [errors at final time: |s - sexact|_max = {serr.max():.1f} m, |s - sexact|_av = {serrav:.1f} m")
+    print(f"  [errors at final time: |s - sexact|_max = {serr.max():.2f} m, |s - sexact|_av = {serrav:.2f} m")
     plt.plot(x / 1000.0, sexact, '.', color="C4", label=f"final exact")
 
 plt.xlabel("x (km)")
