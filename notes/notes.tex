@@ -57,12 +57,12 @@ urlcolor=black
 }
 
 \renewcommand{\baselinestretch}{1.05}
+\raggedbottom
 
 \newcommand{\ddt}[1]{\ensuremath{\frac{\partial #1}{\partial t}}}
 \newcommand{\ddx}[1]{\ensuremath{\frac{\partial #1}{\partial x}}}
 \newcommand{\ddy}[1]{\ensuremath{\frac{\partial #1}{\partial y}}}
 \newcommand{\pp}[2]{\ensuremath{\frac{\partial #1}{\partial #2}}}
-\renewcommand{\t}[1]{\texttt{#1}}
 
 \newcommand{\bg}{\mathbf{g}}
 \newcommand{\bn}{\mathbf{n}}
@@ -112,7 +112,7 @@ urlcolor=black
 \begin{titlepage}
 
   \begin{center}
-  \phantom{foo}
+  \null
     \vspace{1.0cm}
 
      {\Large \textsc{Numerical Modeling of Glaciers}}
@@ -146,16 +146,11 @@ urlcolor=black
 
 \section{Introduction}  \label{sec:intro}
 
-\subsection*{Purpose}  The greatest importance of mathematical and numerical models to science, and glaciology in particular, is \emph{introspection}.  In building and using a model you are asking yourself: When I combine my imperfect and incomplete understanding of glacier processes into this model, does it behave as I expect?  A numerical simulation can only report the consequences of your equations, inadequacies and all, but the approximation can show how processes interact to give overall behavior, and it can sometimes demonstrate flaws in your understanding of those processes.  In any case, while all computer programs produce numbers, we want numbers that closely-approximate our intended continuum equations.  Therefore the differential equations, not just the Python programs, will be a primary focus of these notes.
+\subsection*{Purpose}  The greatest importance of mathematical and numerical models to science, and glaciology in particular, is \emph{introspection}.  In building and using a model you are asking yourself: when I combine my imperfect and incomplete understanding of glacier processes into this model, does it behave as I expect?  A numerical simulation only reports the consequences of the equations, inadequacies and all, but the approximation can show how processes interact to give overall behavior, and it can sometimes demonstrate flaws in your understanding of those processes.  While all computer programs produce numbers, we want numbers that closely approximate our intended continuum equations---therefore the differential equations, not just the Python programs, will be a leading focus.
 
-\subsection*{Scope}  These notes are deliberately limited in scope:
-  \begin{quote}\emph{surface kinematics and shallow approximations of ice flow.}\end{quote}
-Defining these technical terms is a big part of our agenda.  This scope includes a surface kinematical equation, and the equations of the shallow ice approximation.
+\subsection*{Scope}  These notes are deliberately limited in scope---\emph{surface kinematics and shallow approximations of ice flow}---approached through \emph{understandable and short Python codes that do particular jobs}.  Defining these technical terms is a big part of our agenda.
 
-For these topics there is a constructive approach:
-  \begin{quote}\emph{understandable and short Python codes that do particular jobs.}\end{quote}
-
-In truth, we start the presentation with the non-shallow Glen-Stokes model.  There is a Firedrake-based \cite{Rathgeberetal2016} Stokes solver in \texttt{py/stokes/}; its documentation \texttt{doc.pdf} is a technical appendix to these notes.  However, these notes do not explore the numerical solutions of a Stokes model.
+We start, however, with the non-shallow Glen-Stokes model to motivate the approximations.  Note that a Firedrake-based \cite{Rathgeberetal2016} Stokes solver in \texttt{py/stokes/} is available as a technical appendix (\texttt{doc.pdf}).
 
 \subsection*{Download and Python codes}  These notes, some slides, additional exercises, and  the Python programs are all distributed by cloning the \texttt{git} repository at
 \begin{quote}
@@ -163,7 +158,7 @@ In truth, we start the presentation with the non-shallow Glen-Stokes model.  The
 \end{quote}
 \noindent The programs are in the \texttt{py/} subdirectory.
 
-\subsection*{Notation}  Our notation, which generally follows references \cite{GreveBlatter2009,SchoofHewitt2013}, is in Table \ref{tab:notation}.  Cartesian coordinates are $x,y,z$ and time $t$, with $z$ positive-upward.  Tensor notation uses subscripts from $\{1,2,3,i,j\}$, so $\tau_{ij}$ and $\tau_{13}$ denote entries of the deviatoric stress tensor.  We will use a few abbreviations later on; they appear in Table \ref{tab:abbrev} on page \pageref{tab:abbrev}.
+\subsection*{Notation}  Our notation, which generally follows references \cite{GreveBlatter2009,SchoofHewitt2013}, is in Table \ref{tab:notation}.  Cartesian coordinates are $x,y,z$ and time $t$, with $z$ positive-upward.  Tensor notation uses subscripts from $\{1,2,3,i,j\}$, so $\tau_{ij}$ and $\tau_{13}$ denote entries of the deviatoric stress tensor.  A few abbreviations appear in Table \ref{tab:abbrev} on page \pageref{tab:abbrev}.
 
 \begin{table}[ht]
 \caption{Notation used in these notes.}
@@ -196,6 +191,7 @@ $x_i$         & $x_1,x_2,x_3=x,y,z$ coordinates & m
 \label{tab:notation}
 \end{table}
 
+With this notation in hand, the next section introduces the standard model for ice flow.
 
 \section{Ice flow equations}  \label{sec:continuum}
 
@@ -541,7 +537,7 @@ Since equation \eqref{masscont} looks different from the others, we give a brief
 \end{equation}
 where $x$ should be regarded as a generic independent variable, and $k,f,g$ as generic differentiable functions.  Note that ``$y$'' is an index (variable) of integration, thus the results do not depend on it.
 
-We apply the Leibniz rule to compute the gradient (partial derivatives) of the flux \eqref{flux}, paying attention to which functions depend on which independent variables:
+We apply the Leibniz rule to compute the divergence of the flux \eqref{flux}, paying attention to which functions depend on which independent variables:
 \begin{align*}
 (\Div \bq) (t,x,y) &= \bU(t,x,y,s(t,x,y)) \cdot \grad s(t,x,y) - \bU(t,x,y,b(t,x,y)) \cdot \grad b(t,x,y) \\
    &\qquad + \int_{b(t,x,y)}^{s(t,x,y)} (\Div \bU)(t,x,y,z)\,dz.
@@ -675,12 +671,12 @@ def diffusiveD(x, b, s):
 \end{lstlisting}
 Computing $\bq$ at staggered grid points requires only a small modification, but we will not specifically need that here.
 
-To compute the surface vertical velocity $w|_s$ we evaluate \eqref{sia:wsurface} using another centered difference, which yields values on the (interior) regular grid points:
-\begin{equation}
-w_j = \frac{\phi_{j-1/2} + \phi_{j+1/2}}{2} + \frac{\Dsia_{j+1/2} (s_{j+1}-s_j) - \Dsia_{j-1/2} (s_{j}-s_{j-1})}{\Delta x^2}, \label{fd:wsurface:planar}
-\end{equation}
-where
+To compute the surface vertical velocity $w|_s$ we evaluate \eqref{sia:wsurface} using another centered difference, which yields values on the (interior) regular grid points.  Define staggered-grid values
 	$$\phi_{j+1/2} = u_{j+1/2} \frac{s_{j+1}-s_j}{\Delta x} \approx \left(u|_s \frac{\partial s}{\partial x}\right)_{j+1/2}.$$
+Then:
+\begin{equation}
+w_j = \frac{\phi_{j-1/2} + \phi_{j+1/2}}{2} + \frac{\Dsia_{j+1/2} (s_{j+1}-s_j) - \Dsia_{j-1/2} (s_{j}-s_{j-1})}{\Delta x^2}. \label{fd:wsurface:planar}
+\end{equation}
 The short Python function which computes \eqref{fd:wsurface:planar} is not shown.
 
 Run \href{https://github.com/bueler/mccarthy/blob/master/py/shallow.py}{\texttt{py/shallow.py}} as follows.  It calls the above functions, for a particular geometry, and it generates Figure \ref{fig:uw}:
@@ -815,7 +811,7 @@ for k in range(maxsteps):
     dt = getdt(t, tf, D.max())  # adaptive time step length
     if tf - t < 1.0e-6:  # normal stopping criterion
         break
-    s = geometrystep(x, b, s, D, dt)
+    s = geometrystep(x, s, D, dt)
     t += dt
 \end{lstlisting}
 Normal termination is by the \texttt{break}, once $t$ is within $10^{-6}$ seconds of the final time, to allow for rounding error, while \texttt{maxsteps} merely protects against an infinite loop.
@@ -936,7 +932,7 @@ $J$ & $\Delta x$ (m) & maximum (m) & average (m) \\ \hline
 \smallskip
 The two columns are the maximum and average numerical elevation errors at the final time.  The average error decreases with improved grid resolution, as expected for a correctly-implemented code, at a measured rate $O((\Delta x)^{1.40})$.  By contrast, because the numerical error in margin location will never be better than about one grid space \cite{Bueler2021conservation}, and because the margin gradient is unbounded,  the maximum error behaves erratically \cite{Bueleretal2005}.
 
-The Halfar solution is simple to use for verification, but such elegant exact solutions are rare.  However, exact solutions for verification can actually be constructed at will, by the \emph{method of manufactured solutions} \cite{Wesseling2001}; it is worthwhile to learn this trick.
+The Halfar solution is simple to use for verification, but such elegant exact solutions are rare.  However, exact solutions for verification can actually be constructed at will, by the \emph{method of manufactured solutions} \cite{Wesseling2001}.  The idea is to choose a desired solution, compute analytically what source term would make it satisfy the PDE exactly, run the numerical scheme with that source term, and compare against the chosen solution; almost any coding mistake will corrupt the convergence rate.
 
 
 
