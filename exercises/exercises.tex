@@ -89,7 +89,7 @@
 
 \normalsize
 \begin{quote}
-\emph{Abbreviations: SKE $=$ surface kinematical equation, SIA $=$ shallow ice approximation, CFL $=$ Courant-Friedrichs-Lewy.  All questions are encouraged!}
+\emph{The \href{https://github.com/bueler/mccarthy/tree/master/notes/notes-2026.pdf}{notes} and the \href{https://github.com/bueler/mccarthy/tree/master/slides/slides-2026.pdf}{slides} are background.  Abbreviations: SKE $=$ surface kinematical equation, SIA $=$ shallow ice approximation, CFL $=$ Courant-Friedrichs-Lewy.}
 \end{quote}
 \medskip
 \thispagestyle{empty}
@@ -99,9 +99,9 @@
 \vspace{-2mm}
 \prob{1}  Sketch a smooth ice surface $z=s(x)$ in the planar case.  Convince yourself that the vector $\bn_s = (-\frac{\partial s}{\partial x},1)$ is normal to the surface and upward.  What is the equivalent formula when $z=s(x,y)$, i.e.~in 3D reality?
 
-\prob{2}  Assume $a=0$ and $w=0$ here, so that the SKE is simply $\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = 0$.  Assume that $u$ is not zero.  For grid spacing $\Delta t>0,\Delta x>0$, rewrite the forward-time centered-space scheme from the slides as $s_j^{\text{new}} = c_{-} s_{j-1} + c_0 s_j + c_{+} s_{j+1}$.  Show that the coefficients $c_{-},c_0,c_{+}$ sum to one, but that at least one coefficient is negative.  Is $c_{-} A + c_0 B + c_{+} C$ an average of $A,B,C$?  Argue not; this ``average'' can be less than any of $A,B,C$.
+\prob{2}  Assume $a=0$ and $w=0$, so that the SKE is simply $\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = 0$.  Assume that $u$ is not zero.  For grid spacing $\Delta t>0,\Delta x>0$, rewrite the forward-time centered-space scheme from the slides as $s_j^{\text{new}} = c_{-} s_{j-1} + c_0 s_j + c_{+} s_{j+1}$.  Show that the coefficients $c_{-},c_0,c_{+}$ sum to one, but that at least one coefficient is negative.  Is $c_{-} A + c_0 B + c_{+} C$ an average of $A,B,C$?  Argue not; this ``average'' can be less than any of $A,B,C$.
 
-\prob{3}  Continuing the assumptions in \textbf{2}, write down the upwind scheme, from the slides, for both the $u_j\ge 0$ and $u_j\le 0$ cases.  Show that if the CFL condition $|u_j| \frac{\Delta t}{\Delta x} \le 1$ applies then the new surface value is a true average of the old values.  (For instance, when $u_j\ge 0$ show that $s_j^{\text{new}} = c_{-} s_{j-1} + c_0 s_j$ where $c_{-},c_0$ are nonnegative and sum to one.)  What will happen if $\Delta t$ is too large, that is, if the CFL condition is violated?
+\prob{3}  Continuing the assumptions in \textbf{2}, write down the upwind scheme, from the slides, for both the $u_j\ge 0$ and $u_j\le 0$ cases.  Show that if the CFL condition $|u_j| \frac{\Delta t}{\Delta x} \le 1$ applies then the new surface value is a true average of the old values.  For instance, when $u_j\ge 0$ show that $s_j^{\text{new}} = c_{-} s_{j-1} + c_0 s_j$ where $c_{-},c_0$ are nonnegative and sum to one.  What will happen if $\Delta t$ is too large, that is, if the CFL condition is violated?
 
 \prob{4}  Practice using the Leibniz rule for differentiating integrals, namely this rule
   $$\frac{d}{dx}\left(\int_{g(x)}^{f(x)} k(x,y)\,dy\right) = f'(x)\, k(x,f(x)) - g'(x)\, k(x,g(x)) + \int_{g(x)}^{f(x)} \frac{\partial k}{\partial x}(x,y)\,dy,$$
@@ -112,7 +112,7 @@ by finding $\frac{\partial}{\partial x} \left(\int_{b(t,x)}^{s(t,x)} u(t,x,z)\,d
 
 \prob{6}  Write out the details of the slab-on-a-slope calculation from the slides.  Thereby derive the ($n=3$) velocity formula $u(z) = u_0 + \frac{1}{2} A (\rho g \sin\alpha)^3  \left(H^4 - (H-z)^4\right)$.  Now add in $x$-dependence, to see the velocity formula in the SIA model.
 
-\prob{7}  \emph{(Do with a friend.)}  Sketch a hypothetical planar glacier shape, with smooth surface and bed.  Sketch what you think the non-sliding SIA formulas will generate for the surface values of the horizontal ($u$) and vertical ($w$) velocity components.  How would the non-sliding Stokes model change your pictures?  Repeat with a different hypothetical shape.
+\prob{7}  \emph{(Do with a friend.)}  Sketch a hypothetical planar glacier shape, with smooth surface and bed.  Sketch what you think the non-sliding SIA formulas will generate for the surface values of the horizontal ($u$) and vertical ($w$) velocity components.  Can you tell how the non-sliding Stokes model would change your pictures?
 
 \prob{8}  \emph{(Do with a friend.)}  For the ice thickness $H=s-b$, what inequality is equivalent to ``$s\ge b$''?   Which other geophysical fluid layer problems, in cryosphere contexts and outside, have the same inequalities?  What (physically) determines the shapes of these fluid layers, and their margins and termini?  (\emph{Remember surface mass processes.})
 
@@ -124,25 +124,26 @@ by finding $\frac{\partial}{\partial x} \left(\int_{b(t,x)}^{s(t,x)} u(t,x,z)\,d
 \emph{These exercises are based on Python codes in the \href{https://github.com/bueler/mccarthy/tree/master/py}{\,\emph{\texttt{py/}}} directory of \emph{\texttt{github.com/ bueler/mccarthy}}; see the \emph{\texttt{README.md}}.  When you modify a code, it is best to copy to a new source file, and modify that.  Keep the original code in pristine condition to check how things are supposed to work.}
 \end{quote}
 
-\prob{9}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} to systematically test its (conditional) stability.  Specifically, vary the grid spacings $\Delta t$ and $\Delta x$, and on the other hand vary the velocity formula.  Confirm that the CFL condition $|u_j| \frac{\Delta t}{\Delta x} \le 1$ predicts which cases are stable and unstable.
+\prob{9}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface.py}{\texttt{surface.py}} to systematically test its (conditional) stability.  Specifically, vary the grid spacings $\Delta t$ and $\Delta x$, but also vary the velocity formula.  Confirm that the CFL condition $|u_j| \frac{\Delta t}{\Delta x} \le 1$ predicts which cases are stable and unstable.
 
-\prob{10}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} to use the forward-time centered-space scheme, and confirm that you get instabilities for essentially any $\Delta t,\Delta x$.  (\emph{Then revert to upwind.})
+\prob{10}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface.py}{\texttt{surface.py}} to use the forward-time centered-space scheme, and confirm that you get instabilities for essentially any $\Delta t,\Delta x$.  (\emph{Then revert to upwind.})
 
-\prob{11}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} to show that the scheme can generate surfaces which fail $s\ge b$, i.e.~which violate \emph{admissibility}.  (\emph{Increase the ablation rate to cause this.})  Then modify the scheme so that it maintains admissibility via \emph{truncation}.  That is, compute a preliminary surface elevation ${\tilde s}_j^{\text{new}}$ and then apply $s_j^{\text{new}} = \max\{{\tilde s}_j^{\text{new}},b_j\}$.
+\prob{11}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface.py}{\texttt{surface.py}} to show that the scheme can generate surfaces which fail $s\ge b$, i.e.~which violate \emph{admissibility}.  (\emph{Increase the ablation rate to cause this.})  Then modify the scheme so that it maintains admissibility via \emph{truncation}.  That is, compute a preliminary surface elevation ${\tilde s}_j^{\text{new}}$ and then apply $s_j^{\text{new}} = \max\{{\tilde s}_j^{\text{new}},b_j\}$.
 
-\prob{12}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} to solve a case where the horizontal velocity depends on time and space: $u=u(t,x)$.  Then modify the time-stepping scheme so that the time step is determined via the CFL condition.  That is, at each time step, find the largest horizontal speed and adjust $\Delta t$ for the next step accordingly.
+\prob{12}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface.py}{\texttt{surface.py}} to solve a case where the horizontal velocity depends on time and space: $u=u(t,x)$.  Then modify the time-stepping scheme so that the time step is determined via the CFL condition.  That is, at each time step, find the largest horizontal speed and adjust $\Delta t$ for the next step accordingly.
 
 \medskip
 
 \smallskip
 \noindent \emph{Comment.}  Any serious numerical model for glacier geometry should at least have the mechanisms in \textbf{11} and \textbf{12}.  The surface mass balance could then safely come from any energy balance sub-model, and the surface velocities from any stress balance sub-model.  (See \textbf{16} below.)  However, numerical stability will not be \emph{guaranteed} by the CFL above, \emph{because ice flows downhill}.  The precise stability condition is mostly an open question.
 
-\prob{13}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} so that the data $a,u,w$ can be read from a file.  Check that it runs as before by loading the same values as in the unmodified code.
+\prob{13}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface.py}{\texttt{surface.py}} so that the data $a,u,w$ can be read from a file.  Check that it runs as before by loading the same values as in the unmodified code.
 
-\prob{14}  In a suitable textbook, read about \emph{implicit time-stepping}, and perhaps also about the \emph{method of lines}.  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} to use an implicit scheme.  Do you see benefits?  What should replace truncation---see \textbf{11}---in such an implicit scheme?
+\prob{14}  Modify the ice geometry in \href{https://github.com/bueler/mccarthy/blob/master/py/shallow.py}{\texttt{shallow.py}} to a case where the glacier terminates.  By trying different fractional power shapes for the terminus (margin), show that in some cases the horizontal SIA surface velocity goes to zero as one approaches the terminus, and in some cases not.  (\emph{Look up ``Vialov glacier profile'' for a bad case.})  Explain what is going on in terms of the powers which appear in the SIA formulas for surface velocity.
 
-\prob{15}  Modify the ice geometry in \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{\texttt{shallowuw.py}} to a case where the glacier terminates.  By trying different fractional power shapes for the terminus (margin), show that in some cases the horizontal SIA surface velocity goes to zero as one approaches the terminus, and in some cases not.  (\emph{Look up ``Vialov glacier profile'' for a bad case.})  Explain what is going on in terms of the powers which appear in the SIA formulas for surface velocity.
+\prob{15}  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{dome.py}} to work with a non-flat bed, and choose a test case for plotting.  Noting that the Halfar exact solution requires a flat bed, how would you verify that your modifications are correct?
 
-\prob{16}  Combine \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} and \href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{\texttt{shallowuw.py}} into one code which numerically solves the time-dependent SIA model via explicit time stepping.  That is, alternately compute surface velocity from the current geometry (\href{https://github.com/bueler/mccarthy/blob/master/py/shallowuw.py}{\texttt{shallowuw.py}}), and then update the geometry using a time step of the SKE.  (For the latter, modify \href{https://github.com/bueler/mccarthy/blob/master/py/surface1d.py}{\texttt{surface1d.py}} using \textbf{11} \& \textbf{12} techniques.)  How might one detect instability as the combined scheme runs?  What is the empirical/apparent time step condition for stability?
+\prob{16}  In a suitable textbook, read about \emph{implicit time-stepping}, and perhaps also about the \emph{method of lines}.  Modify \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{dome.py}} to use an implicit scheme.  Do you see benefits?  What should replace truncation---see \textbf{11}, or the corresponding code in \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{dome.py}}---in such an implicit scheme?
+
 
 \end{document}
