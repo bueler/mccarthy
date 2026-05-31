@@ -25,17 +25,7 @@ The PDF slides [slides/slides-2026.pdf](slides/slides-2026.pdf) cover the essent
 Python programs
 ---------------
 
-The Python codes in subdirectory [py/](py/) solve surface kinematic equation (SKE) and shallow ice approximation (SIA) problems.  The primary Python programs [surface1d.py](py/surface1d.py) and [shallowuw.py](py/shallowuw.py) use only the numpy and matplotlib libraries.
-
-You are encouraged to actually run and modify these codes!  Feel free to email me about how they work.
-
-The [slides](slides/slides-2026.pdf) and the [notes](notes/notes-2026.pdf) are the documentation for the Python codes, along with line comments in the `.py` source codes.
-
-The [surface2d.py](py/surface2d.py) program uses [Firedrake](https://www.firedrakeproject.org/) (a finite element library) which calls [PETSc](http://www.mcs.anl.gov/petsc/) for equation solvers.
-
-The codes in [py/stokes/](py/stokes/) also use Firedrake to solve a 2D Glen-law Stokes flow over a bedrock step.  The workflow for the Stokes codes also use [Gmsh](http://gmsh.info/) (a mesh generator) and [Paraview](https://www.paraview.org/) (for visualization).  See [py/stokes/doc.pdf](py/stokes/doc.pdf) for more information.  See also my [tutorial for using Firedrake to solve the Stokes equations](https://github.com/bueler/stokes-ice-tutorial), which is in a separate repository.
-
-Please report any bugs in the codes either by email or by using the [issues](https://github.com/bueler/mccarthy/issues) for this repository.
+The Python codes in subdirectory [py/](py/) solve surface kinematic equation (SKE) and shallow ice approximation (SIA) problems, as demonstrated in the notes and slides.  See the [README](py/README.md) there.
 
 Older material
 --------------
