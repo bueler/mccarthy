@@ -14,7 +14,7 @@ Convenient way to run and view (where "eog" is a .png viewer):
 Explore using code modifications (for example):
    u(x)    -->  4 * u(x)    instability
    N = 50  -->  N = 20      instability
-   a(x)    -->  2 * a(x)    violate s >= b
+   a(x)    -->  3 * a(x)    violate s >= b
 """
 
 import numpy as np
