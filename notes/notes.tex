@@ -434,15 +434,15 @@ The initial condition and final result (50th time step) are shown in Figure \ref
 \item lengthen time-steps: \quad $\Delta t = 1$ a \, $\to$ \, $\Delta t = 2.5$ a    
 \end{itemize}
 
-This kind of instability is well understood, and in fact the condition to avoid it has been known for 100 years.  The idea is that in the SKE \eqref{skeplanar}, and similar \emph{advection} equations, information about the surface travels at the speeds $\{u_j\}$.  Therefore we need to make sure that information does not travel more than one spatial distance $\Delta x$ during the time step $\Delta t$.  Equivalently, the maximum dimensionless Courant, Friedrichs, \& Lewy (CFL; \cite{CFL1928}) ratio should not exceed one:
+This kind of instability is well understood, and in fact the condition to avoid it has been known for 100 years.  The idea is that in SKE \eqref{skeplanar} and similar \emph{advection} equations, information travels at the speeds $\{u_j\}$.  For numerical stability we need it to not travel more than spatial distance $\Delta x$ during the time step $\Delta t$.  Equivalently, the maximum dimensionless Courant, Friedrichs, \& Lewy (CFL; \cite{CFL1928}) ratio should not exceed one:
 \begin{equation}
 \frac{(\max_j |u_j|) \Delta t}{\Delta x} \le 1.  \label{cfl}
 \end{equation}
-The destabilizing modifications each pushed this ratio over the limit.
+The earlier destabilizing modifications each pushed this ratio over the limit.
 
-In practice, inequality \eqref{cfl} is used to set the time step $\Delta t$ to assure stability.  At run time a simulation program sets $\Delta t = C \frac{\Delta x}{\max_j |u_j|}$, using $C=0.9$ for example.  The step $\Delta t$ is adjusted so that \eqref{cfl} holds even if the velocities $u_j$ were changing in time.
+In practice, inequality \eqref{cfl} is used to set the time step $\Delta t$ to assure stability.  Before each step the program sets $\Delta t = C \frac{\Delta x}{\max_j |u_j|}$, using $C=0.9$ for example, so that \eqref{cfl} holds even when the velocities $u_j$ are changing in time.
 
-\subsection*{Admissibility}  A different type of modification also breaks our method.  In the default set-up, the function $a(x)$ in \href{https://github.com/bueler/mccarthy/blob/master/py/surface.py}{\texttt{py/surface.py}} is linear and decreasing  in $x$, with a zero, i.e.~an equilibrium line \cite{Cogleyetal2011}, at $1/5$ of the total length $L$.  That is, accumulation occurs over $0<x<L/5$ and ablation over $L/5<x<L$.  The modification
+\subsection*{Admissibility}  A different type of modification also breaks our method.  In the default set-up, the SMB function $a(x)$ in \href{https://github.com/bueler/mccarthy/blob/master/py/surface.py}{\texttt{py/surface.py}} is linear and decreasing  in $x$, with a zero (an \emph{equilibrium line} \cite{Cogleyetal2011}) at $1/5$ of the total length $L$.  This means that accumulation occurs over $0<x<L/5$ and ablation over $L/5<x<L$.  The modification
 \begin{itemize}
 \item stronger SMB: \quad $a(x)$ \, $\to$ \, $3 a(x)$  
 \end{itemize}
@@ -454,29 +454,27 @@ therefore strengthens the ablation over most of the domain.  The final-time resu
 \label{fig:inadmissdemo}
 \end{figure}
 
-The bed elevation $b$ does not even appear in equations \eqref{skeplanar} and \eqref{ske}, so it would seem to be irrelevant when using the SKE to evolve the glacier geometry.  However, glaciers can end \emph{where they have ablated away}, and we need to model this real effect.
-
-We say that a surface elevation at some time $t$ is \emph{admissible} if
+The bed elevation $b$ does not even appear in equations \eqref{skeplanar} and \eqref{ske}, so it would seem to be irrelevant when using the SKE to evolve the glacier geometry.  However, glaciers must end \emph{where they have ablated away}, and we need to model this real effect instead of having the surface elevation beneath the bedrock.  We say that the surface elevation at time $t$ is \emph{admissible} if
 \begin{equation}
 s(t,x,y) \ge b(x,y) \label{admissible}
 \end{equation}
-for every point $x,y$ in the computational domain.  Equivalently, admissibility says that $H(t,x,y) \ge 0$; a glacier's thickness $H=s-b$ cannot be negative.
+for every point $x,y$ in the computational domain.  Equivalently, this says that $H(t,x,y) \ge 0$; the thickness $H=s-b$ cannot be negative.
 
-The above strengthened-SMB simulation started from an admissible state (Figure \ref{fig:demo}, top), but it evolved to an inadmissible one (Figure \ref{fig:inadmissdemo}).  Avoiding this possibility, at least in an explicit solution method, is straightforward.  Namely, we should \emph{truncate} the solution, $\snew_j = \max\{b_j, \snew_j\}$ (planar case), to force admissibility.
+Our simulation using the modified SMB started from an admissible state (Figure \ref{fig:demo}, top), but it evolved to an inadmissible one (Figure \ref{fig:inadmissdemo}).  Avoiding this possibility, at least in an explicit solution method like \eqref{fd:upwind}, is straightforward.  Namely, we can \emph{truncate} the solution, $\snew_j = \max\{b_j, \snew_j\}$ (planar case), to force admissibility.
 
-Inequality \eqref{admissible} complements definition \eqref{domain} of the ice domain, and it implies the \emph{free-boundary} nature of the glacier geometry problem \cite{Bueler2016,Bueler2021conservation}.  Bed elevation data $b$ can be needed even when modeling glacier surfaces using the SKE, and it is necessary when solving stress balances (Sections \ref{sec:continuum} and \ref{sec:sia}).  Note that in unglaciated areas it makes sense to say (allow) $s(t,x)=b(x)$, and this is compatible with how digital elevation models work in practice; the surface elevation is the top of the glacier if one is present, otherwise it is the top of the land.
+Inequality \eqref{admissible}, which complements definition \eqref{domain} of the ice domain, and reflects the \emph{free-boundary} nature of the glacier geometry problem \cite{Bueler2016,Bueler2021conservation}.  Bed elevation data $b$ is thus needed even when modeling glacier surfaces, and when solving stress balances (Sections \ref{sec:continuum} and \ref{sec:sia}).  Note that in unglaciated areas it makes sense to assert that $s(t,x)=b(x)$, which is compatible with how digital elevation models work in practice; the surface elevation is the top of the glacier if one is present, otherwise it is the top of the land.
 
-\subsection*{Steady state}  We are regarding the SKE as a minimal model which can predict glacier geometry given data for SMB and surface velocity, and this approach works in \emph{steady state} as well.  Equation \eqref{skeplanar} with $\partial s/\partial t=0$ becomes
+\subsection*{Steady state}  We are regarding the SKE as a minimal model which can predict glacier geometry given data for SMB and surface velocity.  This approach works in \emph{steady state} as well.  Here equation \eqref{skeplanar} with $\partial s/\partial t=0$ becomes
 \begin{equation}
 u \frac{\partial s}{\partial x} = a + w, \label{skeplanarsteady}
 \end{equation}
-and \eqref{ske} becomes $-\bu \cdot \bn_s = a$.  (Recall notation: $\bu = \left<u,v,w\right>$, $\bn_s = \big<\!-\!\frac{\partial s}{\partial x},-\,\frac{\partial s}{\partial y},1\big>$.)  Then, using an upwind FD idea like \eqref{fd:upwind}, solving \eqref{skeplanarsteady} is easier than the time-dependent case.  Specifically, because $u(x)>0$ everywhere, our FD scheme is
+and \eqref{ske} becomes $-\bu \cdot \bn_s = a$.
+
+Using an upwind FD idea like \eqref{fd:upwind}, in 1D equation \eqref{skeplanarsteady} can be solved like the time-dependent case.  Specifically, because $u(x)>0$ everywhere, our FD scheme is
 \begin{equation}
 u_j \frac{s_{j} - s_{j-1}}{\Delta x} = a_j + w_j \qquad (\text{assumes } u_j>0), \label{fd:upwindsteady}
 \end{equation}
-or $s_{j} = s_{j-1} + (\Delta x/u_j) (a_j + w_j)$ as an update formula in increasing spatial indices $j$.
-
-In code, we start from the left and have a single \texttt{for} loop:
+which is solved for $s_j$ to give an update formula.  In code, we start from the left and have a single \texttt{for} loop:
 
 \begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
 s = x.copy()
@@ -485,55 +483,53 @@ for j in range(1, J+1):
     s[j] = s[j-1] + (dx / u(x[j])) * (a(x[j]) + w(x[j]))
 \end{lstlisting}
 
-\noindent The same program \href{https://github.com/bueler/mccarthy/blob/master/py/surface.py}{\texttt{py/surface.py}} has done the job already.  Viewing the output image (\texttt{output/steady.png}) shows a result very similar to Figure \ref{fig:demo}, bottom.
+\noindent Program \href{https://github.com/bueler/mccarthy/blob/master/py/surface.py}{\texttt{py/surface.py}} has solved the problem already.  Viewing the output image (\texttt{output/steady.png}) shows a result very similar to Figure \ref{fig:demo}, bottom.
 
-We have not assured admissibility in the above loop, but this is straightforward using truncation.  The update formula inside the loop becomes
+We have not assured admissibility in the above loop, but this is straightforward using truncation.  The update formula becomes
 \begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
     s[j] = max(b(x[j]), s[j-1] + (dx / u(x[j])) * (a(x[j]) + w(x[j])))
 \end{lstlisting}
 
-Solving the same steady-state problem in the two horizontal dimensions of a realistic glacier requires completely rethinking the solution strategy.  For that we have written a very different, and more advanced, program \href{https://github.com/bueler/mccarthy/blob/master/py/surface2d.py}{\texttt{py/surface2d.py}} which calls the Firedrake finite element library.  Now the admissibility \eqref{admissible} inequality is integrated into the weak form of the partial differential equation (PDE) problem itself, as a \emph{variational inequality} \cite[Chapter 12, and references therein]{Bueler2021}.  The reader is encouraged to explore this example, but we will not pursue this further in these notes.
+Solving the same steady-state problem in the two horizontal dimensions of a realistic glacier requires completely rethinking the solution strategy.  For that we have written a very different, and more advanced, program \href{https://github.com/bueler/mccarthy/blob/master/py/surface2d.py}{\texttt{py/surface2d.py}} which calls the Firedrake finite element library.  Now the admissibility \eqref{admissible} inequality is integrated into the weak form of the partial differential equation (PDE) problem, as a \emph{variational inequality} \cite[Chapter 12, and references therein]{Bueler2021}.  The reader is encouraged to explore this example, but we will not pursue it further in these notes.
 
-\subsection*{Mass continuity equation}  Equation \eqref{ske}, the SKE in its cleanest form, relates more-or-less observable quantities on a glacier's surface.  For example, it is a preferred equation for relating measured surface velocity to SMB.  However, a different equation is often used to describe the evolution of glacier geometry, namely the \emph{mass continuity} equation, derived next.  It is essentially equivalent to \eqref{ske} because of incompressibility \eqref{incompressible}, which is mass conservation as it applies within the ice.
+\subsection*{Mass continuity equation}  Equation \eqref{ske}, the SKE in its cleanest form, relates more-or-less observable quantities on a glacier's surface.  For example, it is a preferred equation for relating measured surface velocity to SMB.  However, a different equation is often used to describe the evolution of glacier geometry, namely the \emph{mass continuity} equation, derived next.  It is essentially equivalent to \eqref{ske}, because of incompressibility \eqref{incompressible}, which states mass conservation within the ice.
 
-The derivation is clearest if we state the \emph{basal kinematical equation} first.  Consider the mass balance $m(t,x,y)$ at the basal surface $z=b(t,x,y)$, the difference between melt and freeze-on.  (Here all quantities can be time-dependent.)  The field $m$, in ice-equivalent meters per second, is positive if there is net melt.  It can be of either sign for grounded glaciers, and underneath floating ice shelves, often through thermodynamical effects.  Similar to \eqref{ske}, this kinematical equation is
+The derivation is clearest if we state the \emph{basal kinematical equation} first.  Consider the mass balance $m(t,x,y)$ at the basal surface $z=b(t,x,y)$, the difference between melt and freeze-on.  (In this derivation all quantities can depend on time.)  The field $m$, in ice-equivalent meters per second, is positive if there is net melt.  Both for grounded glaciers and floating ice shelves it can be of either sign, often through thermodynamical effects.  Similar to \eqref{ske}, the equation is
 \begin{equation}
-\frac{\partial b}{\partial t} - \bu \cdot \bn_b = m,  \label{bke}
+\frac{\partial b}{\partial t} - \bu \cdot \bn_b = m.  \label{bke}
 \end{equation}
-where $\bn_b = \big<-\frac{\partial b}{\partial x}, -\frac{\partial b}{\partial y}, 1\big>$ is normal to the base and pointing upward, and ``$\bu$'' here denotes $\bu(t,x,y,b(t,x,y))$ (on the base surface).
+Here $\bn_b = \big<-\frac{\partial b}{\partial x}, -\frac{\partial b}{\partial y}, 1\big>$ is normal to the base and pointing upward, and ``$\bu$'' denotes $\bu(t,x,y,b(t,x,y))$ on the basal surface.
 
-If the bed elevation $b$ is time-independent ($b_t=0$) then \eqref{bke} relates the ice velocity at the base to the mass balance $m$.  For example, in the case of a grounded glacier with a flat ($\grad b=\big<\frac{\partial b}{\partial x},\frac{\partial b}{\partial y}\big>=0$) and stationary bedrock, and a melting base ($m>0$), the vertical ice velocity at the bed surface is downward: $w=-m$.
+If the bed elevation $b$ is time-independent ($\partial b/\partial t=0$) then \eqref{bke} relates the ice velocity at the base to the mass balance $m$.  For example, in the case of a grounded glacier with a flat ($\grad b=\big<\frac{\partial b}{\partial x},\frac{\partial b}{\partial y}\big>=0$) and stationary bedrock, and a melting base ($m>0$), the vertical ice velocity at the bed surface is downward and equal to the melt: $w=-m$.
 
-Now consider the vector horizontal velocity $\bU = \left<u,v\right>$; contrast notation for the 3D velocity $\bu=\left<u,v,w\right>$.  The horizontal \emph{ice flux}, also called \emph{discharge}, is defined to be the integral
+Consider the vector horizontal velocity $\bU = \left<u,v\right>$; compare notation for the 3D velocity $\bu=\left<u,v,w\right>$.  The horizontal \emph{ice flux}, also called \emph{discharge}, is defined as the integral
 \begin{equation}
 \bq(t,x,y) = \int_{b(t,x,y)}^{s(t,x,y)} \bU(t,x,y,z)\,dz,  \label{flux}
 \end{equation}
-or simply $\bq=\int_b^s\bU\,dz$ if we suppress variables.  The flux is a vector with two components, $\bq=\left<q_1,q_2\right>$.  It is often written $\bq=\bar\bU H$ where $H=s-b$ is the ice thickness; it follows that $\bar\bU=H^{-1} \int_b^s\bU\,dz$ is the vertically-averaged horizontal velocity.
+or simply $\bq=\int_b^s\bU\,dz$ if we suppress variables.  This is a vector with two components, $\bq=\left<q_1,q_2\right>$.  It is often written $\bq=\bar\bU H$ where $H=s-b$ is the ice thickness, and $\bar\bU=H^{-1} \int_b^s\bU\,dz$ is the \emph{vertically-averaged horizontal velocity}.
 
-Finally we can state the mass continuity equation itself,
+In these terms we can state the mass continuity equation itself,
 \begin{equation}
     \frac{\partial H}{\partial t} + \Div \bq = a - m.  \label{masscont}
 \end{equation}
-Note that if the bed is stationary ($\partial b/\partial t=0$) then we can equivalently write ``$\partial s/\partial t$'' on the left, but the most common way to think about this equation is as describing how a layer of ice changes thickness, and thus volume, instead of in terms of elevation.  The divergence here is in horizontal variables, so $\Div\bq= \frac{\partial q_1}{\partial x} + \frac{\partial q_2}{\partial y}$.
+This equation describes how the thickness of a moving layer of ice changes, and thus how ice volume changes.  The divergence here is in horizontal variables: $\Div\bq= \frac{\partial q_1}{\partial x} + \frac{\partial q_2}{\partial y}$.  If the bed is stationary ($\partial b/\partial t=0$) then we can equivalently write ``$\partial s/\partial t$'' on the left.
 
-The net function $a-m$ on the right is the \emph{climatic-basal mass balance} \cite{Cogleyetal2011}.  This combination of the surface and basal mass balances $a$ and $m$ determines how much mass is lost or gained in a column within the glacier.
+The net function $a-m$ on the right of \eqref{masscont} is the \emph{climatic-basal mass balance} \cite{Cogleyetal2011}.  This difference of the surface and basal mass balances determines how much mass is lost or gained in a column within the glacier.
 
-Since equation \eqref{masscont} looks different from the others, we give a brief derivation.  We need the \emph{Leibniz rule} for differentiating integrals,
+Because equation \eqref{masscont} looks different from the kinematical equations, we give a brief derivation.  We need the \emph{Leibniz rule} for differentiating integrals,
 \begin{equation}
-\frac{d}{dx}\left(\int_{g(x)}^{f(x)} k(x,y)\,dy\right) = k(x,f(x))\, f'(x) - k(x,g(x)) \, g'(x) + \int_{g(x)}^{f(x)} \frac{\partial k}{\partial x}(x,y)\,dy,  \label{leibniz}
+\frac{d}{dx}\left(\int_{g(x)}^{f(x)} k(x,y)\,dy\right) = k(x,f(x))\, f'(x) - k(x,g(x)) \, g'(x) + \int_{g(x)}^{f(x)} \frac{\partial k}{\partial x}(x,y)\,dy.  \label{leibniz}
 \end{equation}
-where $x$ should be regarded as a generic independent variable, and $k,f,g$ as generic differentiable functions.  Note that ``$y$'' is an index (variable) of integration, thus the results do not depend on it.
-
-We apply the Leibniz rule to compute the divergence of the flux \eqref{flux}, paying attention to which functions depend on which independent variables:
+Here $x$ should be regarded as a generic independent variable, and $k,f,g$ are generic differentiable functions.  Note that ``$y$'' is an index (variable) of integration, and the results do not depend on its name.  We apply the Leibniz rule to compute the divergence of the flux \eqref{flux}, paying attention to dependence on the independent variables:
 \begin{align*}
 (\Div \bq) (t,x,y) &= \bU(t,x,y,s(t,x,y)) \cdot \grad s(t,x,y) - \bU(t,x,y,b(t,x,y)) \cdot \grad b(t,x,y) \\
    &\qquad + \int_{b(t,x,y)}^{s(t,x,y)} (\Div \bU)(t,x,y,z)\,dz.
 \end{align*}
-Divergences $\Div$ here are in the horizontal variables $x,y$.  By incompressibility \eqref{incompressible} we can write the integrand as a vertical derivative of the vertical velocity:
+The divergence $\Div$ here is in the horizontal variables $x,y$, but by incompressibility \eqref{incompressible} we can write the integrand as a vertical derivative of the vertical velocity:
     $$\Div \bU = \frac{\partial u}{\partial x} + \frac{\partial v}{\partial y} = - \frac{\partial w}{\partial z}.$$
-Thus, continuing the calculation, indicating surface values by ``$\bU|_s$'' etc., suppressing variables, and applying the fundamental theorem of calculus, we have
+Continuing the calculation, indicating surface values by ``$\bU|_s$'' etc.~and suppressing variables, and applying the fundamental theorem of calculus, we have
     $$\Div \bq = \bU|_s \cdot \grad s - \bU|_b \cdot \grad b - \int_b^s \frac{\partial w}{\partial z}\,dz = \bU|_s \cdot \grad s - \bU|_b \cdot \grad b - w|_s + w|_b.$$
-The expressions on the right are familiar from the kinematical equations \eqref{ske} and \eqref{bke}, and in fact if we use the 3D velocity $\bu=\left<u,v,w\right>$, and our normal vector notations, and those kinematical equations, then we have
+The expressions on the right are familiar from the kinematical equations \eqref{ske} and \eqref{bke}, and in fact if we use the 3D velocity $\bu=\left<u,v,w\right>$, standard vector notations, and the kinematical equations then we have
     $$\Div \bq = -\bu|_s \cdot \bn_s + \bu|_b \cdot \bn_b = a - \frac{\partial s}{\partial t} + \frac{\partial b}{\partial t} - m.$$
 This says $\Div \bq = (a-m) - \partial H/\partial t$, which is mass continuity \eqref{masscont}.
 
@@ -544,13 +540,13 @@ At this point we have three equations which might be used to describe the evolvi
   \item the basal kinematical equation \eqref{bke}, and
   \item the mass continuity equation \eqref{masscont}.  
   \end{enumerate}
-We derived the third using the first two and incompressibility.  Actually, any \emph{pair} of these three equations implies the third, using incompressibility and the Leibniz rule to make the connections.
+We derived the third using the first two and incompressibility \eqref{incompressible}.  Actually, any \emph{pair} of these three equations implies the third; one uses incompressibility and the Leibniz rule to prove the connections.
 
-In designing a numerical glacier simulation, which equations to use for time-dependent geometry is largely a matter of taste and tradition.  The most common choice in the literature is to use mass continuity \eqref{masscont} as the primary equation, and to interpret the basal kinematical relation \eqref{bke} in a somewhat ad hoc manner.  Our main point here is that we can treat these equations as tools, and be free to use them.
+In designing a numerical glacier simulation, which equations to use for time-dependent geometry is largely a matter of taste and tradition.  The most common choice in the literature is to use mass continuity \eqref{masscont} as the primary equation.  It is also common to interpret the basal kinematical relation \eqref{bke} in an ad hoc manner.  Our main point here is that we can treat these equations as tools, and be free to use them.
 
-\subsection*{Understanding planar mass continuity}  It helps to illustrate mass continuity in the same $x,z$ flow-line plane we used earlier.  Suppose for simplicity that the base is flat ($b=0$), so the thickness and surface elevation are the same thing ($H=s$), and suppose there is no basal mass balance ($m=0$).  In this planar case the horizontal velocity is a scalar function $U$, and its vertical average $\bar U = H^{-1} \int_0^{H} U\,dz$ and the flux $q = \int_0^{H} U\,dz = \bar U\, H$ are also scalar.
+\subsection*{Understanding planar mass continuity}  It helps to illustrate mass continuity in the $x,z$ (flow-line) plane.  Suppose for simplicity that the base is flat ($b=0$), so the thickness and surface elevation are the same thing ($H=s$), and suppose there is no basal mass balance ($m=0$).  In this planar case the horizontal velocity is a scalar function $U$, and its vertical average $\bar U = H^{-1} \int_0^{H} U\,dz$ and the flux $q = \int_0^{H} U\,dz = \bar U\, H$ are also scalar.
 
-The ice flux $q = \bar U\, H$ is the rate of mass flow through the sides of a part of the glacier, for example at locations $x_1$ and $x_2$ as shown in Figure \ref{fig:slabmasscontfig}.  Therefore mass can be added by SMB $a$, distributed along the upper surface, or by a \emph{difference} in the flux between the left and right sides.  That is, the flow-line area $A$ of this part of the glacier changes according to the sum of certain boundary contributions:
+The ice flux $q = \bar U\, H$ is the rate of mass flow through the sides of a part of the glacier, for example at locations $x_1$ and $x_2$ as shown in Figure \ref{fig:slabmasscontfig}.  Mass can be added by SMB $a$, distributed along the upper surface, or by a \emph{difference} in the flux between the left and right sides.  That is, the planar area $A$ of this part of the glacier changes according to the sum of certain boundary contributions:
 \begin{equation}
 \frac{dA}{dt} = \int_{x_1}^{x_2} a\,dx + \bar U_1\, H_1 - \bar U_2\, H_2. \label{masscontintegrated}
 \end{equation}
@@ -558,7 +554,7 @@ In three-dimensions, \eqref{masscontintegrated} would become an equation for $dV
 
 \onefigsize{slabmasscontfig}{Mass continuity equation \eqref{masscont} can be interpreted as giving the rate of change of the time-dependent area $A$.}{2.0in}
 
-Equation \eqref{masscontintegrated} is an integrated form of mass continuity.  To determine the derivative (and planar) form, suppose the width $\Delta x=x_2-x_1$ is small, thus $A\approx \Delta x\, H$.  If we divide \eqref{masscontintegrated} by $\Delta x$ and take $\Delta x \to 0$ then we get
+Equation \eqref{masscontintegrated} is an integrated form of mass continuity.  To determine the derivative form, suppose the width $\Delta x=x_2-x_1$ is small, thus $A\approx \Delta x\, H$.  If we divide \eqref{masscontintegrated} by $\Delta x$ and take $\Delta x \to 0$ then we get
 \begin{equation}
 \frac{\partial H}{\partial t} = a - \frac{\partial}{\partial x}\left(\bar U\, H\right) \label{masscontplanar}
 \end{equation}
