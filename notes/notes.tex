@@ -563,32 +563,36 @@ because $\lim_{\Delta x \to 0} (\int_{x_1}^{x_2} a\,dx)/\Delta x = a$ is the ave
 
 \section{Shallow ice approximation}  \label{sec:sia}
 
-\subsection*{Shallowness of glaciers and ice sheets}  Glacier ice has several outstanding properties as a fluid.  As explained in Section \ref{sec:continuum}, it is slow and non-Newtonian.  Also, glaciers are subject to contact slip, i.e.~basal sliding, along a hard-to-observe boundary.  However, it is the typical \emph{shallowness} of glacier geometry, at least for large glaciers and ice sheets, which allows us to use a simpler stress balance model, an approximation to the full Glen-Stokes system, which enables faster simulations.  Because ice sheet geometry is both shallow and slow, the problem has a distinctive \emph{diffusive} character.
+\subsection*{Shallowness of glaciers and ice sheets}  Glaciers have several outstanding properties as fluid problems.  As explained in Section \ref{sec:continuum}, ice is slow and non-Newtonian.  Also, glaciers are subject to contact slip, i.e.~basal sliding, along a hard-to-observe boundary.  However, it is the typical \emph{shallowness} of glacier geometry, at least for large glaciers and ice sheets, which allows us to use a simpler stress balance model, an approximation to the full Glen-Stokes system, which enables faster simulations.  Because ice sheet geometry is both shallow and slow, the problem has a distinctive \emph{diffusive} character.
 
-Figure \ref{fig:green-transect} shows a cross-section of the Greenland ice sheet.  This vertically-exaggerated view is more familiar from the glaciological literature, but without such exaggeration the ice sheet is revealed to be a thin blanket, barely three-dimensional.  More precisely, ice sheets are \emph{shallow} in the sense that the dimensionless ratio $\eps = [H]/[L]$, between typical scales for thickness $[H]$ and horizontal (length) $[L]$, is small.  For this Greenland example, $[H]=2000$ m and $[L]=1000$ km are representative, so $\eps = 0.002$.
+Figure \ref{fig:green-transect} shows a cross-section of the Greenland ice sheet.  This vertically-exaggerated view is familiar from the literature, but without such exaggeration the ice sheet is revealed to be a thin blanket, barely three-dimensional.  More precisely, ice sheets are \emph{shallow} in the sense that the dimensionless ratio $\eps = [H]/[L]$, between typical scales for thickness $[H]$ and horizontal (length) $[L]$, is small.  For this Greenland example, $[H]=2000$ m and $[L]=1000$ km are representative, so $\eps = 0.002$.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=80mm,height=35mm]{green-transect}
-\caption{A cross-section of the Greenland ice sheet at $71^\circ$ N latitude, 760 km wide by 3200 m thick.  The slightly-thick horizontal line (bottom; red) shows the same cross-section as the blue and green surfaces, but without the vertical exaggeration.}
+\caption{This cross-section of the Greenland ice sheet, at $71^\circ$ N latitude, is 760 km wide and 3200 m thick.  The slightly-thickened horizontal line (bottom; red) shows the same cross-section without vertical exaggeration.}
 \label{fig:green-transect}
 \end{figure}
 
-The non-sliding, isothermal \emph{shallow ice approximation} (SIA; \cite{Bueler2016,GreveBlatter2009,SchoofHewitt2013}) is an effective model for shallow glaciers, as long as they are not dominated by basal sliding.  Mountain glaciers have much larger $\eps$ ratios, but they too are often modeled within an SIA framework.  A model of a small portion of an ice sheet may have a large $\eps$ ratio, so it might not use the SIA.  If there is substantial basal sliding, or the ice is floating, then a different shallow model, the \emph{shallow shelf} or \emph{membrane} approximation \cite{SchoofHewitt2013}, is more appropriate.  Hybrid shallow models \cite{BuelerBrown2009}, that combine the two approximations, are in widespread use, and comprehensive models couple these with conservation of energy \cite{Aschwandenetal2012}.  However, these notes will not plunge into the thicket of modern modeling choices.
+The non-sliding, isothermal \emph{shallow ice approximation} (SIA; \cite{Bueler2016,GreveBlatter2009,SchoofHewitt2013}) is an effective model for shallow glaciers, as long as they are not dominated by basal sliding.  Mountain glaciers have much larger $\eps$ ratios, but they too are often modeled within an SIA framework.  A small portion of an ice sheet may have a large $\eps$ ratio, so one might not use the SIA.  If there is substantial basal sliding, or the ice is floating, then a different shallow model, the \emph{shallow shelf} or \emph{membrane} approximation \cite{SchoofHewitt2013}, is more appropriate.  Hybrid shallow models \cite{BuelerBrown2009}, that combine two shallow approximations, are in widespread use, and comprehensive models couple these with conservation of energy \cite{Aschwandenetal2012}.  However, these notes will not plunge into the thicket of modern modeling choices.
 
-\subsection*{Velocity formulas in the SIA}  The label ``SIA'' is put on several equations.  First it refers to certain simplified velocity formulas.  The principled way to derive these formulas starts from the full Glen-Stokes stress balance \eqref{incompressibleagain}--\eqref{flowlaw}, and then applies a small parameter argument \cite[for example]{Fowler1997}, rescaling the variables using $\eps = [H]/[L]$, and then dropping terms which are small when $\eps$ is small.  However, the same destination can be reached by a lazier approach, adopted here.  The SIA can be regarded as using the slab-on-a-slope result \eqref{uslab}, as valid even for general glaciers, not just uniform slabs.  Actually, we need two assumptions for this to work: \emph{i)} the surface $s$ and bed $b$ elevation functions must be smooth, and \emph{ii)} a small-angle approximation must be adequate to replace $\sin\alpha$ in \eqref{uslab} with the surface slope $|\grad s|$.  Regarding \emph{ii)}, $|\sin \alpha| \approx |\tan\alpha| = |\grad s|$ when $\alpha$ is small (Figure \ref{fig:slab}).  A key idea is that the shear stresses are then linear in depth and proportional to $|\grad s|$.
+\subsection*{Velocity formulas in the SIA}  The label ``SIA'' is put on several equations.  First it refers to certain simplified velocity formulas.  The principled way to derive these formulas starts from the full Glen-Stokes stress balance \eqref{incompressibleagain}--\eqref{flowlaw}, and then applies a small parameter argument \cite[for example]{Fowler1997}, rescaling the variables using $\eps = [H]/[L]$, and then dropping terms which are small when $\eps$ is small.
+
+However, the same destination can be reached by a lazier approach, adopted here.  The SIA can simply uses the slab-on-a-slope result \eqref{uslab} as valid even for general glaciers, not just uniform slabs.  Actually, we need two assumptions for this to work: \emph{i)} the surface $s$ and bed $b$ elevation functions must be smooth, and \emph{ii)} a small-angle approximation must be adequate to replace $\sin\alpha$ in \eqref{uslab} with the surface slope $|\grad s|$.  Regarding \emph{ii)}, $|\sin \alpha| \approx |\tan\alpha| = |\grad s|$ when $\alpha$ is small (Figure \ref{fig:slab}), and a key idea in the derivation is that the shear stresses are then linear in depth and proportional to $\grad s$.
 
 For a general Glen exponent $n$, equation \eqref{uslab} becomes the following SIA formula for the horizontal velocity $\bU(t,x,y,z)$, which is $\bU=\left<u,v\right>$ in components:
 \begin{equation}
 \bU = \bU_0 - \frac{2}{n+1} A (\rho g)^n \left((s-b)^{n+1} - (s-z)^{n+1}\right) |\grad s|^{n-1} \grad s. \label{sia:ugeneral}
 \end{equation}
-The first minus sign in \eqref{sia:ugeneral} is remembered by noting that ice flows downhill, that is, opposite the $\grad s$ direction.  When using SKE \eqref{ske} to evolve geometry under the non-sliding SIA theory---see the next Section---only the surface value is needed:
+This formula applies on the domain \eqref{domain}.  The first minus sign in \eqref{sia:ugeneral} is remembered by noting that ice flows downhill, that is, opposite the $\grad s$ direction.
+
+When using SKE \eqref{ske} to evolve geometry under the non-sliding SIA theory---see the next Section---only the surface value is needed:
 \begin{equation}
 \bU|_s = - \frac{2}{n+1} A (\rho g)^n (s-b)^{n+1} |\grad s|^{n-1} \grad s. \label{sia:usurface}
 \end{equation}
 Derive \eqref{sia:usurface} by substituting $\bU_0=0$ and $z=s$ into \eqref{sia:ugeneral}.
 
-Vertical integration yields two additional formulas.  First, vertical integration of \eqref{sia:ugeneral}, using the power rule $\int z^{n+1}\,dz = z^{n+2}/(n+2) + c$, yields a formula for the ice flux:
+Vertical integration of \eqref{sia:ugeneral} yields two additional formulas.  First, using the power rule $\int z^{n+1}\,dz = z^{n+2}/(n+2) + c$, we have a formula for the ice flux:
 \begin{equation}
 \bq = - \frac{2}{n+2} A (\rho g)^n (s-b)^{n+2} |\grad s|^{n-1} \grad s. \label{sia:q:early}
 \end{equation}
@@ -597,38 +601,39 @@ Vertical integration yields two additional formulas.  First, vertical integratio
 w|_s &= \bU|_s \cdot \grad s - \Div \bq   \label{sia:wsurface:early} \\
   &= - \frac{2}{n+1} A (\rho g)^n (s-b)^{n+1} |\grad s|^{n+1} + \Div \left(\frac{2}{n+2} A (\rho g)^n (s-b)^{n+2} |\grad s|^{n-1} \grad s\right).  \notag
 \end{align}
-Equation \eqref{sia:wsurface:early} is derived like the mass continuity equation \eqref{masscont}.  One uses incompressibility \eqref{incompressibleagain}, $w|_b=0$, and vertical integration to express $w$ at the surface, and then the Leibniz rule \eqref{leibniz} and $\bU_0=0$.  The second line follows from \eqref{sia:usurface} and \eqref{sia:q:early}.
+Equation \eqref{sia:wsurface:early} is derived, similar to the mass continuity equation \eqref{masscont}, using incompressibility \eqref{incompressibleagain}, $w|_b=0$, and vertical integration to express $w$ at the surface, and then the Leibniz rule \eqref{leibniz} and $\bU_0=0$.  The second form in \eqref{sia:wsurface:early} follows from \eqref{sia:usurface} and \eqref{sia:q:early}.
 
-The formulas for $\bq$ and $w|_s$ have a common scalar \emph{diffusivity} coefficient function:
+The formulas for $\bq$ and $w|_s$ contain a common scalar \emph{diffusivity} coefficient function:
 \begin{equation}
 \Dsia = \frac{2}{n+2} A (\rho g)^n (s-b)^{n+2} |\grad s|^{n-1}. \label{sia:D}
 \end{equation}
-This positive coefficient appears in \eqref{sia:q:early} and \eqref{sia:wsurface:early}, and now we can write them cleanly:
+This positive coefficient appears in \eqref{sia:q:early} and \eqref{sia:wsurface:early}, which we can now write cleanly:
 \begin{align}
 \bq  &= - \Dsia \grad s. \label{sia:q} \\
 w|_s &= \bU|_s \cdot \grad s + \Div \left(\Dsia \grad s\right).  \label{sia:wsurface}
 \end{align}
-In the remainder of this section we will try to understand these SIA formulas, and see how they might be applied in examples, and in simulations of evolving glaciers.
 
-\subsection*{Example: Computing SIA velocities for a given geometry}    If the glacier geometry is known then the above formulas compute the surface velocity and the flux.  We will do this approximately using finite differences (FD; Section \ref{sec:masscont}), as needed for the time-dependent SIA simulations to follow, but it can be done analytically by differentiating the surface elevation function.
+In the remainder of this section we will try to understand these SIA formulas.  We will see how they can be applied in example geometries and in simulations of evolving glaciers.
 
-For planar geometry given by known functions $b(x)$ and $s(x)$, either steady or a snapshot in time, \eqref{sia:usurface} simplifies to this formula for horizontal surface velocity:
+\subsection*{Example: Computing SIA velocities for a given geometry}    If the glacier geometry is known then the above formulas compute the surface velocity and the flux.  We will do this approximately using finite differences (FD; Section \ref{sec:masscont}), as needed for the time-dependent SIA simulations to follow, but in some cases it can be done analytically by differentiating the surface elevation function.
+
+For planar geometry, given by known functions $b(x)$ and $s(x)$ for either steady or a snapshot in time, \eqref{sia:usurface} simplifies to this formula for horizontal surface velocity:
 \begin{equation}
 u|_s = - \frac{2}{n+1} A (\rho g)^n (s-b)^{n+1} \left|\frac{\partial s}{\partial x}\right|^{n-1} \frac{\partial s}{\partial x}. \label{sia:usurface:planar}
 \end{equation}
-For example, suppose $b$ is a simple incline and $s$ is a gently-oscillating surface, as shown in Figure \ref{fig:uw} (top).  Where this surface is (nearly) flat we expect $u|_s\approx 0$, while on the steeper parts we expect significant rightward flow $u|_s>0$.
+For example, suppose $b$ is a simple incline and $s$ is a gently-oscillating surface, as shown in Figure \ref{fig:uw} (top).  Where this surface is (nearly) flat we expect $u|_s\approx 0$, while on the steeper parts we expect significant rightward flow $u|_s>0$, and this is what we see.
 
-\onefigsize{uw}{Top panel: glacier geometry.  Bottom panel: FD approximations of the horizontal ($\circ$) and vertical ($+$) surface velocity in the SIA.}{4.0in}
+\onefigsize{uw}{Top panel: glacier geometry.  Bottom panel: FD approximations of the horizontal ($\circ$) and vertical ($+$) surface velocity in the SIA.}{4.5in}
 
-Our FD approximation of \eqref{sia:usurface:planar} will compute the surface slope at the \emph{staggered grid} points $x_{j+1/2}$, which are half-way between the regular grid locations $\{x_j\}$; see Section \ref{sec:masscont} for grid notation.  Using the staggered point achieves second-order accuracy because the function evaluations are centered around it:
+Our FD approximation of formula \eqref{sia:usurface:planar} computes the surface slope at the \emph{staggered grid} points $x_{j+1/2}$, which are half-way between the regular grid locations $\{x_j\}$; see Section \ref{sec:masscont} for grid notation.  Using the staggered point achieves second-order accuracy because the function evaluations are centered around it:
 \begin{equation}
 \frac{\partial s}{\partial x}(x_{j+1/2}) = \frac{s(x_{j+1})-s(x_j)}{\Delta x} + O((\Delta x)^2).  \label{fd:slope}
 \end{equation}
-Averaging the ice thicknesses, symmetrically to the staggered point, is also needed, to maintain the second-order accuracy.  The velocity approximation is
+Averaging the ice thicknesses, symmetrically to the staggered point, is also needed, to maintain second-order accuracy.  Now the approximation of \eqref{sia:usurface:planar} is
 \begin{equation}
-u_{j+1/2} = - \frac{2}{n+1} A (\rho g)^n \left(\frac{H_j + H_{j+1}}{2}\right)^{n+1} \left|\frac{s_{j+1}-s_j}{\Delta x}\right|^{n-1} \frac{s_{j+1}-s_j}{\Delta x} \label{fd:usurface:planar}
+u_{j+1/2} = - \frac{2}{n+1} A (\rho g)^n \left(\frac{H_j + H_{j+1}}{2}\right)^{n+1} \left|\frac{s_{j+1}-s_j}{\Delta x}\right|^{n-1} \frac{s_{j+1}-s_j}{\Delta x}, \label{fd:usurface:planar}
 \end{equation}
-where $H_j = s_j - b_j$.  Here is the Python function for \eqref{fd:usurface:planar}:
+where $H_j = s_j - b_j$.  Here is the corresponding Python function:
 
 \begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
 def u(x, b, s):
@@ -639,7 +644,7 @@ def u(x, b, s):
     return -C_u * Hstag ** (n + 1) * abs(dsdx) ** (n - 1) * dsdx
 \end{lstlisting}
 
-The diffusivity $\Dsia$ is computed from \eqref{sia:D} at staggered points as follows:
+The diffusivity $\Dsia$ is computed from formula \eqref{sia:D}, again at staggered points:
 \begin{equation}
 \Dsia_{j+1/2} = \frac{2}{n+2} A (\rho g)^n \left(\frac{H_j + H_{j+1}}{2}\right)^{n+2} \left|\frac{s_{j+1}-s_j}{\Delta x}\right|^{n-1}. \label{fd:Dsia:planar}
 \end{equation}
@@ -652,7 +657,7 @@ def diffusiveD(x, b, s):
     C_D = (2.0 / (n + 2)) * A * (rhoi * g) ** n
     return C_D * Hstag ** (n + 2) * abs(dsdx) ** (n - 1)
 \end{lstlisting}
-Computing $\bq$ at staggered grid points requires only a small modification, but we will not specifically need that here.
+Computing $\bq=-\Dsia \frac{\partial s}{\partial x}$, if that were needed, requires only a small modification.
 
 To compute the surface vertical velocity $w|_s$ we evaluate \eqref{sia:wsurface} using another centered difference, which yields values on the (interior) regular grid points.  Define staggered-grid values
 	$$\phi_{j+1/2} = u_{j+1/2} \frac{s_{j+1}-s_j}{\Delta x} \approx \left(u|_s \frac{\partial s}{\partial x}\right)_{j+1/2}.$$
@@ -675,32 +680,30 @@ writing to image file output/uw.pdf
 %$
 
 \medskip
-What does Figure \ref{fig:uw} show?  Because of gravity the flow is faster where the surface is steeper, and the horizontal velocity reflects this, as expected.  The surface vertical velocity is more interesting.  Through incompressibility, it causes the surface to rise in dips and fall at humps.  This is a key feature of ice flow: it is \emph{smoothing}.  The vertical velocity tends to remove details of surface topography, at least at the large scales covered by the SIA.  Gravity and incompressibility combine to generate ice surface motion which generates smoother surfaces under SKE evolution, at least when the SMB data is also smooth (in space and time).
+What does Figure \ref{fig:uw} show?  As already noted, because of gravity the flow is faster where the surface is steeper, and the horizontal velocity reflects this.  The surface vertical velocity is more interesting.  Through incompressibility, it causes the surface to rise in dips and fall at humps.  This is a key feature of ice flow: it is \emph{smoothing}.  The vertical velocity tends to remove details of surface topography, at least at the large scales covered by the SIA.  Gravity and incompressibility combine to generate ice surface motion which smoothes surfaces under SKE evolution, at least when the SMB data is also smooth (in space and time).
 
-Figure \ref{fig:green-transect} shows the result for a real ice sheet; the surface is much smoother than the base.  Ice-penetrating radar in the 21st century has revealed widespread rough bedrock topography under ice sheets, making it even more obvious that their surfaces are smoother than their beds.  Numerically solving the time-dependent SIA, our next task, will also make the smoothing effect clear.
+Figure \ref{fig:green-transect} showed the result for a real ice sheet; the surface is much smoother than the base.  Ice-penetrating radar in the 21st century has revealed widespread rough bedrock topography under ice sheets, making it even more obvious that ice sheet surfaces are smoother than their beds.  In numerically solving the time-dependent SIA, our next task, we will also see the smoothing effect.
 
 
 \section{Time-dependent glacier simulations from the SIA}  \label{sec:evolution}
 
-\subsection*{Diffusion equations for geometry}  Section \ref{sec:masscont} presented two equations which model the evolution of a glacier's shape: the surface kinematical equation (SKE) \eqref{ske} for the surface elevation $s$, and the mass continuity equation \eqref{masscont} for the thickness $H$.  If we decide to compute velocities and fluxes from the non-sliding shallow ice approximation (SIA; Section \ref{sec:sia}), which approximates the Glen-Stokes system of Section \ref{sec:continuum}, then these evolution equations become time-dependent glacier models.  Unlike the minimal SKE-based ``model'' in Section \ref{sec:masscont}, these SIA geometry-evolution models are self-contained.
+\subsection*{Diffusion equations for geometry}  Section \ref{sec:masscont} presented two equations which model the evolution of a glacier's shape: the surface kinematical equation (SKE) \eqref{ske} for the surface elevation $s$, and the mass continuity equation \eqref{masscont} for the thickness $H$.  Our plan is to compute velocities and fluxes from the non-sliding shallow ice approximation (SIA; Section \ref{sec:sia}), which approximates the Glen-Stokes system of Section \ref{sec:continuum}.  Now these geometry evolution equations become time-dependent glacier models.  Unlike the minimal SKE-based ``model'' in Section \ref{sec:masscont}, these models are essentially self-contained.
 
-In the current Section we will demonstrate this strategy, combining equations from Sections \ref{sec:masscont} and \ref{sec:sia} to build the simplest well-posed\footnote{In a technical sense the well-posedness problem is only partly solved \cite{JouvetBueler2012}.} evolution model in glaciology.  Simulations built this way start from a known glacier geometry and apply a (generally) time-dependent climate, an SMB function.  They generate the geometry at future times, which can be regarded as predictions.
+Thus in the current Section we will combine equations from Sections \ref{sec:masscont} and \ref{sec:sia} to build the simplest well-posed\footnote{In a technical sense the well-posedness problem is only partly solved \cite{JouvetBueler2012}.} evolution model in glaciology.  Simulations built this way start from a known glacier geometry and apply a (generally) time-dependent climate, an SMB function.  They generate the geometry at future times, which can be regarded as predictions.
 
-All SIA-based geometry-evolution equations simplify to essentially the same \emph{diffusion equation}.  On the one hand, recall the SKE \eqref{ske}, namely
+In fact, all SIA-based geometry-evolution equations simplify to essentially the same \emph{diffusion equation}.  On the one hand, recall the SKE \eqref{ske}, namely
 \begin{equation}
 \frac{\partial s}{\partial t} - \bu|_s \cdot \bn_s = a.  \label{skeagain}
 \end{equation}
-Here $\bu|_s=\left<u|_s,v|_s,w|_s\right>$ is the 3D surface velocity and $\bn_s = \left<-\frac{\partial s}{\partial x}, -\frac{\partial s}{\partial y}, \,1\right>$ is a normal vector.  From equation \eqref{sia:wsurface} the surface motion term has a divergence form:
+Here $\bu|_s$ is the 3D surface velocity, and recall that $\bn_s = \left<-\frac{\partial s}{\partial x}, -\frac{\partial s}{\partial y}, \,1\right>$ is a normal vector.  From equation \eqref{sia:wsurface} the surface motion term has a divergence form:
 	$$\bu|_s \cdot \bn_s = -\bU|_s \cdot \grad s + w|_s = \Div\left(\Dsia \grad s\right).$$
-(Note that $\bU|_s \cdot \grad s$ is a 2D dot product.)  Recall that $\Dsia$ is given by equation \eqref{sia:D}, and Section \ref{sec:sia} provides a Python function which computes it.
+(Note that $\bU|_s \cdot \grad s$ is a 2D dot product.)  Recall that $\Dsia$ is given by equation \eqref{sia:D}, and Section \ref{sec:sia} provides a Python function for it.
 
 On the other hand, recall mass continuity equation \eqref{masscont} for the thickness $H=s-b$:
 \begin{equation}
 \frac{\partial H}{\partial t} + \Div \bq = a - m.  \label{masscontagain}
 \end{equation}
-The SIA ice flux $\bq$ is from equation \eqref{sia:q}: $\bq = - \Dsia \grad s$.
-
-These (non-sliding) SIA substitutions create very-similar diffusion equations, the boxed equations in the following diagram.
+The SIA ice flux $\bq = - \Dsia \grad s$ can be substituted into this equation.  Thus these (non-sliding) SIA formulas reduce to very-similar diffusion equations, the boxed equations in the following diagram.
 
 \medskip
 \begin{center}
@@ -729,52 +732,51 @@ These (non-sliding) SIA substitutions create very-similar diffusion equations, t
 \end{center}
 
 \medskip
-Such similar forms are not a surprise, actually.  Section \ref{sec:masscont} showed that our starting equations \eqref{skeagain} and \eqref{masscontagain} are equivalent if we assume incompressibility \eqref{incompressibleagain} and a basal kinematical equation \eqref{bke}.    Both equations \eqref{diffusion:ske} and \eqref{diffusion:masscont} involve the surface elevation (via the slope $\grad s$) and the ice thickness (through $\Dsia$, equation \eqref{sia:D}).  The apparent $s$-vs-$H$ distinction is not that important, but the surface elevation $s$ tends to be a smoother geometry function in time and space than the thickness $H$ (e.g.~Figure \ref{fig:green-transect}).
+Such similar forms are not a surprise, actually.  Section \ref{sec:masscont} showed that our starting equations \eqref{skeagain} and \eqref{masscontagain} are equivalent if we assume incompressibility \eqref{incompressibleagain} and a basal kinematical equation \eqref{bke}.    Both boxed equations involve the surface slope $\grad s$ and the ice thickness (through $\Dsia$, equation \eqref{sia:D}).  The apparent $s$-vs-$H$ distinction is not that important, though the surface elevation $s$ is a smoother geometry function in time and space than the thickness $H$ (e.g.~Figure \ref{fig:green-transect}).
 
-An apparent difference between the boxed equations is that \eqref{diffusion:ske} does not refer to the \emph{basal} mass balance $m$ (Section \ref{sec:masscont}).  The original SKE \eqref{ske} isolates the surface evolution, while the mass continuity equation \eqref{masscont} always involves the whole ice column.  On the other hand, the derivation of \eqref{diffusion:ske} used \eqref{sia:D}, via an assumption of zero basal velocity, and if that derivation were generalized appropriately then the basal mass balance $m$ would reappear.
+An apparent difference between the boxed equations is that \eqref{diffusion:ske} does not refer to the \emph{basal} mass balance $m$ (Section \ref{sec:masscont}).  The original SKE \eqref{ske} isolates the surface evolution, while the mass continuity equation \eqref{masscont} always involves the whole ice column.  On the other hand, the derivation of \eqref{diffusion:ske} used \eqref{sia:D}, via an assumption of zero basal velocity.  In the general case the basal mass balance $m$ would reappear.
 
-The two models \eqref{diffusion:ske} and \eqref{diffusion:masscont} are similar in another respect: they must be solved subject to a geometrical inequality constraint.  That is, the surface must remain above the bed ($s\ge b$) and the thickness must not be negative ($H\ge 0$).
+The two models \eqref{diffusion:ske} and \eqref{diffusion:masscont} are similar in another respect: they must be solved subject to an inequality constraint.  That is, the surface must remain above the bed ($s\ge b$) and the thickness must not be negative ($H\ge 0$).
 
-Historically-speaking, the diffusion form \eqref{diffusion:masscont} of the mass continuity equation allowed numerical ice sheet modeling to get started.  Diffusion equations, especially the \emph{heat equation}, are clich\'ed topics in numerical analysis textbooks, for example in \cite{LeVeque2007,MortonMayers2005}.  By inventing an FD scheme for the diffusivity in \eqref{diffusion:masscont}, Mary-Anne Mahaffy \cite{Mahaffy1976} started the field with a 1976 numerical model of the Barnes ice cap (Baffin Island, Canada).
+Historically-speaking, form \eqref{diffusion:masscont} of the mass continuity equation allowed numerical ice sheet modeling to get started.  Note that diffusion equations, especially the \emph{heat equation}, are clich\'ed topics in numerical analysis textbooks, for example in \cite{LeVeque2007,MortonMayers2005}.  By inventing an FD scheme for the SIA diffusivity in \eqref{diffusion:masscont}, Mary-Anne Mahaffy \cite{Mahaffy1976} started the field with a 1976 numerical model of the Barnes ice cap (Baffin Island, Canada).
 
-\subsection*{Nonlinear and degenerate diffusivity}  Equation \eqref{sia:D} gives the diffusivity $\Dsia$, which appears in the diffusion equations \eqref{diffusion:ske} and \eqref{diffusion:masscont}:
+\subsection*{Nonlinear and degenerate diffusivity}  Equation \eqref{sia:D} gives the diffusivity $\Dsia$, which appears in the diffusion equations \eqref{diffusion:ske} and \eqref{diffusion:masscont}.  Recall:
 \begin{equation}
 \Dsia = \frac{2}{n+2} A (\rho g)^n (s-b)^{n+2} |\grad s|^{n-1}. \label{sia:Dagain}
 \end{equation}
 Independent of the power $n$, the units of $\Dsia$ reduce to square meters per second, as otherwise equations \eqref{diffusion:ske} and \eqref{diffusion:masscont} would not be dimensionally correct.  It follows that the units of the ice softness $A$ will depend on $n$ (Table \ref{tab:notation}).
 
-Equation \eqref{sia:Dagain} expresses the dominant macroscopic effect of the Glen flow law \eqref{flowlaw}, and it is at the heart of why glaciology is a (highly!) \emph{nonlinear} science.  The diffusivity is not a constant, nor a known-in-advance function, as it is in linear textbook examples \cite{LeVeque2007,MortonMayers2005}.  Instead, for $n=3$ it scales with the $5$th power of thickness and the $2$nd power of surface slope.  Even when $n=1$, which is the Newtonian fluid case where diffusivity is independent of surface slope, it still depends on the $3$rd power of thickness.
+Equation \eqref{sia:Dagain} expresses the dominant macroscopic effect of the Glen flow law \eqref{flowlaw}, and it is at the heart of why glaciology is a (highly!) \emph{nonlinear} science.  The diffusivity is not a constant, nor a known-in-advance function, as it is in linear textbook examples \cite{LeVeque2007,MortonMayers2005}.  Instead, for $n=3$ it scales with the $5$th power of thickness and the $2$nd power of surface slope.  Even when $n=1$, which is the Newtonian fluid case, diffusivity is independent of surface slope but it still depends on the $3$rd power of thickness.
 
-The local value of diffusivity $\Dsia$ is the rate of smoothing of the surface elevation, over adjacent areas, caused by ice flow.  Formula \eqref{sia:Dagain} returns a large value when the ice is both thick and steep.  Ice will flow downhill, away from surface maxima, and it will converge toward surface minima, most strongly at such locations.
+The local value of diffusivity $\Dsia$ is the rate of smoothing of the surface elevation, over a small area, caused by ice flow.  Formula \eqref{sia:Dagain} returns a large value when the ice is both thick and steep.  Thus ice will flow downhill, away from surface maxima, and it will converge toward surface minima, most strongly at such locations.
 
-However, it is worth noting some conceptual and practical concerns about \eqref{diffusion:ske} or \eqref{diffusion:masscont} as diffusion PDEs, given the nonlinearities in formula \eqref{sia:Dagain}:
+However, it is worth noting some conceptual and practical concerns about SIA equations \eqref{diffusion:ske} or \eqref{diffusion:masscont}, and interpreting them as diffusion PDEs, given the nonlinearities in \eqref{sia:Dagain}:
 \renewcommand{\labelenumi}{\emph{\roman{enumi})}}
 \begin{enumerate}
-\item The derivation of the SIA model is inaccurate when significant longitudinal (membrane) stresses are present.  This is distinctly true when ice is floating or sliding, but also over shorter ranges when the flow is confined by terrain.  In such cases the SIA approximation of the true solution of the Glen-Stokes model equations \eqref{incompressibleagain}--\eqref{flowlaw} may be completely inadequate.
-\item The diffusivity $\Dsia$ depends on the solution, and thus PDEs \eqref{diffusion:ske} and \eqref{diffusion:masscont} are nonlinear.  Numerical methods are therefore more difficult to implement, and harder to analyze and debug.
-\item The diffusivity $\Dsia$ goes to zero at margins, where $H=s-b\to 0$, and at divides and domes, where $|\grad s|\to 0$.  That is, the diffusion process \emph{degenerates}.  The solutions $s$ and $H$ of \eqref{diffusion:ske} or \eqref{diffusion:masscont} are generally not smooth at these locations, though they will be continuous everywhere if $b$ is.  Smoothness of $s$ and $H$ is lost at margins and domes even when the bed $b$ and SMB $a$ data are smooth.  The largest numerical geometry errors arise at such locations.
+\item The derivation of the SIA model is inaccurate when significant longitudinal (membrane) stresses are present.  This is distinctly true when ice is floating or sliding, but also when the flow is locally confined by terrain.  In such cases the SIA approximation of the true solution of the Glen-Stokes model equations \eqref{incompressibleagain}--\eqref{flowlaw} may be completely inadequate.
+\item The diffusivity $\Dsia$ depends on the geometry solution function, and thus PDEs \eqref{diffusion:ske} and \eqref{diffusion:masscont} are nonlinear.  Numerical methods are therefore more difficult to implement, and harder to analyze and debug.
+\item The diffusivity $\Dsia$ goes to zero at margins, where $H=s-b\to 0$, and at divides and domes, where $|\grad s|\to 0$.  That is, the diffusion process \emph{degenerates} at these places.  The solutions $s$ and $H$ of \eqref{diffusion:ske} or \eqref{diffusion:masscont} are generally not smooth there, though they are continuous (if $b$ is).  Smoothness of $s$ and $H$ is lost at margins and domes, even when the bed $b$ and SMB $a$ data are smooth.  The largest numerical geometry errors arise at such locations.
 \end{enumerate}
-Item \emph{i)} concerns a deficiency of the SIA model, not just our diffusion-based understanding of it.  All of these concerns are research topics in mathematical glaciology.
+All of these concerns are research topics in mathematical glaciology.
 
-\subsection*{Explicit scheme for the geometry SIA}  Having thought about the form and meaning of these equations, let us apply finite differences (FD) and write code.
+\subsection*{Explicit scheme for the geometry SIA}  Having thought about the form and meaning of these equations, we finally apply finite differences (FD) and write code.
 
 Consider the planar case of equation \eqref{diffusion:ske}.  This is the simplest combination of the SKE and the SIA stress balance:
 \begin{equation}
 \frac{\partial s}{\partial t} - \frac{\partial}{\partial x} \left(\Dsia \frac{\partial s}{\partial x}\right) = a.  \label{diffusion:ske:planar}
 \end{equation}
-
-The simplest scheme for \eqref{diffusion:ske:planar} applies forward differences in time (Euler method) and centered differences in space.  We will treat the diffusivity as a coefficient which varies in time and space, evaluated on the staggered grid, $D_{j+1/2} = \Dsia(t_n,x_{j+1/2})$.  Recall from Section \ref{sec:masscont} the notation $s_j \approx s(t_n,x_j)$ and $\snew_j\approx s(t_{n+1},x_j)$, and now we write $a_j= a(t_n,x_j)$.  Here is the scheme:
+The simplest scheme for \eqref{diffusion:ske:planar} applies forward differences in time (Euler method) and centered differences in space.  We will treat the diffusivity as a coefficient which varies in time and space, evaluated on the staggered grid, $D_{j+1/2} = \Dsia(t_n,x_{j+1/2})$.  Recall from Section \ref{sec:masscont} the notation $s_j \approx s(t_n,x_j)$ and $\snew_j\approx s(t_{n+1},x_j)$, and write $a_j= a(t_n,x_j)$.  Here is the scheme:
 \begin{equation}
 \frac{\snew_j - s_j}{\Delta t} - \frac{D_{j+1/2} (s_{j+1} - s_j)/\Delta x - D_{j-1/2} (s_j - s_{j-1})/\Delta x}{\Delta x} = a_j.  \label{fd:diffusion:planar:early}
 \end{equation}
 
-The staggered-grid diffusivities $D_{j+1/2}$ are exactly the values of $\Dsia$ computed in Section \ref{sec:sia} by \texttt{diffusiveD()}, so we will re-use that Python function.  The slopes $(s_{j+1} - s_j)/\Delta x$ use approximation \eqref{fd:slope}.  Note that our centered-difference approximation of the outer derivative in \eqref{diffusion:ske:planar} can be regarded as differencing staggered-grid values of the flux $\bq=-\Dsia \grad s$, an idea which generalizes to two horizontal dimensions \cite{Bueler2016}.
+The staggered-grid diffusivities $D_{j+1/2}$ are exactly the values of $\Dsia$ computed in Section \ref{sec:sia} by \texttt{diffusiveD()}; we will re-use that Python function.  The slopes $(s_{j+1} - s_j)/\Delta x$ use approximation \eqref{fd:slope}.  Note that our centered-difference approximation of the outer derivative in \eqref{diffusion:ske:planar} is effectively differencing staggered-grid values of the flux $\bq=-\Dsia \grad s$, an idea which generalizes to two horizontal dimensions \cite{Bueler2016}.
 
-Unlike the advection problem in Section \ref{sec:masscont}, a forward-time centered-space scheme \eqref{fd:diffusion:planar:early} is acceptable for a diffusion equation like \eqref{diffusion:ske:planar}.  It is \emph{conditionally stable} \cite{MortonMayers2005}, about which more below.  For implementation we write \eqref{fd:diffusion:planar:early} as an update,
+Unlike the advection problem in Section \ref{sec:masscont}, a forward-time centered-space scheme \eqref{fd:diffusion:planar:early} is acceptable for a diffusion equation like \eqref{diffusion:ske:planar}.  At least it is \emph{conditionally stable} \cite{MortonMayers2005}, about which more below.  Writing \eqref{fd:diffusion:planar:early} as an update,
 \begin{equation}
 \snew_j = s_j + \frac{\Delta t}{\Delta x^2} \left[D_{j+1/2}\, (s_{j+1} - s_j) - D_{j-1/2}\, (s_j - s_{j-1})\right] + \Delta t\,a_j,  \label{fd:diffusion:planar}
 \end{equation}
-which becomes this Python in the $a=0$ case we will be testing:
+it becomes this Python in the $a=0$ case we will be testing:
 \begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
 def geometrystep(x, s, D, dt):
     dx = x[1] - x[0]
@@ -784,9 +786,9 @@ def geometrystep(x, s, D, dt):
     return snew
 \end{lstlisting}
 
-The above code freezes the surface elevation at both ends, that is, \texttt{snew[0]=s[0]} and \texttt{snew[J+1]=s[J+1]}.  In Section \ref{sec:masscont} we needed a single boundary condition for the SKE, which was a one-way advection (velocity-is-given paradigm).  Now our velocities are from the SIA, and we have a second-order (in space) diffusion problem, so these Dirichlet boundary values are appropriate \cite{MortonMayers2005}.
+Observe that this code freezes the surface elevation at both ends, that is, \texttt{snew[0]=s[0]} and \texttt{snew[J+1]=s[J+1]}.  In Section \ref{sec:masscont} we needed a single boundary condition for the SKE, which is a one-way advection in that velocity-is-given paradigm.  However, in the current Section our velocities are from the SIA, and we have a second-order (in space) diffusion problem, so two Dirichlet boundary values \cite{MortonMayers2005} are appropriate. 
 
-The time axis is $t\in [0,t_f]$, with final time $t_f$.  The example below uses $t_f=40$ a.  As explained momentarily, the following time-stepping loop is \emph{adaptive} in the sense that $\Delta t$ is re-computed at each step, based on the current state of the solution:
+\subsection*{Adaptive time-stepping for stability}  The following time-stepping loop is \emph{adaptive} in the sense that $\Delta t$ is re-computed at each step, based on the current state of the solution:
 \begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
 t = 0
 for k in range(maxsteps):
@@ -797,15 +799,15 @@ for k in range(maxsteps):
     s = geometrystep(x, s, D, dt)
     t += dt
 \end{lstlisting}
-Normal termination is by the \texttt{break}, once $t$ is within $10^{-6}$ seconds of the final time, to allow for rounding error, while \texttt{maxsteps} merely protects against an infinite loop.
+The time axis is $t\in [0,t_f]$, with final time $t_f$; our demonstration below uses $t_f=40$ a.  Normal termination is by the \texttt{break}, once $t$ is within $10^{-6}$ seconds of the final time, to allow for rounding error, while \texttt{maxsteps} merely protects against an infinite loop.
 
-\subsection*{Adaptive time-stepping for stability}  If \eqref{diffusion:ske:planar} were a linear PDE, so that the staggered-grid diffusivities $D_{j+1/2}$ did not depend on the solution $s$, then it is well-known \cite{LeVeque2007,MortonMayers2005} that a sufficient condition for scheme stability is
+Now, if \eqref{diffusion:ske:planar} were a linear PDE, so that the staggered-grid diffusivities $D_{j+1/2}$ did not depend on the solution $s$, then it is well-known \cite{LeVeque2007,MortonMayers2005} that a sufficient condition for scheme stability is
 \begin{equation}
-   \frac{(\max_j D_{j+1/2})\,\Delta t}{\Delta x^2} \le \frac{1}{2} \quad \iff \quad \Delta t \le \frac{\Delta x^2}{2 (\max_j D_{j+1/2})}.  \label{linearstabcrit}
+   \frac{(\max_j D_{j+1/2})\,\Delta t}{\Delta x^2} \le C \quad \iff \quad \Delta t \le \frac{C \Delta x^2}{\max_j D_{j+1/2}}  \label{linearstabcrit}
 \end{equation}
-This criterion is comparable\footnote{Condition \eqref{linearstabcrit} is sometimes called ``CFL'' also, but it applies to a different problem.} to the CFL condition \eqref{cfl}, which was for the explicit upwind scheme applied to the advection problem in Section \ref{sec:masscont}.
+where $C = \frac{1}{2}$.  This criterion is comparable to the CFL condition \eqref{cfl} for the explicit upwind scheme applied to the advection problem in Section \ref{sec:masscont}.
 
-However, using condition \eqref{linearstabcrit} in an adaptive time-stepping scheme will not give stability for a glacier simulation.  PDE \eqref{diffusion:ske:planar} is actually nonlinear, because of the dependence of $\Dsia$ on the solution, equation \eqref{sia:Dagain}, and a different analysis is needed.  That analysis \cite{Hindmarsh2001} concludes that $1/(2n)$ should replace ``$1/2$'' in \eqref{linearstabcrit}, so we compute the time-step as follows:
+However, using condition \eqref{linearstabcrit} with $C = \frac{1}{2}$ in an adaptive time-stepping scheme will not necessarily give stability for a glacier simulation.  PDE \eqref{diffusion:ske:planar} is actually nonlinear, because of the dependence of $\Dsia$ on the solution, equation \eqref{sia:Dagain}, and a different analysis is needed.  Hindmarsh's analysis in \cite{Hindmarsh2001} concludes that $C=1/(2n)$ is suitable in \eqref{linearstabcrit}.  Therefore we compute the time-step as follows:
 \begin{lstlisting}[language=PythonPlus, xleftmargin=4mm]
 def getdt(t, tf, maxD):
     c_D = 1.0 / 6.0  # coefficient from Hindmarsh (2001), for n=3
@@ -814,9 +816,9 @@ def getdt(t, tf, maxD):
 \end{lstlisting}
 
 
-\subsection*{Example: A very rough start}  These pieces go into a Python program \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}} which simulates a time-dependent glacier using the SIA.  The data (climate) is highly-simplified: the bed is flat ($b=0$) and the SMB is zero ($a=0$; also $m=0$).  A flat bed means that $H=s$ and diffusion equations \eqref{diffusion:ske} and \eqref{diffusion:masscont} are identical.  The focus in this simulation is on how SIA ice flow evolves glacier shape.
+\subsection*{Example: A rough start}  These pieces go into a Python program \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}} which simulates a time-dependent glacier using the SIA.  The data (climate) is highly-simplified: the bed is flat ($b=0$) and the SMB is zero ($a=0$; also $m=0$).  Note that $H=s$ and diffusion equations \eqref{diffusion:ske} and \eqref{diffusion:masscont} are identical, so the focus in this simulation is on how SIA ice flow evolves glacier shape.
 
-On the other hand we generate the initial surface elevation \emph{randomly}.  The geometry is initially horrible, compared to real glaciers.  Run this experiment as follows:
+Suppose we generate the initial surface elevation \emph{randomly}.  The geometry is initially horrible, compared to real glaciers.  Run this experiment as follows:
 
 \smallskip
 \begin{Verbatim}[xleftmargin=4mm]
@@ -829,52 +831,52 @@ writing results to output/dome.png and output/timesteps.png
 %$
 
 \medskip
-The evolving geometry is shown in Figure \ref{fig:dome}.  The initial surface generates very large stresses in the SIA model, and thus strain rates, and so the geometry change rate $|\partial s/\partial t|$ is large at the beginning.  Recall that the SIA formula \eqref{sia:Dagain}, for $\Dsia$, generates large values when the ice is thick and the surface slope is steep, which certainly applies during the early part of the simulation.  However, the ice flow is aggressively smoothing and the final surface elevation is a surprisingly symmetric and smooth dome shape, to which we will return soon.  Also note that, because of conserved mass, the \emph{glacier margin} advances as the central heights fall; the free boundary moves.
+The evolving geometry is shown in Figure \ref{fig:dome}.  Recall that the SIA formula \eqref{sia:Dagain}, for $\Dsia$, generates large values when the ice is thick and the surface slope is steep, which certainly applies during the early part of the simulation.  The geometry change rates $|\partial s/\partial t|$ are huge at the beginning.  However, the ice flow is aggressively smoothing and the final surface elevation is a surprisingly symmetric and smooth dome shape, to which we will return soon.  Also note that, because of conserved mass, the margin advances as the central heights fall; the free boundary moves.
 
 \onefigsize{dome}{Evolution of surface elevation (and thickness) under the SIA model, from a very rough start.}{4.0in}
 
-The other output from the run, Figure \ref{fig:timesteps}, graphs the time step $\Delta t$ over time.  At the start the stability criteria sees enormous computed diffusivities so the time steps are correspondingly short.  Toward the end of the run the time steps stabilize, at order of a month for this resolution.  Given the crazy start, this example also demonstrates the \emph{robustness} of the diffusion-based adaptive time-stepping approach.
+The other output from the run, Figure \ref{fig:timesteps}, graphs the time step $\Delta t$ over time.  At the start the stability criteria sees enormous computed diffusivities, so by \eqref{linearstabcrit} the time steps are correspondingly short.  Toward the end of the run the time steps stabilize, at order of a month for this resolution.  Given the crazy start, this example also demonstrates the \emph{robustness} of the adaptive time-stepping approach.
 
-\onefigsize{timesteps}{Time step length $\Delta t$, over time, from the simulation which produced Figure \ref{fig:dome}.}{3.0in}
+\onefigsize{timesteps}{Time step length $\Delta t$, over time, from the Figure \ref{fig:dome} simulation.}{3.0in}
 
-Modifications of the program \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}} are recommended exercises.  Runs become unstable if the time step $\Delta t$ is too large, although the coefficient $1/6$ can be increased quite a bit without obvious instabilities.  One exercise is to throw out the adaptive time-stepping scheme entirely, but then it becomes clear why we want it.  Fixing a sufficiently-short time step to permit stability will generate many more time steps and thus long run times.
+Making modifications to the program \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}} is a recommended exercise.  Runs become unstable if the time step $\Delta t$ is too large, although the coefficient $1/6$ can be increased quite a bit without obvious instabilities.  One exercise is to throw out the adaptive time-stepping scheme entirely, but then it becomes clear why we want it.  Fixing a sufficiently-short time step to permit stability will generate very long run times.
 
-The most valuable exercise is to increase the spatial resolution, e.g.~by doubling the number $J$ of subintervals.  Our program does $O(J)$ arithmetic to compute each time step, and so of course the simulation gets more computationally expensive under spatial refinement.  However, the adaptive scheme \emph{also} reduces $\Delta t$, thus the number of time steps increases.  An easy exercise shows that a stability criterion like \eqref{linearstabcrit} converts a doubling of $J$ into an increase in arithmetic (\emph{flops}), for the whole simulation to a fixed final time $t_f$, by a factor of eight!
+The most valuable exercise is to increase the spatial resolution, e.g.~by doubling the number $J$ of subintervals.  Our program does $O(J)$ arithmetic at each time step, and of course the simulation gets more computationally expensive under spatial refinement.  However, the adaptive scheme also reduces $\Delta t$ so the number of time steps increases.  An easy exercise shows that stability criterion \eqref{linearstabcrit} converts a doubling of $J$ into an increase in arithmetic (\emph{flops}), for a simulation to a fixed final time $t_f$, by a factor of eight!
 
-Adaptive time-stepping is strongly recommended to maintain the stability of glacier simulations, especially because of the strong nonlinearities in ice flow.  This recommendation extends to comprehensive glacier and ice sheet models containing multiple time scales and processes \cite{BuelerBrown2009}.
+Adaptive time-stepping is strongly recommended to maintain the numerical stability of glacier simulations, especially because of the strong nonlinearities in ice flow.  This recommendation extends to comprehensive glacier and ice sheet models containing multiple time scales and processes \cite{BuelerBrown2009}.
 
 \subsection*{Implicit schemes for glacier evolution}  An alternate approach to creating stable numerical schemes is \emph{implicitness}.  For example, an implicit \emph{backward Euler} scheme corresponding to \eqref{fd:diffusion:planar:early} is
 \begin{equation}
 \frac{\snew_j - s_j}{\Delta t} - \frac{D_{j+1/2} (\snew_{j+1} - \snew_j)/\Delta x - D_{j-1/2} (\snew_j - \snew_{j-1})/\Delta x}{\Delta x} = a_j.  \label{fd:diffusion:planar:beuler}
 \end{equation}
-Here the unknown surface elevations $\snew_j$ appear in multiple places in the equation.  We cannot write it as an explicit update scheme like \eqref{fd:diffusion:planar}.  Instead we must solve algebraic equations, simultaneously for all the values $\{\snew_j\}$, at each time step.  Nonetheless the stability benefits of implicitness are substantial, compensating for increased program complexity.  For linear diffusions, backward Euler scheme \eqref{fd:diffusion:planar:beuler} is \emph{unconditionally stable}, meaning that arbitrarily long time steps are allowed without instability \cite{MortonMayers2005}.
+Here the unknown surface elevations $\snew_j$ appear in multiple places in the equation, so we cannot write it as an (explicit) update scheme like \eqref{fd:diffusion:planar}.  Instead we must solve algebraic equations, simultaneously for all the values $\{\snew_j\}$, at each time step.  Nonetheless the stability benefits of implicitness are substantial, compensating for the increased program complexity.  For linear diffusions, backward Euler scheme \eqref{fd:diffusion:planar:beuler} is \emph{unconditionally stable}, meaning that arbitrarily long time steps are allowed without instability \cite{MortonMayers2005}.
 
-Implicitness comes with caveats.  First, long time steps, i.e.~large $\Delta t$ values, always imply an accuracy cost, because the approximation $\partial s/\partial t \approx (\snew_j - s_j)/\Delta t$ becomes poor.  Therefore accuracy limits time steps, not just stability.  Second, and more important, implicit schemes are more expensive in a per-time-step sense because the unknown solution values must be treated as a vector in a (large) linear or nonlinear system of equations, which must be formed and solved at each time step.
+Implicitness comes with caveats.  First, long time steps, i.e.~large $\Delta t$ values, always imply an accuracy cost, because the approximation $\partial s/\partial t \approx (\snew_j - s_j)/\Delta t$ becomes poor.  Therefore accuracy concerns also limit the time steps, not just stability.  Second, and more important, implicit schemes are more expensive in a per-time-step sense, because the unknown solution values must be treated as a vector in a (large) linear or nonlinear system of equations, which must be formed and solved at each time step.
 
-Note that scheme \eqref{fd:diffusion:planar:beuler} is really only \emph{semi-implicit} because it uses staggered-grid diffusivities which were evaluated, by formula \eqref{sia:Dagain}, from the current-time surface elevations $s_j$.  The advantage is that only a linear system needs to be solved at each time step for such a semi-implicit scheme.  A fully-implicit scheme would use the updated values $\snew_j$ there as well, and this would require the solution of a system on nonlinear equations at each time step, for instance by Newton's method \cite{Bueler2021}.
+Note that scheme \eqref{fd:diffusion:planar:beuler} is really only \emph{semi-implicit} as written.  That is, it uses staggered-grid diffusivities which were evaluated, by formula \eqref{sia:Dagain}, from the current-time surface elevations $s_j$.  The advantage of this choice is that only a linear system needs to be solved at each time step.  A \emph{fully-implicit} scheme like the one in \cite{Bueler2016} would use the updated values $\snew_j$in the diffusivities as well, and this would require the solution of a system on nonlinear equations at each time step, for instance by Newton's method \cite{Bueler2021}.  Despite the strong nonlinearities, fully-implicit SIA schemes are practical when appropriate high-performance solver tools are used.
 
-Despite the strong nonlinearities, fully implicit schemes are implementable when appropriate high-performance solver tools are used \cite{Bueler2016}.  Because there is a tradeoff between easy implementability, for adaptive explicit schemes, versus improved stability, implicit evolution schemes have not made it into widely-used glacier models.  Especially for Stokes-type models, the tradeoff depends on the poorly-understood character of geometry evolution, and the jury is still out on whether they are the better choice \cite{Bueler2023}.  Most present-day numerical glacier and ice sheet models use explicit time-stepping.
+There is a tradeoff between the easy implementability of adaptive explicit schemes and the improved stability of implicit ones.  The latter have not made it into widely-used glacier models.  Especially for Stokes-type models, the tradeoff depends on the poorly-understood character of geometry evolution, and the jury is still out on the ultimate best scheme \cite{Bueler2023}.  Most present-day numerical glacier and ice sheet models use explicit time-stepping.
 
-\subsection*{Halfar's exact, attracting solution}   The final shape in Figure \ref{fig:dome} is a smooth and symmetrical dome, but this is no accident.  It turns out that \emph{any} flat-bed ($b=0$) and zero SMB ($a=0$) glacier will asymptotically approach this dome shape.
+\subsection*{Halfar's exact, attracting solution}   The final shape in Figure \ref{fig:dome} is a smooth and symmetrical dome, and this is no accident.  It turns out that \emph{any} flat-bed ($b=0$) and zero SMB ($a=0$) glacier will asymptotically approach this dome shape.
 
-In 1981 Peter Halfar published a time-dependent SIA solution \cite{Halfar1981}, and he showed that any rough surface will evolve toward this solution.\footnote{The proof, a linear asymptotic analysis, applies to any surface that is not too far from the solution, but numerical results show that large perturbations will also converge to the Halfar dome solution.}  A second paper \cite{Halfar1983} extended these results to two horizontal dimensions.  The Halfar solutions are both exact and \emph{attracting}, and thus worth knowing.
+In 1981 Peter Halfar published a time-dependent SIA solution \cite{Halfar1981}, and he showed that any rough surface will evolve toward this solution.\footnote{The proof, a linear asymptotic analysis, applies to any surface that is not too far from the solution.  Numerical results, however, show that any large perturbation will also converge to the Halfar dome solution.}  A second paper \cite{Halfar1983} extended these results to two horizontal dimensions.  The Halfar solutions are both exact and \emph{attracting}, and thus worth knowing.
 
 Consider the PDE you get by inserting \eqref{sia:Dagain} into \eqref{diffusion:ske}.  Then setting $a=b=0$, and naming the constant $\Gamma = \frac{2}{n+2} A (\rho g)^n$, we have this simplified nonlinear diffusion equation:
 \begin{equation}
 \frac{\partial s}{\partial t} = \Div \left(\Gamma s^{n+2} |\grad s|^{n-1} \grad s\right).  \label{sia:pureforhalfar}
 \end{equation}
 
-Halfar found the \emph{similarity solution} of this SIA equation by applying scaling arguments, as follows for the planar case.  Because $a=0$ the ice mass is conserved, so the input ($x$) and output ($s$) lengths can be re-scaled by the same unknown power of $t$:
+Halfar found the \emph{similarity solution} of \eqref{sia:pureforhalfar} by applying scaling arguments.  In outline for the planar case, because $a=0$, the ice mass is conserved so the input ($x$) and output ($s$) lengths can be re-scaled by the same unknown power of $t$:
 \begin{equation}
 x = t^{\alpha} \tilde x, \qquad s(t,x)=t^{-\alpha} \phi(\tilde x) \label{halfarscalings}
 \end{equation}
-These variables are substituted into \eqref{sia:pureforhalfar}.  Note that the dome grows laterally ($x$ increases) as its height falls ($s$ decreases), which explains the signs of the powers.  After much calculus one finds that $t$ cancels from the equation if $\alpha=1/(3n+2)$, which is $\alpha=1/11$ when $n=3$.  Then an exact formula for $\phi(\tilde x)$ can be derived, which gives the invariant shape of the dome.  These formulas feature in the program \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}}.
+These variables are substituted into \eqref{sia:pureforhalfar}.  Note that the dome grows laterally ($x$ increases) as its height falls ($s$ decreases), which explains the signs of the powers.  After much calculus one finds that $t$ cancels from the equation if $\alpha=1/(3n+2)$, which is $\alpha=1/11$ when $n=3$.  Then an exact formula for $\phi(\tilde x)$ can be derived by solving an ordinary differential equation; this is the invariant shape of the dome.  The resulting formulas appear in the program \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}}.
 
 Figure \ref{fig:halfardome} was generated by changing a boolean flag in \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}}, so that the initial condition is equal to the Halfar dome formula, evaluated at its characteristic time $t_0$ \cite{Bueleretal2005}.  The simulation runs for the same duration as before, and then the program plots both the numerical and exact solutions at that time.  The fit is very close.
 
-\onefigsize{halfardome}{Just like Figure \ref{fig:dome}, but starting from an initial Halfar dome.  The numerical and exact final states are very close.}{4.0in}
+\onefigsize{halfardome}{Just like Figure \ref{fig:dome}, but starting from a Halfar dome shape.}{4.0in}
 
-The power $\alpha=1/(3n+2)$ is a manifestation of shear-thinning water ice flow \cite{Nyeetal2000}.  The Halfar solution solves the problem of putting a Dirac delta mass of ice at the origin, at some conceptual starting time, and evolving its shape only through flow.  The dome expands laterally at $t^\alpha$ rate, which starts very fast when the dome is tall, but becomes agonizingly slow as $t$ gets large.  The geometry never reaches steady state.
+The power $\alpha=1/(3n+2)$ is a manifestation of shear-thinning ice flow \cite{Nyeetal2000}.  The Halfar solution solves the problem of putting a Dirac delta mass of ice at the origin, at some (conceptual) true starting time, and evolving its shape only through flow.  The dome expands laterally at $t^\alpha$ rate, which is very fast when the dome is tall but becomes agonizingly slow for long times.  The geometry never actually reaches steady state.
 
 \subsection*{Convergence and verification}  Our program \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}} calls \href{https://github.com/bueler/mccarthy/blob/master/py/shallow.py}{\texttt{py/shallow.py}}, so the code is already complicated.  Are we sure that our implementation is correct?
 
@@ -886,11 +888,11 @@ These three justifications for numerical correctness appear in the modeling lite
 \end{enumerate}
 The first two justifications, \emph{infallibility} and \emph{intercomparison}, should be less common than they are.  The third, preferred by the CFD community \cite{Wesseling2001}, is the simple idea of \emph{verification}: the numerical error should be measured in cases where the correct answer is known.  Here ``correct answer'' means an exact solution to the PDE itself.
 
-In technical terms, we intend our numerical schemes to \emph{converge} to the exact (but usually unknown) solution of the continuum problem under \emph{grid refinement}.  Proving such convergence is a main topic in numerical textbooks \cite{LeVeque2007,MortonMayers2005}.  However, even if we expect convergence to happen in theory, we still need to \emph{verify} it for the actual computer program which implements the scheme.  This involves measuring the accuracy of the scheme by finding its empirical rate of convergence in particular cases.  Almost any implementation mistake will break convergence, or drastically reduce its rate; the fragility of the verification process is its strongest feature.
+In technical terms, we intend our numerical schemes to \emph{converge} to the exact (but usually unknown) solution of the continuum problem under \emph{grid refinement}.  Proving such convergence is a main topic in numerical textbooks \cite{LeVeque2007,MortonMayers2005}.  However, even if we expect convergence to happen in theory, we still need to \emph{verify} it for the actual computer program.  This involves measuring the accuracy of the scheme by finding its empirical rate of convergence in particular cases.  Almost any implementation mistake will break convergence, or drastically reduce its rate; the fragility of the verification process is its strongest feature.
 
-In theory, if we had a linear diffusion equation like \eqref{diffusion:ske:planar} then scheme \eqref{fd:diffusion:planar} would make $O(\Delta t) + O((\Delta x)^2)$ numerical errors.  That is, one finds these rates for the \emph{local truncation error} \cite{MortonMayers2005} just from examining the FD formulas.  This is the best rate we can expect when measuring the \emph{numerical error} compared to the exact solution.  However, the convergence rate for glacier equations is reduced because of the singular-gradient margin shape.
+In theory, for a linear diffusion equation in the form of \eqref{diffusion:ske:planar}, the scheme \eqref{fd:diffusion:planar} makes $O(\Delta t) + O((\Delta x)^2)$ numerical errors.  These \emph{local truncation error} \cite{MortonMayers2005} rates come merely from examining the FD formulas.  They are the best we can expect when measuring the \emph{numerical error} compared to the exact solution.
 
-For an experiment, set the resolution $J$ in \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}} to five values $J=40$, $80$, $160$, $320$, $640$.  The measured errors against the Halfar solution (Figure \ref{fig:halfardome}) are as follows:
+However, the convergence rate for glacier equations is reduced because of the singular-gradient margin shape.  For an experiment, run \href{https://github.com/bueler/mccarthy/blob/master/py/dome.py}{\texttt{py/dome.py}} with resolutions $J=40$, $80$, $160$, $320$, $640$.  The measured errors against the Halfar solution (Figure \ref{fig:halfardome}) are as follows:
 
 \smallskip
 \begin{center}
@@ -913,13 +915,13 @@ $J$ & $\Delta x$ (m) & maximum (m) & average (m) \\ \hline
 %   5.8535   2.2148   0.8380   0.3171   0.1200
 
 \smallskip
-The two columns are the maximum and average numerical elevation errors at the final time.  The average error decreases with improved grid resolution, as expected for a correctly-implemented code, at a measured rate $O((\Delta x)^{1.40})$.  By contrast, because the numerical error in margin location will never be better than about one grid space \cite{Bueler2021conservation}, and because the margin gradient is unbounded,  the maximum error behaves erratically \cite{Bueleretal2005}.
+The two columns are the maximum and average numerical elevation errors at the final time.  The average error decreases with improved grid resolution, as expected for a correctly-implemented code, at a measured rate $O((\Delta x)^{1.40})$.  By contrast, because the numerical error in horizontal margin location will be comparable to one grid space, and because the gradient there is unbounded, the maximum error behaves erratically \cite{Bueleretal2005}.
 
-The Halfar solution is simple to use for verification, but such elegant exact solutions are rare.  However, exact solutions for verification can actually be constructed at will, by the \emph{method of manufactured solutions} \cite{Wesseling2001}.  The idea is to choose a desired solution, compute analytically what source term would make it satisfy the PDE exactly, run the numerical scheme with that source term, and compare against the chosen solution; almost any coding mistake will corrupt the convergence rate.
+The Halfar solution is simple to use for verification, but such elegant exact solutions are rare.  However, exact solutions for verification can actually be constructed at will, by the \emph{method of manufactured solutions} \cite{Wesseling2001}.  The idea is to choose a desired solution, then compute analytically what source term would make it satisfy the PDE exactly, then run the numerical scheme with that source term, and finally compare against the chosen solution.  Almost any coding mistake will corrupt the convergence rate.
 
 \bigskip
 \begin{quotation}
-\emph{If in physics there's something you don't understand, you can always hide behind the uncharted depths of nature. You can always blame God. You didn't make it so complex yourself. But if your program doesn't work, there is no one to hide behind. You cannot hide behind an obstinate nature. If it doesn't work, you've messed up.} \,  E.~Dijkstra
+\emph{If in physics there's something you don't understand, you can always hide behind the uncharted depths of nature. You can always blame God. You didn't make it so complex yourself. But if your program doesn't work, there is no one to hide behind. You cannot hide behind obstinate nature. If it doesn't work, you've messed up.} \,  E.~Dijkstra
 \end{quotation}
 
 
