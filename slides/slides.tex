@@ -34,7 +34,7 @@
   morekeywords=[5]{,ode,fsolve,sqrt,exp,sin,cos,arctan,arctan2,arccos,pi, array,norm,solve,dot,arange,isscalar,max,sum,flatten,shape,reshape,find,any,all,abs,plot,linspace,legend,quad,polyval,polyfit,hstack,concatenate,vstack,column_stack,empty,zeros,ones,rand,vander,grid,pcolor,eig,eigs,eigvals,svd,qr,tan,det,logspace,roll,min,mean,cumsum,cumprod,diff,vectorize,lstsq,cla,eye,xlabel,ylabel,squeeze,}, % numpy / math
 }
 \lstdefinestyle{colorEX}{
-  basicstyle=\ttfamily\small,
+  basicstyle=\ttfamily\footnotesize,
   backgroundcolor={},
   commentstyle=\color{darkgreen}\slshape,
   keywordstyle=\color{blue}\bfseries\itshape,
@@ -65,8 +65,11 @@
 \newcommand{\grad}{\nabla}
 \newcommand{\Div}{\nabla\cdot}
 
+\newcommand{\ds}{\displaystyle}
+
 \newcommand{\rhoi}{\rho_{\text{i}}}
 \newcommand{\snew}{s^{\text{new}}}
+\newcommand{\Dsia}{D^{\text{\textrm{SIA}}}}
 
 \newcommand{\comm}[1]{{\footnotesize \hfill \emph{#1}}}  % small font comment at right
 
@@ -117,10 +120,10 @@ my slides, exercises, notes, and codes are hosted at
 these slides: \href{https://github.com/bueler/mccarthy/blob/master/slides/slides-2026.pdf}{\texttt{slides/slides-2026.pdf}}
 
 \smallskip
-exercises: \href{https://github.com/bueler/mccarthy/blob/master/exercises/exercises-2026.pdf}{\texttt{exercises/exercises-2026.pdf}}
+notes: \href{https://github.com/bueler/mccarthy/blob/master/notes/notes-2026.pdf}{\texttt{notes/notes-2026.pdf}}
 
 \smallskip
-notes: \href{https://github.com/bueler/mccarthy/blob/master/notes/notes-2026.pdf}{\texttt{notes/notes-2026.pdf}}
+exercises: \href{https://github.com/bueler/mccarthy/blob/master/exercises/exercises-2026.pdf}{\texttt{exercises/exercises-2026.pdf}}
 
 Python codes: \href{https://github.com/bueler/mccarthy/tree/master/py}{\texttt{py/}}
 }
@@ -163,7 +166,7 @@ Python codes: \href{https://github.com/bueler/mccarthy/tree/master/py}{\texttt{p
 \item 2D planar (flow-line) coordinates: \, $x$ horizontal, $z$ vertical
 \item $b(x)$: bed elevation (m)
 \item $s(t,x)$: ice surface elevation (m)
-\item $\bu(t,x,z)=(u(t,x,z), w(t,x,z))$: \, ice velocity ($\text{m}\,\text{s}^{-1}$)
+\item $\bu(t,x,z)=\left<u(t,x,z), w(t,x,z)\right>$: \, ice velocity ($\text{m}\,\text{s}^{-1}$)
 \item $a(t,x)$: surface mass balance in ice-equivalent units ($\text{m}\,\text{s}^{-1}$)
 \end{itemize}
 \end{frame}
@@ -179,7 +182,7 @@ Python codes: \href{https://github.com/bueler/mccarthy/tree/master/py}{\texttt{p
 \text{SKE:} \qquad \frac{\partial s}{\partial t} = \uncover<2-4>{a} \uncover<3-4>{+w} \uncover<4>{-u \frac{\partial s}{\partial x}}
 \end{equation*}
 
-the ice surface moves up and down according to
+the ice surface moves up and down according to \cite{GreveBlatter2009,SchoofHewitt2013}
 \begin{itemize}
 \item<2-4> surface mass balance (SMB)
 \item<3-4> vertical component of ice velocity
@@ -219,7 +222,7 @@ the ice surface moves up and down according to
 \begin{itemize}
 \item \alert{model:} the planar surface kinematical equation (SKE)
 \begin{equation*}
-\frac{\partial s}{\partial t} - \bu \cdot \bn_s = a \qquad \iff \qquad \frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} = a + w
+\frac{\partial s}{\partial t} - \bu \cdot \bn_s = a \qquad \iff \qquad \frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} - w = a
 \end{equation*}
 
     \begin{itemize}
@@ -235,7 +238,6 @@ the ice surface moves up and down according to
      \item how to compute time-dependent solutions?
      \item accuracy and stability?
      \item how to compute steady state solutions?
-     \item practical: debugging, verification, visualization?
      \end{enumerate}
 \end{itemize}
 \end{frame}
@@ -291,7 +293,7 @@ is the surface kinematical equation
 \item however \dots
 \item if we implement this ``forward-time centered-space'' scheme
 	$$\snew_j = s_j - \Delta t\, u_j \frac{s_{j+1}-s_{j-1}}{2\Delta x} + \Delta t (a_j + w_j) \hspace{1.0cm} \leftarrow \text{\emph{bad}}$$
-then unstable things happen! \comm{exercise \textbf{2}}
+then unstable things happen! (exercise \textbf{2})
 \item instead, it is known that an \alert{upwind} scheme is stable
     \begin{itemize}
     \item[$\circ$] \alert{conditionally} stable, anyway, for this kind of \alert{advection} problem
@@ -302,7 +304,7 @@ then unstable things happen! \comm{exercise \textbf{2}}
 
     \begin{itemize}
     \item[$\circ$] general upwind formula: \quad $\displaystyle \frac{\partial s}{\partial x} \approx \frac{1}{\Delta x} \begin{cases} (s_j-s_{j-1}), & u_j \ge 0 \\ (s_{j+1}-s_j), & u_j < 0 \end{cases}$
-    \item[$\circ$] the condition for stability is known \comm{more soon}
+    \item[$\circ$] the condition for stability is known (more soon)
     \end{itemize}
 %\item see textbooks for these caveats
 \end{itemize}
@@ -315,7 +317,6 @@ then unstable things happen! \comm{exercise \textbf{2}}
 \item assuming $u_j \ge 0$, the upwind scheme for the SKE is
     $$\snew_j = s_j - \Delta t\, u_j \frac{s_j-s_{j-1}}{\Delta x} + \Delta t (a_j + w_j)$$
 \item this becomes a Python function:
-\end{itemize}
 \begin{lstlisting}[language=PythonPlus]
 def explicitupwindstep(x, s, dt):
     dx = x[1] - x[0]
@@ -324,16 +325,13 @@ def explicitupwindstep(x, s, dt):
     snew[1:] += dt * (a(x[1:]) + w(x[1:]))
     return snew
 \end{lstlisting}
-
-\vspace{-2mm}
-{\footnotesize
     \begin{itemize}
     \item[$\circ$] \texttt{x}, \texttt{s}, \texttt{snew} are 1D NumPy arrays
     \item[$\circ$] \texttt{x} is an equally-spaced grid
     \item[$\circ$] note that separate functions define $a(x)$, $u(x)$, $w(x)$
     \item[$\circ$] note that \, \texttt{snew[0] = s[0]} \, is never changed; this is a boundary condition
     \end{itemize}
-}
+\end{itemize}
 \end{frame}
 
 
@@ -378,7 +376,7 @@ scheme can only be stable if
 $$|u_j| \Delta t \le \Delta x \quad \text{for every } j \hspace{40mm}$$
 
     \begin{itemize}
-    \item[$\circ$] observed by Courant, Friedrichs, and Lewy in 1928 \cite{CFL1928}
+    \item[$\circ$] observed by Courant, Friedrichs, and Lewy in 1928 %\cite{CFL1928}
     \end{itemize}
 
 \vspace{-45mm}
@@ -442,7 +440,7 @@ where $\bn_s = \left<-\frac{\partial s}{\partial x},-\frac{\partial s}{\partial 
 \mbox{\hspace{50mm} \includegraphics[width=0.45\textwidth]{surface2d}}
 
 \bigskip
-    \item[$\circ$] the idea is that \alert{the SKE and requiring $s\ge b$} yields the glacier outline and geometry, here in steady state with the SMB $a$
+    \item[$\circ$] the idea is that \alert{SKE and $s\ge b$} yields the glacier outline and geometry, here in steady state with the SMB $a$
     \item[$\circ$] this is the project \textbf{7} starting point
     \end{itemize}
 }
@@ -751,21 +749,22 @@ from inclinometry (Savage \& Paterson 1963)]
 \begin{itemize}
 \item \alert{model:} the shallow ice approximation (SIA)
   \begin{itemize}
-  \item[$\circ$] this model adopts the slab-on-slope formula for $u(x)$ \emph{as a general formula for glaciers}
-  \item[$\circ$] it is an imperfect stress balance (momentum) model for a glacier, but it gives a meaningful velocity field in any geometry
-  \item[$\circ$] there are careful shallowness scale analysis arguments for the SIA model, using $\eps = [H]/[L] \to 0$ \cite{Fowler1997}
+  \item[$\circ$] the SIA adopts the slab-on-slope formula for $u$ \emph{as a general formula for glaciers}
+  \item[$\circ$] it is an imperfect stress balance (momentum) model, but it gives a meaningful velocity field in any geometry
+  \item[$\circ$] there are careful shallowness scale analysis arguments for the SIA, using $\eps = [H]/[L] \to 0$ \cite{Fowler1997}
   \end{itemize}
 \item \alert{numerical modeling goals:}
   \begin{itemize}
-  \item[$\circ$] finite difference computations of surface velocity $u(x)$, $w(x)$
+  \item[$\circ$] finite difference computations of surface velocity $u$, $w$
   \item[$\circ$] staggered grid points
   \item[$\circ$] one short Python code: \quad \href{https://github.com/bueler/mccarthy/blob/master/py/shallow.py}{py/shallow.py}
   \end{itemize}
+
+\bigskip
 \item won't get to:
-     \begin{enumerate}
-     \item can we include sliding into the SIA?
-     \item how does the SIA velocity field compare to the Stokes field for the same geometry? \comm{project \textbf{8}?}
-     \end{enumerate}
+     \begin{itemize}
+     \item[$\circ$] how does the SIA velocity field compare to the Stokes field for the same geometry? \comm{project \textbf{8}?}
+     \end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -782,8 +781,7 @@ u = - \frac{2}{n+1} A (\rho g)^n \left[\big(s - b\big)^{n+1} - \big(s-z\big)^{n+
 \end{gather*}
 
   \begin{itemize}
-  \item[$\circ$] $u,w$ here depend on $x$ and $z$
-  \item[$\circ$] $s,b$ depend only on $x$
+  \item[$\circ$] $u,w$ depend on $t,x,z$, but $s$ depends only on $t,x$
   \end{itemize}
 
 \item note that the horizontal velocity formula is of the form
@@ -828,47 +826,78 @@ def u(x, b, s):
 \end{frame}
 
 
-\begin{frame}{surface vertical velocity}
-
-FIXME
+\begin{frame}{surface vertical velocity (and ice flux)}
 
 \begin{itemize}
-\item we can integrate vertically to recover the surface value of $w$ from $\partial u/\partial x$, by \alert{using incompressibility} \,$\left(\frac{\partial u}{\partial x} + \frac{\partial w}{\partial z} = 0\right)$:
-\begin{align*}
-w(x,s(x)) &= w(x,s(x)) - w(x,b(x)) \\
-   &= - \int_{b(x)}^{s(x)} \frac{\partial u}{\partial x}(x,z)\,dz
-\end{align*}
+\item we can recover the vertical velocity $w$ from \alert{incompressibility}
+
   \begin{itemize}
-  \item[$\circ$] uses non-penetrating model: $w(x,b(x))=0$
-  \end{itemize}
-\item $w_j \approx w(x_j,s_j)$ is found by integrating vertically:
+  \item[$\circ$] recall: \,$\frac{\partial u}{\partial x} + \frac{\partial w}{\partial z} = 0$
+  \item[$\circ$] integrate vertically, using non-penetrating ($w(t,x,b(x))=0$), then incompressibility, then Leibniz rule, then non-sliding ($u(t,x,b(x))=0$), to get $w$ at the surface:
 \begin{align*}
-w_j &= - \int_{b_j}^{s_j} \frac{u_{j+1/2}(z) - u_{j-1/2}(z)}{\Delta x}\,dz \\
-    &= - \frac{1}{\Delta x} \left(\int_{b_j}^{s_j} u_{j+1/2}(z)\,dz - \int_{b_j}^{s_j} u_{j-1/2}(z)\,dz\right)
+\alert{w(t,x,s(t,x))} &= - \int_{b(x)}^{s(t,x)} \frac{\partial u}{\partial x}(t,x,z)\,dz \\
+     &= \alert{u(x,s(t,x)) \frac{\partial s}{\partial x}(t,x) - \frac{\partial q}{\partial x}(t,x)}
 \end{align*}
+  \item[$\circ$] exercises \textbf{4} and \textbf{5} help with the Leibniz rule
+  \end{itemize}
+
+\medskip
+\item here \, $\ds \alert{q(t,x) = \int_{b(x)}^{s(t,x)} u(t,x,z)\,dz}$\, is the \alert{ice flux}
+  \begin{itemize}
+  \item[$\circ$] alternate form:  $q = \bar u H$ where $\bar u$ is vertically-averaged horizontal velocity and $H$ is ice thickness
+  \end{itemize}
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{finite differences for $w(x)$}
-
-FIXME
+\begin{frame}{ice flux and diffusion}
 
 \begin{itemize}
-\item this code is more complicated \comm{thus not shown \dots}
+\item in the planar case the ice flux is \,$\ds q = \int_b^s u\,dz$
+\item vertically-integrating the horizontal velocity gives
+    $$q  = - \Dsia \frac{\partial s}{\partial x}$$
+where the (effective) \alert{diffusivity} is
+    $$\Dsia = \frac{2}{n+2} A (\rho g)^n H^{n+2} \left|\frac{\partial s}{\partial x}\right|^{n-1}$$
+\item the formula for surface vertical velocity also uses it:
+    $$w = u \frac{\partial s}{\partial x} + \frac{\partial}{\partial x} \left(\Dsia \frac{\partial s}{\partial x}\right)$$
+
   \begin{itemize}
-  \item[$\circ$] see robustness aspect: integrate $u_{j\pm 1/2}(z)$ from $b_j$ to $s_j$, even if that puts you above or below the ice
+  \item[$\circ$] we will use this form to compute $w$ at the surface
   \end{itemize}
-\item see the code \href{https://github.com/bueler/mccarthy/blob/master/py/shallow.py}{py/shallow.py}
-  \begin{itemize}
-  \item[$\circ$] result: visualization of $u(x),w(x)$ at the surface
-  \end{itemize}
+\item we will return to what diffusivity \emph{means}, but for now we apply finite differences to compute $\Dsia$ and $w$ in an example
 \end{itemize}
 \end{frame}
 
 
 \begin{frame}[fragile]
-\frametitle{demo: SIA velocity for wavy surface}
+\frametitle{finite differences for $\Dsia$ and $w$}
+
+\begin{itemize}
+\item for $\Dsia$ on the staggered grid:
+    $$\Dsia_{j+1/2} = \frac{2}{n+2} A (\rho g)^n \left(\frac{H_j + H_{j+1}}{2}\right)^{n+2} \left|\frac{s_{j+1}-s_j}{\Delta x}\right|^{n-1}$$
+\begin{lstlisting}[language=PythonPlus]
+def diffusiveD(x, b, s):
+    dx = x[1] - x[0]
+    dsdx = (s[1:] - s[:-1]) / dx
+    Hstag = ((s[:-1] - b[:-1]) + (s[1:] - b[1:])) / 2.0
+    C_D = (2.0 / (n + 2)) * A * (rhoi * g) ** n
+    return C_D * Hstag ** (n + 2) * abs(dsdx) ** (n - 1)
+\end{lstlisting}
+\item for $w$, let $\phi_{j+1/2} = u_{j+1/2} \frac{s_{j+1}-s_j}{\Delta x}$ on staggered grid, so:
+    $$w_j = \frac{\phi_{j-1/2} + \phi_{j+1/2}}{2} + \frac{\Dsia_{j+1/2} (s_{j+1}-s_j) - \Dsia_{j-1/2} (s_{j}-s_{j-1})}{\Delta x^2}$$
+
+  \begin{itemize}
+  \item[$\circ$] we get $w_j$ on the regular grid (Python function not shown)
+  \end{itemize}
+
+\bigskip
+\item formulas for $u,\Dsia,w$ are all in \href{https://github.com/bueler/mccarthy/blob/master/py/shallow.py}{py/shallow.py}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{demo: SIA surface velocity for wavy surface}
 
 \begin{center}
 \includegraphics[width=0.7\textwidth]{uw.pdf}
@@ -883,67 +912,79 @@ FIXME
 \end{frame}
 
 
-\begin{frame}{time-dependent SKE $+$ SIA approximation}
+\begin{frame}{time-dependent SKE $+$ SIA model}
 
 \begin{itemize}
-\item here are the equations of the \alert{time-dependent SIA model}:
+\item here are equations, so far, of the planar, non-sliding, and isothermal \alert{time-dependent model} combining SKE and SIA:
+{\footnotesize
 \begin{align*}
-\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} &= a + w \\
-u &= - \frac{2}{n+1} A (\rho g)^n \left|\frac{\partial s}{\partial x}\right|^{n-1} \frac{\partial s}{\partial x} \left[\big(s - b\big)^{n+1} - \big(s-z\big)^{n+1}\right] \\
-w &= - \int_{b}^{s} \frac{\partial u}{\partial x}(x,z)\,dz
+\frac{\partial s}{\partial t} &= a + w - u \frac{\partial s}{\partial x} \\
+u &= - \frac{2}{n+1} A (\rho g)^n \big(s - b\big)^{n+1} \left|\frac{\partial s}{\partial x}\right|^{n-1} \frac{\partial s}{\partial x} \hspace{2mm} (\text{\emph{surface value}}) \\
+w &= u \frac{\partial s}{\partial x} - \frac{\partial q}{\partial x}  \hspace{35mm} (\text{\emph{surface value}})\\
+q &= - \Dsia \frac{\partial s}{\partial x}
 \end{align*}
-\item implementing is exercise \textbf{16}
-  \begin{itemize}
-  \item[$\circ$] combine my codes \href{https://github.com/bueler/mccarthy/blob/master/py/surace1d.py}{py/surface.py} and \href{https://github.com/bueler/mccarthy/blob/master/py/shallow.py}{py/shallow.py}
-  \end{itemize}
+}
 
-\bigskip
-\item but there is an important fact which I want to flesh-out: \alert{this model \emph{diffuses} the surface elevation}
+\item we can simplify to just this for $s(t,x)$:
+    $$\alert{\frac{\partial s}{\partial t} = \frac{\partial}{\partial x}\left(\Dsia \frac{\partial s}{\partial x}\right) + a}$$
+
   \begin{itemize}
-  \item[$\circ$] because ice flows downhill
-  \item[$\circ$] hard to see in the above form
+  \item[$\circ$] along with the formula: \, $\Dsia = \frac{2}{n+2} A (\rho g)^n H^{n+2} \left|\frac{\partial s}{\partial x}\right|^{n-1}$
+  \item[$\circ$] $u,w,q$ are not directly needed to express geometry evolution
   \end{itemize}
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{SKE versus mass continuity equation}
-\begin{itemize}
-\item consider this subset of the equations:
-\begin{align*}
-\frac{\partial s}{\partial t} + u \frac{\partial s}{\partial x} &= a + w &&\text{\emph{SKE}} \\
-\frac{\partial u}{\partial x} + \frac{\partial w}{\partial z} &= 0 &&\text{\emph{incompressible}} \\
-u(x,b(x))=0,\,\, w(x,b(x))&=0  &&\text{\emph{non-sliding/penetrating}}
-\end{align*}
-\item exercise \textbf{5} asks you to derive via vertical integration:
-$$\frac{\partial H}{\partial t} + \frac{\partial}{\partial x}\left(\bar u H\right) = a \hspace{10mm} \text{\emph{\alert{mass continuity equation}}}$$
-where $H=s-b$ is ice thickness and $\bar u$ is the vertically-averaged horizontal velocity
-\item \alert{main idea.} for incompressible ice these are equivalent:
-$$\text{SKE} \quad \leftrightarrow \quad \text{mass continuity equation}$$
-\end{itemize}
-\end{frame}
+\begin{frame}{time-dependent SKE $+$ SIA model as diffusion equation}
 
-
-\begin{frame}{time-dependent SIA for thickness, and diffusivity}
 \begin{itemize}
-\item we can write the time-dependent equation in terms of thickness:
-$$\frac{\partial H}{\partial t} = a + \frac{\partial}{\partial x}\left(D \frac{\partial s}{\partial x}\right)$$
-where $D$ is the \alert{diffusivity} in the SIA:
-	$$D = \frac{2}{n+2} A (\rho g)^n H^{n+2} \left|\frac{\partial s}{\partial x}\right|^{n-1}$$
+\item the SKE $+$ SIA geometry evolution model is
+    $$\frac{\partial s}{\partial t} = \frac{\partial}{\partial x}\left(\Dsia \frac{\partial s}{\partial x}\right) + a$$
+\item this model \alert{diffuses} the surface elevation
+  \begin{itemize}
+  \item[$\circ$] because ice flows downhill: $\ds q = - \Dsia \frac{\partial s}{\partial x}$
+  \end{itemize}
 \item analogy to Fourier's heat equation:
-$$\frac{\partial H}{\partial t} = a + \frac{\partial}{\partial x}\left(D \frac{\partial s}{\partial x}\right) \quad \leftrightarrow \quad \frac{\partial T}{\partial t} = f + \frac{\partial}{\partial x}\left(D \frac{\partial T}{\partial x}\right)$$
-where $T$ is temperature and $f$ is a heat source
+$$\frac{\partial s}{\partial t} = \frac{\partial}{\partial x}\left(\Dsia \frac{\partial s}{\partial x}\right) + a \quad \leftrightarrow \quad \frac{\partial T}{\partial t} = \frac{\partial}{\partial x}\left(D \frac{\partial T}{\partial x}\right) + f$$
+
+  \begin{itemize}
+  \item[$\circ$] $T$ is temperature and $f$ is a heat source
+  \item[$\circ$] Fourier's law says heat flux is ``downtemperature'': $\ds q = - D \frac{\partial T}{\partial x}$
+  \end{itemize}
+\item but the SKE $+$ SIA is extremely nonlinear because
+    $$\Dsia = \frac{2}{n+2} A (\rho g)^n H^{n+2} \left|\frac{\partial s}{\partial x}\right|^{n-1}$$
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{demo: geometry evolution from a rough start}
+
+\begin{center}
+\includegraphics[width=0.6\textwidth]{dome.png}
+\end{center}
+
+\begin{block}{demo}
+\begin{itemize}
+\item \,\texttt{\$ python3 dome.py}
+\item view images \texttt{output/dome.png} and \texttt{output/dome.png}
+\end{itemize}
+\end{block}
+
+\begin{itemize}
+\item the \href{https://github.com/bueler/mccarthy/blob/master/notes/notes-2026.pdf}{notes} say much more about the time-dependent model
 \end{itemize}
 \end{frame}
 
 
 \begin{frame}{questions and issues for the SIA}
 \begin{itemize}
-\item[] \alert{MAJOR modeling questions}\only<2>{\alert{/answers}}
+\item[] \alert{modeling questions}\only<2>{\alert{ and answers}}
     \begin{enumerate}
     \item what do we lose when using the SIA, versus Stokes?
     \only<1>{\item how to add sliding to SIA?}
-    \only<2>{\item \underline{answer:} add sliding via a \alert{membrane-stress-resolving balance}}
+    \only<2>{\item add sliding via a membrane-type stress balance}
     \end{enumerate}
 \item[] \alert{mathematical issues}
     \begin{enumerate}\setcounter{enumi}{2}
@@ -953,8 +994,10 @@ where $T$ is temperature and $f$ is a heat source
         \item non-uniqueness in a some cases
         \end{itemize}
     \end{enumerate}
-\item[] \alert{numerical questions}
+\item[] \alert{numerical questions}\only<2>{\alert{ and answers}}
     \begin{enumerate}\setcounter{enumi}{3}
+    \only<1>{\item how to control the numerical instabilities?}
+    \only<2>{\item use adaptive time-stepping to maintain stability (\href{https://github.com/bueler/mccarthy/blob/master/notes/notes-2026.pdf}{notes})}
     \item how to do efficient implicit time-stepping?
     \end{enumerate}
 \end{itemize}
@@ -965,7 +1008,7 @@ where $T$ is temperature and $f$ is a heat source
 
 \begin{itemize}
 \item what is the \alert{standard model} of glaciology?
-\item \alert{SKE with power-law Stokes with admissible surfaces}:
+\item \alert{SKE $+$ Stokes}, with admissible surfaces:
 \begin{align*}
 \frac{\partial s}{\partial t} - \mathbf{u} \cdot \mathbf{n}_s &= a \\
 \nabla \cdot \mathbf{u} &= 0 \\
@@ -981,11 +1024,11 @@ s &\ge b
 \end{frame}
 
 
-\begin{frame}{questions and issues for any Stokes model}
+\begin{frame}{questions and issues for Stokes models}
 \begin{itemize}
 \item[] \alert{modeling questions}
     \begin{enumerate}
-    \item \alert{sliding laws} determine the basal stress state; what's best?
+    \item sliding laws determine the basal stress state; what's best?
     \item how to couple to temperature/enthalpy equation?
     \item how to adapt Stokes to compressible (e.g.~temperate) ice?
     \end{enumerate}
@@ -997,18 +1040,15 @@ s &\ge b
         \end{itemize}
     \item well-posedness of the time-dependent standard model?
         \begin{itemize}
-        \item[$\circ$] entirely open as far as I can tell
-        \item[$\circ$] can't be easier than for the SIA
+        \item[$\circ$] entirely open as far as I can tell; can't be easier than SIA case
         \end{itemize}
     \end{enumerate}
-\item[] \alert{numerical recommendations and questions}
+\item[] \alert{numerical recommendation}
     \begin{enumerate}\setcounter{enumi}{5}
     \item as a practical matter, use a powerful finite element \cite{Elmanetal2014} library
         \begin{itemize}
-        \item[$\circ$] Firedrake? Elmer? FENiCs? Icepack? \dots
+        \item[$\circ$] Firedrake, Elmer, FENiCs, Icepack, \dots
         \end{itemize}
-    \item how to numerically combine SKE and Stokes in an efficient and stable manner?
-    \item how to achieve good time-stepping solver performance?
     \end{enumerate}
 \end{itemize}
 \end{frame}
@@ -1017,26 +1057,20 @@ s &\ge b
 \begin{frame}{an opinionated summary}
 
 \begin{itemize}
-\item numerical models are inevitable in glaciology
-\item<2-> most of your work is to understand the math, not to write code
+\item numerical models are unavoidable in glaciology
+\item most of your work is to understand the math, not to write code
     \begin{itemize}
-    \item<2->[$\circ$] even more true in the generative AI era
+    \item[$\circ$] even more true in the generative AI era
     \end{itemize}
-\item<3-> writing your own numerical models is of great value, but you should toss the result in the trash once you understand it
-    \begin{itemize}
-    \item<3->[$\circ$] almost always: find the pro version
-    \end{itemize}
-\item<4-> surface mass/energy processes are as important as ice dynamics
-\item<5-> machine learning \emph{after} understanding the laws of physics
+\item<2-> writing your own numerical models is of great value, but you should almost always toss the result in the trash once you understand it
+\item<3-> surface mass/energy processes are as important as ice dynamics
+\item<4-> machine learning \emph{after} understanding the laws of physics
+
+\bigskip
+\item<5-> thanks so much for listening!  \, \alert{questions?}
 \end{itemize}
 \end{frame}
 
-\begin{frame}[standout]
-  Questions?
-\end{frame}
-
-
-\appendix
 
 \setbeamerfont{bibliography item}{size=\scriptsize}
 \setbeamerfont{bibliography entry author}{size=\scriptsize}
@@ -1054,6 +1088,8 @@ s &\ge b
 \end{frame}
 
 
+\appendix
+
 \subsection[]{extra slides}
 
 
@@ -1061,27 +1097,37 @@ s &\ge b
 Extra Slides
 
 \begin{itemize}
-\item 1. derive SKE from mass conservation
-\item 2. why $s$ is preferable to $H=s-b$
+\item 1.~why $s$ is preferable to $H=s-b$
+\item 2.~derive SKE from mass conservation
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{SKE from mass conservation}
-\begin{center}
-\includegraphics[width=0.65\textwidth]{skederive.png}
-\end{center}
+\begin{frame}{surface elevation versus thickness}
 
 \begin{itemize}
-\item these extra slides derive the surface kinematical equation (SKE) from mass conservation applied over a rectangle
-\item contrast with standard (dismissive!) derivations \cite{GreveBlatter2009,SchoofHewitt2013}
+\item why not use thickness $H=s-b$ to describe glacier geometry?
+\end{itemize}
+
+\medskip
+\begin{center}
+\includegraphics[width=0.7\textwidth]{giscross}
+\end{center}
+
+\vspace{-5mm}
+\hfill {\tiny [Morlighem et al (2017); figure thanks to A.~Aschwanden]}
+
+\begin{itemize}
+\item answer: glacier surface $s$ is generally smoother than the bedrock topography $b$
+\item $H$ is rougher because $H=s-b$ inherits bed roughness
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{SKE from mass conservation 2}
+\begin{frame}{SKE from mass conservation 1}
+
 \begin{center}
-\includegraphics[width=0.4\textwidth]{skederive.png}
+\includegraphics[width=0.45\textwidth]{skederive.png}
 \end{center}
 
 \begin{itemize}
@@ -1097,7 +1143,7 @@ Extra Slides
 \end{frame}
 
 
-\begin{frame}{SKE from mass conservation 3}
+\begin{frame}{SKE from mass conservation 2}
 \begin{center}
 \includegraphics[width=0.4\textwidth]{skederive.png}
 \end{center}
@@ -1110,12 +1156,12 @@ Extra Slides
     \item[$\circ$] there are no mass sources within $\Omega$
     \item[$\circ$] there is an interval of time $t$ so that \,$z_0-\eps < s(t,x) < z_0 + \eps$
     %\item[$\circ$] ice has constant density $\rhoi$
-    \item[$\circ$] the ice velocity $\bu(t,x,z)=(u,w)$ is defined on $\{z<s(t,x)\}$
+    \item[$\circ$] the ice velocity $\bu(t,x,z)=\left<u,w\right>$ is defined on $\{z<s(t,x)\}$
     \item[$\circ$] the SMB $a(t,x)$ is a mass flux only across $\Gamma_t$:
         \begin{itemize}
         \item $\bpsi\big|_{\Gamma_t} = - \rho_i a(t,x) \hbz$  \comm{note $a>0$ is precipitation}
         \end{itemize}
-    \item[$\circ$] the other mass fluxes are advective:
+    \item[$\circ$] the other mass fluxes are kinematic (advective):
         \begin{itemize}
         \item $\bpsi\big|_{\Gamma_b} = \rho_i w(t,x,z_0-\eps) \hbz$
         \item $\bpsi\big|_{\Gamma_{\{\ell,r\}}} = \begin{cases} \rho_i u(t,x_{\{\ell,r\}},z) \hbx, & \text{if } z < s(t,x_{\{\ell,r\}}), \\ \bzero, & \text{otherwise} \end{cases}$
@@ -1125,7 +1171,7 @@ Extra Slides
 \end{frame}
 
 
-\begin{frame}{SKE from mass conservation 4}
+\begin{frame}{SKE from mass conservation 3}
 
 \begin{itemize}
 \item mass is conserved:
@@ -1139,7 +1185,7 @@ Extra Slides
 \end{frame}
 
 
-\begin{frame}{SKE from mass conservation 5}
+\begin{frame}{SKE from mass conservation 4}
 
 \begin{itemize}
 \item time derivative:
@@ -1160,7 +1206,7 @@ w(t,x,z) &= w(t,x_0,z_0) + O(\delta) + O(\eps) \\
 \end{frame}
 
 
-\begin{frame}{SKE from mass conservation 6}
+\begin{frame}{SKE from mass conservation 5}
 
 \begin{itemize}
 \item combine mass conservation, time derivative, and Taylor:
@@ -1176,27 +1222,6 @@ w(t,x,z) &= w(t,x_0,z_0) + O(\delta) + O(\eps) \\
 \end{align*}
 \item limit $\delta, \eps \to 0$ to get SKE at $(t,x_0,z_0) = (t,x_0,s(t,x_0))$:
   $$\frac{\partial s}{\partial t} = a + w - u \frac{\partial s}{\partial x}$$
-\end{itemize}
-\end{frame}
-
-
-\begin{frame}{surface elevation versus thickness}
-
-\begin{itemize}
-\item why not use thickness $H=s-b$ to describe glacier geometry?
-\end{itemize}
-
-\medskip
-\begin{center}
-\includegraphics[width=0.7\textwidth]{giscross}
-\end{center}
-
-\vspace{-5mm}
-\hfill {\tiny [Morlighem et al (2017); figure thanks to A.~Aschwanden]}
-
-\begin{itemize}
-\item answer: glacier surfaces are generally smoother than the bedrock topography
-\item $H$ is rougher than $s$ because $H=s-b$ is as rough as the bed
 \end{itemize}
 \end{frame}
 
