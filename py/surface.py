@@ -12,9 +12,10 @@ Convenient way to run and view (where "eog" is a .png viewer):
    $ rm -rf output/;  python3 surface.py;  eog output/
 
 Explore using code modifications (for example):
-   u(x)    -->  4 * u(x)    instability
-   N = 50  -->  N = 20      instability
-   a(x)    -->  3 * a(x)    violate s >= b
+   u(x)      -->  2.5 * u(x)  instability
+   N = 50    -->  N = 20      instability (dt=1a --> dt=2.5a)
+   dx = 1000 -->  dx = 400    instability (J=20 --> J=50)
+   a(x)      -->  3 * a(x)    violate s >= b
 """
 
 import numpy as np
