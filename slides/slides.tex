@@ -1,7 +1,6 @@
 \documentclass[10pt,dvipsnames]{beamer}
 
 \definecolor{links}{HTML}{2A1B81}
-\hypersetup{colorlinks,linkcolor=,urlcolor=links}
 
 \usetheme{metropolis}
 \metroset{block=fill}
@@ -16,6 +15,11 @@
 
 \usepackage{xspace}
 \newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage[style=alphabetic]{biblatex}
+\addbibresource{slides.bib}
+
+\hypersetup{colorlinks,citecolor=,linkcolor=,urlcolor=links}
 
 % for python listings; inspired by https://gist.github.com/YidongQIN/a10dd4f72381362aff4257e7a5541d86 
 \usepackage{listings}
@@ -90,13 +94,6 @@
 
 \maketitle
 
-\begin{frame}{Outline}
-  %\setbeamertemplate{section in toc}[sections numbered]
-  %\tableofcontents[hideallsubsections]
-  \tableofcontents
-\end{frame}
-
-
 \begin{frame}{online materials}
 
 \begin{itemize}
@@ -107,9 +104,7 @@
 \bigskip
 
 \metroset{block=fill}
-\begin{block}{online materials}
-
-my slides, exercises, notes, and codes are hosted at
+\begin{block}{my slides, exercises, notes, and codes are hosted at}
 
 \medskip
 \centerline{\href{https://github.com/bueler/mccarthy}{\texttt{github.com/bueler/mccarthy}}}
@@ -127,6 +122,13 @@ exercises: \href{https://github.com/bueler/mccarthy/blob/master/exercises/exerci
 
 Python codes: \href{https://github.com/bueler/mccarthy/tree/master/py}{\texttt{py/}}
 }
+\end{frame}
+
+
+\begin{frame}{Outline}
+  %\setbeamertemplate{section in toc}[sections numbered]
+  %\tableofcontents[hideallsubsections]
+  \tableofcontents
 \end{frame}
 
 
@@ -149,9 +151,9 @@ Python codes: \href{https://github.com/bueler/mccarthy/tree/master/py}{\texttt{p
 %LIVE imagine a magic glacier boat which always floats on the top of the ice.
 \end{frame}
 
-\begin{frame}{surface motion: notation}
+\begin{frame}{surface motion: planar (flow-line) notation}
 \begin{center}
-\begin{tikzpicture}[scale=1.2]
+\begin{tikzpicture}[scale=1.1]
 \node[inner sep=0pt] (domain) at (0,0)
     {\includegraphics[width=0.72\textwidth]{domain}};
 \node (a) at (-2.5,0.8) {$a(t,x)$};
@@ -161,13 +163,17 @@ Python codes: \href{https://github.com/bueler/mccarthy/tree/master/py}{\texttt{p
 \end{tikzpicture}
 \end{center}
 
-\vspace{-3mm}
 \begin{itemize}
-\item 2D planar (flow-line) coordinates: \, $x$ horizontal, $z$ vertical
-\item $b(x)$: bed elevation (m)
+\item 2D planar coordinates: \, $x$ horizontal, $z$ vertical
+
+\bigskip
+\item $a(t,x)$: surface mass balance in ice-equivalent units ($\text{m}\,\text{s}^{-1}$)
 \item $s(t,x)$: ice surface elevation (m)
 \item $\bu(t,x,z)=\left<u(t,x,z), w(t,x,z)\right>$: \, ice velocity ($\text{m}\,\text{s}^{-1}$)
-\item $a(t,x)$: surface mass balance in ice-equivalent units ($\text{m}\,\text{s}^{-1}$)
+\item $b(x)$: bed elevation (m)
+
+\bigskip
+\item references for glacier equations: \cite{GreveBlatter2009,SchoofHewitt2013}
 \end{itemize}
 \end{frame}
 
@@ -182,12 +188,15 @@ Python codes: \href{https://github.com/bueler/mccarthy/tree/master/py}{\texttt{p
 \text{SKE:} \qquad \frac{\partial s}{\partial t} = \uncover<2-4>{a} \uncover<3-4>{+w} \uncover<4>{-u \frac{\partial s}{\partial x}}
 \end{equation*}
 
-the ice surface moves up and down according to \cite{GreveBlatter2009,SchoofHewitt2013}
+the ice surface moves up and down according to:
+
+{\small
 \begin{itemize}
 \item<2-4> surface mass balance (SMB)
-\item<3-4> vertical component of ice velocity
-\item<4> (horizontal component of ice velocity) $\times$ (surface slope)
+\item<3-4> vertical component of ice velocity at surface
+\item<4> (horizontal component of ice velocity at surface) $\times$ (surface slope)
 \end{itemize}
+}
 \end{frame}
 
 
@@ -227,7 +236,7 @@ the ice surface moves up and down according to \cite{GreveBlatter2009,SchoofHewi
 
     \begin{itemize}
     \item[$\circ$] assume $a,u,w$ are given functions/values
-    \item[$\circ$] this assumption is silly, but it is fixed in hour 2
+    \item[$\circ$] \dots which is silly, but it is fixed in hour 2
     \end{itemize}
 \item \alert{numerical modeling goal:} build a computer program which evolves the glacier surface $z=s(t,x)$ according to the SKE
     \begin{itemize}
@@ -281,7 +290,7 @@ is the surface kinematical equation
 \begin{itemize}
 \item the SKE becomes discrete:
     $$\frac{\snew_j - s_j}{\Delta t} + u_j \frac{s_{j+1} - s_{j-1}}{2\Delta x} - w_j = a_j$$
-\item write as an equation which determines $\snew_j$:
+\item write as an \alert{update} equation which determines $\snew_j$:
 	$$\snew_j = s_j - \Delta t\, u_j \frac{s_{j+1}-s_{j-1}}{2\Delta x} + \Delta t (a_j + w_j)$$
 \end{itemize}
 \end{frame}
@@ -290,11 +299,10 @@ is the surface kinematical equation
 \begin{frame}{upwinding}
 
 \begin{itemize}
-\item however \dots
-\item if we implement this ``forward-time centered-space'' scheme
+\item however, if we implement this explicit ``forward-time centered-space'' scheme
 	$$\snew_j = s_j - \Delta t\, u_j \frac{s_{j+1}-s_{j-1}}{2\Delta x} + \Delta t (a_j + w_j) \hspace{1.0cm} \leftarrow \text{\emph{bad}}$$
 then unstable things happen! (exercise \textbf{2})
-\item instead, it is known that an \alert{upwind} scheme is stable
+\item instead, it is known that an explicit \alert{upwind} scheme is stable
     \begin{itemize}
     \item[$\circ$] \alert{conditionally} stable, anyway, for this kind of \alert{advection} problem
     \end{itemize}
@@ -352,8 +360,8 @@ $ python3 surface.py
 \item however, the following modifications reveal stability issues:
     \begin{enumerate}
     \item increase velocity: \quad $u(x)$ \, $\to$ \, $2.5\, u(x)$
-    \item increase resolution: \quad $\Delta x=1000$ m \, $\to$ \, $\Delta x=400$ m
     \item lengthen time-steps: \quad $\Delta t = 1$ a \, $\to$ \, $\Delta t = 2.5$ a
+    \item increase resolution: \quad $\Delta x=1000$ m \, $\to$ \, $\Delta x=400$ m
     \end{enumerate}
 \end{itemize}
 \end{block}
@@ -450,7 +458,7 @@ where $\bn_s = \left<-\frac{\partial s}{\partial x},-\frac{\partial s}{\partial 
 
 \begin{frame}{some questions when solving the SKE}
 \begin{itemize}
-\item[] \alert{MAJOR modeling questions}
+\item[] \alert{modeling questions}
     \begin{enumerate}
     \item whence the SMB $a$?
     \item whence the surface velocity $u,w$? \comm{topic of the 2nd hour!}
@@ -968,12 +976,12 @@ $$\frac{\partial s}{\partial t} = \frac{\partial}{\partial x}\left(\Dsia \frac{\
 \begin{block}{demo}
 \begin{itemize}
 \item \,\texttt{\$ python3 dome.py}
-\item view images \texttt{output/dome.png} and \texttt{output/dome.png}
+\item view image \texttt{output/dome.png}
 \end{itemize}
 \end{block}
 
 \begin{itemize}
-\item the \href{https://github.com/bueler/mccarthy/blob/master/notes/notes-2026.pdf}{notes} say much more about the time-dependent model
+\item the \href{https://github.com/bueler/mccarthy/blob/master/notes/notes-2026.pdf}{notes} say much more about this time-dependent model
 \end{itemize}
 \end{frame}
 
@@ -1036,7 +1044,7 @@ s &\ge b
     \begin{enumerate}\setcounter{enumi}{3}
     \item well-posedness of the Stokes model for fixed geometry?
         \begin{itemize}
-        \item[$\circ$] essentially settled: yes
+        \item[$\circ$] essentially settled: yes  \cite{JouvetRappaz2011}
         \end{itemize}
     \item well-posedness of the time-dependent standard model?
         \begin{itemize}
@@ -1083,8 +1091,7 @@ s &\ge b
 \frametitle{further reading}
 \setbeamertemplate{bibliography item}[text]
 
-  \bibliography{slides}
-  \bibliographystyle{alpha}
+  \printbibliography[heading=none]
 \end{frame}
 
 
