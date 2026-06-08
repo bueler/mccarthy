@@ -44,7 +44,7 @@ def b(x):
 
 
 def u(x):
-    """horizontal velocity is constant"""
+    """horizontal velocity is constant, but could be linear"""
     return (500.0 + 0.0 * x) / secpera
 
 
