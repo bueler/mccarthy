@@ -99,9 +99,9 @@ The full (Cauchy) stress tensor $\sigma$ is the deviatoric stress tensor $\tau$ 
 \begin{equation}
     \sigma = \tau - p\,I,  \label{cauchystress}
 \end{equation}
-so equation \eqref{forcebalance} simply says $-\Div \sigma = \rho \bg$.  One may derive from \eqref{cauchystress} that $p = -\frac{1}{2} \trace \sigma$ (in 2D), thus the pressure is the negative of the average normal stress.  By definition $\Div\tau$ in \eqref{forcebalance} is a vector with components which are the divergences of the columns:
+so equation \eqref{forcebalance} simply says $-\Div \sigma = \rho \bg$.  One may derive from \eqref{cauchystress} that $p = -\frac{1}{3} \trace \sigma$ in 3D, thus the pressure is the negative of the average normal stress.  By definition $\Div\tau$ in \eqref{forcebalance} is a vector with components which are the divergences of the columns:
 \begin{equation}
-    \left(\nabla \cdot \tau\right)_i = \left(\tau_{1i}\right)_{x_1} + \left(\tau_{2i}\right)_{x_2}  \label{divtaudefn}
+    \left(\nabla \cdot \tau\right)_i = \left(\tau_{1i}\right)_{x_1} + \left(\tau_{2i}\right)_{x_2} + \left(\tau_{3i}\right)_{x_3}  \label{divtaudefn}
 \end{equation}
 Note $\nabla\cdot \tau$, $\nabla p$, and $\bg$ are regarded as column vectors.
 
@@ -113,13 +113,13 @@ Here $B_n = (A_n)^{-1/n}$ is the ice hardness in units $\text{Pa}\,\text{s}^{1/n
 \begin{align*}
 |\tau|^2 = \frac{1}{2} \trace\left(\tau^2\right) = \frac{1}{2} \tau_{ij} \tau_{ij}, \qquad |D\bu|^2 = \frac{1}{2} \trace\left((D\bu)^2\right) = \frac{1}{2} (D\bu)_{ij} (D\bu)_{ij}
 \end{align*}
-Using \eqref{viscflowlaw} we can eliminate $\tau$ from equation \eqref{forcebalance}, thereby rewriting the system in terms of velocity $\bu$ and pressure $p$ only:
+($|\tau|^2$ is also known as the \emph{second invariant} of the stress tensor.)  Using \eqref{viscflowlaw} we can eliminate $\tau$ from equation \eqref{forcebalance}, thereby rewriting the system in terms of velocity $\bu$ and pressure $p$ only:
 \begin{align}
 - \nabla \cdot \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu\right) + \nabla p &= \rho \mathbf{g} \label{stokes} \\
 \Div \bu &= 0 \label{incompagain}
 \end{align}
 
-From now on we denote the points of the 2D region $\Omega$ by $(x,z)$, and we add an angle parameter: gravity is at an angle $\alpha$ with the $z$-direction, so that $\bg = \left<g\sin\alpha,-g\cos\alpha\right>$ where $g>0$.  The numerical model in these notes solves system \eqref{stokes}, \eqref{incompagain} with a body force given by this $\rho \bg$.  A solution of the problem is a pair $(\bu,p)$.
+From now on we consider a 2D region $\Omega$, and we denote the coordinates by $(x,z)$.  We add an angle parameter: gravity is at an angle $\alpha$ with the $z$-direction, so that $\bg = \left<g\sin\alpha,-g\cos\alpha\right>$ where $g>0$.  The numerical model in these notes solves system \eqref{stokes}, \eqref{incompagain} with a body force given by $\rho \bg$, and the problem solution is a pair $\bu,p$.
 
 Certain glacier-suitable velocity and stress boundary conditions will be used here.  We assume that base, top, inflow, and outflow boundaries can all be identified.  On the base we require no slip:
 \begin{align}
@@ -129,8 +129,7 @@ Certain glacier-suitable velocity and stress boundary conditions will be used he
 \intertext{The inflow boundary is the left side, which has outward normal $\hbn=\left<-1,0\right>$, and here we set a nonzero inflow velocity:}
 \bu &= \left<f(z),0\right>  &&\text{\emph{inflow}} \label{inflowbc} \\
 \intertext{The implemented function $f(z)$ satisfies the slab-on-slope equations for a given thickness $H_{\text{in}}$; see below.  On the outflow boundary, which is the right side and has $\hbn=\left<1,0\right>$ in the implemented form, we set a nonzero hydrostatic normal stress using the ice thickness $H_{\text{out}}$ at that location:}
-\left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= \big<- \rho g \cos\alpha (H_{\text{out}}-z),  \notag && \\
-    &\qquad\quad \rho g\sin\alpha (H_{\text{out}}-z)\big> && \text{\emph{outflow}} \label{outflowbc}
+\left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu - pI\right) \hbn &= - \rho g (H_{\text{out}}-z)\left<\cos\alpha, \sin\alpha \right> && \text{\emph{outflow}} \label{outflowbc}
 \end{align}
 
 
@@ -189,22 +188,21 @@ This justifies formula \eqref{outflowbc}.
 
 \section{Weak form} \label{sec:weakform}
 
-Equations \eqref{stokes} and \eqref{incompagain} are called the \emph{strong form} of the Glen-Stokes model.  An integral equation form of the same equations, the \emph{weak form}, is needed when building a numerical finite element (FE) method \cite{Elmanetal2014}.  This new form will be derived by multiplying the strong form equations by test functions and then integrating over $\Omega$, which defines a nonlinear functional $F$, that is, a function which takes functions as input and returns scalars.  The weak form says that $F$ is zero when acting on test functions.  The significance of the weak form can be stated in several ways:
+Equations \eqref{stokes} and \eqref{incompagain} are called the \emph{strong form} of the Glen-Stokes model.  An integral equation form of the same equations, the \emph{weak form}, is needed when building a numerical finite element (FE) method \cite{Elmanetal2014}.  This new form will be derived by multiplying the strong form equations by test functions and then integrating over $\Omega$, which defines a nonlinear functional $F$, that is, a function which takes functions as input and returns scalars.  The weak form says that $F$ is zero when acting on all of the test functions.  The weak form has two well-known advantages:
 \begin{itemize}
-\item It is well-posed in the sense of always having a unique solution  for glaciologically-relevant boundary values \cite{JouvetRappaz2011}.
-\item It has a larger space of potential solutions than the strong form, for instance it is more flexible with respect to discontinuities in the data.
-\item An FE method can create test functions via local constructions which work on a mesh of triangles or quadrilaterals, and these piecewise-defined functions are allowed in the weak form.  This framework is more flexible with respect to problem geometry than finite difference methods based on the strong form.
+\item It has a larger space of possible solutions than the strong form, for instance it is more flexible with respect to discontinuities in the data.
+\item An FE method can create test functions via local constructions on meshes of triangles or quadrilaterals.  These piecewise-defined functions are allowed in the weak form.  Such a framework is more flexible with respect to problem geometry than finite difference methods based on the strong form.
 \end{itemize}
 
-A solution to the weak form below is a velocity-pressure pair $(\bu,p)$.  Each function lives in a certain function space.  We write $\bu\in V_D$ and $p \in Q$, and the Sobolev spaces $V_D$ and $Q$ are precisely-identified in \cite{JouvetRappaz2011}.  Test functions $\bv\in V_0$ and $q\in Q$ come from nearly the same spaces, with $V_D$ and $V_0$ differing only by the value on the Dirichlet boundary: $\bu\in V_D$ satisfies a nonhomogeneous inflow condition \eqref{inflowbc} while $\bv\in V_0$ is zero there.
+A solution to the weak form below is a velocity-pressure pair $\bu,p$.  Each function lives in a certain function space.  We write $\bu\in V_D$ and $p \in Q$.  (The Sobolev spaces $V_D$ and $Q$ are precisely-identified in \cite{JouvetRappaz2011}.)  Test functions $\bv\in V_0$ and $q\in Q$ come from nearly the same spaces, with $V_D$ and $V_0$ differing only by the value on the Dirichlet boundary: $\bu\in V_D$ satisfies a nonhomogeneous inflow condition \eqref{inflowbc} while $\bv\in V_0$ is zero there.
 
 To give a preliminary definition of $F$ we multiply \eqref{stokes} by $\bv\in V_0$ and \eqref{incompagain} by $q\in Q$, then add and integrate:
 \begin{equation}
 F(\bu,p;\bv,q) = \int_\Omega - \left(\nabla \cdot \left(B_n |D\bu|^{\frac{1}{n} - 1} D\bu\right)\right)\cdot \bv + \nabla p \cdot \bv - \rho \mathbf{g} \cdot \bv - \left(\nabla \cdot \bu\right) q \label{nonfuncone}
 \end{equation}
-However, the actual definition of $F$ re-balances the number of derivatives on $(\bv,q)$ versus $(\bu,p)$, to have only first derivatives on $\bu,\bv$, and no derivative on $p,q$.  For this we need integration-by-parts.
+However, the actual definition of $F$ re-balances the number of derivatives on $\bv,q$ versus $\bu,p$, to have only first derivatives on $\bu,\bv$, and no derivative on $p,q$.  For this we need integration-by-parts.
 
-Recall the product rule $\nabla \cdot(f\bX) = \grad f\cdot \bX + f \nabla \cdot \bX$ and the divergence theorem $\int_\Omega \nabla \cdot (f\bX) = \int_{\partial \Omega} f\bX \cdot \hbn$.  Denoting $\tau = B_n |D\bu|^{\frac{1}{n} - 1} D\bu$ for convenience we have
+Recall the product rule $\nabla \cdot(f\bX) = \grad f\cdot \bX + f \nabla \cdot \bX$ and the divergence theorem $\int_\Omega \nabla \cdot (f\bX) = \int_{\partial \Omega} f\bX \cdot \hbn$.  Denoting $\tau = B_n |D\bu|^{\frac{1}{n} - 1} D\bu$ for convenience we have, in 2D,
 \begin{align*}
 \int_\Omega \left(\nabla \cdot \tau\right)\cdot \bv &= \sum_{j=1}^2 \int_\Omega \nabla \cdot (\tau_{j\circ})\, v_j = \sum_{j=1}^2 \int_\Omega \nabla \cdot (\tau_{j\circ} v_j) - \tau_{j\circ} \nabla v_j \\
   &= \sum_{j=1}^2 \int_{\partial \Omega} (\tau_{j\circ} v_j) \cdot \hbn - \int_\Omega \tau_{j\circ} \cdot \nabla v_j = \int_{\partial \Omega} (\tau \hbn)\cdot \bv - \int_\Omega \trace(\tau \nabla \bv)
@@ -227,7 +225,7 @@ F(\bu,p;\bv,q) =  \int_\Omega \left[\trace(\tau D\bv) - p (\nabla \cdot \bv) - \
 \end{equation}
 (We have denoted $\sigma=\tau-pI$ for brevity.)  In this not-quite-final form of the functional, note that $\bu,\bv$ appear with first derivatives and $p,q$ have no derivatives.
 
-Next recall that test functions $\bv\in V_0$ satisfy $\bv=0$ along the base and inflow surfaces.  Thus these parts of the integral over $\partial\Omega$ in \eqref{nonfunctwo} are zero.  Conditions \eqref{topbc}, \eqref{outflowbc} now completely eliminate the unknown solution $\bu,p$ from the boundary integral.  The above computations yield our final formula for the nonlinear functional:
+Finally, recall that the test functions $\bv\in V_0$ satisfy $\bv=0$ along the base and inflow surfaces.  Thus these parts of the integral over $\partial\Omega$ in \eqref{nonfunctwo} are zero.  Conditions \eqref{topbc}, \eqref{outflowbc} now completely eliminate the unknown solution $\bu,p$ from the boundary integral.  The above computations yield our final formula for the nonlinear functional:
 \begin{align}
 F(\bu,p;\bv,q) &= \int_\Omega B_n |D\bu|^{\frac{1}{n} - 1} \trace(D\bu D\bv) - p (\nabla \cdot \bv) - \left(\nabla \cdot \bu\right) q \label{defineF} \\
     &\qquad  - \int_\Omega \rho \mathbf{g} \cdot \bv - \int_{\{\text{outflow}\}} \rho g \cos\alpha (h-z) v  \notag
@@ -237,7 +235,7 @@ The final weak form of the Glen-Stokes model is the statement that, at the solut
 \begin{equation}
 F(\bu,p;\bv,q) = 0 \qquad \text{ for all } \bv\in V_0 \text{ and } q\in Q  \label{weak}
 \end{equation}
-This weak formulation is proven in \cite[Theorem 3.8]{JouvetRappaz2011} to be well-posed, so that a unique solution exists.  The theorem in \cite{JouvetRappaz2011} makes reasonable assumptions about the domain $\Omega$ and the boundary data, and these are satisfied in the cases we consider.  Note that the last two integrals in \eqref{defineF} can be regarded as source terms for stress.  In fact, if the inflow velocity is zero and if we replace these source terms by zero---that is if we remove gravity and outflow stresses---then the unique solution to \eqref{weak} is $\bu=0$ and $p=0$.
+This weak formulation is proven in \cite[Theorem 3.8]{JouvetRappaz2011} to be well-posed, so that a unique solution exists.  The theorem in \cite{JouvetRappaz2011} makes reasonable assumptions about the domain $\Omega$ and the boundary data, and these are satisfied in the cases we consider.  The last two integrals in \eqref{defineF} can be regarded as source terms for stress.  It follows that if the inflow velocity is zero and if we replace these source terms by zero---that is if we remove gravity and outflow stresses---then the unique solution to \eqref{weak} is $\bu=0$ and $p=0$.
 
 
 \section{Finite element method} \label{sec:femethod}
