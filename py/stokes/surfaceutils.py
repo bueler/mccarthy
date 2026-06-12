@@ -1,3 +1,5 @@
+# (C) 2018--2026 Ed Bueler
+
 # utility module for computing and plotting surface values
 
 import firedrake as fd

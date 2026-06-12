@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# (C) 2018--2024 Ed Bueler
+# (C) 2018--2026 Ed Bueler
 
 # The purpose of this code is to generate a flow-line domain,
 # suitable for meshing, on which we can solve the Stokes equations.
@@ -9,10 +9,8 @@
 #   $ gmsh -2 glacier.geo
 # This generates glacier.msh.  You can use gmsh to inspect the mesh,
 # or you can load it into python using firedrake.  For example:
-#   $ source firedrake/bin/activate
-#   (firedrake) $ ipython3
-#   In [1]: from firedrake import *
-#   In [2]: Mesh('glacier.msh')
+#   $ source venv-firedrake/bin/activate
+#   (venv-firedrake) $ ./flow -mesh glacier.msh
 
 # numbering of parts of boundary
 bdryids = {'outflow' : 41,

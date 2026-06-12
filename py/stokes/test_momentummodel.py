@@ -1,3 +1,5 @@
+# (C) 2018--2026 Ed Bueler
+
 from firedrake import *
 from momentummodel import secpera, dayspera, MomentumModel
 from domain import bdryids

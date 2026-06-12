@@ -1,5 +1,6 @@
-# module: class MomentumModel
+# (C) 2018--2026 Ed Bueler
 
+# module: class MomentumModel
 # design principles for this class:
 #   1. it owns the velocity, pressure, and mixed spaces
 #   2. it does not interact with options or stdout
