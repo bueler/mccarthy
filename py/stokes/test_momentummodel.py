@@ -1,11 +1,8 @@
 # (C) 2018--2026 Ed Bueler
 
 from firedrake import *
-from momentummodel import secpera, dayspera, MomentumModel
+from momentummodel import secpera, MomentumModel
 from domain import bdryids
-
-# see bottom page https://www.firedrakeproject.org/extruded-meshes.html
-extrudebdryids = {"inflow": 1, "outflow": 2, "top": "top", "base": "bottom"}
 
 
 def test_slab_extrude():
@@ -15,6 +12,8 @@ def test_slab_extrude():
     mz = 5
     basemesh = IntervalMesh(mx, length_or_left=L)
     mesh = ExtrudedMesh(basemesh, layers=mz, layer_height=H0 / mz)
+    # see bottom page https://www.firedrakeproject.org/extruded-meshes.html
+    extrudebdryids = {"inflow": 1, "outflow": 2, "top": "top", "base": "bottom"}
     mm = MomentumModel(Hin=H0, Hout=H0)
     up = mm.solve(mesh, extrudebdryids, extrudemode=True, package="Direct")
     umagav, umagmax, pav, pmax = mm.solutionstats(mesh)
@@ -25,7 +24,6 @@ def test_slab_extrude():
     # print('flow speed: av = %10.3f m a-1,  max = %10.3f m a-1' % (secpera*umagav,secpera*umagmax))
     # print('pressure:   av = %10.3f bar,    max = %10.3f bar' % (1.0e-5*pav,1.0e-5*pmax))
     # u, p = up.subfunctions
-    # from firedrake.output import VTKFile
     # VTKFile('foo.pvd').write(u, p)
 
 
@@ -44,7 +42,6 @@ def test_bedstep_coarse():
     # print('flow speed: av = %10.3f m a-1,  max = %10.3f m a-1' % (secpera*umagav,secpera*umagmax))
     # print('pressure:   av = %10.3f bar,    max = %10.3f bar' % (1.0e-5*pav,1.0e-5*pmax))
     # u, p = up.subfunctions
-    # from firedrake.output import VTKFile
     # VTKFile('foo.pvd').write(u, p)
 
 
