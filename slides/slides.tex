@@ -76,12 +76,12 @@
 \newcommand{\Dsia}{D^{\text{\textrm{SIA}}}}
 
 \newcommand{\comm}[1]{{\footnotesize \hfill \emph{#1}}}  % small font comment at right
+\newcommand{\mcomm}[1]{\text{\footnotesize \hfill \emph{#1}}}  % math mode small font comment at right
 
 
 \title{numerical modeling of glaciers}
-%\subtitle{version 1.1}
 
-\date{June 2026}
+\date{June 2026 (version 1.2)}
 
 \author{Ed Bueler}
 
@@ -107,7 +107,12 @@
 \begin{block}{my slides, exercises, notes, and codes are hosted at}
 
 \medskip
-\centerline{\href{https://github.com/bueler/mccarthy}{\texttt{github.com/bueler/mccarthy}}}
+\qquad \href{https://github.com/bueler/mccarthy}{\texttt{github.com/bueler/mccarthy}}
+
+\vspace{-5mm}
+
+\hfill \includegraphics[width=0.2\textwidth]{figs/githubqr.png}
+
 \end{block}
 
 \medskip
@@ -1052,13 +1057,13 @@ $$\frac{\partial s}{\partial t} = \frac{\partial}{\partial x}\left(\Dsia \frac{\
 
 \begin{itemize}
 \item what is the \alert{standard model} of glaciology?
-\item \alert{SKE $+$ Stokes}, with admissible surfaces:
+\item I think it is \alert{SKE $+$ Stokes with admissible surface}:
 \begin{align*}
-\frac{\partial s}{\partial t} - \mathbf{u} \cdot \mathbf{n}_s &= a \\
-\nabla \cdot \mathbf{u} &= 0 \\
-0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \bm{g} \\
-D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij} \\
-s &\ge b
+\frac{\partial s}{\partial t} - \mathbf{u} \cdot \mathbf{n}_s &= a && \mcomm{SKE} \\
+\nabla \cdot \mathbf{u} &= 0 && \mcomm{incompressibility} \\
+0 &= - \nabla p + \nabla \cdot \tau_{ij} + \rho\, \bm{g} && \mcomm{stress balance} \\
+D\mathbf{u}_{ij} &= A \tau^{n-1} \tau_{ij} && \mcomm{flow law} \\
+s &\ge b && \mcomm{admissibility}
 \end{align*}
 \item implementing well is a topic of current research
   \begin{itemize}
@@ -1100,19 +1105,34 @@ s &\ge b
 
 \begin{frame}{an opinionated summary}
 
+\bigskip
+
 \begin{itemize}
 \item numerical models are unavoidable in glaciology
 \item most of your work is to understand the math, not to write code
     \begin{itemize}
     \item[$\circ$] even more true in the generative AI era
     \end{itemize}
-\item<2-> writing your own numerical models is of great value, but you should almost always toss the result in the trash once you understand it
-\item<3-> surface mass/energy processes are as important as ice dynamics
-\item<4-> machine learning \emph{after} understanding the laws of physics
+\item writing your own numerical models is of great value, but you should almost always toss the result in the trash once you understand it
+\item surface mass/energy processes are as important as ice dynamics
+\item machine learning \emph{after} understanding the laws of physics
 
 \bigskip
-\item<5-> thanks so much for listening!  \, \alert{questions?}
+\item<2> thanks so much for listening!  \, \alert{questions?}
 \end{itemize}
+
+\bigskip
+\begin{block}<2>{my slides, exercises, notes, and codes are hosted at}
+
+\medskip
+\qquad \href{https://github.com/bueler/mccarthy}{\texttt{github.com/bueler/mccarthy}}
+
+\vspace{-5mm}
+
+\hfill \includegraphics[width=0.15\textwidth]{figs/githubqr.png}
+
+\end{block}
+
 \end{frame}
 
 
