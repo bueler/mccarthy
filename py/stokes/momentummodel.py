@@ -151,9 +151,11 @@ class MomentumModel(OptionsManager):
     # generate regularized effective viscosity from the solution:
     #   nu = (1/2) B_n X^((1/n)-1)
     # where X = sqrt(|Du|^2 + eps^2 Dtyp^2)
-    def effectiveviscosity(self, mesh):
+    def effectiveviscosity(self, mesh, eps=None):
+        if eps is None:
+            eps = self.eps
         P1 = fd.FunctionSpace(mesh, 'CG', 1)
-        Du2 = 0.5 * fd.inner(D(self.u), D(self.u)) + (self.eps * self.Dtyp)**2.0
+        Du2 = 0.5 * fd.inner(D(self.u), D(self.u)) + (eps * self.Dtyp)**2.0
         rr = 1.0 / self.n_glen - 1.0
         nu = fd.Function(P1).interpolate(0.5 * self._B3 * Du2**(rr/2.0))
         nu.rename('effective viscosity')

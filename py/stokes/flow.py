@@ -52,7 +52,7 @@ from firedrake.petsc import PETSc
 
 import numpy as np
 from domain import bdryids
-from momentummodel import secpera, dayspera, MomentumModel
+from momentummodel import secpera, dayspera, MomentumModel, D
 from surfaceutils import surfaceplot
 
 if len(args.mesh) == 0:
@@ -113,9 +113,16 @@ if args.slab:
     numericalerrorsslab()
 u, p = up.subfunctions
 
+# compute the stress on the whole base
+Tspace = TensorFunctionSpace(mesh, 'CG', 1)
+Du = Function(Tspace).interpolate(D(u))
+nu = mm.effectiveviscosity(mesh)
+sigma = Function(Tspace).interpolate(2.0 * nu * Du - p * Identity(2))
+tbstress = assemble(inner(as_vector([1, 0]), dot(sigma, as_vector([0, 1]))) * ds(bdryids['base']))
+printpar(f'basal shear stress applied by ice to bed = {tbstress / 3000.0} Pa')
+
 # save results in paraview-readable file
 if len(args.o) > 0:
-    nu = mm.effectiveviscosity(mesh)
     if mesh.comm.size > 1:
         rank = Function(FunctionSpace(mesh,'DG',0))
         rank.dat.data[:] = mesh.comm.rank
